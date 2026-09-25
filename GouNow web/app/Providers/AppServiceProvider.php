@@ -29,6 +29,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Rate limiting definitions
+        \Illuminate\Support\Facades\RateLimiter::for('checkout', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(30)->by($request->ip());
+        });
+
+        \Illuminate\Support\Facades\RateLimiter::for('inquiries', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(20)->by($request->ip());
+        });
+
+        \Illuminate\Support\Facades\RateLimiter::for('quote', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->ip());
+        });
+
+        \Illuminate\Support\Facades\RateLimiter::for('admin_login', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)->by($request->ip());
+        });
+
         // Super admins implicitly have all abilities
         Gate::before(function (User $user, string $ability) {
             if ($user->is_admin || $user->hasRole('super_admin')) {

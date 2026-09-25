@@ -19,7 +19,7 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])->name('local
 // Admin Authentication Routes
 Route::prefix('admin')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/login', [LoginController::class, 'login'])->name('admin.login.submit');
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:admin_login')->name('admin.login.submit');
     Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('admin.logout');
 });
 
@@ -149,7 +149,7 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
 });
 
 // Public Checkout Routes (Sections 15, 18, 19, 22, 23)
-Route::prefix('checkout')->name('checkout.')->group(function () {
+Route::prefix('checkout')->middleware('throttle:checkout')->name('checkout.')->group(function () {
     Route::post('/calculate', [CheckoutController::class, 'calculate'])->name('calculate');
     Route::get('/{property:slug}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
@@ -168,19 +168,19 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
 Route::middleware(['web', 'locale'])->group(function () {
     // Homepage (Sections 7 & 126)
     Route::get('/', [HomeController::class, 'index'])->name('home');
-    Route::post('/inquire', [HomeController::class, 'inquire'])->name('home.inquire');
+    Route::post('/inquire', [HomeController::class, 'inquire'])->middleware('throttle:inquiries')->name('home.inquire');
 
     // Stays & Real Estate Listing (Section 26 & 27)
     Route::get('/stays', [PropertyListingController::class, 'index'])->name('properties.index');
     Route::get('/properties', [PropertyListingController::class, 'index']);
     Route::get('/stays/{property:slug}', [PropertyListingController::class, 'show'])->name('properties.show');
     Route::get('/properties/{property:slug}', [PropertyListingController::class, 'show']);
-    Route::post('/stays/{property:slug}/inquire', [PropertyListingController::class, 'inquire'])->name('properties.inquire');
+    Route::post('/stays/{property:slug}/inquire', [PropertyListingController::class, 'inquire'])->middleware('throttle:inquiries')->name('properties.inquire');
 
     // Curated Experiences (Section 29 & 30)
     Route::get('/experiences', [ExperienceListingController::class, 'index'])->name('experiences.index');
     Route::get('/experiences/{experience:slug}', [ExperienceListingController::class, 'show'])->name('experiences.show');
-    Route::post('/experiences/{experience:slug}/inquire', [ExperienceListingController::class, 'inquire'])->name('experiences.inquire');
+    Route::post('/experiences/{experience:slug}/inquire', [ExperienceListingController::class, 'inquire'])->middleware('throttle:inquiries')->name('experiences.inquire');
 
     // SEO Infrastructure Routes (Section 48)
     Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
