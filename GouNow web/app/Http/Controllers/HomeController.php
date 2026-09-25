@@ -95,27 +95,9 @@ class HomeController extends Controller
     /**
      * Store a general contact lead or concierge request (Section 131).
      */
-    public function inquire(Request $request): RedirectResponse|JsonResponse
+    public function inquire(\App\Modules\Lead\Presentation\Requests\StoreInquiryRequest $request): RedirectResponse|JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'type' => ['nullable', 'string', 'in:inquiry,concierge,real_estate,experience'],
-            'message' => ['required', 'string', 'max:2000'],
-            'source' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        $dto = new LeadInquiryDTO(
-            name: $validated['name'],
-            email: $validated['email'],
-            phone: $validated['phone'] ?? null,
-            message: $validated['message'],
-            type: $validated['type'] ?? 'inquiry',
-            source: $validated['source'] ?? 'website_homepage'
-        );
-
-        $this->storeLeadAction->execute($dto);
+        $this->storeLeadAction->execute($request->toDTO());
 
         $message = app()->getLocale() === 'ar'
             ? 'شكراً لتواصلك معنا! سيقوم فريق كونسيرج الجونة بالرد عليك في أقرب وقت.'

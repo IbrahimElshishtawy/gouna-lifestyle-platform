@@ -24,120 +24,17 @@ class PropertyListingController extends Controller
         private AvailabilityService $availabilityService,
         private PricingService $pricingService,
         private StoreInquiryLeadAction $storeLeadAction,
+        private \App\Modules\Property\Application\Queries\SearchPropertiesQuery $searchPropertiesQuery,
     ) {}
 
     /**
      * Display a filtered listing of properties (Vacation Rentals & Real Estate).
      */
-    public function index(Request $request): View
+    public function index(\App\Modules\Property\Presentation\Requests\PropertySearchRequest $request): View
     {
-        $listingType = $request->query('listing_type', 'rent'); // 'rent', 'sale', 'all'
-        $locationSlug = $request->query('location');
-        $categorySlug = $request->query('category');
-        $bedrooms = $request->query('bedrooms');
-        $guests = $request->query('guests');
-        $minPrice = $request->query('min_price');
-        $maxPrice = $request->query('max_price');
-        $sort = $request->query('sort', 'featured');
+        $viewData = $this->searchPropertiesQuery->execute($request->toDTO());
 
-        $checkInStr = $request->query('check_in');
-        $checkOutStr = $request->query('check_out');
-
-        $query = Property::published()->with(['category', 'location', 'images']);
-
-        // Listing Type filter
-        if ($listingType === 'rent') {
-            $query->forRent();
-        } elseif ($listingType === 'sale') {
-            $query->forSale();
-        }
-
-        // Location filter
-        if (! empty($locationSlug) && $locationSlug !== 'all') {
-            $query->whereHas('location', fn($q) => $q->where('slug', $locationSlug));
-        }
-
-        // Category filter
-        if (! empty($categorySlug) && $categorySlug !== 'all') {
-            $query->whereHas('category', fn($q) => $q->where('slug', $categorySlug));
-        }
-
-        // Bedrooms filter
-        if (! empty($bedrooms) && is_numeric($bedrooms)) {
-            $query->where('bedrooms', '>=', (int) $bedrooms);
-        }
-
-        // Guests filter
-        if (! empty($guests) && is_numeric($guests)) {
-            $query->where('max_guests', '>=', (int) $guests);
-        }
-
-        // Price range filter
-        if ($listingType === 'sale') {
-            if (! empty($minPrice)) {
-                $query->where('sale_price_cents', '>=', (int) $minPrice * 100);
-            }
-            if (! empty($maxPrice)) {
-                $query->where('sale_price_cents', '<=', (int) $maxPrice * 100);
-            }
-        } else {
-            if (! empty($minPrice)) {
-                $query->where('base_price_cents', '>=', (int) $minPrice * 100);
-            }
-            if (! empty($maxPrice)) {
-                $query->where('base_price_cents', '<=', (int) $maxPrice * 100);
-            }
-        }
-
-        // Date availability filter
-        if (! empty($checkInStr) && ! empty($checkOutStr)) {
-            try {
-                $checkIn = Carbon::parse($checkInStr);
-                $checkOut = Carbon::parse($checkOutStr);
-
-                if ($checkIn->lt($checkOut)) {
-                    $candidateIds = (clone $query)->pluck('id');
-                    $availableIds = $this->availabilityService->filterAvailablePropertyIds($candidateIds, $checkIn, $checkOut);
-                    $query->whereIn('id', $availableIds);
-                }
-            } catch (\Exception $e) {
-                // Ignore parse errors, proceed with unfiltered dates
-            }
-        }
-
-        // Sorting
-        match ($sort) {
-            'price_asc' => $query->orderBy(
-                $listingType === 'sale' ? 'sale_price_cents' : 'base_price_cents',
-                'asc'
-            ),
-            'price_desc' => $query->orderBy(
-                $listingType === 'sale' ? 'sale_price_cents' : 'base_price_cents',
-                'desc'
-            ),
-            'newest' => $query->orderBy('created_at', 'desc'),
-            default => $query->orderByDesc('is_featured')->orderBy('id', 'asc'),
-        };
-
-        $properties = $query->paginate(12)->withQueryString();
-        $locations = Cache::remember(CacheKeys::LOCATIONS_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => Location::active()->get());
-        $categories = Cache::remember(CacheKeys::PROPERTY_CATEGORIES_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => PropertyCategory::active()->get());
-
-        return view('properties.index', compact(
-            'properties',
-            'locations',
-            'categories',
-            'listingType',
-            'locationSlug',
-            'categorySlug',
-            'bedrooms',
-            'guests',
-            'minPrice',
-            'maxPrice',
-            'checkInStr',
-            'checkOutStr',
-            'sort'
-        ));
+        return view('properties.index', $viewData);
     }
 
     /**
@@ -200,28 +97,9 @@ class PropertyListingController extends Controller
     /**
      * Store lead inquiry for a property (Sale viewing or rental question).
      */
-    public function inquire(Request $request, Property $property): RedirectResponse|JsonResponse
+    public function inquire(\App\Modules\Lead\Presentation\Requests\StorePropertyInquiryRequest $request, Property $property): RedirectResponse|JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
-            'message' => ['required', 'string', 'max:1500'],
-            'type' => ['nullable', 'string', 'in:inquiry,property_sale,viewing'],
-        ]);
-
-        $dto = new LeadInquiryDTO(
-            name: $validated['name'],
-            email: $validated['email'],
-            phone: $validated['phone'],
-            message: $validated['message'],
-            type: $validated['type'] ?? ($property->listing_type === 'sale' ? 'property_sale' : 'inquiry'),
-            source: 'website_property_page',
-            leadableType: Property::class,
-            leadableId: $property->id
-        );
-
-        $this->storeLeadAction->execute($dto);
+        $this->storeLeadAction->execute($request->toDTO($property));
 
         $message = app()->getLocale() === 'ar'
             ? 'تم استلام استفسارك بنجاح! سيتواصل معك مستشارنا العقاري قريباً.'
