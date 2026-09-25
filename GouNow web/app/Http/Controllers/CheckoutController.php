@@ -1,41 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\Customer;
 use App\Models\PaymentMethod;
-use App\Models\PaymentTransaction;
 use App\Models\Property;
+use App\Modules\Booking\Application\Actions\CreateBookingAction;
+use App\Modules\Booking\Application\DTOs\CreateBookingDTO;
+use App\Modules\Booking\Presentation\Requests\CalculateQuoteRequest;
+use App\Modules\Booking\Presentation\Requests\ProcessCheckoutRequest;
+use App\Modules\Customer\Application\Actions\FindOrCreateCustomerAction;
+use App\Modules\Payment\Application\Actions\InitiatePaymentAction;
 use App\Services\BookingService;
 use App\Services\Payment\PaymentService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use InvalidArgumentException;
 
 class CheckoutController extends Controller
 {
     public function __construct(
-        private BookingService $bookingService,
-        private PaymentService $paymentService,
+        private readonly BookingService $bookingService,
+        private readonly PaymentService $paymentService,
+        private readonly CreateBookingAction $createBookingAction,
+        private readonly FindOrCreateCustomerAction $findOrCreateCustomerAction,
+        private readonly InitiatePaymentAction $initiatePaymentAction,
     ) {}
 
     /**
      * Calculate pricing quote dynamically (API / AJAX endpoint).
      */
-    public function calculate(Request $request): JsonResponse
+    public function calculate(CalculateQuoteRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'property_id' => ['required', 'exists:properties,id'],
-            'check_in' => ['required', 'date'],
-            'check_out' => ['required', 'date', 'after:check_in'],
-            'guests' => ['required', 'integer', 'min:1'],
-            'promo_code' => ['nullable', 'string', 'max:50'],
-        ]);
-
+        $validated = $request->validated();
         $property = Property::findOrFail($validated['property_id']);
         $checkIn = Carbon::parse($validated['check_in']);
         $checkOut = Carbon::parse($validated['check_out']);
@@ -48,7 +51,7 @@ class CheckoutController extends Controller
                 'success' => true,
                 'quote' => $quote,
             ]);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -71,7 +74,7 @@ class CheckoutController extends Controller
 
         try {
             $quote = $this->bookingService->getQuote($property, $checkIn, $checkOut, $guests, $promoCode);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return back()->with('error', $e->getMessage());
         }
 
@@ -89,24 +92,9 @@ class CheckoutController extends Controller
     /**
      * Process checkout form submission: server-side validation, booking creation, and payment initiation.
      */
-    public function process(Request $request): RedirectResponse|JsonResponse
+    public function process(ProcessCheckoutRequest $request): RedirectResponse|JsonResponse
     {
-        $validated = $request->validate([
-            'property_id' => ['required', 'exists:properties,id'],
-            'check_in' => ['required', 'date', 'after_or_equal:today'],
-            'check_out' => ['required', 'date', 'after:check_in'],
-            'guests' => ['required', 'integer', 'min:1'],
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
-            'country' => ['nullable', 'string', 'max:100'],
-            'special_requests' => ['nullable', 'string', 'max:1000'],
-            'payment_method_id' => ['required', 'exists:payment_methods,id'],
-            'payment_type' => ['required', 'in:full,deposit'],
-            'promo_code' => ['nullable', 'string', 'max:50'],
-        ]);
-
+        $validated = $request->validated();
         $property = Property::findOrFail($validated['property_id']);
         $paymentMethod = PaymentMethod::findOrFail($validated['payment_method_id']);
         $checkIn = Carbon::parse($validated['check_in']);
@@ -114,22 +102,11 @@ class CheckoutController extends Controller
 
         try {
             [$booking, $paymentResult] = DB::transaction(function () use ($validated, $property, $paymentMethod, $checkIn, $checkOut) {
-                // Find or create customer profile inside transaction
-                $customer = Customer::firstOrCreate(
-                    ['email' => $validated['email']],
-                    [
-                        'first_name' => $validated['first_name'],
-                        'last_name' => $validated['last_name'],
-                        'phone' => $validated['phone'],
-                        'country_of_residence' => $validated['country'] ?? 'Egypt',
-                        'user_id' => auth()->id(),
-                        'notes' => $validated['special_requests'] ?? null,
-                        'source' => 'website_checkout',
-                    ]
-                );
+                // Find or create customer
+                $customer = $this->findOrCreateCustomerAction->execute($validated, auth()->id());
 
-                // Create booking inside atomic transaction with availability locking
-                $booking = $this->bookingService->createPropertyBooking(
+                // Create booking with concurrency locking and availability verification
+                $dto = new CreateBookingDTO(
                     property: $property,
                     customer: $customer,
                     checkIn: $checkIn,
@@ -142,10 +119,12 @@ class CheckoutController extends Controller
                     internalNotes: $validated['special_requests'] ?? null,
                 );
 
-                // Initiate payment via resolved gateway
-                $paymentResult = $this->paymentService->initiatePayment($booking);
+                $booking = $this->createBookingAction->execute($dto);
 
-                return [$booking, $paymentResult];
+                // Initiate payment via payment action
+                $paymentResultDTO = $this->initiatePaymentAction->execute($booking);
+
+                return [$booking, $paymentResultDTO->toArray()];
             });
 
             if ($request->wantsJson()) {
@@ -157,7 +136,7 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // If payment gateway returned a redirect URL (e.g. Card 3DS, PayPal), redirect user there
+            // If gateway provided a redirect URL (e.g. Card 3DS, PayPal), redirect user there
             if (! empty($paymentResult['redirect_url'])) {
                 return redirect($paymentResult['redirect_url']);
             }
@@ -166,7 +145,7 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.confirmation', $booking->reference)
                 ->with('success', 'Your reservation has been created! Please follow the payment instructions below.');
 
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
             }
@@ -191,6 +170,8 @@ class CheckoutController extends Controller
      */
     public function cardMock(Request $request, string $reference): View
     {
+        abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
+
         $booking = Booking::where('reference', $reference)
             ->with(['bookable', 'paymentMethod', 'transactions'])
             ->firstOrFail();
@@ -206,6 +187,8 @@ class CheckoutController extends Controller
      */
     public function cardMockComplete(Request $request, string $reference): RedirectResponse
     {
+        abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
+
         $booking = Booking::where('reference', $reference)->firstOrFail();
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->firstOrFail();
 
@@ -220,6 +203,8 @@ class CheckoutController extends Controller
      */
     public function cardMockDecline(Request $request, string $reference): RedirectResponse
     {
+        abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
+
         $booking = Booking::where('reference', $reference)->firstOrFail();
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->firstOrFail();
 
@@ -234,6 +219,8 @@ class CheckoutController extends Controller
      */
     public function paypalMock(Request $request, string $reference): View
     {
+        abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
+
         $booking = Booking::where('reference', $reference)
             ->with(['bookable', 'paymentMethod', 'transactions'])
             ->firstOrFail();
@@ -249,12 +236,14 @@ class CheckoutController extends Controller
      */
     public function paypalMockComplete(Request $request, string $reference): RedirectResponse
     {
+        abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
+
         $booking = Booking::where('reference', $reference)->firstOrFail();
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->firstOrFail();
 
-        $this->paymentService->confirmPayment($transaction->transaction_id, 'PAYPAL-CAP-' . time());
+        $this->paymentService->confirmPayment($transaction->transaction_id, 'PAYPAL-CAPTURE-' . time());
 
         return redirect()->route('checkout.confirmation', $booking->reference)
-            ->with('success', 'PayPal order captured successfully! Your reservation is confirmed.');
+            ->with('success', 'PayPal order captured and verified! Your reservation is now confirmed.');
     }
 }

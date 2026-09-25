@@ -12,6 +12,10 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
+use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
+use App\Shared\Infrastructure\Caching\CacheKeys;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class PropertyListingController extends Controller
@@ -19,6 +23,7 @@ class PropertyListingController extends Controller
     public function __construct(
         private AvailabilityService $availabilityService,
         private PricingService $pricingService,
+        private StoreInquiryLeadAction $storeLeadAction,
     ) {}
 
     /**
@@ -91,15 +96,9 @@ class PropertyListingController extends Controller
                 $checkOut = Carbon::parse($checkOutStr);
 
                 if ($checkIn->lt($checkOut)) {
-                    // Filter in PHP collection or query sub-select
-                    $candidateProperties = $query->get();
-                    $availableIds = $candidateProperties->filter(function ($property) use ($checkIn, $checkOut) {
-                        return $this->availabilityService->isAvailable($property, $checkIn, $checkOut);
-                    })->pluck('id');
-
-                    $query = Property::published()
-                        ->with(['category', 'location', 'images'])
-                        ->whereIn('id', $availableIds);
+                    $candidateIds = (clone $query)->pluck('id');
+                    $availableIds = $this->availabilityService->filterAvailablePropertyIds($candidateIds, $checkIn, $checkOut);
+                    $query->whereIn('id', $availableIds);
                 }
             } catch (\Exception $e) {
                 // Ignore parse errors, proceed with unfiltered dates
@@ -121,8 +120,8 @@ class PropertyListingController extends Controller
         };
 
         $properties = $query->paginate(12)->withQueryString();
-        $locations = Location::active()->get();
-        $categories = PropertyCategory::active()->get();
+        $locations = Cache::remember(CacheKeys::LOCATIONS_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => Location::active()->get());
+        $categories = Cache::remember(CacheKeys::PROPERTY_CATEGORIES_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => PropertyCategory::active()->get());
 
         return view('properties.index', compact(
             'properties',
@@ -211,17 +210,18 @@ class PropertyListingController extends Controller
             'type' => ['nullable', 'string', 'in:inquiry,property_sale,viewing'],
         ]);
 
-        Lead::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'leadable_type' => Property::class,
-            'leadable_id' => $property->id,
-            'type' => $validated['type'] ?? ($property->listing_type === 'sale' ? 'property_sale' : 'inquiry'),
-            'source' => 'website_property_page',
-            'message' => $validated['message'],
-            'status' => 'new',
-        ]);
+        $dto = new LeadInquiryDTO(
+            name: $validated['name'],
+            email: $validated['email'],
+            phone: $validated['phone'],
+            message: $validated['message'],
+            type: $validated['type'] ?? ($property->listing_type === 'sale' ? 'property_sale' : 'inquiry'),
+            source: 'website_property_page',
+            leadableType: Property::class,
+            leadableId: $property->id
+        );
+
+        $this->storeLeadAction->execute($dto);
 
         $message = app()->getLocale() === 'ar'
             ? 'تم استلام استفسارك بنجاح! سيتواصل معك مستشارنا العقاري قريباً.'

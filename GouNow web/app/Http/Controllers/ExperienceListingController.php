@@ -1,18 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Experience;
 use App\Models\ExperienceCategory;
-use App\Models\Lead;
 use App\Models\Location;
+use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
+use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
+use App\Shared\Infrastructure\Caching\CacheKeys;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ExperienceListingController extends Controller
 {
+    public function __construct(
+        private readonly StoreInquiryLeadAction $storeLeadAction
+    ) {}
+
     /**
      * Display a listing of curated El Gouna experiences (Section 29 & 30).
      */
@@ -32,8 +41,8 @@ class ExperienceListingController extends Controller
         }
 
         $experiences = $query->orderByDesc('is_featured')->orderBy('id')->paginate(12)->withQueryString();
-        $categories = ExperienceCategory::active()->get();
-        $locations = Location::active()->get();
+        $categories = Cache::remember(CacheKeys::EXPERIENCE_CATEGORIES_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => ExperienceCategory::active()->get());
+        $locations = Cache::remember(CacheKeys::LOCATIONS_ACTIVE, CacheKeys::TTL_EXTENDED, fn() => Location::active()->get());
 
         return view('experiences.index', compact('experiences', 'categories', 'locations', 'categorySlug', 'locationSlug'));
     }
@@ -77,17 +86,18 @@ class ExperienceListingController extends Controller
         $message .= "Party Size: " . ($validated['guests'] ?? 1) . " guests\n\n";
         $message .= ($validated['message'] ?? 'Experience booking request via website.');
 
-        Lead::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'leadable_type' => Experience::class,
-            'leadable_id' => $experience->id,
-            'type' => 'experience',
-            'source' => 'website_experience_page',
-            'message' => $message,
-            'status' => 'new',
-        ]);
+        $dto = new LeadInquiryDTO(
+            name: $validated['name'],
+            email: $validated['email'],
+            phone: $validated['phone'],
+            message: $message,
+            type: 'experience',
+            source: 'website_experience_page',
+            leadableType: Experience::class,
+            leadableId: $experience->id
+        );
+
+        $this->storeLeadAction->execute($dto);
 
         $feedback = app()->getLocale() === 'ar'
             ? 'تم إرسال طلب حجز التجربة بنجاح! سيتواصل معك فريق التجارب لتأكيد الموعد.'

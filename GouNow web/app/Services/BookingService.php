@@ -1,24 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Booking;
-use App\Models\BookingNightlyPrice;
 use App\Models\Customer;
-use App\Models\Discount;
-use App\Models\DiscountUsage;
 use App\Models\PaymentMethod;
 use App\Models\Property;
+use App\Modules\Booking\Application\Actions\CancelBookingAction;
+use App\Modules\Booking\Application\Actions\CreateBookingAction;
+use App\Modules\Booking\Application\Actions\RecordBookingPaymentAction;
+use App\Modules\Booking\Application\DTOs\CreateBookingDTO;
+use App\Shared\Domain\ValueObjects\BookingReference;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use InvalidArgumentException;
 
+/**
+ * Booking Service (Backward-compatibility adapter delegating to Modular Booking actions).
+ */
 class BookingService
 {
     public function __construct(
-        private PricingService $pricingService,
-        private AvailabilityService $availabilityService,
+        private ?PricingService $pricingService = null,
+        private ?AvailabilityService $availabilityService = null,
+        private ?CreateBookingAction $createBookingAction = null,
+        private ?CancelBookingAction $cancelBookingAction = null,
+        private ?RecordBookingPaymentAction $recordBookingPaymentAction = null,
     ) {}
+
+    private function getPricingService(): PricingService
+    {
+        return $this->pricingService ?? app(PricingService::class);
+    }
+
+    private function getAvailabilityService(): AvailabilityService
+    {
+        return $this->availabilityService ?? app(AvailabilityService::class);
+    }
+
+    private function getCreateBookingAction(): CreateBookingAction
+    {
+        return $this->createBookingAction ?? app(CreateBookingAction::class);
+    }
+
+    private function getCancelBookingAction(): CancelBookingAction
+    {
+        return $this->cancelBookingAction ?? app(CancelBookingAction::class);
+    }
+
+    private function getRecordPaymentAction(): RecordBookingPaymentAction
+    {
+        return $this->recordBookingPaymentAction ?? app(RecordBookingPaymentAction::class);
+    }
 
     /**
      * Generate a fast calculation quote for checkout or frontend pricing display.
@@ -32,24 +66,24 @@ class BookingService
     ): array {
         // Enforce guest capacity
         if ($guests > $property->max_guests) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Maximum allowable guests for {$property->title_en} is {$property->max_guests}."
             );
         }
 
         // Validate date order
         if ($checkIn->gte($checkOut)) {
-            throw new \InvalidArgumentException('Check-out date must be after check-in date.');
+            throw new InvalidArgumentException('Check-out date must be after check-in date.');
         }
 
-        $isAvailable = $this->availabilityService->isAvailable($property, $checkIn, $checkOut);
+        $isAvailable = $this->getAvailabilityService()->isAvailable($property, $checkIn, $checkOut);
         if (! $isAvailable) {
-            throw new \InvalidArgumentException('The property is not available for the selected dates.');
+            throw new InvalidArgumentException('The property is not available for the selected dates.');
         }
 
-        $pricing = $this->pricingService->calculateBooking($property, $checkIn, $checkOut, $guests, $promoCode);
+        $pricing = $this->getPricingService()->calculateBooking($property, $checkIn, $checkOut, $guests, $promoCode);
         if (! $pricing['satisfies_min_stay']) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Minimum stay for the selected dates is {$pricing['min_stay_required']} nights."
             );
         }
@@ -75,7 +109,7 @@ class BookingService
 
     /**
      * Create a new booking with full pricing snapshot and server-side validation.
-     * Uses a DB transaction and re-validates availability before creation to avoid race conditions.
+     * Uses atomic DB transaction and re-validates availability before creation to avoid race conditions.
      */
     public function createPropertyBooking(
         Property $property,
@@ -89,137 +123,20 @@ class BookingService
         ?string $source = null,
         ?string $internalNotes = null,
     ): Booking {
-        // Enforce guest limits
-        if ($guests < 1 || $guests > $property->max_guests) {
-            throw new \InvalidArgumentException(
-                "Guest count must be between 1 and {$property->max_guests}."
-            );
-        }
+        $dto = new CreateBookingDTO(
+            property: $property,
+            customer: $customer,
+            checkIn: $checkIn,
+            checkOut: $checkOut,
+            guests: $guests,
+            paymentType: $paymentType,
+            paymentMethod: $paymentMethod,
+            promoCode: $promoCode,
+            source: $source ?? 'website_checkout',
+            internalNotes: $internalNotes
+        );
 
-        // Validate Section 20 Payment Requirement
-        if ($property->payment_requirement === 'full' && $paymentType !== 'full') {
-            throw new \InvalidArgumentException('This property requires full payment upfront.');
-        }
-        if ($property->payment_requirement === 'deposit' && $paymentType !== 'deposit') {
-            throw new \InvalidArgumentException('This property only accepts deposit payments upon checkout.');
-        }
-
-        // Validate allowed payment method for this property (Section 20)
-        $configuredMethods = $property->paymentMethods;
-        if ($configuredMethods->isNotEmpty() && ! $configuredMethods->contains($paymentMethod->id)) {
-            throw new \InvalidArgumentException("Payment method '{$paymentMethod->name}' is not accepted for this property.");
-        }
-
-        return DB::transaction(function () use (
-            $property, $customer, $checkIn, $checkOut, $guests,
-            $paymentType, $paymentMethod, $promoCode, $source, $internalNotes
-        ) {
-            // Re-validate availability inside the transaction to lock out concurrent double-bookings
-            $this->availabilityService->lockAndValidateForBooking(
-                $property, $checkIn, $checkOut, $guests
-            );
-
-            // Calculate exact pricing and minimum stay rules server-side
-            $pricing = $this->pricingService->calculateBooking(
-                $property, $checkIn, $checkOut, $guests, $promoCode
-            );
-
-            if (! $pricing['satisfies_min_stay']) {
-                throw new \InvalidArgumentException(
-                    "Minimum stay for the selected dates is {$pricing['min_stay_required']} nights."
-                );
-            }
-
-            $subtotal = $pricing['subtotal_cents'];
-            $cleaningFee = $pricing['cleaning_fee_cents'];
-            $serviceFee = $pricing['service_fee_cents'];
-            $tax = $pricing['tax_cents'];
-            $discountCents = $pricing['discount_cents'];
-            $discountId = $pricing['discount_id'];
-            $total = $pricing['total_cents'];
-
-            // Calculate upfront deposit required
-            $depositCents = $paymentType === 'deposit'
-                ? $pricing['deposit_cents']
-                : $total;
-
-            $amountRemaining = max(0, $total - $depositCents);
-
-            // Calculate balance due date (e.g. 14 days before arrival)
-            $balanceDueDate = null;
-            if ($amountRemaining > 0) {
-                $candidateDueDate = $checkIn->copy()->subDays(14);
-                $balanceDueDate = $candidateDueDate->isPast() ? now()->toDateString() : $candidateDueDate->toDateString();
-            }
-
-            // Determine initial status based on property booking mode (Section 21)
-            $initialStatus = match ($property->booking_mode) {
-                'instant' => 'awaiting_payment',
-                'request' => 'pending',
-                'whatsapp' => 'pending',
-                'manual' => 'pending',
-                default => 'pending',
-            };
-
-            $reference = $this->generateReference();
-
-            $booking = Booking::create([
-                'reference' => $reference,
-                'customer_id' => $customer->id,
-                'bookable_type' => Property::class,
-                'bookable_id' => $property->id,
-                'check_in' => $checkIn->toDateString(),
-                'check_out' => $checkOut->toDateString(),
-                'nights' => $pricing['nights'],
-                'guests' => $guests,
-                'subtotal_cents' => $subtotal,
-                'cleaning_fee_cents' => $cleaningFee,
-                'service_fee_cents' => $serviceFee,
-                'tax_cents' => $tax,
-                'discount_cents' => $discountCents,
-                'total_cents' => $total,
-                'deposit_cents' => $depositCents,
-                'amount_paid_cents' => 0,
-                'amount_remaining_cents' => $total,
-                'currency' => $pricing['currency'],
-                'payment_type' => $paymentType,
-                'payment_method_id' => $paymentMethod->id,
-                'status' => $initialStatus,
-                'payment_status' => 'unpaid',
-                'discount_id' => $discountId,
-                'promo_code' => $pricing['promo_code'],
-                'balance_due_date' => $balanceDueDate,
-                'internal_notes' => $internalNotes,
-                'source' => $source ?? 'website_checkout',
-            ]);
-
-            // Store immutable nightly price snapshots (Section 18)
-            foreach ($pricing['nightly_prices'] as $nightData) {
-                BookingNightlyPrice::create([
-                    'booking_id' => $booking->id,
-                    'night_date' => $nightData['night_date'],
-                    'price_cents' => $nightData['price_cents'],
-                    'currency' => $nightData['currency'],
-                    'seasonal_price_id' => $nightData['seasonal_price_id'],
-                    'season_name' => $nightData['season_name'],
-                    'is_base_price' => $nightData['is_base_price'],
-                ]);
-            }
-
-            // Record discount usage if applicable
-            if ($discountId && $discountCents > 0) {
-                DiscountUsage::create([
-                    'discount_id' => $discountId,
-                    'booking_id' => $booking->id,
-                    'customer_id' => $customer->id,
-                    'amount_discounted_cents' => $discountCents,
-                ]);
-
-                Discount::where('id', $discountId)->increment('used_count');
-            }
-
-            return $booking;
-        });
+        return $this->getCreateBookingAction()->execute($dto);
     }
 
     /**
@@ -227,24 +144,7 @@ class BookingService
      */
     public function recordPayment(Booking $booking, int $amountCents, string $type = 'payment'): void
     {
-        DB::transaction(function () use ($booking, $amountCents, $type) {
-            $booking->increment('amount_paid_cents', $amountCents);
-            $booking->amount_remaining_cents = max(0, $booking->total_cents - $booking->amount_paid_cents);
-
-            if ($booking->amount_paid_cents >= $booking->total_cents) {
-                $booking->payment_status = 'paid';
-                if (in_array($booking->status, ['draft', 'pending', 'awaiting_payment', 'partially_paid', 'payment_processing'])) {
-                    $booking->status = 'confirmed';
-                }
-            } elseif ($booking->amount_paid_cents > 0) {
-                $booking->payment_status = 'partially_paid';
-                if (in_array($booking->status, ['draft', 'pending', 'awaiting_payment', 'payment_processing'])) {
-                    $booking->status = 'confirmed'; // Confirmed with deposit
-                }
-            }
-
-            $booking->save();
-        });
+        $this->getRecordPaymentAction()->execute($booking, $amountCents, $type);
     }
 
     /**
@@ -252,12 +152,7 @@ class BookingService
      */
     public function cancelBooking(Booking $booking, string $reason, ?int $refundAmountCents = 0): void
     {
-        $booking->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-            'cancellation_reason' => $reason,
-            'refund_amount_cents' => $refundAmountCents ?? 0,
-        ]);
+        $this->getCancelBookingAction()->execute($booking, $reason, $refundAmountCents);
     }
 
     /**
@@ -265,10 +160,8 @@ class BookingService
      */
     public function generateReference(): string
     {
-        $year = now()->format('Y');
         do {
-            $number = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-            $reference = "GON-{$year}-{$number}";
+            $reference = BookingReference::generate()->toString();
         } while (Booking::where('reference', $reference)->exists());
 
         return $reference;

@@ -1,21 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Experience;
 use App\Models\HomepageSection;
-use App\Models\Lead;
 use App\Models\Location;
 use App\Models\Property;
 use App\Models\PropertyCategory;
+use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
+use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
+use App\Shared\Infrastructure\Caching\CacheKeys;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    public function __construct(
+        private readonly StoreInquiryLeadAction $storeLeadAction
+    ) {}
+
     /**
      * Display the editorial Gounow Homepage (Sections 7 & 126).
      */
@@ -53,11 +62,20 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        // Locations & Categories for Search Filter Bar
-        $locations = Location::active()->get();
-        $categories = PropertyCategory::active()->get();
+        // Cached Locations & Categories for Search Filter Bar
+        $locations = Cache::remember(
+            CacheKeys::LOCATIONS_ACTIVE,
+            CacheKeys::TTL_EXTENDED,
+            fn() => Location::active()->get()
+        );
 
-        // CMS Homepage Sections (if customized by admin)
+        $categories = Cache::remember(
+            CacheKeys::PROPERTY_CATEGORIES_ACTIVE,
+            CacheKeys::TTL_EXTENDED,
+            fn() => PropertyCategory::active()->get()
+        );
+
+        // CMS Homepage Sections
         $sections = HomepageSection::where('is_visible', true)
             ->orderBy('sort_order')
             ->get()
@@ -88,15 +106,16 @@ class HomeController extends Controller
             'source' => ['nullable', 'string', 'max:50'],
         ]);
 
-        Lead::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'type' => $validated['type'] ?? 'inquiry',
-            'source' => $validated['source'] ?? 'website_homepage',
-            'message' => $validated['message'],
-            'status' => 'new',
-        ]);
+        $dto = new LeadInquiryDTO(
+            name: $validated['name'],
+            email: $validated['email'],
+            phone: $validated['phone'] ?? null,
+            message: $validated['message'],
+            type: $validated['type'] ?? 'inquiry',
+            source: $validated['source'] ?? 'website_homepage'
+        );
+
+        $this->storeLeadAction->execute($dto);
 
         $message = app()->getLocale() === 'ar'
             ? 'شكراً لتواصلك معنا! سيقوم فريق كونسيرج الجونة بالرد عليك في أقرب وقت.'
