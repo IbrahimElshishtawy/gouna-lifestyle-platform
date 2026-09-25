@@ -13,7 +13,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            \App\Shared\Application\Contracts\LockManagerInterface::class,
+            \App\Shared\Infrastructure\Locking\DatabaseLockManager::class
+        );
+
+        $this->app->singleton(
+            \App\Shared\Application\Contracts\IdempotencyServiceInterface::class,
+            \App\Shared\Infrastructure\Idempotency\IdempotencyService::class
+        );
     }
 
     /**
