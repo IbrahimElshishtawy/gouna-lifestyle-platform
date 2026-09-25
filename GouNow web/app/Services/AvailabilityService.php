@@ -1,35 +1,60 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\AvailabilityBlock;
-use App\Models\Booking;
 use App\Models\Property;
+use App\Modules\Availability\Application\Actions\CreateAvailabilityBlockAction;
+use App\Modules\Availability\Application\Actions\LockAndValidateAvailabilityAction;
+use App\Modules\Availability\Application\Queries\CheckPropertyAvailabilityQuery;
+use App\Modules\Availability\Application\Queries\FilterAvailablePropertiesQuery;
+use App\Modules\Availability\Application\Queries\GetUnavailableDatesQuery;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
+/**
+ * Availability Service (Backward-compatibility adapter delegating to Modular Availability domain).
+ */
 class AvailabilityService
 {
-    /**
-     * Active booking statuses that block property availability.
-     */
-    public const BLOCKING_BOOKING_STATUSES = [
-        'pending',
-        'awaiting_payment',
-        'payment_processing',
-        'partially_paid',
-        'paid',
-        'confirmed',
-        'completed',
-    ];
+    public const BLOCKING_BOOKING_STATUSES = CheckPropertyAvailabilityQuery::BLOCKING_BOOKING_STATUSES;
+
+    public function __construct(
+        private readonly ?CheckPropertyAvailabilityQuery $checkQuery = null,
+        private readonly ?LockAndValidateAvailabilityAction $lockAction = null,
+        private readonly ?CreateAvailabilityBlockAction $createBlockAction = null,
+        private readonly ?GetUnavailableDatesQuery $unavailableDatesQuery = null,
+        private readonly ?FilterAvailablePropertiesQuery $filterAvailableQuery = null,
+    ) {}
+
+    private function getCheckQuery(): CheckPropertyAvailabilityQuery
+    {
+        return $this->checkQuery ?? app(CheckPropertyAvailabilityQuery::class);
+    }
+
+    private function getLockAction(): LockAndValidateAvailabilityAction
+    {
+        return $this->lockAction ?? app(LockAndValidateAvailabilityAction::class);
+    }
+
+    private function getCreateBlockAction(): CreateAvailabilityBlockAction
+    {
+        return $this->createBlockAction ?? app(CreateAvailabilityBlockAction::class);
+    }
+
+    private function getUnavailableDatesQuery(): GetUnavailableDatesQuery
+    {
+        return $this->unavailableDatesQuery ?? app(GetUnavailableDatesQuery::class);
+    }
+
+    private function getFilterAvailableQuery(): FilterAvailablePropertiesQuery
+    {
+        return $this->filterAvailableQuery ?? app(FilterAvailablePropertiesQuery::class);
+    }
 
     /**
      * Quick boolean check if a property is available for a date range.
-     *
-     * Rules:
-     * - Property must be active and published.
-     * - Adjacent bookings are valid: guest can check in on the day another guest checks out.
-     * - Cancelled, rejected, or refunded bookings do NOT block availability.
      */
     public function isAvailable(
         Property $property,
@@ -37,20 +62,12 @@ class AvailabilityService
         Carbon $checkOut,
         ?int $excludeBookingId = null
     ): bool {
-        $details = $this->checkAvailabilityDetails($property, $checkIn, $checkOut, $excludeBookingId);
-        return $details['available'];
+        $result = $this->getCheckQuery()->execute($property, $checkIn, $checkOut, $excludeBookingId);
+        return $result->isAvailable;
     }
 
     /**
      * Detailed availability evaluation returning diagnostic reasons for availability status.
-     *
-     * @return array [
-     *   'available' => bool,
-     *   'reason' => ?string,
-     *   'conflict_type' => 'none' | 'unlisted' | 'invalid_dates' | 'booking_conflict' | 'manual_block',
-     *   'conflicting_booking' => ?array,
-     *   'conflicting_block' => ?array,
-     * ]
      */
     public function checkAvailabilityDetails(
         Property $property,
@@ -58,92 +75,13 @@ class AvailabilityService
         Carbon $checkOut,
         ?int $excludeBookingId = null
     ): array {
-        if ($checkIn->gte($checkOut)) {
-            return [
-                'available' => false,
-                'reason' => 'Check-out date must be strictly after check-in date.',
-                'conflict_type' => 'invalid_dates',
-                'conflicting_booking' => null,
-                'conflicting_block' => null,
-            ];
-        }
-
-        if (! $property->is_available || $property->status !== 'published') {
-            return [
-                'available' => false,
-                'reason' => 'Property is currently unpublished or marked unavailable by management.',
-                'conflict_type' => 'unlisted',
-                'conflicting_booking' => null,
-                'conflicting_block' => null,
-            ];
-        }
-
-        $checkInStr = $checkIn->toDateString();
-        $checkOutStr = $checkOut->toDateString();
-
-        // 1. Check for conflicting active bookings
-        // Hotel date overlap formula: (existing.check_in < requested.check_out) AND (existing.check_out > requested.check_in)
-        $conflictingBooking = Booking::where('bookable_type', Property::class)
-            ->where('bookable_id', $property->id)
-            ->whereIn('status', self::BLOCKING_BOOKING_STATUSES)
-            ->whereDate('check_in', '<', $checkOutStr)
-            ->whereDate('check_out', '>', $checkInStr)
-            ->when($excludeBookingId, fn($q) => $q->where('id', '!=', $excludeBookingId))
-            ->first();
-
-        if ($conflictingBooking) {
-            return [
-                'available' => false,
-                'reason' => "Dates conflict with existing reservation ({$conflictingBooking->reference}) from {$conflictingBooking->check_in->format('M d')} to {$conflictingBooking->check_out->format('M d')}.",
-                'conflict_type' => 'booking_conflict',
-                'conflicting_booking' => [
-                    'id' => $conflictingBooking->id,
-                    'reference' => $conflictingBooking->reference,
-                    'status' => $conflictingBooking->status,
-                    'check_in' => $conflictingBooking->check_in->toDateString(),
-                    'check_out' => $conflictingBooking->check_out->toDateString(),
-                ],
-                'conflicting_block' => null,
-            ];
-        }
-
-        // 2. Check for manual availability blocks (maintenance, owner use, blocked)
-        $conflictingBlock = AvailabilityBlock::where('property_id', $property->id)
-            ->whereDate('start_date', '<', $checkOutStr)
-            ->whereDate('end_date', '>', $checkInStr)
-            ->first();
-
-        if ($conflictingBlock) {
-            $statusLabel = ucfirst(str_replace('_', ' ', $conflictingBlock->status));
-            $reasonNote = $conflictingBlock->reason ? " ({$conflictingBlock->reason})" : '';
-
-            return [
-                'available' => false,
-                'reason' => "Property is blocked for {$statusLabel}{$reasonNote} from " . Carbon::parse($conflictingBlock->start_date)->format('M d') . ' to ' . Carbon::parse($conflictingBlock->end_date)->format('M d') . '.',
-                'conflict_type' => 'manual_block',
-                'conflicting_booking' => null,
-                'conflicting_block' => [
-                    'id' => $conflictingBlock->id,
-                    'status' => $conflictingBlock->status,
-                    'reason' => $conflictingBlock->reason,
-                    'start_date' => Carbon::parse($conflictingBlock->start_date)->toDateString(),
-                    'end_date' => Carbon::parse($conflictingBlock->end_date)->toDateString(),
-                ],
-            ];
-        }
-
-        return [
-            'available' => true,
-            'reason' => null,
-            'conflict_type' => 'none',
-            'conflicting_booking' => null,
-            'conflicting_block' => null,
-        ];
+        $result = $this->getCheckQuery()->execute($property, $checkIn, $checkOut, $excludeBookingId);
+        return $result->toArray();
     }
 
     /**
      * Lock property and validate availability in a database transaction to prevent race conditions.
-     * Throws \InvalidArgumentException if unavailable.
+     * Throws InvalidArgumentException / DomainException if unavailable.
      */
     public function lockAndValidateForBooking(
         Property $property,
@@ -152,27 +90,7 @@ class AvailabilityService
         int $guests,
         ?int $excludeBookingId = null
     ): void {
-        // Enforce guest capacity
-        if ($guests > $property->max_guests) {
-            throw new \InvalidArgumentException("Maximum allowable guests for {$property->title_en} is {$property->max_guests}.");
-        }
-
-        $nights = $checkIn->diffInDays($checkOut);
-
-        // Enforce stay duration limits
-        if ($nights <= 0) {
-            throw new \InvalidArgumentException('Check-out must be after check-in.');
-        }
-
-        if ($property->max_stay_nights && $nights > $property->max_stay_nights) {
-            throw new \InvalidArgumentException("Maximum stay length is {$property->max_stay_nights} nights.");
-        }
-
-        $availability = $this->checkAvailabilityDetails($property, $checkIn, $checkOut, $excludeBookingId);
-
-        if (! $availability['available']) {
-            throw new \InvalidArgumentException($availability['reason']);
-        }
+        $this->getLockAction()->execute($property, $checkIn, $checkOut, $guests, $excludeBookingId);
     }
 
     /**
@@ -186,69 +104,23 @@ class AvailabilityService
         ?string $reason = null,
         ?int $userId = null
     ): AvailabilityBlock {
-        if ($startDate->gte($endDate)) {
-            throw new \InvalidArgumentException('End date must be after start date.');
-        }
-
-        return AvailabilityBlock::create([
-            'property_id' => $property->id,
-            'start_date' => $startDate->toDateString(),
-            'end_date' => $endDate->toDateString(),
-            'status' => $status,
-            'reason' => $reason,
-            'created_by' => $userId,
-        ]);
+        return $this->getCreateBlockAction()->execute($property, $startDate, $endDate, $status, $reason, $userId);
     }
 
     /**
      * Return all unavailable dates in a given window for calendar display.
-     * Maps each date string to its unavailability reason.
-     *
-     * @return array [ 'YYYY-MM-DD' => 'booked' | 'blocked' | 'maintenance' | 'owner_use' ]
      */
     public function getUnavailableDateMap(Property $property, Carbon $from, Carbon $to): array
     {
-        $map = [];
+        return $this->getUnavailableDatesQuery()->execute($property, $from, $to);
+    }
 
-        // Active Bookings
-        $bookings = Booking::where('bookable_type', Property::class)
-            ->where('bookable_id', $property->id)
-            ->whereIn('status', self::BLOCKING_BOOKING_STATUSES)
-            ->whereDate('check_in', '<', $to->toDateString())
-            ->whereDate('check_out', '>', $from->toDateString())
-            ->get(['check_in', 'check_out', 'status', 'reference']);
-
-        foreach ($bookings as $booking) {
-            $current = Carbon::parse($booking->check_in);
-            $end = Carbon::parse($booking->check_out);
-            while ($current->lt($end)) {
-                $map[$current->toDateString()] = [
-                    'status' => 'booked',
-                    'booking_reference' => $booking->reference,
-                ];
-                $current->addDay();
-            }
-        }
-
-        // Manual Blocks
-        $blocks = AvailabilityBlock::where('property_id', $property->id)
-            ->whereDate('start_date', '<', $to->toDateString())
-            ->whereDate('end_date', '>', $from->toDateString())
-            ->get(['start_date', 'end_date', 'status', 'reason']);
-
-        foreach ($blocks as $block) {
-            $current = Carbon::parse($block->start_date);
-            $end = Carbon::parse($block->end_date);
-            while ($current->lt($end)) {
-                $map[$current->toDateString()] = [
-                    'status' => $block->status, // 'blocked', 'maintenance', 'owner_use'
-                    'reason' => $block->reason,
-                ];
-                $current->addDay();
-            }
-        }
-
-        return $map;
+    /**
+     * Batch filter available properties for search catalogs.
+     */
+    public function filterAvailablePropertyIds(iterable $candidateIds, Carbon $checkIn, Carbon $checkOut): array
+    {
+        return $this->getFilterAvailableQuery()->execute($candidateIds, $checkIn, $checkOut);
     }
 
     /**
