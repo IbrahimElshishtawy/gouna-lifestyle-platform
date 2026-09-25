@@ -90,7 +90,7 @@ class AdminCrudTest extends TestCase
 
     public function test_admin_can_create_property_with_media_and_section_20_21_settings(): void
     {
-        $image = UploadedFile::fake()->image('villa-front.png', 800, 600);
+        $image = UploadedFile::fake()->create('villa-front.png', 500, 'image/png');
 
         $postData = [
             'title_en' => 'Tawila Island Waterfront Mansion',
@@ -224,7 +224,7 @@ class AdminCrudTest extends TestCase
             'status' => 'draft',
         ]);
 
-        $image = UploadedFile::fake()->image('photo.png', 600, 400);
+        $image = UploadedFile::fake()->create('photo.png', 500, 'image/png');
         $mediaService = app(\App\Services\MediaService::class);
         $media = $mediaService->uploadMedia($property, $image, true, 'Delete Me');
 
@@ -259,7 +259,7 @@ class AdminCrudTest extends TestCase
         $createResponse->assertStatus(200);
 
         // Store
-        $image = UploadedFile::fake()->image('yacht.png', 800, 600);
+        $image = UploadedFile::fake()->create('yacht.png', 500, 'image/png');
         $storeResponse = $this->actingAs($this->admin)->post(route('admin.experiences.store'), [
             'title_en' => 'Luxury Sunseeker Yacht Tour',
             'title_ar' => 'جولة يخت صن سيكر الفاخر',
@@ -322,7 +322,7 @@ class AdminCrudTest extends TestCase
         $createResponse->assertStatus(200);
 
         // Store
-        $banner = UploadedFile::fake()->image('festival.png', 1200, 600);
+        $banner = UploadedFile::fake()->create('festival.png', 500, 'image/png');
         $storeResponse = $this->actingAs($this->admin)->post(route('admin.events.store'), [
             'title_en' => 'Gouna Beach Sunset Festival',
             'title_ar' => 'مهرجان شاطئ الجونة للغروب',
