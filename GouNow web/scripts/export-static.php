@@ -1,20 +1,22 @@
 <?php
 
 // -------------------------------------------------------------
-// GouNow - Static Site Exporter for GitHub Pages
+// GouNow - Comprehensive Static Site Exporter for GitHub Pages
 // -------------------------------------------------------------
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// Force environment variables for GitHub Pages
+$baseUrl = 'https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform';
+
 putenv('APP_ENV=production');
 putenv('APP_DEBUG=false');
-putenv('APP_URL=https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform');
-$_ENV['APP_URL'] = 'https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform';
-$_SERVER['APP_URL'] = 'https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform';
+putenv("APP_URL=$baseUrl");
+$_ENV['APP_URL'] = $baseUrl;
+$_SERVER['APP_URL'] = $baseUrl;
 
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$kernel->bootstrap();
 
 $distDir = __DIR__ . '/../dist';
 @mkdir($distDir, 0755, true);
@@ -33,19 +35,34 @@ $routesToExport = [
     '/' => 'index.html',
     '/stays' => 'stays/index.html',
     '/experiences' => 'experiences/index.html',
+    '/admin/login' => 'admin/login/index.html',
+    '/admin/login' => 'admin/index.html', // Also export at /admin/index.html
 ];
 
-$baseUrl = 'https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform';
+// Add all property pages dynamically
+$properties = \App\Models\Property::all();
+foreach ($properties as $prop) {
+    $routesToExport['/stays/' . $prop->slug] = 'stays/' . $prop->slug . '/index.html';
+    $routesToExport['/properties/' . $prop->slug] = 'properties/' . $prop->slug . '/index.html';
+}
+
+// Add all experience pages dynamically
+$experiences = \App\Models\Experience::all();
+foreach ($experiences as $exp) {
+    $routesToExport['/experiences/' . $exp->slug] = 'experiences/' . $exp->slug . '/index.html';
+}
+
+echo "Starting export of " . count($routesToExport) . " public routes...\n";
 
 foreach ($routesToExport as $uri => $relativePath) {
-    echo "Rendering route: $uri -> $relativePath\n";
+    echo "Rendering: $uri -> $relativePath\n";
     $request = Illuminate\Http\Request::create($uri, 'GET');
     $request->headers->set('HOST', 'ibrahimelshishtawy.github.io');
     $response = $kernel->handle($request);
     
     $content = $response->getContent();
     
-    // Replace localhost occurrences with GitHub Pages base URL
+    // Replace any remaining localhost occurrences with GitHub Pages base URL
     $content = str_replace('http://localhost', $baseUrl, $content);
     $content = str_replace('https://localhost', $baseUrl, $content);
 
@@ -54,7 +71,23 @@ foreach ($routesToExport as $uri => $relativePath) {
     file_put_contents($targetFile, $content);
 }
 
-// 404 page (fallback to homepage)
+// Export Admin Dashboard Preview for demo
+echo "Rendering Admin Dashboard preview...\n";
+$admin = \App\Models\User::where('email', 'admin@gounow.com')->first();
+if ($admin) {
+    auth()->login($admin);
+    $req = Illuminate\Http\Request::create('/admin', 'GET');
+    $req->headers->set('HOST', 'ibrahimelshishtawy.github.io');
+    $res = $kernel->handle($req);
+    $content = $res->getContent();
+    $content = str_replace('http://localhost', $baseUrl, $content);
+    $content = str_replace('https://localhost', $baseUrl, $content);
+    
+    @mkdir($distDir . '/admin/dashboard', 0755, true);
+    file_put_contents($distDir . '/admin/dashboard/index.html', $content);
+}
+
+// 404 page (friendly fallback)
 copy($distDir . '/index.html', $distDir . '/404.html');
 
 // Copy public assets
@@ -88,4 +121,4 @@ if (file_exists($publicDir . '/favicon.ico')) {
 // Add .nojekyll so GitHub Pages does not ignore underscore files
 file_put_contents($distDir . '/.nojekyll', '');
 
-echo "✅ Static export completed successfully in: $distDir\n";
+echo "✅ Comprehensive export completed! Exported all pages, stays, experiences and admin panels.\n";
