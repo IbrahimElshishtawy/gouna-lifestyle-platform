@@ -5,11 +5,11 @@ FROM node:20-alpine AS frontend
 WORKDIR /app
 
 # Copy package files
-COPY "GouNow web/package*.json" ./
+COPY backend/package*.json ./
 RUN npm ci || npm install
 
 # Copy application assets for Vite build
-COPY "GouNow web" ./
+COPY backend ./
 RUN npm run build
 
 # -------------------------------------------------------------
@@ -54,8 +54,8 @@ RUN apk add --no-cache \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy application code
-COPY "GouNow web" /var/www/html
+# Copy backend code
+COPY backend /var/www/html
 
 # Copy pre-compiled Vite frontend assets from stage 1
 COPY --from=frontend /app/public/build /var/www/html/public/build
@@ -67,7 +67,7 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-d
 COPY docker/production/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/production/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY "GouNow web/docker/php/custom.ini" /usr/local/etc/php/conf.d/custom.ini
+COPY backend/docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache

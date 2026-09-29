@@ -24,7 +24,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: "GouNow web"
+        working-directory: "backend"
 
     steps:
       - name: Checkout Code
@@ -42,7 +42,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: 'GouNow web/package-lock.json'
+          cache-dependency-path: 'backend/package-lock.json'
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress --ignore-platform-req=php+
@@ -82,7 +82,7 @@ jobs:
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "GouNow web/dist"
+          path: "frontend"
 
   # -------------------------------------------------------------
   # Job 2 (CD): Deploy to GitHub Pages (Live Free Website URL)

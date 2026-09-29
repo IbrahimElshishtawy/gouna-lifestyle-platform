@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="h-full bg-[#FAF8F5]">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="LwiY8B6wje2gBS81LTFQXAjcq5ZVcj5bXrypSpdG">
+    <title>Secure Checkout - Marina Waterfront Test Villa</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            terracotta: '#B85D3B',
+                            'terracotta-dark': '#9A4A2B',
+                            sand: '#E5DCD3',
+                            'sand-light': '#F6F3EE',
+                            'sand-card': '#FAF8F5',
+                            brown: '#3D2E26',
+                            'brown-dark': '#291F1A',
+                            'brown-muted': '#786B63',
+                            border: '#E8E2D9',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="h-full text-brand-brown antialiased selection:bg-brand-terracotta/20 selection:text-brand-terracotta">
+
+    <!-- Top Minimal Navigation -->
+    <header class="h-20 bg-white border-b border-brand-border flex items-center justify-between px-6 lg:px-12 sticky top-0 z-30 shadow-xs">
+        <a href="/" class="flex items-center space-x-3 ">
+            <img src="http://ibrahimelshishtawy.github.io/assets/images/logo.jpg" alt="GOUNOW" class="h-10 w-auto rounded-md object-cover shadow-sm">
+            <div>
+                <span class="block text-xs font-semibold uppercase tracking-widest text-brand-terracotta">El Gouna</span>
+                <span class="block text-sm font-bold text-brand-brown tracking-wider">GOUNOW LIFESTYLE</span>
+            </div>
+        </a>
+        <div class="flex items-center space-x-3 text-xs text-brand-brown-muted ">
+            <span class="flex items-center text-emerald-700 font-semibold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                🔒 256-Bit SSL Encrypted
+            </span>
+        </div>
+    </header>
+
+    <!-- Error / Flash Notices -->
+    
+    
+    <!-- Main Checkout Container -->
+    <main class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8"
+          x-data="{
+              paymentType: 'full',
+              paymentMethodId: '1',
+              totalCents: 2223000,
+              depositCents: 2223000,
+              get payableAmount() {
+                  return this.paymentType === 'deposit' ? (this.depositCents / 100) : (this.totalCents / 100);
+              }
+          }">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- LEFT COLUMN: Guest Info, Payment Options, & Policies (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <form method="POST" action="http://ibrahimelshishtawy.github.io/checkout/process" class="space-y-6" id="checkout-form">
+                    <input type="hidden" name="_token" value="LwiY8B6wje2gBS81LTFQXAjcq5ZVcj5bXrypSpdG" autocomplete="off">                    <input type="hidden" name="property_id" value="34">
+                    <input type="hidden" name="check_in" value="2026-10-01">
+                    <input type="hidden" name="check_out" value="2026-10-04">
+                    <input type="hidden" name="guests" value="2">
+                    <input type="hidden" name="promo_code" value="">
+
+                    <!-- 1. Guest Contact Details -->
+                    <div class="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
+                        <div class="flex items-center space-x-2 border-b border-brand-border pb-3 ">
+                            <span class="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">1</span>
+                            <h2 class="font-bold text-brand-brown text-sm uppercase tracking-wider">
+                                Primary Guest Details
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-brand-brown mb-1">First Name *</label>
+                                <input type="text" name="first_name" value="" required
+                                       class="w-full text-xs rounded-xl border-brand-border focus:border-brand-terracotta py-2.5 px-3">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-brand-brown mb-1">Last Name *</label>
+                                <input type="text" name="last_name" value="" required
+                                       class="w-full text-xs rounded-xl border-brand-border focus:border-brand-terracotta py-2.5 px-3">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-brand-brown mb-1">Email Address *</label>
+                                <input type="email" name="email" value="" required
+                                       placeholder="For booking confirmation & digital key"
+                                       class="w-full text-xs rounded-xl border-brand-border focus:border-brand-terracotta py-2.5 px-3">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-brand-brown mb-1">Phone / WhatsApp *</label>
+                                <input type="text" name="phone" value="" required
+                                       placeholder="+20 100 000 0000"
+                                       class="w-full text-xs rounded-xl border-brand-border focus:border-brand-terracotta py-2.5 px-3">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-brand-brown mb-1">Country of Residence</label>
+                                <input type="text" name="country" value="Egypt"
+                                       class="w-full text-xs rounded-xl border-brand-border focus:border-brand-terracotta py-2.5 px-3">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-brand-brown mb-1">Special Requests / Arrival Notes</label>
+                                <textarea name="special_requests" rows="2" placeholder="e.g. Late arrival, airport transfer needed, baby crib"
+                                          class="w-full text-xs rounded-xl border-brand-border py-2 px-3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Section 20 Payment Option: Full vs Deposit -->
+                                            <div class="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
+                            <div class="flex items-center space-x-2 border-b border-brand-border pb-3 ">
+                                <span class="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">2</span>
+                                <div>
+                                    <h2 class="font-bold text-brand-brown text-sm uppercase tracking-wider">
+                                        Payment Schedule
+                                    </h2>
+                                    <p class="text-[11px] text-brand-brown-muted">Choose to pay in full today or secure with a refundable deposit</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <!-- Deposit Option -->
+                                <label class="flex items-start p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentType === 'deposit' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <input type="radio" name="payment_type" value="deposit" x-model="paymentType" class="mt-1 text-brand-terracotta focus:ring-brand-terracotta">
+                                    <div class="ml-3 ">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-bold text-brand-brown">Pay Deposit Now</span>
+                                            <span class="text-xs font-bold text-brand-terracotta">22,230 EGP</span>
+                                        </div>
+                                        <p class="text-[11px] text-brand-brown-muted mt-1">
+                                            Pay 50% today. Remaining balance of 0 EGP due 14 days before arrival.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <!-- Full Payment Option -->
+                                <label class="flex items-start p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentType === 'full' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <input type="radio" name="payment_type" value="full" x-model="paymentType" class="mt-1 text-brand-terracotta focus:ring-brand-terracotta">
+                                    <div class="ml-3 ">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs font-bold text-brand-brown">Pay In Full</span>
+                                            <span class="text-xs font-bold text-brand-terracotta">22,230 EGP</span>
+                                        </div>
+                                        <p class="text-[11px] text-brand-brown-muted mt-1">
+                                            Complete 100% of payment today for hassle-free instant express check-in upon arrival.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    
+                    <!-- 3. Payment Gateway Selector -->
+                    <div class="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
+                        <div class="flex items-center space-x-2 border-b border-brand-border pb-3 ">
+                            <span class="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">3</span>
+                            <h2 class="font-bold text-brand-brown text-sm uppercase tracking-wider">
+                                Payment Method
+                            </h2>
+                        </div>
+
+                        <div class="space-y-3">
+                                                            <label class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentMethodId == '1' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <div class="flex items-center space-x-3 ">
+                                        <input type="radio" name="payment_method_id" value="1" x-model="paymentMethodId" class="text-brand-terracotta focus:ring-brand-terracotta">
+                                        <div>
+                                            <span class="block text-xs font-bold text-brand-brown">Credit / Debit Card (Online)</span>
+                                            <span class="block text-[11px] text-brand-brown-muted">Pay securely online with Visa, Mastercard, or local card schemes.</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-mono font-bold text-brand-brown-muted uppercase bg-brand-sand-light px-2 py-0.5 rounded">
+                                        card
+                                    </span>
+                                </label>
+                                                            <label class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentMethodId == '2' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <div class="flex items-center space-x-3 ">
+                                        <input type="radio" name="payment_method_id" value="2" x-model="paymentMethodId" class="text-brand-terracotta focus:ring-brand-terracotta">
+                                        <div>
+                                            <span class="block text-xs font-bold text-brand-brown">PayPal</span>
+                                            <span class="block text-[11px] text-brand-brown-muted">Pay with your PayPal account or linked cards.</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-mono font-bold text-brand-brown-muted uppercase bg-brand-sand-light px-2 py-0.5 rounded">
+                                        paypal
+                                    </span>
+                                </label>
+                                                            <label class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentMethodId == '3' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <div class="flex items-center space-x-3 ">
+                                        <input type="radio" name="payment_method_id" value="3" x-model="paymentMethodId" class="text-brand-terracotta focus:ring-brand-terracotta">
+                                        <div>
+                                            <span class="block text-xs font-bold text-brand-brown">Bank Wire / Instapay Transfer</span>
+                                            <span class="block text-[11px] text-brand-brown-muted">Direct transfer to our Egyptian National Bank account or Instapay.</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-mono font-bold text-brand-brown-muted uppercase bg-brand-sand-light px-2 py-0.5 rounded">
+                                        bank_transfer
+                                    </span>
+                                </label>
+                                                            <label class="flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all"
+                                       :class="paymentMethodId == '4' ? 'border-brand-terracotta bg-brand-sand-light/50 ring-1 ring-brand-terracotta' : 'border-brand-border bg-white hover:bg-brand-sand-light/20'">
+                                    <div class="flex items-center space-x-3 ">
+                                        <input type="radio" name="payment_method_id" value="4" x-model="paymentMethodId" class="text-brand-terracotta focus:ring-brand-terracotta">
+                                        <div>
+                                            <span class="block text-xs font-bold text-brand-brown">Cash on Arrival / Office Payment</span>
+                                            <span class="block text-[11px] text-brand-brown-muted">Pay cash upon arrival or at our Abu Tig Marina office.</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-mono font-bold text-brand-brown-muted uppercase bg-brand-sand-light px-2 py-0.5 rounded">
+                                        cash
+                                    </span>
+                                </label>
+                                                    </div>
+                    </div>
+
+                    <!-- 4. Cancellation & House Rules -->
+                    <div class="bg-white p-6 rounded-2xl border border-brand-border shadow-xs text-xs text-brand-brown space-y-2">
+                        <h3 class="font-bold text-sm text-brand-brown mb-1">
+                            Moderate Cancellation Policy
+                        </h3>
+                        <p class="text-brand-brown-muted leading-relaxed">
+                            Full refund up to 14 days before check-in. Within 14 days, cancellation fees may apply as stated in the rental agreement.
+                        </p>
+                        <p class="text-[11px] text-brand-brown-muted pt-2 border-t border-brand-border">
+                            By selecting 'Complete Reservation', you agree to the Gounow Villa Rental Terms, House Rules, and Privacy Policy.
+                        </p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full py-4 px-6 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <span>Complete Reservation & Pay</span>
+                        <span x-text="'(' + new Intl.NumberFormat().format(payableAmount) + ' EGP)'"></span>
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Booking Financial Summary Card (5 Cols) -->
+            <div class="lg:col-span-5 space-y-6 sticky top-28">
+
+                <div class="bg-white rounded-2xl border border-brand-border shadow-xs overflow-hidden">
+                    
+                    <!-- Property Header in Summary -->
+                    <div class="p-6 border-b border-brand-border flex items-center space-x-4 ">
+                        <div class="w-20 h-20 rounded-xl overflow-hidden bg-brand-sand shrink-0 border border-brand-border">
+                                                            <div class="w-full h-full flex items-center justify-center text-[10px] text-brand-brown-muted font-bold">VILLA</div>
+                                                    </div>
+                        <div>
+                            <span class="text-[10px] font-bold text-brand-terracotta uppercase tracking-wider bg-brand-terracotta/10 px-2 py-0.5 rounded">
+                                Signature Villas
+                            </span>
+                            <h3 class="font-bold text-brand-brown text-sm mt-1 leading-snug">
+                                Marina Waterfront Test Villa
+                            </h3>
+                            <p class="text-[11px] text-brand-brown-muted mt-0.5">📍 Marina Test Bay</p>
+                        </div>
+                    </div>
+
+                    <!-- Dates & Guests Box -->
+                    <div class="p-6 border-b border-brand-border bg-brand-sand-light/30 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="border-r border-brand-border/80 ">
+                            <span class="block text-[10px] font-bold text-brand-brown-muted uppercase">Check-in</span>
+                            <span class="font-bold text-brand-brown">Oct 01, 2026</span>
+                        </div>
+                        <div class="border-r border-brand-border/80 ">
+                            <span class="block text-[10px] font-bold text-brand-brown-muted uppercase">Check-out</span>
+                            <span class="font-bold text-brand-brown">Oct 04, 2026</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-bold text-brand-brown-muted uppercase">Duration</span>
+                            <span class="font-bold text-brand-brown">3 Nights • 2 Guests</span>
+                        </div>
+                    </div>
+
+                    <!-- Price Breakdown Snapshot (Section 18) -->
+                    <div class="p-6 space-y-3 text-xs text-brand-brown">
+                        <div class="flex items-center justify-between">
+                            <span>Base Stay (3 Nights)</span>
+                            <span class="font-semibold">18,000 EGP</span>
+                        </div>
+
+                        <!-- Nightly Accordion -->
+                        <div x-data="{ openNights: false }" class="border-y border-brand-border/60 py-2">
+                            <button type="button" @click="openNights = !openNights" class="w-full flex items-center justify-between text-[11px] text-brand-terracotta font-semibold hover:underline">
+                                <span>Nightly Rate Details</span>
+                                <span x-text="openNights ? '▲ Hide' : '▼ View'"></span>
+                            </button>
+                            <div x-show="openNights" x-cloak class="mt-2 space-y-1.5 pl-2 text-[11px] text-brand-brown-muted">
+                                                                    <div class="flex items-center justify-between">
+                                        <span>Thu, Oct 01 (Standard)</span>
+                                        <span class="font-medium text-brand-brown">6,000 EGP</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between">
+                                        <span>Fri, Oct 02 (Standard)</span>
+                                        <span class="font-medium text-brand-brown">6,000 EGP</span>
+                                    </div>
+                                                                    <div class="flex items-center justify-between">
+                                        <span>Sat, Oct 03 (Standard)</span>
+                                        <span class="font-medium text-brand-brown">6,000 EGP</span>
+                                    </div>
+                                                            </div>
+                        </div>
+
+                                                    <div class="flex items-center justify-between">
+                                <span>Departure Cleaning Fee</span>
+                                <span class="font-semibold">1,000 EGP</span>
+                            </div>
+                        
+                                                    <div class="flex items-center justify-between">
+                                <span>Concierge & Guest Service Fee</span>
+                                <span class="font-semibold">500 EGP</span>
+                            </div>
+                        
+                        
+                                                    <div class="flex items-center justify-between text-brand-brown-muted">
+                                <span>Applicable Taxes (14%)</span>
+                                <span>2,730 EGP</span>
+                            </div>
+                        
+                        <div class="border-t border-brand-border pt-3 flex items-center justify-between text-sm font-bold">
+                            <span>Total Stay Amount</span>
+                            <span class="text-brand-terracotta text-base">22,230 EGP</span>
+                        </div>
+
+                        <!-- Due Today Highlight -->
+                        <div class="bg-brand-sand-light p-3.5 rounded-xl border border-brand-border mt-3">
+                            <div class="flex items-center justify-between font-bold text-xs">
+                                <span>Amount Due Today</span>
+                                <span class="text-brand-terracotta text-sm" x-text="new Intl.NumberFormat().format(payableAmount) + ' EGP'"></span>
+                            </div>
+                            <template x-if="paymentType === 'deposit'">
+                                <p class="text-[10px] text-brand-brown-muted mt-1">
+                                    Remaining 0 EGP payable prior to arrival.
+                                </p>
+                            </template>
+                        </div>
+
+                    </div>
+
+                    <!-- Promo Code Box -->
+                    <div class="p-6 bg-brand-sand-light/40 border-t border-brand-border">
+                        <form method="GET" action="http://ibrahimelshishtawy.github.io/checkout/marina-waterfront-test-villa" class="flex gap-2">
+                            <input type="hidden" name="check_in" value="2026-10-01">
+                            <input type="hidden" name="check_out" value="2026-10-04">
+                            <input type="hidden" name="guests" value="2">
+                            <input type="text" name="promo_code" value="" placeholder="Promo / Voucher Code"
+                                   class="flex-1 text-xs rounded-xl border-brand-border py-2 px-3 uppercase font-mono">
+                            <button type="submit" class="py-2 px-4 bg-brand-brown text-white text-xs font-semibold rounded-xl hover:bg-brand-brown-dark transition-colors">
+                                Apply
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="h-16 bg-white border-t border-brand-border px-6 flex items-center justify-between text-xs text-brand-brown-muted mt-12">
+        <span>&copy; 2026 GOUNOW Luxury Stays & Lifestyle. El Gouna, Red Sea.</span>
+        <span>Secure Payment Infrastructure Section 22</span>
+    </footer>
+
+    <!-- Google Analytics 4 Ecommerce begin_checkout Event -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function trackGaEvent(eventName, eventParams = {}) {
+            const payload = Object.assign({ event: eventName, timestamp: new Date().toISOString() }, eventParams);
+            window.dataLayer.push(payload);
+            if (window.console && console.log) {
+                console.log('[GA4 DataLayer]', eventName, payload);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            trackGaEvent('begin_checkout', {
+                ecommerce: {
+                    currency: 'EGP',
+                    value: 22230,
+                    items: [{
+                        item_id: 'GON-FRONT-RENT-01',
+                        item_name: 'Marina Waterfront Test Villa',
+                        item_category: 'Signature Villas',
+                        price: 6000,
+                        quantity: 3
+                    }]
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
