@@ -1,0 +1,113 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # -------------------------------------------------------------
+  # Job 1 (CI): Lint, Build Frontend & Run Backend Tests
+  # -------------------------------------------------------------
+  ci:
+    name: Build & Run Tests (CI)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: "GouNow web"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath, zip, curl, gd
+          coverage: none
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'GouNow web/package-lock.json'
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: GouNow web/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('GouNow web/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare Environment File
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+      - name: Generate Application Key
+        run: php artisan key:generate
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      - name: Build Frontend Assets (Vite)
+        run: npm run build
+
+      - name: Prepare SQLite Database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Run Database Migrations
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan migrate --force
+
+      - name: Execute Feature & Unit Tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
+
+  # -------------------------------------------------------------
+  # Job 2 (CD): Trigger Cloud Deployment
+  # -------------------------------------------------------------
+  cd:
+    name: Deploy to Production (CD)
+    needs: [ci]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Trigger Cloud Deployment (Render / Webhook)
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "🚀 Triggering cloud deployment via Deploy Hook..."
+            HTTP_CODE=$(curl -s -o deploy_response.txt -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK_URL")
+            echo "Response status code: $HTTP_CODE"
+            cat deploy_response.txt
+            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+              echo "✅ Deployment webhook triggered successfully!"
+            else
+              echo "❌ Failed to trigger deployment hook. HTTP Code: $HTTP_CODE"
+              exit 1
+            fi
+          else
+            echo "ℹ️ Note: RENDER_DEPLOY_HOOK_URL secret is not set in GitHub Secrets."
+            echo "ℹ️ If your cloud host (like Render or Railway) is connected directly to this GitHub repository, it automatically deploys every push to 'main'!"
+          fi
