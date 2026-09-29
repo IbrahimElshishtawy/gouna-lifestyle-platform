@@ -1,7 +1,7 @@
 <?php
 
 // -------------------------------------------------------------
-// GouNow - Comprehensive Static Site Exporter for GitHub Pages
+// GouNow - Complete Static Site Exporter for GitHub Pages
 // -------------------------------------------------------------
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -31,64 +31,132 @@ foreach ($files as $fileinfo) {
     $todo($fileinfo->getRealPath());
 }
 
-$routesToExport = [
-    '/' => 'index.html',
-    '/stays' => 'stays/index.html',
-    '/experiences' => 'experiences/index.html',
-    '/admin/login' => 'admin/login/index.html',
-    '/admin/login' => 'admin/index.html', // Also export at /admin/index.html
-];
+// Ensure database is seeded with admin
+$admin = \App\Models\User::where('email', 'admin@gounow.com')->first();
+if (!$admin) {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    $admin = \App\Models\User::where('email', 'admin@gounow.com')->first();
+}
 
-// Add all property pages dynamically
+$routesToExport = [];
+
+// 1. Add all static GET routes from web.php
+$allRoutes = \Illuminate\Support\Facades\Route::getRoutes()->get('GET');
+foreach ($allRoutes as $uri => $route) {
+    if (str_contains($uri, '{')) continue;
+    if (str_starts_with($uri, 'sanctum/')) continue;
+    if (str_starts_with($uri, '_ignition/')) continue;
+    if ($uri === 'up' || $uri === 'robots.txt' || $uri === 'sitemap.xml') continue;
+    
+    $cleanUri = '/' . trim($uri, '/');
+    if ($cleanUri === '/') {
+        $routesToExport[$cleanUri] = 'index.html';
+    } else {
+        $routesToExport[$cleanUri] = trim($cleanUri, '/') . '/index.html';
+    }
+}
+
+// 2. Add all Properties (Stays, Properties & Checkout)
 $properties = \App\Models\Property::all();
 foreach ($properties as $prop) {
     $routesToExport['/stays/' . $prop->slug] = 'stays/' . $prop->slug . '/index.html';
     $routesToExport['/properties/' . $prop->slug] = 'properties/' . $prop->slug . '/index.html';
+    $routesToExport['/checkout/' . $prop->slug] = 'checkout/' . $prop->slug . '/index.html';
+    $routesToExport['/admin/properties/' . $prop->id . '/edit'] = 'admin/properties/' . $prop->id . '/edit/index.html';
 }
 
-// Add all experience pages dynamically
+// 3. Add all Experiences
 $experiences = \App\Models\Experience::all();
 foreach ($experiences as $exp) {
     $routesToExport['/experiences/' . $exp->slug] = 'experiences/' . $exp->slug . '/index.html';
+    $routesToExport['/admin/experiences/' . $exp->id . '/edit'] = 'admin/experiences/' . $exp->id . '/edit/index.html';
 }
 
-echo "Starting export of " . count($routesToExport) . " public routes...\n";
+// 4. Add all Events
+$events = \App\Models\Event::all();
+foreach ($events as $event) {
+    $routesToExport['/admin/events/' . $event->id . '/edit'] = 'admin/events/' . $event->id . '/edit/index.html';
+}
+
+// 5. Ensure admin login and admin root exist explicitly
+$routesToExport['/admin/login'] = 'admin/login/index.html';
+$routesToExport['/admin'] = 'admin/index.html';
+$routesToExport['/admin/dashboard'] = 'admin/dashboard/index.html';
+
+echo "Total unique routes identified for export: " . count($routesToExport) . "\n";
+
+$exportedCount = 0;
 
 foreach ($routesToExport as $uri => $relativePath) {
-    echo "Rendering: $uri -> $relativePath\n";
-    $request = Illuminate\Http\Request::create($uri, 'GET');
+    $request = \Illuminate\Http\Request::create($uri, 'GET');
     $request->headers->set('HOST', 'ibrahimelshishtawy.github.io');
-    $response = $kernel->handle($request);
     
-    $content = $response->getContent();
+    $app->instance('request', $request);
     
-    // Replace any remaining localhost occurrences with GitHub Pages base URL
-    $content = str_replace('http://localhost', $baseUrl, $content);
-    $content = str_replace('https://localhost', $baseUrl, $content);
-
-    $targetFile = $distDir . '/' . $relativePath;
-    @mkdir(dirname($targetFile), 0755, true);
-    file_put_contents($targetFile, $content);
+    // If admin route, authenticate as admin so the full dashboard/CRUD views render
+    if (str_starts_with($uri, '/admin') && $uri !== '/admin/login' && $admin) {
+        auth()->login($admin);
+    } else {
+        auth()->logout();
+    }
+    
+    try {
+        $response = $kernel->handle($request);
+        $status = $response->getStatusCode();
+        
+        // If redirected (e.g. guest redirected to login), follow or export
+        if ($status >= 300 && $status < 400) {
+            // If redirected to login, render login page
+            $targetUrl = $response->headers->get('Location');
+            $loginReq = \Illuminate\Http\Request::create('/admin/login', 'GET');
+            $response = $kernel->handle($loginReq);
+        }
+        
+        $content = $response->getContent();
+        
+        // Replace absolute local paths with full GitHub Pages base URL
+        $content = str_replace('http://localhost', $baseUrl, $content);
+        $content = str_replace('https://localhost', $baseUrl, $content);
+        
+        // Fix any href="/..." or src="/..." or action="/..." that missing repository name
+        $content = preg_replace('/href="\/([^\/"])/', 'href="' . $baseUrl . '/$1', $content);
+        $content = preg_replace('/src="\/([^\/"])/', 'src="' . $baseUrl . '/$1', $content);
+        $content = preg_replace('/action="\/([^\/"])/', 'action="' . $baseUrl . '/$1', $content);
+        
+        // Write index.html
+        $targetFile = $distDir . '/' . $relativePath;
+        @mkdir(dirname($targetFile), 0755, true);
+        file_put_contents($targetFile, $content);
+        
+        // Also write .html sibling (e.g. stays.html as well as stays/index.html) for direct URLs
+        if ($relativePath !== 'index.html' && str_ends_with($relativePath, '/index.html')) {
+            $htmlSibling = $distDir . '/' . substr($relativePath, 0, -11) . '.html';
+            file_put_contents($htmlSibling, $content);
+        }
+        
+        $exportedCount++;
+        echo "[$exportedCount] Exported: $uri -> $relativePath\n";
+    } catch (\Throwable $e) {
+        echo "⚠️ Skipping $uri due to exception: " . $e->getMessage() . "\n";
+    }
 }
 
-// Export Admin Dashboard Preview for demo
-echo "Rendering Admin Dashboard preview...\n";
-$admin = \App\Models\User::where('email', 'admin@gounow.com')->first();
-if ($admin) {
-    auth()->login($admin);
-    $req = Illuminate\Http\Request::create('/admin', 'GET');
-    $req->headers->set('HOST', 'ibrahimelshishtawy.github.io');
-    $res = $kernel->handle($req);
-    $content = $res->getContent();
-    $content = str_replace('http://localhost', $baseUrl, $content);
-    $content = str_replace('https://localhost', $baseUrl, $content);
-    
-    @mkdir($distDir . '/admin/dashboard', 0755, true);
-    file_put_contents($distDir . '/admin/dashboard/index.html', $content);
-}
+// 404 page with intelligent client-side redirect for GitHub Pages
+$fallbackContent = file_get_contents($distDir . '/index.html');
+$spaRedirectScript = <<<HTML
+<script>
+    (function() {
+        var path = window.location.pathname;
+        var repoPrefix = '/gouna-lifestyle-platform';
+        if (!path.startsWith(repoPrefix)) {
+            window.location.replace(repoPrefix + path + window.location.search + window.location.hash);
+        }
+    })();
+</script>
+HTML;
 
-// 404 page (friendly fallback)
-copy($distDir . '/index.html', $distDir . '/404.html');
+$fallbackContent = str_replace('</head>', $spaRedirectScript . "\n</head>", $fallbackContent);
+file_put_contents($distDir . '/404.html', $fallbackContent);
 
 // Copy public assets
 $publicDir = __DIR__ . '/../public';
@@ -117,8 +185,13 @@ if (file_exists($publicDir . '/robots.txt')) {
 if (file_exists($publicDir . '/favicon.ico')) {
     copy($publicDir . '/favicon.ico', $distDir . '/favicon.ico');
 }
+try {
+    $sitemapReq = \Illuminate\Http\Request::create('/sitemap.xml', 'GET');
+    $sitemapRes = $kernel->handle($sitemapReq);
+    file_put_contents($distDir . '/sitemap.xml', $sitemapRes->getContent());
+} catch (\Throwable $e) {}
 
-// Add .nojekyll so GitHub Pages does not ignore underscore files
+// Add .nojekyll
 file_put_contents($distDir . '/.nojekyll', '');
 
-echo "✅ Comprehensive export completed! Exported all pages, stays, experiences and admin panels.\n";
+echo "\n🎉 Export finished! Successfully exported $exportedCount pages with full assets.\n";
