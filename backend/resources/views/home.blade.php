@@ -16,23 +16,23 @@
 
     <div class="relative z-10 max-w-5xl mx-auto px-6 lg:px-12 text-center py-20">
         <!-- Subheading Badge -->
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[#E5DCD3] text-xs font-semibold uppercase tracking-[0.2em] mb-6 border border-white/20">
+        <span class="gsap-hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[#E5DCD3] text-xs font-semibold uppercase tracking-[0.2em] mb-6 border border-white/20">
             <span>✨</span>
             <span>{{ app()->getLocale() === 'ar' ? 'إقامات شاطئية وتجارب حصرية' : 'Red Sea Coastal Living & Private Villas' }}</span>
         </span>
 
         <!-- Main Editorial Headline -->
-        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight max-w-4xl mx-auto">
+        <h1 class="gsap-hero-title font-serif text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight max-w-4xl mx-auto">
             {{ app()->getLocale() === 'ar' ? 'عيش تجربة الجونة بكل تفاصيلها الفاخرة' : 'Live the Unrivaled El Gouna Lifestyle' }}
         </h1>
-        <p class="text-sm sm:text-base text-[#E5DCD3]/90 max-w-2xl mx-auto mt-4 font-light leading-relaxed">
+        <p class="gsap-hero-desc text-sm sm:text-base text-[#E5DCD3]/90 max-w-2xl mx-auto mt-4 font-light leading-relaxed">
             {{ app()->getLocale() === 'ar' 
                 ? 'فلل حصرية على البحيرة، شاليهات فندقية راقية، يخوت خاصة ومغامرات صحراوية صُممت خصيصاً لذوقك الرفيع.' 
                 : 'Handpicked private lagoon villas, marina chalets, luxury yacht charters, and tailor-made desert adventures across El Gouna.' }}
         </p>
 
         <!-- Floating Multi-Tab Search Box -->
-        <div class="mt-10 max-w-4xl mx-auto bg-white rounded-3xl p-4 sm:p-5 shadow-2xl text-brand-brown border border-brand-border/60 text-left {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}"
+        <div class="gsap-hero-search mt-10 max-w-4xl mx-auto bg-white rounded-3xl p-4 sm:p-5 shadow-2xl text-brand-brown border border-brand-border/60 text-left {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}"
              x-data="{ tab: 'rent' }">
             
             <!-- Tabs -->
@@ -184,7 +184,7 @@
 
 <!-- Editorial Intro Statement (Section 2 & 7) -->
 <section class="py-20 lg:py-24 bg-white border-b border-brand-border">
-    <div class="max-w-4xl mx-auto px-6 text-center space-y-6">
+    <div class="max-w-4xl mx-auto px-6 text-center space-y-6 gsap-fade-up">
         <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
             {{ app()->getLocale() === 'ar' ? 'اكتشف الجونة مع جو ناو' : 'Discover El Gouna with GouNow' }}
         </span>
@@ -200,8 +200,8 @@
         </p>
 
         <!-- 3 Feature Badges -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 text-left {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
-            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 text-left {{ app()->getLocale() === 'ar' ? 'text-right' : '' }} gsap-stagger-container">
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
                 <span class="text-2xl">🏡</span>
                 <h3 class="font-serif text-base font-bold text-brand-brown">
                     {{ app()->getLocale() === 'ar' ? 'فلل وشاليهات مختارة' : 'Curated Private Stays' }}
@@ -211,7 +211,7 @@
                 </p>
             </div>
 
-            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2">
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
                 <span class="text-2xl">🔒</span>
                 <h3 class="font-serif text-base font-bold text-brand-brown">
                     {{ app()->getLocale() === 'ar' ? 'حجز ودفع آمن 100%' : 'Direct & Safe Booking' }}
@@ -221,7 +221,7 @@
                 </p>
             </div>
 
-            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2">
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
                 <span class="text-2xl">✨</span>
                 <h3 class="font-serif text-base font-bold text-brand-brown">
                     {{ app()->getLocale() === 'ar' ? 'كونسيرج الجونة الخاص' : 'VIP Concierge on Demand' }}
@@ -237,7 +237,7 @@
 <!-- Featured Vacation Rentals Grid (Section 7 & 126) -->
 <section class="py-20 bg-brand-sand-card">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
             <div>
                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
                     {{ app()->getLocale() === 'ar' ? 'إقامات الجونة الفاخرة' : 'Bespoke Escapes' }}
@@ -253,9 +253,9 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-container">
             @forelse($featuredRentals as $rental)
-                <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col">
+                <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
                     <!-- Image Card -->
                     <div class="relative h-64 overflow-hidden bg-brand-sand">
                         <img src="{{ $rental->cover_url }}" 
@@ -319,7 +319,7 @@
 <!-- Curated Experiences Spotlight (Section 29 & 126) -->
 <section class="py-20 bg-white border-y border-brand-border">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
             <div>
                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
                     {{ app()->getLocale() === 'ar' ? 'مغامرات وأنشطة الجونة' : 'Red Sea Adventures' }}
@@ -335,9 +335,9 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 gsap-stagger-container">
             @forelse($featuredExperiences as $exp)
-                <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col">
+                <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col gsap-card">
                     <div class="relative h-48 overflow-hidden bg-brand-sand">
                         <img src="{{ $exp->cover_url }}" 
                              alt="{{ $exp->title }}" 
@@ -377,7 +377,7 @@
 @if($featuredSales->isNotEmpty())
 <section class="py-20 bg-brand-sand-light/60">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
             <div>
                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
                     {{ app()->getLocale() === 'ar' ? 'فرص استثمارية حصرية' : 'Prime Real Estate' }}
@@ -393,11 +393,11 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-container">
             @foreach($featuredSales as $sale)
-                <div class="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col">
+                <div class="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
                     <div class="relative h-60 overflow-hidden bg-brand-sand">
-                        <img src="{{ $sale->cover_url }}" alt="{{ $sale->title }}" class="w-full h-full object-cover">
+                        <img src="{{ $sale->cover_url }}" alt="{{ $sale->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         <div class="absolute top-4 left-4">
                             <span class="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
                                 For Sale
@@ -445,7 +445,7 @@
 @if($upcomingEvents->isNotEmpty())
 <section id="events" class="py-20 bg-white border-b border-brand-border">
     <div class="max-w-7xl mx-auto px-6 lg:px-12">
-        <div class="text-center max-w-xl mx-auto mb-12 space-y-2">
+        <div class="text-center max-w-xl mx-auto mb-12 space-y-2 gsap-fade-up">
             <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
                 {{ app()->getLocale() === 'ar' ? 'أجواء وحياة الجونة' : 'El Gouna Nightlife & Culture' }}
             </span>
@@ -454,9 +454,9 @@
             </h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-container">
             @foreach($upcomingEvents as $event)
-                <div class="p-6 bg-brand-sand-light/40 rounded-3xl border border-brand-border flex flex-col justify-between space-y-4">
+                <div class="p-6 bg-brand-sand-light/40 rounded-3xl border border-brand-border flex flex-col justify-between space-y-4 gsap-card hover:shadow-md transition-all">
                     <div class="space-y-3">
                         <div class="flex items-center justify-between text-xs">
                             <span class="px-3 py-1 bg-white font-bold text-brand-terracotta rounded-full border border-brand-border">
@@ -488,7 +488,7 @@
 <!-- VIP Concierge Desk & Lead Form (Section 131) -->
 <section id="concierge" class="py-20 bg-gradient-to-br from-[#FAF8F5] via-white to-brand-sand-light/60">
     <div class="max-w-5xl mx-auto px-6 lg:px-12">
-        <div class="bg-white rounded-3xl border border-brand-border shadow-sm p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div class="bg-white rounded-3xl border border-brand-border shadow-sm p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center gsap-fade-up">
             
             <div class="space-y-5">
                 <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">

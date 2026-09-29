@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="pmDWca0LXfdZTFng1jS2PozgBoU467El3tVKGmbZ">
+    <meta name="csrf-token" content="KeQazheMJOV1kuTi8EzvO6bjcZ9zYKizadMpR1lQ">
 
     <!-- Primary SEO Meta Tags -->
 <title>GouNow | Luxury Stays, Real Estate &amp; Bespoke Experiences in El Gouna</title>
@@ -119,9 +119,17 @@
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    <!-- Swiper.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
     <style>
         [x-cloak] { display: none !important; }
         body { font-family: &quot;Plus Jakarta Sans&quot;, sans-serif; }
+        html.lenis, html.lenis body { height: auto; }
+        .lenis.lenis-smooth { scroll-behavior: auto !important; }
+        .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+        .lenis.lenis-stopped { overflow: hidden; }
+        .lenis.lenis-scrolling iframe { pointer-events: none; }
     </style>
     </head>
 <body class="min-h-full flex flex-col text-brand-brown bg-[#FAF8F5] antialiased selection:bg-brand-terracotta/20 selection:text-brand-terracotta" x-data="{ mobileMenuOpen: false }">
@@ -489,7 +497,7 @@
 
                         <!-- Inquiry Form -->
                         <form method="POST" action="http://ibrahimelshishtawy.github.io/stays/tawila-island-modern-villa-for-sale/inquire" class="space-y-3">
-                            <input type="hidden" name="_token" value="pmDWca0LXfdZTFng1jS2PozgBoU467El3tVKGmbZ" autocomplete="off">                            <input type="hidden" name="type" value="property_sale">
+                            <input type="hidden" name="_token" value="KeQazheMJOV1kuTi8EzvO6bjcZ9zYKizadMpR1lQ" autocomplete="off">                            <input type="hidden" name="type" value="property_sale">
                             <div>
                                 <label class="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">Your Name</label>
                                 <input type="text" name="name" required class="w-full text-xs bg-brand-sand-light/40 border border-brand-border rounded-xl p-2.5">
@@ -673,6 +681,143 @@
         </div>
     </a>
 </div>
+
+    <!-- Luxury Frontend Animation Libraries (GSAP, ScrollTrigger, Lenis, Swiper) -->
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialize Lenis Smooth Scroll
+            let lenis = null;
+            if (typeof Lenis !== 'undefined') {
+                try {
+                    lenis = new Lenis({
+                        duration: 1.2,
+                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                        smoothWheel: true,
+                        touchMultiplier: 1.5,
+                    });
+
+                    function raf(time) {
+                        lenis.raf(time);
+                        requestAnimationFrame(raf);
+                    }
+                    requestAnimationFrame(raf);
+                } catch(e) {
+                    console.warn('Lenis scroll error:', e);
+                }
+            }
+
+            // 2. Initialize GSAP & ScrollTrigger
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+
+                if (lenis) {
+                    lenis.on('scroll', ScrollTrigger.update);
+                    gsap.ticker.add((time) => {
+                        lenis.raf(time * 1000);
+                    });
+                    gsap.ticker.lagSmoothing(0);
+                }
+
+                // Hero Entrance Animation
+                const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+                
+                if (document.querySelector('.gsap-hero-badge')) {
+                    heroTl.fromTo('.gsap-hero-badge', 
+                        { opacity: 0, y: -20 }, 
+                        { opacity: 1, y: 0, duration: 0.8, delay: 0.2 }
+                    );
+                }
+                if (document.querySelector('.gsap-hero-title')) {
+                    heroTl.fromTo('.gsap-hero-title', 
+                        { opacity: 0, y: 30 }, 
+                        { opacity: 1, y: 0, duration: 1 }, 
+                        '-=0.5'
+                    );
+                }
+                if (document.querySelector('.gsap-hero-desc')) {
+                    heroTl.fromTo('.gsap-hero-desc', 
+                        { opacity: 0, y: 20 }, 
+                        { opacity: 1, y: 0, duration: 0.8 }, 
+                        '-=0.6'
+                    );
+                }
+                if (document.querySelector('.gsap-hero-search')) {
+                    heroTl.fromTo('.gsap-hero-search', 
+                        { opacity: 0, y: 40, scale: 0.98 }, 
+                        { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'back.out(1.4)' }, 
+                        '-=0.5'
+                    );
+                }
+
+                // Scroll Reveal Animations
+                gsap.utils.toArray('.gsap-fade-up').forEach((elem) => {
+                    gsap.fromTo(elem, 
+                        { opacity: 0, y: 35 }, 
+                        {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.8,
+                            ease: 'power2.out',
+                            scrollTrigger: {
+                                trigger: elem,
+                                start: 'top 88%',
+                                toggleActions: 'play none none none'
+                            }
+                        }
+                    );
+                });
+
+                // Staggered Cards (Properties, Features, Experiences)
+                gsap.utils.toArray('.gsap-stagger-container').forEach((container) => {
+                    const cards = container.querySelectorAll('.gsap-card');
+                    if (cards.length > 0) {
+                        gsap.fromTo(cards, 
+                            { opacity: 0, y: 40 }, 
+                            {
+                                opacity: 1,
+                                y: 0,
+                                duration: 0.7,
+                                stagger: 0.15,
+                                ease: 'power2.out',
+                                scrollTrigger: {
+                                    trigger: container,
+                                    start: 'top 85%',
+                                    toggleActions: 'play none none none'
+                                }
+                            }
+                        );
+                    }
+                });
+            }
+
+            // 3. Initialize Swipers if present
+            if (typeof Swiper !== 'undefined') {
+                document.querySelectorAll('.swiper-luxury').forEach((sliderEl) => {
+                    new Swiper(sliderEl, {
+                        slidesPerView: 1,
+                        spaceBetween: 24,
+                        grabCursor: true,
+                        pagination: {
+                            el: sliderEl.querySelector('.swiper-pagination'),
+                            clickable: true,
+                        },
+                        navigation: {
+                            nextEl: sliderEl.querySelector('.swiper-button-next'),
+                            prevEl: sliderEl.querySelector('.swiper-button-prev'),
+                        },
+                        breakpoints: {
+                            640: { slidesPerView: 2 },
+                            1024: { slidesPerView: 3 },
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
