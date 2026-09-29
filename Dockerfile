@@ -15,7 +15,7 @@ RUN npm run build
 # -------------------------------------------------------------
 # Stage 2: Production PHP-FPM + Nginx + Composer
 # -------------------------------------------------------------
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 WORKDIR /var/www/html
 
