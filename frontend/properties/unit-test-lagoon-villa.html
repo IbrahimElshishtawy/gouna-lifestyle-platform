@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="ZwaKFzhiYsEKjd2HOZrOsaWBcELCrAmgWXdrB5pe">
+    <meta name="csrf-token" content="dySSxwg5BnWczjMJe30SXrCnXH9xur07yhFfwOpH">
 
     <!-- Primary SEO Meta Tags -->
 <title>GouNow | Luxury Stays, Real Estate &amp; Bespoke Experiences in El Gouna</title>
@@ -30,27 +30,22 @@
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "GouNow Lifestyle",
-    "url": "https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform",
-    "logo": "https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/assets/images/logo.jpg",
-    "description": "Bespoke vacation villa rentals, real estate sales, and yacht charters in El Gouna, Red Sea.",
+    "@type": "LodgingBusiness",
+    "name": "Unit Test Lagoon Villa",
+    "description": "",
+    "url": "https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/unit-test-lagoon-villa",
+    "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
     "address": {
         "@type": "PostalAddress",
+        "streetAddress": "El Gouna",
         "addressLocality": "El Gouna",
         "addressRegion": "Red Sea",
         "addressCountry": "EG"
     },
-    "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+201000000000",
-        "contactType": "customer service",
-        "areaServed": "EG",
-        "availableLanguage": [
-            "English",
-            "Arabic"
-        ]
-    }
+    "numberOfRooms": 3,
+    "priceRange": "EGP 5,000",
+    "checkinTime": "15:00:00",
+    "checkoutTime": "11:00:00"
 }
 </script>
 
@@ -245,23 +240,312 @@
         
     <!-- Main Page Content Slot -->
     <main class="flex-1">
-        <div class="min-h-[60vh] flex items-center justify-center px-6 py-20 text-center">
-    <div class="max-w-md mx-auto space-y-6">
-        <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">404 &bull; Lost in Paradise</span>
-        <h1 class="font-serif text-4xl sm:text-5xl font-bold text-brand-brown">This Shoreline Doesn't Exist</h1>
-        <p class="text-xs sm:text-sm text-brand-brown-muted leading-relaxed font-light">
-            The page or villa sanctuary you are searching for might have been moved, renamed, or is currently reserved.
-        </p>
-        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform" class="w-full sm:w-auto px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm">
-                Return to Homepage
-            </a>
-            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays?listing_type=rent" class="w-full sm:w-auto px-6 py-3 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition">
-                Explore Available Stays
+        
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 lg:py-12"
+     x-data="bookingWidget({
+        propertyId: 1,
+        propertySlug: 'unit-test-lagoon-villa',
+        basePriceCents: 500000,
+        minNights: 2,
+        maxGuests: 6,
+        initialCheckIn: '2026-10-02',
+        initialCheckOut: '2026-10-05',
+        initialGuests: 2,
+        currency: 'EGP'
+     })">
+
+    <!-- Breadcrumb & Header -->
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-brand-brown-muted mb-2">
+                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform" class="hover:text-brand-brown">Home</a>
+                <span>/</span>
+                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays?listing_type=rent" class="hover:text-brand-brown">
+                    Stays
+                </a>
+                <span>/</span>
+                <span class="text-brand-brown font-medium">Test Lagoon</span>
+            </nav>
+            <h1 class="font-serif text-2xl sm:text-4xl font-semibold text-brand-brown">Unit Test Lagoon Villa</h1>
+            <div class="flex items-center gap-3 text-xs text-brand-brown-muted mt-2">
+                <span>📍 Test Lagoon, El Gouna, Egypt</span>
+                <span>•</span>
+                <span class="font-mono text-brand-terracotta font-semibold">Ref: GON-TEST-UNIT-01</span>
+            </div>
+        </div>
+
+        <!-- Share / Wishlist / Inquire -->
+        <div class="flex items-center gap-3 text-xs">
+            <a href="https://wa.me/201000000000?text=Hello+GouNow%2C%0A%0AI+am+inquiring+about%3A+Unit+Test+Lagoon+Villa%0AReference%3A+GON-TEST-UNIT-01%0A%0ACould+you+please+provide+more+details+on+availability+and+arrangements%3F" 
+               target="_blank"
+               data-ga-event="contact_whatsapp"
+               data-ga-item="Unit Test Lagoon Villa"
+               data-ga-category="property_inquiry"
+               class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition flex items-center gap-1.5 shadow-xs">
+                <span>💬</span>
+                <span>WhatsApp Concierge</span>
             </a>
         </div>
     </div>
+
+    <!-- Editorial Gallery (Section 127) -->
+    <div class="mb-10 grid grid-cols-1 md:grid-cols-4 gap-3 rounded-3xl overflow-hidden shadow-xs border border-brand-border bg-brand-sand">
+        <!-- Main Hero Image -->
+        <div class="md:col-span-2 md:row-span-2 h-[380px] md:h-[480px] overflow-hidden group cursor-pointer relative">
+            <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                 alt="Unit Test Lagoon Villa" 
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute bottom-4 left-4">
+                <span class="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] rounded-full uppercase tracking-wider">
+                    Waterfront Residence
+                </span>
+            </div>
+        </div>
+
+        <!-- Supporting Images Grid -->
+                    <div class="h-[185px] md:h-[235px] overflow-hidden group cursor-pointer relative">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                     alt="Unit Test Lagoon Villa photo 2" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+                    <div class="h-[185px] md:h-[235px] overflow-hidden group cursor-pointer relative">
+                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                     alt="Unit Test Lagoon Villa photo 3" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+                    <div class="h-[185px] md:h-[235px] overflow-hidden group cursor-pointer relative">
+                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                     alt="Unit Test Lagoon Villa photo 4" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+                    <div class="h-[185px] md:h-[235px] overflow-hidden group cursor-pointer relative">
+                <img src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                     alt="Unit Test Lagoon Villa photo 5" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            </div>
+            </div>
+
+    <!-- Quick Facts Strip -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 p-5 bg-white rounded-2xl border border-brand-border mb-12 text-xs">
+        <div class="border-r border-brand-border/60 pr-3">
+            <span class="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">Bedrooms</span>
+            <span class="text-sm font-bold text-brand-brown">3 Beds</span>
+        </div>
+        <div class="border-r border-brand-border/60 pr-3">
+            <span class="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">Bathrooms</span>
+            <span class="text-sm font-bold text-brand-brown">3 Baths</span>
+        </div>
+        <div class="border-r border-brand-border/60 pr-3">
+            <span class="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">Capacity</span>
+            <span class="text-sm font-bold text-brand-brown">Up to 6 Guests</span>
+        </div>
+        <div class="border-r border-brand-border/60 pr-3">
+            <span class="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">Area</span>
+            <span class="text-sm font-bold text-brand-brown">Exclusive</span>
+        </div>
+        <div>
+            <span class="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">Times</span>
+            <span class="text-xs font-semibold text-brand-brown">In 15:00:00 / Out 11:00:00</span>
+        </div>
+    </div>
+
+    <!-- Main Content Layout (2 Columns: Description & Booking Widget) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+        
+        <!-- Left Column: Editorial Content (2 Cols) -->
+        <div class="lg:col-span-2 space-y-10">
+            
+            <!-- Description -->
+            <div class="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-4">
+                <h2 class="font-serif text-xl font-bold text-brand-brown">
+                    About This Sanctuary
+                </h2>
+                <div class="text-xs sm:text-sm text-brand-brown/90 leading-relaxed space-y-4 font-light">
+                    <p class="font-medium text-brand-brown leading-relaxed">
+                        
+                    </p>
+                    <div class="whitespace-pre-line text-brand-brown-muted">
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities Grid -->
+            <div class="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-6">
+                <h2 class="font-serif text-xl font-bold text-brand-brown">
+                    Curated Amenities
+                </h2>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                                            <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>🌊</span><span class="font-medium">Direct Lagoon Beach</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>🏊</span><span class="font-medium">Private Heated Pool</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>📶</span><span class="font-medium">High-Speed Wi-Fi</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>❄️</span><span class="font-medium">Climate AC Control</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>🍳</span><span class="font-medium">Fully Equipped Kitchen</span>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 bg-brand-sand-light/50 rounded-xl">
+                            <span>🚗</span><span class="font-medium">Private Parking</span>
+                        </div>
+                                    </div>
+            </div>
+
+            <!-- House Policies & Rules -->
+            <div class="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-6">
+                <h2 class="font-serif text-xl font-bold text-brand-brown">
+                    Stay Policies &amp; Information
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
+                    <div class="space-y-2">
+                        <span class="font-bold text-brand-brown block">Cancellation Policy: <span class="capitalize text-brand-terracotta">moderate</span></span>
+                        <p class="text-brand-brown-muted leading-relaxed">
+                            Full refund up to 14 days before check-in. Partial refund applies thereafter.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <span class="font-bold text-brand-brown block">Payment Rules:</span>
+                        <p class="text-brand-brown-muted leading-relaxed">
+                                                            Flexible: Choose between full upfront payment or 30% deposit at checkout.
+                                                    </p>
+                    </div>
+                </div>
+
+                            </div>
+
+        </div>
+
+        <!-- Right Column: Sticky Booking Widget (Section 128) -->
+        <div class="lg:col-span-1 lg:sticky lg:top-28">
+            <div class="bg-white p-6 sm:p-7 rounded-3xl border border-brand-border shadow-lg space-y-6">
+                
+                                    <!-- Vacation Rental Booking Widget (Sections 128 & 18) -->
+                    <div class="space-y-5">
+                        
+                        <!-- Nightly Price Header -->
+                        <div class="flex items-baseline justify-between border-b border-brand-border pb-4">
+                            <div>
+                                <span class="text-2xl font-serif font-bold text-brand-brown">
+                                    5,000
+                                </span>
+                                <span class="text-xs text-brand-brown-muted font-normal">
+                                    EGP / night
+                                </span>
+                            </div>
+                            <span class="text-[11px] px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold rounded-full border border-emerald-200">
+                                Instant Booking
+                            </span>
+                        </div>
+
+                        <!-- Date Inputs -->
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">Check-In</label>
+                                <input type="date" x-model="checkIn" @change="recalculateQuote()" 
+                                       class="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown mt-1">
+                            </div>
+                            <div class="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl">
+                                <label class="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">Check-Out</label>
+                                <input type="date" x-model="checkOut" @change="recalculateQuote()" 
+                                       class="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown mt-1">
+                            </div>
+                        </div>
+
+                        <!-- Guests Selector -->
+                        <div class="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">Guests</label>
+                            <select x-model="guests" @change="recalculateQuote()" class="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown mt-1">
+                                                                    <option value="1">1 Guest</option>
+                                                                    <option value="2">2 Guests</option>
+                                                                    <option value="3">3 Guests</option>
+                                                                    <option value="4">4 Guests</option>
+                                                                    <option value="5">5 Guests</option>
+                                                                    <option value="6">6 Guests</option>
+                                                            </select>
+                        </div>
+
+                        <!-- Error State -->
+                        <div x-show="errorMessage" x-cloak class="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
+                            <span x-text="errorMessage"></span>
+                        </div>
+
+                        <!-- Live Calculation Breakdown -->
+                        <div x-show="quote && !errorMessage" class="space-y-2.5 text-xs border-t border-brand-border pt-4">
+                            <div class="flex justify-between text-brand-brown">
+                                <span>EGP <span x-text="(quote.subtotal_cents / 100 / quote.nights).toFixed(0)"></span> × <span x-text="quote.nights"></span> nights</span>
+                                <span class="font-semibold">EGP <span x-text="(quote.subtotal_cents / 100).toLocaleString()"></span></span>
+                            </div>
+
+                            <template x-if="quote.cleaning_fee_cents > 0">
+                                <div class="flex justify-between text-brand-brown-muted">
+                                    <span>Cleaning Fee</span>
+                                    <span>EGP <span x-text="(quote.cleaning_fee_cents / 100).toLocaleString()"></span></span>
+                                </div>
+                            </template>
+
+                            <template x-if="quote.service_fee_cents > 0">
+                                <div class="flex justify-between text-brand-brown-muted">
+                                    <span>Service Fee</span>
+                                    <span>EGP <span x-text="(quote.service_fee_cents / 100).toLocaleString()"></span></span>
+                                </div>
+                            </template>
+
+                            <template x-if="quote.tax_cents > 0">
+                                <div class="flex justify-between text-brand-brown-muted">
+                                    <span>Taxes (14% VAT)</span>
+                                    <span>EGP <span x-text="(quote.tax_cents / 100).toLocaleString()"></span></span>
+                                </div>
+                            </template>
+
+                            <div class="flex justify-between font-bold text-sm text-brand-brown pt-3 border-t border-brand-border">
+                                <span>Estimated Total</span>
+                                <span class="text-brand-terracotta text-base">EGP <span x-text="(quote.total_cents / 100).toLocaleString()"></span></span>
+                            </div>
+
+                            <template x-if="quote.deposit_cents > 0">
+                                <div class="p-2.5 bg-amber-50/60 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex justify-between">
+                                    <span>Required Deposit to Reserve:</span>
+                                    <span class="font-bold">EGP <span x-text="(quote.deposit_cents / 100).toLocaleString()"></span></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Reserve CTA Button -->
+                        <div class="pt-2">
+                            <a :href="checkoutUrl" 
+                               :class="errorMessage ? 'opacity-50 pointer-events-none' : ''"
+                               data-ga-event="begin_checkout"
+                               data-ga-item="Unit Test Lagoon Villa"
+                               data-ga-category="booking"
+                               class="w-full block text-center py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-md hover:shadow-lg cursor-pointer">
+                                Reserve Villa Now
+                            </a>
+                            <p class="text-[10px] text-center text-brand-brown-muted mt-2">
+                                🔒 You won't be charged yet &bull; 256-Bit SSL Secured
+                            </p>
+                        </div>
+
+                    </div>
+                
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Similar Stays Recommendation Grid (Section 127) -->
+    
 </div>
+
+
     </main>
 
     <!-- Master Editorial Footer -->
@@ -509,6 +793,86 @@
     </script>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof trackGaEvent === 'function') {
+            trackGaEvent('view_item', {
+                ecommerce: {
+                    currency: 'EGP',
+                    value: 5000,
+                    items: [{
+                        item_id: 'GON-TEST-UNIT-01',
+                        item_name: 'Unit Test Lagoon Villa',
+                        item_category: 'Test Villa Category',
+                        price: 5000,
+                        quantity: 1
+                    }]
+                }
+            });
+        }
+    });
+
+    function bookingWidget(config) {
+        return {
+            propertyId: config.propertyId,
+            propertySlug: config.propertySlug,
+            checkIn: config.initialCheckIn,
+            checkOut: config.initialCheckOut,
+            guests: config.initialGuests,
+            quote: {"nights":3,"nightly_prices":[{"price_cents":500000,"seasonal_price_id":null,"season_name":null,"is_base_price":true,"priority":0,"min_stay_nights":null,"night_date":"2026-10-02","day_of_week":"Friday","currency":"EGP","price_formatted":"5,000.00"},{"price_cents":500000,"seasonal_price_id":null,"season_name":null,"is_base_price":true,"priority":0,"min_stay_nights":null,"night_date":"2026-10-03","day_of_week":"Saturday","currency":"EGP","price_formatted":"5,000.00"},{"price_cents":500000,"seasonal_price_id":null,"season_name":null,"is_base_price":true,"priority":0,"min_stay_nights":null,"night_date":"2026-10-04","day_of_week":"Sunday","currency":"EGP","price_formatted":"5,000.00"}],"subtotal_cents":1500000,"subtotal_formatted":"15,000.00","cleaning_fee_cents":100000,"service_fee_cents":50000,"discount_cents":0,"discount_id":null,"promo_code":null,"tax_percentage":14,"tax_cents":231000,"total_cents":1881000,"total_formatted":"18,810.00","deposit_cents":1881000,"amount_remaining_cents":0,"currency":"EGP","min_stay_required":2,"property_min_stay":2,"seasonal_min_stay_override":null,"satisfies_min_stay":true},
+            errorMessage: null,
+            isLoading: false,
+
+            get checkoutUrl() {
+                const params = new URLSearchParams({
+                    check_in: this.checkIn,
+                    check_out: this.checkOut,
+                    guests: this.guests
+                });
+                return `/checkout/${this.propertySlug}?` + params.toString();
+            },
+
+            async recalculateQuote() {
+                if (!this.checkIn || !this.checkOut || this.checkIn >= this.checkOut) {
+                    this.errorMessage = 'Check-out date must be after check-in date.';
+                    return;
+                }
+
+                this.isLoading = true;
+                this.errorMessage = null;
+
+                try {
+                    const response = await fetch('/checkout/calculate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            property_id: this.propertyId,
+                            check_in: this.checkIn,
+                            check_out: this.checkOut,
+                            guests: this.guests
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        this.quote = data.quote;
+                        this.errorMessage = null;
+                    } else {
+                        this.errorMessage = data.message || 'The selected dates are unavailable or violate stay restrictions.';
+                    }
+                } catch (err) {
+                    this.errorMessage = 'Unable to calculate quote. Please try again.';
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+        };
+    }
+</script>
+<script>
     document.addEventListener('submit', function(e) {
         var form = e.target;
         var method = (form.getAttribute('method') || 'GET').toUpperCase();

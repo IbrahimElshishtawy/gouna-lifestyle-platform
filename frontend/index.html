@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="ZwaKFzhiYsEKjd2HOZrOsaWBcELCrAmgWXdrB5pe">
+    <meta name="csrf-token" content="dySSxwg5BnWczjMJe30SXrCnXH9xur07yhFfwOpH">
 
     <!-- Primary SEO Meta Tags -->
 <title>GouNow | Luxury Stays, Real Estate &amp; Bespoke Experiences in El Gouna</title>
@@ -245,23 +245,1003 @@
         
     <!-- Main Page Content Slot -->
     <main class="flex-1">
-        <div class="min-h-[60vh] flex items-center justify-center px-6 py-20 text-center">
-    <div class="max-w-md mx-auto space-y-6">
-        <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">404 &bull; Lost in Paradise</span>
-        <h1 class="font-serif text-4xl sm:text-5xl font-bold text-brand-brown">This Shoreline Doesn't Exist</h1>
-        <p class="text-xs sm:text-sm text-brand-brown-muted leading-relaxed font-light">
-            The page or villa sanctuary you are searching for might have been moved, renamed, or is currently reserved.
+        
+<!-- Hero Section with Floating Search Widget -->
+<section class="relative min-h-[640px] lg:min-h-[720px] flex items-center justify-center bg-slate-900 text-white overflow-hidden">
+    <!-- Background Image with Soft Warm Overlay -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2000&q=85" 
+             alt="El Gouna Luxury Waterfront" 
+             class="w-full h-full object-cover object-center filter brightness-[0.7] transform scale-105 duration-1000 ease-out">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#291F1A]/90 via-[#291F1A]/40 to-transparent"></div>
+    </div>
+
+    <div class="relative z-10 max-w-5xl mx-auto px-6 lg:px-12 text-center py-20">
+        <!-- Subheading Badge -->
+        <span class="gsap-hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-[#E5DCD3] text-xs font-semibold uppercase tracking-[0.2em] mb-6 border border-white/20">
+            <span>✨</span>
+            <span>Red Sea Coastal Living &amp; Private Villas</span>
+        </span>
+
+        <!-- Main Editorial Headline -->
+        <h1 class="gsap-hero-title font-serif text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-tight max-w-4xl mx-auto">
+            Live the Unrivaled El Gouna Lifestyle
+        </h1>
+        <p class="gsap-hero-desc text-sm sm:text-base text-[#E5DCD3]/90 max-w-2xl mx-auto mt-4 font-light leading-relaxed">
+            Handpicked private lagoon villas, marina chalets, luxury yacht charters, and tailor-made desert adventures across El Gouna.
         </p>
-        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform" class="w-full sm:w-auto px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm">
-                Return to Homepage
-            </a>
-            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays?listing_type=rent" class="w-full sm:w-auto px-6 py-3 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition">
-                Explore Available Stays
-            </a>
+
+        <!-- Floating Multi-Tab Search Box -->
+        <div class="gsap-hero-search mt-10 max-w-4xl mx-auto bg-white rounded-3xl p-4 sm:p-5 shadow-2xl text-brand-brown border border-brand-border/60 text-left "
+             x-data="{ tab: 'rent' }">
+            
+            <!-- Tabs -->
+            <div class="flex items-center gap-2 border-b border-brand-border pb-3 mb-4">
+                <button @click="tab = 'rent'" 
+                        :class="tab === 'rent' ? 'bg-brand-sand-light text-brand-terracotta font-bold' : 'text-brand-brown-muted hover:text-brand-brown font-medium'"
+                        class="px-4 py-1.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                    🏠 Rent a Stay
+                </button>
+                <button @click="tab = 'sale'" 
+                        :class="tab === 'sale' ? 'bg-brand-sand-light text-brand-terracotta font-bold' : 'text-brand-brown-muted hover:text-brand-brown font-medium'"
+                        class="px-4 py-1.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                    🔑 Buy Real Estate
+                </button>
+                <button @click="tab = 'experience'" 
+                        :class="tab === 'experience' ? 'bg-brand-sand-light text-brand-terracotta font-bold' : 'text-brand-brown-muted hover:text-brand-brown font-medium'"
+                        class="px-4 py-1.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
+                    ⛵ Experiences
+                </button>
+            </div>
+
+            <!-- Rent Tab Form -->
+            <form x-show="tab === 'rent'" method="GET" action="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                <input type="hidden" name="listing_type" value="rent">
+                
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Location
+                    </label>
+                    <select name="location" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="all">All El Gouna</option>
+                                                    <option value="test-location">Test Lagoon</option>
+                                                    <option value="test-el-gouna">Test El Gouna</option>
+                                                    <option value="test-checkout-location">Checkout Lagoon</option>
+                                                    <option value="marina-test-bay">Marina Test Bay</option>
+                                                    <option value="abu-tig-marina">Abu Tig Marina</option>
+                                                    <option value="kafr-el-gouna-downtown">Kafr El Gouna / Downtown</option>
+                                                    <option value="fanadir-bay">Fanadir Bay</option>
+                                                    <option value="mangroovy-kite-beach">Mangroovy &amp; Kite Beach</option>
+                                                    <option value="west-golf">West Golf</option>
+                                                    <option value="tawila-island-lagoons">Tawila Island &amp; Lagoons</option>
+                                            </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Check-In
+                    </label>
+                    <input type="date" name="check_in" value="2026-10-01"
+                           class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Check-Out
+                    </label>
+                    <input type="date" name="check_out" value="2026-10-04"
+                           class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full py-2.5 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Search Stays</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Buy Tab Form -->
+            <form x-show="tab === 'sale'" x-cloak method="GET" action="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                <input type="hidden" name="listing_type" value="sale">
+                
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Location
+                    </label>
+                    <select name="location" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="all">All El Gouna</option>
+                                                    <option value="test-location">Test Lagoon</option>
+                                                    <option value="test-el-gouna">Test El Gouna</option>
+                                                    <option value="test-checkout-location">Checkout Lagoon</option>
+                                                    <option value="marina-test-bay">Marina Test Bay</option>
+                                                    <option value="abu-tig-marina">Abu Tig Marina</option>
+                                                    <option value="kafr-el-gouna-downtown">Kafr El Gouna / Downtown</option>
+                                                    <option value="fanadir-bay">Fanadir Bay</option>
+                                                    <option value="mangroovy-kite-beach">Mangroovy &amp; Kite Beach</option>
+                                                    <option value="west-golf">West Golf</option>
+                                                    <option value="tawila-island-lagoons">Tawila Island &amp; Lagoons</option>
+                                            </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Category
+                    </label>
+                    <select name="category" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="all">All Categories</option>
+                                                    <option value="test-category">Test Villa Category</option>
+                                                    <option value="test-villas">Test Villas</option>
+                                                    <option value="test-checkout-category">Checkout Category</option>
+                                                    <option value="test-signature-villas">Signature Villas</option>
+                                                    <option value="luxury-villas">Luxury Villas</option>
+                                                    <option value="waterfront-chalets">Waterfront Chalets</option>
+                                                    <option value="marina-apartments">Marina Apartments &amp; Penthouses</option>
+                                                    <option value="townhouses">Townhouses &amp; Houses</option>
+                                            </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Bedrooms
+                    </label>
+                    <select name="bedrooms" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="">Any</option>
+                        <option value="1">1+ Bedrooms</option>
+                        <option value="2">2+ Bedrooms</option>
+                        <option value="3">3+ Bedrooms</option>
+                        <option value="4">4+ Bedrooms</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full py-2.5 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Browse Sale</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Experiences Tab Form -->
+            <form x-show="tab === 'experience'" x-cloak method="GET" action="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Location
+                    </label>
+                    <select name="location" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="all">All Red Sea</option>
+                                                    <option value="test-location">Test Lagoon</option>
+                                                    <option value="test-el-gouna">Test El Gouna</option>
+                                                    <option value="test-checkout-location">Checkout Lagoon</option>
+                                                    <option value="marina-test-bay">Marina Test Bay</option>
+                                                    <option value="abu-tig-marina">Abu Tig Marina</option>
+                                                    <option value="kafr-el-gouna-downtown">Kafr El Gouna / Downtown</option>
+                                                    <option value="fanadir-bay">Fanadir Bay</option>
+                                                    <option value="mangroovy-kite-beach">Mangroovy &amp; Kite Beach</option>
+                                                    <option value="west-golf">West Golf</option>
+                                                    <option value="tawila-island-lagoons">Tawila Island &amp; Lagoons</option>
+                                            </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Experience Type
+                    </label>
+                    <select name="category" class="w-full text-xs font-medium bg-brand-sand-light/60 border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                        <option value="all">All Experiences</option>
+                        <option value="boat-trips">Boat Trips & Yacht Charters</option>
+                        <option value="safari">Desert Safari & Quad</option>
+                        <option value="water-sports">Kite & Water Sports</option>
+                        <option value="dining">Private Lagoon Dining</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full py-2.5 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <span>Explore Adventures</span>
+                    </button>
+                </div>
+            </form>
+
         </div>
     </div>
-</div>
+</section>
+
+<!-- Editorial Intro Statement (Section 2 & 7) -->
+<section class="py-20 lg:py-24 bg-white border-b border-brand-border">
+    <div class="max-w-4xl mx-auto px-6 text-center space-y-6 gsap-fade-up">
+        <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+            Discover El Gouna with GouNow
+        </span>
+        <h2 class="font-serif text-3xl sm:text-4xl text-brand-brown leading-snug">
+            Where Bohemian Serenity Meets Effortless Coastal Luxury
+        </h2>
+        <p class="text-sm sm:text-base text-brand-brown-muted leading-relaxed font-light">
+            GouNow is an independent hospitality and real estate collective curated specifically for El Gouna. Every villa is personally inspected, every experience is uniquely hosted, and our private concierge is with you from sunrise lagoon dips to stargazing in the desert.
+        </p>
+
+        <!-- 3 Feature Badges -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 text-left  gsap-stagger-container">
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
+                <span class="text-2xl">🏡</span>
+                <h3 class="font-serif text-base font-bold text-brand-brown">
+                    Curated Private Stays
+                </h3>
+                <p class="text-xs text-brand-brown-muted leading-relaxed">
+                    Direct lagoon waterfronts, heated pools, and boho organic interiors.
+                </p>
+            </div>
+
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
+                <span class="text-2xl">🔒</span>
+                <h3 class="font-serif text-base font-bold text-brand-brown">
+                    Direct &amp; Safe Booking
+                </h3>
+                <p class="text-xs text-brand-brown-muted leading-relaxed">
+                    Instant calendar confirmation, 3DS card checkout, and flexible deposit options.
+                </p>
+            </div>
+
+            <div class="p-6 bg-brand-sand-light/50 rounded-2xl border border-brand-border space-y-2 gsap-card hover:-translate-y-1 transition-transform duration-300">
+                <span class="text-2xl">✨</span>
+                <h3 class="font-serif text-base font-bold text-brand-brown">
+                    VIP Concierge on Demand
+                </h3>
+                <p class="text-xs text-brand-brown-muted leading-relaxed">
+                    Airport transfers, yacht charters, private chefs, and instant WhatsApp support.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Vacation Rentals Grid (Section 7 & 126) -->
+<section class="py-20 bg-brand-sand-card">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+                    Bespoke Escapes
+                </span>
+                <h2 class="font-serif text-2xl sm:text-3xl text-brand-brown font-semibold mt-1">
+                    Featured Vacation Rentals
+                </h2>
+            </div>
+            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays?listing_type=rent" 
+               class="text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition flex items-center gap-1">
+                <span>View All Stays</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gsap-stagger-container">
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Fanadir Bay Waterfront Villa" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 Fanadir Bay
+                            </span>
+                        </div>
+                                                    <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-brand-terracotta text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                    ★ Featured
+                                </span>
+                            </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>4 Beds</span>
+                                <span>•</span>
+                                <span>5 Baths</span>
+                                <span>•</span>
+                                <span>Up to 8 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/fanadir-bay-sunlight-villa">Fanadir Bay Waterfront Villa</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                Sublime 4-bedroom signature villa with heated private infinity pool and direct turquoise lagoon beach.
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    12,000 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/fanadir-bay-sunlight-villa" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Abu Tig Marina Luxury Penthouse" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 Abu Tig Marina
+                            </span>
+                        </div>
+                                                    <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-brand-terracotta text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                    ★ Featured
+                                </span>
+                            </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>3 Beds</span>
+                                <span>•</span>
+                                <span>3 Baths</span>
+                                <span>•</span>
+                                <span>Up to 6 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/abu-tig-marina-penthouse">Abu Tig Marina Luxury Penthouse</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                Spectacular 3-bedroom rooftop penthouse with panoramic marina yacht basin views and private sun deck.
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    8,500 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/abu-tig-marina-penthouse" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Mangroovy Beachfront Ground Chalet" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 Mangroovy &amp; Kite Beach
+                            </span>
+                        </div>
+                                                    <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-brand-terracotta text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                    ★ Featured
+                                </span>
+                            </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>2 Beds</span>
+                                <span>•</span>
+                                <span>2 Baths</span>
+                                <span>•</span>
+                                <span>Up to 4 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/mangroovy-beachfront-chalet">Mangroovy Beachfront Ground Chalet</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                Chic 2-bedroom garden chalet steps from the open sea beach clubs and kitesurf centers.
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    6,000 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/mangroovy-beachfront-chalet" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="West Golf Sunset Lagoon Villa" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 West Golf
+                            </span>
+                        </div>
+                                                    <div class="absolute top-4 right-4">
+                                <span class="px-3 py-1 bg-brand-terracotta text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                    ★ Featured
+                                </span>
+                            </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>3 Beds</span>
+                                <span>•</span>
+                                <span>3 Baths</span>
+                                <span>•</span>
+                                <span>Up to 6 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/west-golf-lagoon-villa">West Golf Sunset Lagoon Villa</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                Charming 3-bedroom Nubian-modern villa with private garden, swimming pool, and golf course vistas.
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    7,500 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/west-golf-lagoon-villa" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Unit Test Lagoon Villa" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 Test Lagoon
+                            </span>
+                        </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>3 Beds</span>
+                                <span>•</span>
+                                <span>3 Baths</span>
+                                <span>•</span>
+                                <span>Up to 6 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/unit-test-lagoon-villa">Unit Test Lagoon Villa</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    5,000 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/unit-test-lagoon-villa" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <!-- Image Card -->
+                    <div class="relative h-64 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Test Booking Luxury Villa" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4 flex gap-2">
+                            <span class="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                📍 Checkout Lagoon
+                            </span>
+                        </div>
+                                            </div>
+
+                    <!-- Details Body -->
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted">
+                                <span>3 Beds</span>
+                                <span>•</span>
+                                <span>3 Baths</span>
+                                <span>•</span>
+                                <span>Up to 6 Guests</span>
+                            </div>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/test-booking-villa">Test Booking Luxury Villa</a>
+                            </h3>
+                            <p class="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed">
+                                
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">From</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    5,000 <span class="text-xs font-normal text-brand-brown-muted">EGP / night</span>
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/test-booking-villa" 
+                               class="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition">
+                                View Villa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+</section>
+
+<!-- Curated Experiences Spotlight (Section 29 & 126) -->
+<section class="py-20 bg-white border-y border-brand-border">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+                    Red Sea Adventures
+                </span>
+                <h2 class="font-serif text-2xl sm:text-3xl text-brand-brown font-semibold mt-1">
+                    Curated Experiences
+                </h2>
+            </div>
+            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences" 
+               class="text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition flex items-center gap-1">
+                <span>Explore All Experiences</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 gsap-stagger-container">
+                            <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-48 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Private Yacht Charter to Tawila Island" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase">
+                            Private Boat Trips &amp; Yachts
+                        </span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[11px] text-brand-brown-muted font-medium">⏱️ 7 Hours (09:00 - 16:00)</span>
+                            <h3 class="font-serif text-base font-bold text-brand-brown mt-1 group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/luxury-private-yacht-charter-tawila-island">Private Yacht Charter to Tawila Island</a>
+                            </h3>
+                        </div>
+                        <div class="pt-3 border-t border-brand-border flex items-center justify-between text-xs">
+                            <span class="font-bold text-brand-brown">
+                                35,000 EGP
+                                <span class="font-normal text-[10px] text-brand-brown-muted block">per group</span>
+                            </span>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/luxury-private-yacht-charter-tawila-island" class="text-brand-terracotta font-semibold hover:underline">
+                                Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-48 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Sunset Desert Buggy &amp; Bedouin Stargazing Dinner" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase">
+                            Desert Safaris &amp; Stargazing
+                        </span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[11px] text-brand-brown-muted font-medium">⏱️ 4.5 Hours</span>
+                            <h3 class="font-serif text-base font-bold text-brand-brown mt-1 group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/sunset-desert-quad-safari-bedouin-dinner">Sunset Desert Buggy &amp; Bedouin Stargazing Dinner</a>
+                            </h3>
+                        </div>
+                        <div class="pt-3 border-t border-brand-border flex items-center justify-between text-xs">
+                            <span class="font-bold text-brand-brown">
+                                2,800 EGP
+                                <span class="font-normal text-[10px] text-brand-brown-muted block">per person</span>
+                            </span>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/sunset-desert-quad-safari-bedouin-dinner" class="text-brand-terracotta font-semibold hover:underline">
+                                Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-48 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="VIP Private Kitesurf Coaching Session" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase">
+                            Watersports &amp; Kitesurfing
+                        </span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[11px] text-brand-brown-muted font-medium">⏱️ 2 Hours</span>
+                            <h3 class="font-serif text-base font-bold text-brand-brown mt-1 group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/private-kitesurf-coaching-mangroovy">VIP Private Kitesurf Coaching Session</a>
+                            </h3>
+                        </div>
+                        <div class="pt-3 border-t border-brand-border flex items-center justify-between text-xs">
+                            <span class="font-bold text-brand-brown">
+                                4,500 EGP
+                                <span class="font-normal text-[10px] text-brand-brown-muted block">per person</span>
+                            </span>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/private-kitesurf-coaching-mangroovy" class="text-brand-terracotta font-semibold hover:underline">
+                                Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="group bg-brand-sand-card rounded-2xl overflow-hidden border border-brand-border shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-48 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" 
+                             alt="Tawila Island Private Yacht Cruise" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 px-2.5 py-0.5 bg-white/90 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase">
+                            Boat Trips
+                        </span>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[11px] text-brand-brown-muted font-medium">⏱️ 8 Hours</span>
+                            <h3 class="font-serif text-base font-bold text-brand-brown mt-1 group-hover:text-brand-terracotta transition">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/test-tawila-island-yacht">Tawila Island Private Yacht Cruise</a>
+                            </h3>
+                        </div>
+                        <div class="pt-3 border-t border-brand-border flex items-center justify-between text-xs">
+                            <span class="font-bold text-brand-brown">
+                                25,000 EGP
+                                <span class="font-normal text-[10px] text-brand-brown-muted block">per group</span>
+                            </span>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/experiences/test-tawila-island-yacht" class="text-brand-terracotta font-semibold hover:underline">
+                                Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+</section>
+
+<!-- Real Estate & Properties For Sale Section (Section 26 & 28) -->
+<section class="py-20 bg-brand-sand-light/60">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4 gsap-fade-up">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+                    Prime Real Estate
+                </span>
+                <h2 class="font-serif text-2xl sm:text-3xl text-brand-brown font-semibold mt-1">
+                    Properties For Sale
+                </h2>
+            </div>
+            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays?listing_type=sale" 
+               class="text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition flex items-center gap-1">
+                <span>Browse All For Sale</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-container">
+                            <div class="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-60 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Tawila Lagoons Modern Designer Villa" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                For Sale
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <span class="text-xs text-brand-brown-muted">📍 Tawila Island &amp; Lagoons</span>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown mt-1">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/tawila-island-modern-villa-for-sale">Tawila Lagoons Modern Designer Villa</a>
+                            </h3>
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted pt-2">
+                                <span>5 Beds</span>
+                                <span>•</span>
+                                <span>510 m²</span>
+                                                                    <span>•</span>
+                                    <span class="capitalize">ready</span>
+                                                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">Asking Price</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    45,000,000 EGP
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/tawila-island-modern-villa-for-sale" 
+                               class="px-4 py-2 bg-brand-brown text-white hover:bg-brand-brown-dark rounded-xl text-xs font-bold transition">
+                                Inquire
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-60 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Abu Tig Marina Luxury Penthouse" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                For Sale
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <span class="text-xs text-brand-brown-muted">📍 Abu Tig Marina</span>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown mt-1">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/abu-tig-marina-penthouse">Abu Tig Marina Luxury Penthouse</a>
+                            </h3>
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted pt-2">
+                                <span>3 Beds</span>
+                                <span>•</span>
+                                <span>245 m²</span>
+                                                                    <span>•</span>
+                                    <span class="capitalize">ready</span>
+                                                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">Asking Price</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    28,000,000 EGP
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/abu-tig-marina-penthouse" 
+                               class="px-4 py-2 bg-brand-brown text-white hover:bg-brand-brown-dark rounded-xl text-xs font-bold transition">
+                                Inquire
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                            <div class="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col gsap-card">
+                    <div class="relative h-60 overflow-hidden bg-brand-sand">
+                        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="The Hill Signature Estate For Sale" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-4 left-4">
+                            <span class="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                                For Sale
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <span class="text-xs text-brand-brown-muted">📍 Marina Test Bay</span>
+                            <h3 class="font-serif text-lg font-bold text-brand-brown mt-1">
+                                <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/hill-villa-test-sale">The Hill Signature Estate For Sale</a>
+                            </h3>
+                            <div class="flex items-center gap-3 text-xs text-brand-brown-muted pt-2">
+                                <span>5 Beds</span>
+                                <span>•</span>
+                                <span>650 m²</span>
+                                                                    <span>•</span>
+                                    <span class="capitalize">ready</span>
+                                                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-brand-border flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-brand-brown-muted block">Asking Price</span>
+                                <span class="text-base font-bold text-brand-brown">
+                                    45,000,000 EGP
+                                </span>
+                            </div>
+                            <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/stays/hill-villa-test-sale" 
+                               class="px-4 py-2 bg-brand-brown text-white hover:bg-brand-brown-dark rounded-xl text-xs font-bold transition">
+                                Inquire
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+    </div>
+</section>
+
+<!-- What's On / Events Spotlight (Section 7, 40) -->
+<section id="events" class="py-20 bg-white border-b border-brand-border">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        <div class="text-center max-w-xl mx-auto mb-12 space-y-2 gsap-fade-up">
+            <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+                El Gouna Nightlife &amp; Culture
+            </span>
+            <h2 class="font-serif text-3xl font-semibold text-brand-brown">
+                What&#039;s On This Season
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 gsap-stagger-container">
+                            <div class="p-6 bg-brand-sand-light/40 rounded-3xl border border-brand-border flex flex-col justify-between space-y-4 gsap-card hover:shadow-md transition-all">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="px-3 py-1 bg-white font-bold text-brand-terracotta rounded-full border border-brand-border">
+                                📅 Oct 06, 2026
+                            </span>
+                            <span class="text-brand-brown-muted">17:00</span>
+                        </div>
+                        <h3 class="font-serif text-lg font-bold text-brand-brown">Sunset Lagoon Acoustic Sessions</h3>
+                        <p class="text-xs text-brand-brown-muted leading-relaxed line-clamp-3">
+                            Live bohemian deep house and acoustic sunset gatherings in Abu Tig Marina.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-brand-border flex items-center justify-between text-xs">
+                        <span class="text-brand-brown-muted">📍 Club 88 Marina</span>
+                        <a href="https://wa.me/201000000000?text=Inquiring%20about%20event%20Sunset+Lagoon+Acoustic+Sessions" 
+                           target="_blank"
+                           class="px-3 py-1.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-lg font-semibold transition">
+                            Book Tickets
+                        </a>
+                    </div>
+                </div>
+                            <div class="p-6 bg-brand-sand-light/40 rounded-3xl border border-brand-border flex flex-col justify-between space-y-4 gsap-card hover:shadow-md transition-all">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="px-3 py-1 bg-white font-bold text-brand-terracotta rounded-full border border-brand-border">
+                                📅 Oct 13, 2026
+                            </span>
+                            <span class="text-brand-brown-muted">17:00</span>
+                        </div>
+                        <h3 class="font-serif text-lg font-bold text-brand-brown">Gounow Sunset Sessions @ Mangroovy Beach Club</h3>
+                        <p class="text-xs text-brand-brown-muted leading-relaxed line-clamp-3">
+                            An ethereal open-air seaside gathering featuring international deep house DJs, artisan cocktail bars, and sunset bonfire.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-brand-border flex items-center justify-between text-xs">
+                        <span class="text-brand-brown-muted">📍 Mangroovy Beach Club &amp; Lounge</span>
+                        <a href="https://wa.me/201000000000?text=Inquiring%20about%20event%20Gounow+Sunset+Sessions+%40+Mangroovy+Beach+Club" 
+                           target="_blank"
+                           class="px-3 py-1.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-lg font-semibold transition">
+                            Book Tickets
+                        </a>
+                    </div>
+                </div>
+                            <div class="p-6 bg-brand-sand-light/40 rounded-3xl border border-brand-border flex flex-col justify-between space-y-4 gsap-card hover:shadow-md transition-all">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="px-3 py-1 bg-white font-bold text-brand-terracotta rounded-full border border-brand-border">
+                                📅 Oct 27, 2026
+                            </span>
+                            <span class="text-brand-brown-muted">20:00</span>
+                        </div>
+                        <h3 class="font-serif text-lg font-bold text-brand-brown">Abu Tig Marina Moonlight Yacht &amp; Jazz Gala</h3>
+                        <p class="text-xs text-brand-brown-muted leading-relaxed line-clamp-3">
+                            An elegant open-air jazz concert along the marina waterfront with gourmet canapés and vintage champagne.
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-brand-border flex items-center justify-between text-xs">
+                        <span class="text-brand-brown-muted">📍 Abu Tig Marina Promenade Deck</span>
+                        <a href="https://wa.me/201000000000?text=Inquiring%20about%20event%20Abu+Tig+Marina+Moonlight+Yacht+%26+Jazz+Gala" 
+                           target="_blank"
+                           class="px-3 py-1.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-lg font-semibold transition">
+                            Book Tickets
+                        </a>
+                    </div>
+                </div>
+                    </div>
+    </div>
+</section>
+
+<!-- VIP Concierge Desk & Lead Form (Section 131) -->
+<section id="concierge" class="py-20 bg-gradient-to-br from-[#FAF8F5] via-white to-brand-sand-light/60">
+    <div class="max-w-5xl mx-auto px-6 lg:px-12">
+        <div class="bg-white rounded-3xl border border-brand-border shadow-sm p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center gsap-fade-up">
+            
+            <div class="space-y-5">
+                <span class="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
+                    Bespoke Assistance
+                </span>
+                <h2 class="font-serif text-2xl sm:text-3xl text-brand-brown font-semibold leading-snug">
+                    Personal Concierge &amp; Tailored Arrangements
+                </h2>
+                <p class="text-xs sm:text-sm text-brand-brown-muted leading-relaxed">
+                    Looking for a specific waterfront villa, off-market real estate acquisition, or private yacht itinerary? Let our dedicated local team handle every detail.
+                </p>
+
+                <div class="pt-2 space-y-2 text-xs">
+                    <p class="flex items-center gap-2 text-brand-brown font-medium">
+                        <span>💬</span>
+                        <span>Direct WhatsApp: <strong>+20 100 000 0000</strong></span>
+                    </p>
+                    <p class="flex items-center gap-2 text-brand-brown font-medium">
+                        <span>✉️</span>
+                        <span>Email: <strong>concierge@gounow.com</strong></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Lead Form -->
+            <form method="POST" action="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/inquire" class="space-y-4 bg-brand-sand-light/30 p-6 rounded-2xl border border-brand-border">
+                <input type="hidden" name="_token" value="dySSxwg5BnWczjMJe30SXrCnXH9xur07yhFfwOpH" autocomplete="off">                <input type="hidden" name="type" value="concierge">
+                <input type="hidden" name="source" value="website_homepage_concierge">
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        Full Name
+                    </label>
+                    <input type="text" name="name" required placeholder="Alexander Vance"
+                           class="w-full text-xs bg-white border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                            Email Address
+                        </label>
+                        <input type="email" name="email" required placeholder="alex@example.com"
+                               class="w-full text-xs bg-white border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                            Phone / WhatsApp
+                        </label>
+                        <input type="text" name="phone" placeholder="+20 10..."
+                               class="w-full text-xs bg-white border border-brand-border rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                        How can we assist you?
+                    </label>
+                    <textarea name="message" rows="3" required placeholder="I am looking for a 4-bedroom lagoon villa with private pool for next week..."
+                              class="w-full text-xs bg-white border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"></textarea>
+                </div>
+
+                <button type="submit" 
+                        class="w-full py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer">
+                    Send Concierge Request
+                </button>
+            </form>
+
+        </div>
+    </div>
+</section>
+
     </main>
 
     <!-- Master Editorial Footer -->

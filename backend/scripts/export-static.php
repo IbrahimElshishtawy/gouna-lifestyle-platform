@@ -81,14 +81,13 @@ foreach ($events as $event) {
 // 5. Ensure admin login and admin root exist explicitly
 $routesToExport['/admin/login'] = 'admin/login/index.html';
 $routesToExport['/admin'] = 'admin/index.html';
-$routesToExport['/admin/dashboard'] = 'admin/dashboard/index.html';
 
 echo "Total unique routes identified for export: " . count($routesToExport) . "\n";
 
 $exportedCount = 0;
 
 foreach ($routesToExport as $uri => $relativePath) {
-    $request = \Illuminate\Http\Request::create($baseUrl . $uri, 'GET');
+    $request = \Illuminate\Http\Request::create($uri, 'GET');
     $app->instance('request', $request);
     \Illuminate\Support\Facades\URL::forceRootUrl($baseUrl);
     \Illuminate\Support\Facades\URL::forceScheme('https');
@@ -108,9 +107,15 @@ foreach ($routesToExport as $uri => $relativePath) {
         if ($status >= 300 && $status < 400) {
             // If redirected to login, render login page
             $targetUrl = $response->headers->get('Location');
-            $loginReq = \Illuminate\Http\Request::create($baseUrl . '/admin/login', 'GET');
+            $loginReq = \Illuminate\Http\Request::create('/admin/login', 'GET');
             $app->instance('request', $loginReq);
             $response = $kernel->handle($loginReq);
+            $status = $response->getStatusCode();
+        }
+        
+        if ($status >= 400) {
+            echo "❌ ERROR: $uri returned HTTP $status! Skipping to avoid saving error page.\n";
+            continue;
         }
         
         $content = $response->getContent();
@@ -192,9 +197,21 @@ $spaRedirectScript = <<<HTML
 <script>
     (function() {
         var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
         var repoPrefix = '/gouna-lifestyle-platform';
+        
+        // 1. If accessed without repository prefix (e.g. ibrahimelshishtawy.github.io/stays)
         if (!path.startsWith(repoPrefix)) {
-            window.location.replace(repoPrefix + path + window.location.search + window.location.hash);
+            window.location.replace(repoPrefix + (path === '/' ? '' : path) + search + hash);
+            return;
+        }
+        
+        // 2. If accessed with query params on a folder without trailing slash (e.g. /gouna-lifestyle-platform/stays?listing_type=rent)
+        var subPath = path.substring(repoPrefix.length);
+        if (subPath && !subPath.endsWith('/') && !subPath.endsWith('.html')) {
+            window.location.replace(repoPrefix + subPath + '/' + search + hash);
+            return;
         }
     })();
 </script>
@@ -202,6 +219,13 @@ HTML;
 
 $fallbackContent = str_replace('</head>', $spaRedirectScript . "\n</head>", $fallbackContent);
 file_put_contents($distDir . '/404.html', $fallbackContent);
+
+// Admin dashboard alias
+if (file_exists($distDir . '/admin/index.html')) {
+    @mkdir($distDir . '/admin/dashboard', 0755, true);
+    copy($distDir . '/admin/index.html', $distDir . '/admin/dashboard/index.html');
+    copy($distDir . '/admin/index.html', $distDir . '/admin/dashboard.html');
+}
 
 // Copy public assets
 $publicDir = __DIR__ . '/../public';
