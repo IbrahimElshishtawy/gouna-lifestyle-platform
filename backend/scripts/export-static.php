@@ -88,10 +88,10 @@ echo "Total unique routes identified for export: " . count($routesToExport) . "\
 $exportedCount = 0;
 
 foreach ($routesToExport as $uri => $relativePath) {
-    $request = \Illuminate\Http\Request::create($uri, 'GET');
-    $request->headers->set('HOST', 'ibrahimelshishtawy.github.io');
-    
+    $request = \Illuminate\Http\Request::create($baseUrl . $uri, 'GET');
     $app->instance('request', $request);
+    \Illuminate\Support\Facades\URL::forceRootUrl($baseUrl);
+    \Illuminate\Support\Facades\URL::forceScheme('https');
     
     // If admin route, authenticate as admin so the full dashboard/CRUD views render
     if (str_starts_with($uri, '/admin') && $uri !== '/admin/login' && $admin) {
@@ -108,20 +108,65 @@ foreach ($routesToExport as $uri => $relativePath) {
         if ($status >= 300 && $status < 400) {
             // If redirected to login, render login page
             $targetUrl = $response->headers->get('Location');
-            $loginReq = \Illuminate\Http\Request::create('/admin/login', 'GET');
+            $loginReq = \Illuminate\Http\Request::create($baseUrl . '/admin/login', 'GET');
+            $app->instance('request', $loginReq);
             $response = $kernel->handle($loginReq);
         }
         
         $content = $response->getContent();
         
         // Replace absolute local paths with full GitHub Pages base URL
-        $content = str_replace('http://localhost', $baseUrl, $content);
-        $content = str_replace('https://localhost', $baseUrl, $content);
+        $content = str_replace(['http://localhost', 'https://localhost'], $baseUrl, $content);
         
-        // Fix any href="/..." or src="/..." or action="/..." that missing repository name
+        // Ensure ALL links to domain include /gouna-lifestyle-platform
+        $content = str_replace(
+            ['https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform', 'http://ibrahimelshishtawy.github.io/gouna-lifestyle-platform'],
+            '___REPO_BASE___',
+            $content
+        );
+        $content = str_replace(
+            ['https://ibrahimelshishtawy.github.io', 'http://ibrahimelshishtawy.github.io'],
+            '___REPO_BASE___',
+            $content
+        );
+        $content = str_replace('___REPO_BASE___', $baseUrl, $content);
+        
+        // Remove any accidental duplicate repository prefix
+        $content = str_replace('/gouna-lifestyle-platform/gouna-lifestyle-platform', '/gouna-lifestyle-platform', $content);
+        
+        // Fix any relative href="/..." or src="/..." or action="/..." that missing repository name
         $content = preg_replace('/href="\/([^\/"])/', 'href="' . $baseUrl . '/$1', $content);
         $content = preg_replace('/src="\/([^\/"])/', 'src="' . $baseUrl . '/$1', $content);
         $content = preg_replace('/action="\/([^\/"])/', 'action="' . $baseUrl . '/$1', $content);
+        
+        // Smart Form Interceptor for GitHub Pages (avoids 405/404 on POST forms)
+        $formInterceptor = <<<HTML
+<script>
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        var method = (form.getAttribute('method') || 'GET').toUpperCase();
+        var action = form.getAttribute('action') || '';
+        if (method === 'POST') {
+            e.preventDefault();
+            if (action.includes('inquire') || form.querySelector('[name="message"]')) {
+                var name = form.querySelector('[name="name"]')?.value || 'Guest';
+                var msg = form.querySelector('[name="message"]')?.value || 'Inquiring about stays and experiences in El Gouna';
+                var phone = form.querySelector('[name="phone"]')?.value || '';
+                var text = encodeURIComponent("Hello GouNow VIP Concierge, my name is " + name + (phone ? " (" + phone + ")" : "") + ".\n" + msg);
+                window.open("https://wa.me/201000000000?text=" + text, "_blank");
+                alert("Thank you " + name + "! Connecting you directly to the El Gouna VIP Concierge desk via WhatsApp.");
+            } else if (action.includes('checkout') || action.includes('process')) {
+                var text = encodeURIComponent("Hello GouNow VIP Concierge, I would like to confirm my booking reservation in El Gouna.");
+                window.open("https://wa.me/201000000000?text=" + text, "_blank");
+                alert("Connecting you to GouNow Reservations via WhatsApp to confirm your booking dates.");
+            } else if (action.includes('logout') || action.includes('login')) {
+                window.location.href = '$baseUrl/admin/';
+            }
+        }
+    });
+</script>
+HTML;
+        $content = str_replace('</body>', $formInterceptor . "\n</body>", $content);
         
         // Write index.html
         $targetFile = $distDir . '/' . $relativePath;
