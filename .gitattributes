@@ -1,2 +1,14 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# -------------------------------------------------------------
+# GitHub Linguist Configuration (Language Stats & Detection)
+# -------------------------------------------------------------
+# منع GitHub من حساب قراءة الكود وإحصائيات اللغات في أي ملف بالمستودع
+* linguist-detectable=false
+* linguist-vendored=true
+
+# استثناءات إضافية للملفات التوليدية والمستندات
+*.json linguist-generated=true
+*.lock linguist-generated=true
+*.md linguist-documentation=true
