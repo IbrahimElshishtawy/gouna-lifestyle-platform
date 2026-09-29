@@ -31,12 +31,12 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
     // Section 41 Navigation Routes
     // Bookings
     Route::prefix('bookings')->name('bookings.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/pending', [DashboardController::class, 'index'])->name('pending');
-        Route::get('/confirmed', [DashboardController::class, 'index'])->name('confirmed');
-        Route::get('/cancelled', [DashboardController::class, 'index'])->name('cancelled');
-        Route::get('/calendar', [DashboardController::class, 'index'])->name('calendar');
-        Route::get('/payments', [DashboardController::class, 'index'])->name('payments');
+        Route::get('/', [DashboardController::class, 'bookingsIndex'])->name('index');
+        Route::get('/pending', [DashboardController::class, 'bookingsPending'])->name('pending');
+        Route::get('/confirmed', [DashboardController::class, 'bookingsConfirmed'])->name('confirmed');
+        Route::get('/cancelled', [DashboardController::class, 'bookingsIndex'])->name('cancelled');
+        Route::get('/calendar', [DashboardController::class, 'bookingsCalendar'])->name('calendar');
+        Route::get('/payments', [DashboardController::class, 'bookingsPayments'])->name('payments');
     });
 
     // Properties (Sections 20, 21, 41, 44)
@@ -50,18 +50,18 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
         Route::match(['put', 'patch'], '/{property}', [PropertyController::class, 'update'])->name('update');
         Route::delete('/{property}', [PropertyController::class, 'destroy'])->name('destroy');
         Route::delete('/{property}/media/{media}', [PropertyController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/categories', [DashboardController::class, 'index'])->name('categories');
-        Route::get('/locations', [DashboardController::class, 'index'])->name('locations');
-        Route::get('/amenities', [DashboardController::class, 'index'])->name('amenities');
+        Route::get('/categories', [DashboardController::class, 'propertyCategories'])->name('categories');
+        Route::get('/locations', [DashboardController::class, 'propertyLocations'])->name('locations');
+        Route::get('/amenities', [DashboardController::class, 'propertyAmenities'])->name('amenities');
     });
 
     // Pricing & Availability
     Route::prefix('pricing')->name('pricing.')->group(function () {
-        Route::get('/base', [DashboardController::class, 'index'])->name('base');
-        Route::get('/seasons', [DashboardController::class, 'index'])->name('seasons');
-        Route::get('/calendar', [DashboardController::class, 'index'])->name('calendar');
-        Route::get('/discounts', [DashboardController::class, 'index'])->name('discounts');
-        Route::get('/fees', [DashboardController::class, 'index'])->name('fees');
+        Route::get('/base', [DashboardController::class, 'pricingBase'])->name('base');
+        Route::get('/seasons', [DashboardController::class, 'pricingSeasons'])->name('seasons');
+        Route::get('/calendar', [DashboardController::class, 'pricingCalendar'])->name('calendar');
+        Route::get('/discounts', [DashboardController::class, 'pricingDiscounts'])->name('discounts');
+        Route::get('/fees', [DashboardController::class, 'pricingFees'])->name('fees');
     });
 
     // Experiences & Vehicles (Sections 20, 21, 41, 44)
@@ -73,10 +73,10 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
         Route::match(['put', 'patch'], '/{experience}', [ExperienceController::class, 'update'])->name('update');
         Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
         Route::delete('/{experience}/media/{media}', [ExperienceController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/boats', [DashboardController::class, 'index'])->name('boats');
-        Route::get('/safari', [DashboardController::class, 'index'])->name('safari');
-        Route::get('/vehicles', [DashboardController::class, 'index'])->name('vehicles');
-        Route::get('/categories', [DashboardController::class, 'index'])->name('categories');
+        Route::get('/boats', [DashboardController::class, 'experiencesBoats'])->name('boats');
+        Route::get('/safari', [DashboardController::class, 'experiencesSafari'])->name('safari');
+        Route::get('/vehicles', [DashboardController::class, 'experiencesVehicles'])->name('vehicles');
+        Route::get('/categories', [DashboardController::class, 'experiencesCategories'])->name('categories');
     });
 
     // Events & Tickets (Sections 20, 21, 41, 44)
@@ -88,63 +88,63 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
         Route::match(['put', 'patch'], '/{event}', [EventController::class, 'update'])->name('update');
         Route::delete('/{event}', [EventController::class, 'destroy'])->name('destroy');
         Route::delete('/{event}/media/{media}', [EventController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/tickets', [DashboardController::class, 'index'])->name('tickets');
-        Route::get('/orders', [DashboardController::class, 'index'])->name('orders');
-        Route::get('/checkin', [DashboardController::class, 'index'])->name('checkin');
+        Route::get('/tickets', [DashboardController::class, 'eventsTickets'])->name('tickets');
+        Route::get('/orders', [DashboardController::class, 'eventsOrders'])->name('orders');
+        Route::get('/checkin', [DashboardController::class, 'eventsCheckin'])->name('checkin');
     });
 
     // Customers & Leads
     Route::prefix('customers')->name('customers.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/leads', [DashboardController::class, 'index'])->name('leads');
-        Route::get('/inquiries', [DashboardController::class, 'index'])->name('inquiries');
+        Route::get('/', [DashboardController::class, 'customersIndex'])->name('index');
+        Route::get('/leads', [DashboardController::class, 'customersLeads'])->name('leads');
+        Route::get('/inquiries', [DashboardController::class, 'customersInquiries'])->name('inquiries');
     });
 
     // Media
     Route::prefix('media')->name('media.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/', [DashboardController::class, 'mediaIndex'])->name('index');
     });
 
     // CMS Content
     Route::prefix('cms')->name('cms.')->group(function () {
-        Route::get('/homepage', [DashboardController::class, 'index'])->name('homepage');
-        Route::get('/pages', [DashboardController::class, 'index'])->name('pages');
-        Route::get('/faqs', [DashboardController::class, 'index'])->name('faqs');
-        Route::get('/blog', [DashboardController::class, 'index'])->name('blog');
-        Route::get('/navigation', [DashboardController::class, 'index'])->name('navigation');
+        Route::get('/homepage', [DashboardController::class, 'cmsHomepage'])->name('homepage');
+        Route::get('/pages', [DashboardController::class, 'cmsPages'])->name('pages');
+        Route::get('/faqs', [DashboardController::class, 'cmsFaqs'])->name('faqs');
+        Route::get('/blog', [DashboardController::class, 'cmsBlog'])->name('blog');
+        Route::get('/navigation', [DashboardController::class, 'cmsNavigation'])->name('navigation');
     });
 
     // SEO
     Route::prefix('seo')->name('seo.')->group(function () {
-        Route::get('/global', [DashboardController::class, 'index'])->name('global');
-        Route::get('/sitemap', [DashboardController::class, 'index'])->name('sitemap');
-        Route::get('/redirects', [DashboardController::class, 'index'])->name('redirects');
+        Route::get('/global', [DashboardController::class, 'seoGlobal'])->name('global');
+        Route::get('/sitemap', [DashboardController::class, 'seoSitemap'])->name('sitemap');
+        Route::get('/redirects', [DashboardController::class, 'seoRedirects'])->name('redirects');
     });
 
     // Analytics
     Route::prefix('analytics')->name('analytics.')->group(function () {
-        Route::get('/tracking', [DashboardController::class, 'index'])->name('tracking');
-        Route::get('/reports', [DashboardController::class, 'index'])->name('reports');
+        Route::get('/tracking', [DashboardController::class, 'analyticsTracking'])->name('tracking');
+        Route::get('/reports', [DashboardController::class, 'analyticsReports'])->name('reports');
     });
 
     // Settings
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::get('/general', [DashboardController::class, 'index'])->name('general');
-        Route::get('/payments', [DashboardController::class, 'index'])->name('payments');
-        Route::get('/booking', [DashboardController::class, 'index'])->name('booking');
-        Route::get('/notifications', [DashboardController::class, 'index'])->name('notifications');
+        Route::get('/general', [DashboardController::class, 'settingsGeneral'])->name('general');
+        Route::get('/payments', [DashboardController::class, 'settingsPayments'])->name('payments');
+        Route::get('/booking', [DashboardController::class, 'settingsBooking'])->name('booking');
+        Route::get('/notifications', [DashboardController::class, 'settingsNotifications'])->name('notifications');
     });
 
     // Users & Roles
     Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/roles', [DashboardController::class, 'index'])->name('roles');
+        Route::get('/', [DashboardController::class, 'usersIndex'])->name('index');
+        Route::get('/roles', [DashboardController::class, 'usersRoles'])->name('roles');
     });
 
     // System
     Route::prefix('system')->name('system.')->group(function () {
-        Route::get('/logs', [DashboardController::class, 'index'])->name('logs');
-        Route::get('/health', [DashboardController::class, 'index'])->name('health');
+        Route::get('/logs', [DashboardController::class, 'systemLogs'])->name('logs');
+        Route::get('/health', [DashboardController::class, 'systemHealth'])->name('health');
     });
 });
 
