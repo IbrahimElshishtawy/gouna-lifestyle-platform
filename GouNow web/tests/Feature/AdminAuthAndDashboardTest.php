@@ -8,6 +8,15 @@ use Tests\TestCase;
 
 class AdminAuthAndDashboardTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (!User::where('email', 'admin@gounow.com')->exists()) {
+            $this->seed();
+        }
+    }
+
     public function test_guest_is_redirected_to_admin_login_when_accessing_dashboard(): void
     {
         $response = $this->get('/admin');
