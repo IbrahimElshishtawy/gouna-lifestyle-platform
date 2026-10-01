@@ -5,52 +5,55 @@ export default function EventsSection() {
   const events = [
     {
       id: 1,
-      title: "El Gouna Film Festival (GFF)",
-      date: "OCTOBER 2026",
-      category: "Film & Culture",
-      location: "Festival Plaza, El Gouna",
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-      description:
-        "The flagship cinematic event celebrating international cinema, world premieres, red carpets, and masterclasses by the Red Sea.",
-    },
-    {
-      id: 2,
-      title: "Sunset Lagoon Sessions",
+      title: "Sunset Lagoon Acoustic Sessions",
       date: "EVERY FRIDAY",
-      category: "Music & Sunset",
-      location: "The Club House, Downtown",
+      time: "17:30 - 21:00",
+      location: "The Clubhouse Lagoon, Downtown",
+      category: "Live Music & Sunset",
       image:
         "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80",
       description:
-        "Live deep house DJ sets, handcrafted cocktails, and bohemian vibes as the golden hour reflects across the lagoon waters.",
+        "Acoustic indie sets, artisanal cocktails, and chilled bohemian vibes as the golden twilight reflects over the lagoon.",
+    },
+    {
+      id: 2,
+      title: "Gouna Street Food & Wine Gathering",
+      date: "OCT 28, 2026",
+      time: "19:00 - LATE",
+      location: "Abu Tig Marina Promenade",
+      category: "Culinary & Lifestyle",
+      image:
+        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+      description:
+        "Curated tasting stations by Red Sea master chefs, boutique Mediterranean wines, and live jazz along the superyacht harbor.",
     },
     {
       id: 3,
-      title: "Red Sea Half Marathon & Sports Fest",
-      date: "NOVEMBER 2026",
-      category: "Sports & Wellness",
-      location: "Abu Tig Marina Promenade",
+      title: "Full Moon Yacht Regatta & Party",
+      date: "NOV 04, 2026",
+      time: "20:00 - 02:00",
+      location: "Tawila Anchorage & Open Sea",
+      category: "Yacht Gathering",
       image:
         "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
       description:
-        "Run the scenic coastal course passing marina yachts and turquoise lagoons with global runners and family fun runs.",
+        "Flotilla of illuminated luxury yachts sailing out for night swimming, deep house DJ sets under the desert moon, and champagne bar.",
     },
   ];
 
   return (
-    <section id="events" className="py-20 px-6 lg:px-12 bg-brand-sand-light/50 border-t border-brand-border">
+    <section id="events" className="py-20 lg:py-24 px-6 lg:px-12 bg-white border-t border-brand-border/80">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-            Community &amp; Culture
+            El Gouna Happenings &amp; Festivities
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-            What&apos;s On in El Gouna
+            What&apos;s On This Season
           </h2>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 font-light leading-relaxed">
-            Discover curated world-class festivals, acoustic lagoon concerts,
-            yacht gatherings, and sporting spectacles.
+            Curated cultural gatherings, sunset parties, and private dinners
+            happening in town.
           </p>
         </div>
 
@@ -58,7 +61,7 @@ export default function EventsSection() {
           {events.map((event) => (
             <div
               key={event.id}
-              className="bg-white rounded-3xl overflow-hidden border border-brand-border shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group"
+              className="bg-[#FAF8F5] rounded-3xl overflow-hidden border border-brand-border/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group hover:-translate-y-1"
             >
               <div className="relative h-56 overflow-hidden bg-brand-sand">
                 <Image
@@ -75,31 +78,38 @@ export default function EventsSection() {
                 </div>
               </div>
 
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 text-[11px] text-brand-terracotta font-semibold uppercase tracking-wider mb-2">
-                  <span>{event.category}</span>
-                  <span>•</span>
-                  <span className="text-brand-brown-muted normal-case font-normal">
-                    {event.location}
-                  </span>
+              <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-[11px] text-brand-terracotta font-semibold uppercase tracking-wider mb-2">
+                    <span>{event.category}</span>
+                    <span>•</span>
+                    <span className="text-brand-brown-muted normal-case font-normal">
+                      {event.location}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-brown mb-2 group-hover:text-brand-terracotta transition-colors">
+                    {event.title}
+                  </h3>
+
+                  <p className="text-xs text-brand-brown-muted line-clamp-3 font-light leading-relaxed mb-6">
+                    {event.description}
+                  </p>
                 </div>
 
-                <h3 className="font-serif text-lg font-bold text-brand-brown mb-2 group-hover:text-brand-terracotta transition-colors">
-                  {event.title}
-                </h3>
-
-                <p className="text-xs text-brand-brown-muted line-clamp-3 font-light leading-relaxed mb-6">
-                  {event.description}
-                </p>
-
-                <div className="mt-auto pt-4 border-t border-brand-border/60">
+                <div className="pt-4 border-t border-brand-border/60 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-brand-brown-muted">
+                    {event.time}
+                  </span>
                   <a
-                    href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20would%20like%20information%20and%20access%20to%20events%20in%20El%20Gouna"
+                    href={`https://wa.me/201000000000?text=${encodeURIComponent(
+                      `Hello GouNow Concierge, I would like to reserve a spot for "${event.title}".`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-center py-2.5 px-4 bg-brand-sand-light hover:bg-brand-brown hover:text-white text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+                    className="py-2 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
                   >
-                    RSVP &amp; Details
+                    Reserve Spot
                   </a>
                 </div>
               </div>

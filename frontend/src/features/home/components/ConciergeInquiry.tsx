@@ -7,6 +7,7 @@ export default function ConciergeInquiry() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [service, setService] = useState("villa-stay");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState("");
@@ -20,147 +21,234 @@ export default function ConciergeInquiry() {
         name,
         phone,
         email,
-        message,
+        message: `[Service: ${service}] ${message}`,
       });
 
       setStatus("success");
-      setFeedback(res.message);
+      setFeedback(res.message || "Your concierge request has been dispatched to our on-site team!");
 
-      // WhatsApp Concierge redirection like the original form
+      // Open WhatsApp for instant VIP concierge connection
       const whatsappText = encodeURIComponent(
-        `Hello GouNow VIP Concierge, my name is ${name}${phone ? ` (${phone})` : ""}.\n${message}`
+        `Hello GouNow VIP Concierge,\nMy Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nRequested Service: ${service}\nDetails: ${message || "I would like to inquire about bespoke arrangements."}`
       );
       window.open(`https://wa.me/201000000000?text=${whatsappText}`, "_blank");
     } catch {
       setStatus("error");
-      setFeedback("Unable to send inquiry. Please reach out via WhatsApp directly.");
+      setFeedback("Unable to submit online. Please message our 24/7 WhatsApp concierge directly.");
     }
   };
 
   return (
-    <section id="concierge" className="py-20 px-6 lg:px-12 max-w-7xl mx-auto">
-      <div className="bg-brand-sand-card rounded-3xl border border-brand-border p-8 sm:p-12 lg:p-16 shadow-xs relative overflow-hidden">
-        {/* Background Accent */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-terracotta/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-          {/* Left Column: Info */}
-          <div>
+    <section id="concierge" className="py-20 lg:py-24 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          {/* Left Column: Narrative & Direct VIP Channels (6 cols) */}
+          <div className="lg:col-span-6">
             <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-              24/7 VIP Hospitality
+              Bespoke 24/7 Concierge
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-              El Gouna Concierge Desk
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.15]">
+              Personal Concierge &amp; Tailored Arrangements
             </h2>
             <p className="text-xs sm:text-sm text-brand-brown-muted mt-4 font-light leading-relaxed max-w-lg">
-              Whether you require a private chef for your villa, a last-minute
-              yacht berth in Abu Tig Marina, airport transfers, or VIP nightlife
-              reservations, our dedicated team is at your command.
+              Looking for a tailored yacht charter, VIP airport fast-track,
+              private chef in your villa, or custom event setup? Tell us what you
+              need and our local team will arrange it within 30 minutes.
             </p>
 
-            <div className="mt-8 space-y-4 text-xs">
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                  💬
-                </span>
+            <div className="mt-8 space-y-4">
+              {/* Phone Channel */}
+              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg">
+                  📞
+                </div>
                 <div>
-                  <span className="block font-bold text-brand-brown">Instant WhatsApp Support</span>
+                  <span className="block text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                    Direct VIP Telephone
+                  </span>
                   <a
-                    href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20VIP%20concierge%20assistance"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brand-terracotta hover:underline font-medium"
+                    href="tel:+201000000000"
+                    className="text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
                   >
                     +20 100 000 0000
                   </a>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-brand-sand text-brand-brown flex items-center justify-center font-bold">
-                  📍
-                </span>
-                <div>
-                  <span className="block font-bold text-brand-brown">Clubhouse Desk</span>
-                  <span className="text-brand-brown-muted">Abu Tig Marina Promenade, El Gouna</span>
+              {/* Email Channel */}
+              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg">
+                  ✉️
                 </div>
+                <div>
+                  <span className="block text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                    Private Client Email
+                  </span>
+                  <a
+                    href="mailto:concierge@gounow.com"
+                    className="text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
+                  >
+                    concierge@gounow.com
+                  </a>
+                </div>
+              </div>
+
+              {/* WhatsApp Fast Track */}
+              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg">
+                  💬
+                </div>
+                <div className="flex-1">
+                  <span className="block text-[11px] uppercase font-bold text-emerald-800 tracking-wider">
+                    Instant WhatsApp Concierge
+                  </span>
+                  <span className="block text-xs text-emerald-700 font-light">
+                    On the ground in El Gouna 24 hours a day
+                  </span>
+                </div>
+                <a
+                  href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20would%20like%20VIP%20concierge%20assistance"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  Chat Now
+                </a>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Form */}
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-border shadow-md">
-            {status === "success" && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium">
-                {feedback}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1.5">
-                  Your Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Elena Rostova"
-                  className="w-full text-xs p-3 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-                />
+          {/* Right Column: Tailored Arrangements Form Card (6 cols) */}
+          <div className="lg:col-span-6">
+            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-brand-border/80 shadow-xl relative overflow-hidden">
+              <div className="mb-6">
+                <h3 className="font-serif text-2xl font-bold text-brand-brown mb-1">
+                  Submit Concierge Inquiry
+                </h3>
+                <p className="text-xs text-brand-brown-muted font-light">
+                  Our dedicated host will reply with options and tailored pricing within 30 minutes.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1.5">
-                    Phone / WhatsApp *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+20 100 000 0000"
-                    className="w-full text-xs p-3 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-                  />
+              {status === "success" ? (
+                <div className="py-12 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
+                    ✓
+                  </div>
+                  <h4 className="font-serif text-xl font-bold text-brand-brown">
+                    Inquiry Received
+                  </h4>
+                  <p className="text-xs text-brand-brown-muted max-w-sm mx-auto font-light leading-relaxed">
+                    {feedback} We have also opened WhatsApp so you can converse directly with your designated host.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setStatus("idle");
+                      setName("");
+                      setPhone("");
+                      setEmail("");
+                      setMessage("");
+                    }}
+                    className="mt-4 px-6 py-2.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+                  >
+                    Send Another Request
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1.5">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="guest@example.com"
-                    className="w-full text-xs p-3 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-                  />
-                </div>
-              </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Lord Alexander Wright"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1.5">
-                  How May We Assist You? *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Villa preferences, dates, yacht charter requirements, or special celebration arrangements..."
-                  className="w-full text-xs p-3 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-                ></textarea>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                        WhatsApp / Phone *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="+20 100 000 0000"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                      />
+                    </div>
 
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                className="w-full py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm hover:shadow-md cursor-pointer disabled:opacity-50"
-              >
-                {status === "loading" ? "Submitting..." : "Send Concierge Request"}
-              </button>
-            </form>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="alexander@domain.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                      Service of Interest
+                    </label>
+                    <select
+                      value={service}
+                      onChange={(e) => setService(e.target.value)}
+                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors cursor-pointer"
+                    >
+                      <option value="villa-stay">Bespoke Villa Booking</option>
+                      <option value="yacht-charter">Private Yacht Charter</option>
+                      <option value="real-estate-viewing">Real Estate Acquisition &amp; Viewing</option>
+                      <option value="private-chef">In-Villa Private Chef Dining</option>
+                      <option value="airport-fast-track">Hurghada Airport VIP Fast-Track Transfer</option>
+                      <option value="other-arrangements">Custom Itinerary &amp; Nightlife</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                      Request Details &amp; Preferred Dates
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Please specify dates, guest party size, or specific requirements..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                    />
+                  </div>
+
+                  {status === "error" && (
+                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
+                      {feedback}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 cursor-pointer"
+                  >
+                    {status === "loading"
+                      ? "Dispatching Request..."
+                      : "Send Concierge Request"}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>

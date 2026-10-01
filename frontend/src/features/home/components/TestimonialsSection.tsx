@@ -6,9 +6,9 @@ export default function TestimonialsSection() {
       id: 1,
       name: "Marcus & Sophia V.",
       origin: "Zurich, Switzerland",
-      stay: "Marina Waterfront Villa",
+      stay: "Fanadir Bay Waterfront Villa",
       quote:
-        "The most seamless luxury rental experience in El Gouna. The villa was spotless with breathtaking lagoon views and a heated pool our children adored. The VIP concierge handled everything effortlessly.",
+        "The most seamless luxury rental experience in El Gouna. The villa was immaculate with breathtaking lagoon views and a heated infinity pool our children adored. The VIP concierge handled our arrival and dinner bookings effortlessly.",
       rating: 5,
     },
     {
@@ -17,33 +17,33 @@ export default function TestimonialsSection() {
       origin: "London, UK",
       stay: "Private Tawila Yacht Expedition",
       quote:
-        "Our private yacht day to Tawila Island was undeniably the highlight of our holiday. Professional captain, gourmet seafood lunch on board, and swimming with wild dolphins in crystal waters.",
+        "Our private yacht charter to Tawila Island was undeniably the highlight of our holiday. Professional skipper, gourmet seafood lunch prepared on board, and swimming with wild dolphins in crystal waters. Truly world-class.",
       rating: 5,
     },
     {
       id: 3,
       name: "Laila & Tarek M.",
       origin: "Cairo, Egypt",
-      stay: "Fanadir Bay Villa & Golf Pass",
+      stay: "Tawila Lagoon Modern Villa Buyer",
       quote:
-        "GouNow sets a brand-new standard for hospitality on the Red Sea. Instant check-in, flawless communication, and genuine attention to detail. We have already booked our winter retreat.",
+        "GouNow sets a brand-new standard for hospitality and real estate advisory on the Red Sea. Transparent transaction, instant communication, and genuine attention to detail. We couldn't be happier with our new home.",
       rating: 5,
     },
   ];
 
   return (
-    <section className="py-20 px-6 lg:px-12 bg-white border-t border-brand-border">
+    <section className="py-20 lg:py-24 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-            Guest Testimonials
+            Guest Reviews &amp; Reputation
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-            Stories from Our Guests
+            Praised by Discerning Travelers
           </h2>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 font-light leading-relaxed">
-            Discover why global travelers and discerning homeowners choose
-            GouNow for bespoke El Gouna stays.
+            Direct reviews from high-net-worth travelers, property owners, and
+            repeat guests who trust us with their Red Sea stays.
           </p>
         </div>
 
@@ -51,10 +51,10 @@ export default function TestimonialsSection() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="bg-brand-sand-light/40 p-8 rounded-3xl border border-brand-border/80 flex flex-col justify-between"
+              className="bg-white p-8 rounded-3xl border border-brand-border/80 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
             >
               <div>
-                <div className="flex gap-1 text-brand-terracotta mb-4 text-sm">
+                <div className="flex gap-1 text-amber-500 mb-4 text-sm">
                   {Array.from({ length: review.rating }).map((_, i) => (
                     <span key={i}>★</span>
                   ))}
@@ -64,11 +64,11 @@ export default function TestimonialsSection() {
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-brand-border/60">
+              <div className="pt-5 border-t border-brand-border/60">
                 <span className="block font-bold text-xs text-brand-brown">
                   {review.name}
                 </span>
-                <span className="block text-[11px] text-brand-brown-muted">
+                <span className="block text-[11px] text-brand-brown-muted mt-0.5">
                   {review.origin} &bull; {review.stay}
                 </span>
               </div>
