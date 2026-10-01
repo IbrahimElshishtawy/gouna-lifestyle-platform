@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+  display: none !important;
+}
+
+body {
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+.gounow-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.gounow-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gounow-scrollbar::-webkit-scrollbar-thumb {
+  background: #d6cbc2;
+  border-radius: 9999px;
+}
+
+.gounow-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b85d3b;
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content="0;url='https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/admin'" />
+
+        <title>Redirecting to https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/admin</title>
+    </head>
+    <body>
+        Redirecting to <a href="https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/admin">https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/admin</a>.
+    <script>
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        var method = (form.getAttribute('method') || 'GET').toUpperCase();
+        var action = form.getAttribute('action') || '';
+        if (method === 'POST') {
+            e.preventDefault();
+            if (action.includes('inquire') || form.querySelector('[name="message"]')) {
+                var name = form.querySelector('[name="name"]')?.value || 'Guest';
+                var msg = form.querySelector('[name="message"]')?.value || 'Inquiring about stays and experiences in El Gouna';
+                var phone = form.querySelector('[name="phone"]')?.value || '';
+                var text = encodeURIComponent("Hello GouNow VIP Concierge, my name is " + name + (phone ? " (" + phone + ")" : "") + ".
+" + msg);
+                window.open("https://wa.me/201000000000?text=" + text, "_blank");
+                alert("Thank you " + name + "! Connecting you directly to the El Gouna VIP Concierge desk via WhatsApp.");
+            } else if (action.includes('checkout') || action.includes('process')) {
+                var text = encodeURIComponent("Hello GouNow VIP Concierge, I would like to confirm my booking reservation in El Gouna.");
+                window.open("https://wa.me/201000000000?text=" + text, "_blank");
+                alert("Connecting you to GouNow Reservations via WhatsApp to confirm your booking dates.");
+            } else if (action.includes('logout') || action.includes('login')) {
+                window.location.href = 'https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/admin/';
+            }
+        }
+    });
+</script>
+</body>
+</html>
