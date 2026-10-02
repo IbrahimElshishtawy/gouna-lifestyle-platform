@@ -1,59 +1,25 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function EventsSection() {
-  const events = [
-    {
-      id: 1,
-      title: "Sunset Lagoon Acoustic Sessions",
-      date: "EVERY FRIDAY",
-      time: "17:30 - 21:00",
-      location: "The Clubhouse Lagoon, Downtown",
-      category: "Live Music & Sunset",
-      image:
-        "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80",
-      description:
-        "Acoustic indie sets, artisanal cocktails, and chilled bohemian vibes as the golden twilight reflects over the lagoon.",
-    },
-    {
-      id: 2,
-      title: "Gouna Street Food & Wine Gathering",
-      date: "OCT 28, 2026",
-      time: "19:00 - LATE",
-      location: "Abu Tig Marina Promenade",
-      category: "Culinary & Lifestyle",
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-      description:
-        "Curated tasting stations by Red Sea master chefs, boutique Mediterranean wines, and live jazz along the superyacht harbor.",
-    },
-    {
-      id: 3,
-      title: "Full Moon Yacht Regatta & Party",
-      date: "NOV 04, 2026",
-      time: "20:00 - 02:00",
-      location: "Tawila Anchorage & Open Sea",
-      category: "Yacht Gathering",
-      image:
-        "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
-      description:
-        "Flotilla of illuminated luxury yachts sailing out for night swimming, deep house DJ sets under the desert moon, and champagne bar.",
-    },
-  ];
+  const { t } = useLanguage();
+  const events = t.events.eventsList;
 
   return (
     <section id="events" className="py-20 lg:py-24 px-6 lg:px-12 bg-white border-t border-brand-border/80">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-            El Gouna Happenings &amp; Festivities
+            {t.events.eyebrow}
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-            What&apos;s On This Season
+            {t.events.title}
           </h2>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 font-light leading-relaxed">
-            Curated cultural gatherings, sunset parties, and private dinners
-            happening in town.
+            {t.events.subtitle}
           </p>
         </div>
 
@@ -71,7 +37,7 @@ export default function EventsSection() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4">
                   <span className="px-3 py-1 bg-brand-terracotta text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
                     {event.date}
                   </span>
@@ -109,7 +75,7 @@ export default function EventsSection() {
                     rel="noopener noreferrer"
                     className="py-2 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
                   >
-                    Reserve Spot
+                    {t.events.reserveSpot}
                   </a>
                 </div>
               </div>

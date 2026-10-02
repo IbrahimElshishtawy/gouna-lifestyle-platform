@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Experience } from "@/features/experiences/types/experience.types";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Props {
   experiences: Experience[];
 }
 
 export default function FeaturedExperiences({ experiences }: Props) {
+  const { t } = useLanguage();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activeExperience = experiences[selectedIndex] || experiences[0];
 
@@ -30,15 +32,13 @@ export default function FeaturedExperiences({ experiences }: Props) {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
             <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-              Red Sea Discoveries • Unforgettable Experiences
+              {t.experiences.eyebrow}
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-              Curated Experiences
+              {t.experiences.title}
             </h2>
             <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 max-w-2xl font-light leading-relaxed">
-              Embark on private yacht charters, kitesurfing adventures, desert
-              safari banquets, and customized diving expeditions across the Red
-              Sea.
+              {t.experiences.subtitle}
             </p>
           </div>
 
@@ -49,14 +49,14 @@ export default function FeaturedExperiences({ experiences }: Props) {
                 aria-label="Previous Experience"
                 className="w-10 h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs"
               >
-                &larr;
+                <span className="rtl:rotate-180 inline-block">&larr;</span>
               </button>
               <button
                 onClick={handleNext}
                 aria-label="Next Experience"
                 className="w-10 h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs"
               >
-                &rarr;
+                <span className="rtl:rotate-180 inline-block">&rarr;</span>
               </button>
             </div>
 
@@ -64,15 +64,15 @@ export default function FeaturedExperiences({ experiences }: Props) {
               href="/experiences"
               className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition-colors group"
             >
-              <span>View All Experiences</span>
-              <span className="transform group-hover:translate-x-1 transition-transform">
+              <span>{t.common.viewAll}</span>
+              <span className="transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-transform">
                 &rarr;
               </span>
             </Link>
           </div>
         </div>
 
-        {/* Flagship Split Showcase Card (Matching Screenshot Yacht Showcase) */}
+        {/* Flagship Split Showcase Card */}
         <div className="bg-[#FAF8F5] rounded-3xl border border-brand-border/80 shadow-md overflow-hidden p-6 sm:p-8 lg:p-10 mb-12 transition-all duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Column: Experience Imagery (7 cols) */}
@@ -88,18 +88,18 @@ export default function FeaturedExperiences({ experiences }: Props) {
                 />
 
                 {/* Badges Overlay */}
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
+                <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 flex flex-wrap gap-2 z-10">
                   <span className="px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1 border border-brand-border">
-                    <span>⚓</span> VIP Private Charter
+                    <span>⚓</span> {t.experiences.vipCharter}
                   </span>
                   <span className="px-3 py-1 bg-brand-terracotta text-white text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                    All-Inclusive
+                    {t.experiences.allInclusive}
                   </span>
                 </div>
 
-                <div className="absolute bottom-4 left-4 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md text-white text-xs font-medium rounded-xl flex items-center gap-2">
+                <div className="absolute bottom-4 left-4 rtl:left-auto rtl:right-4 z-10 px-3 py-1.5 bg-black/60 backdrop-blur-md text-white text-xs font-medium rounded-xl flex items-center gap-2">
                   <span>📍</span>
-                  <span>{activeExperience.location?.name || "Abu Tig Marina • El Gouna"}</span>
+                  <span>{activeExperience.location?.name || t.common.elGouna}</span>
                 </div>
               </div>
             </div>
@@ -108,9 +108,9 @@ export default function FeaturedExperiences({ experiences }: Props) {
             <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-6">
               <div>
                 <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-2">
-                  <span>{activeExperience.category?.name || "Private Boat Trips"}</span>
+                  <span>{activeExperience.category?.name || t.experiences.vipCharter}</span>
                   <span className="flex items-center gap-1 text-brand-brown">
-                    <span className="text-amber-500">★</span> 5.0 (38 reviews)
+                    <span className="text-amber-500">★</span> 5.0 (38 {t.common.readReviews})
                   </span>
                 </div>
 
@@ -129,7 +129,7 @@ export default function FeaturedExperiences({ experiences }: Props) {
                       {activeExperience.max_guests}
                     </span>
                     <span className="block text-[10px] uppercase font-semibold text-brand-brown-muted">
-                      Max Guests
+                      {t.common.maxGuests}
                     </span>
                   </div>
                   <div>
@@ -137,15 +137,15 @@ export default function FeaturedExperiences({ experiences }: Props) {
                       {activeExperience.duration}
                     </span>
                     <span className="block text-[10px] uppercase font-semibold text-brand-brown-muted">
-                      Duration
+                      {t.common.duration}
                     </span>
                   </div>
                   <div>
                     <span className="block text-base sm:text-lg font-bold text-brand-brown">
-                      Full Crew
+                      {t.experiences.fullCrew}
                     </span>
                     <span className="block text-[10px] uppercase font-semibold text-brand-brown-muted">
-                      Skipper &amp; Chef
+                      {t.experiences.crewDesc}
                     </span>
                   </div>
                 </div>
@@ -154,15 +154,15 @@ export default function FeaturedExperiences({ experiences }: Props) {
                 <div className="space-y-2 mb-6 text-xs text-brand-brown">
                   <div className="flex items-center gap-2">
                     <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Exclusive Tawila Island Sandbar Anchorage</span>
+                    <span>{t.experiences.feature1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Fresh Gourmet Seafood Lunch &amp; Refreshments</span>
+                    <span>{t.experiences.feature2}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Seabob, Stand-up Paddleboards &amp; Snorkel Gear</span>
+                    <span>{t.experiences.feature3}</span>
                   </div>
                 </div>
               </div>
@@ -172,19 +172,19 @@ export default function FeaturedExperiences({ experiences }: Props) {
                 <div className="flex items-baseline justify-between mb-4">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-brand-brown-muted tracking-wider block">
-                      Charter Pricing
+                      {t.experiences.charterPricing}
                     </span>
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl sm:text-3xl font-bold font-serif text-brand-brown">
                         {activeExperience.price_formatted}
                       </span>
                       <span className="text-xs font-semibold text-brand-brown-muted">
-                        {activeExperience.currency} {activeExperience.pricing_type}
+                        {activeExperience.currency === "EGP" ? t.common.currency : activeExperience.currency} {activeExperience.pricing_type}
                       </span>
                     </div>
                   </div>
                   <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/50">
-                    VIP Fast Track
+                    {t.experiences.vipFastTrack}
                   </span>
                 </div>
 
@@ -193,13 +193,13 @@ export default function FeaturedExperiences({ experiences }: Props) {
                     href={`/experiences/${activeExperience.slug}`}
                     className="py-3 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    Reserve Experience
+                    {t.experiences.reserveCharter}
                   </Link>
                   <Link
                     href={`/experiences/${activeExperience.slug}`}
                     className="py-3 px-4 bg-white hover:bg-brand-sand-light text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border"
                   >
-                    View Itinerary
+                    {t.experiences.viewItinerary}
                   </Link>
                 </div>
               </div>
@@ -228,9 +228,9 @@ export default function FeaturedExperiences({ experiences }: Props) {
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 rtl:left-auto rtl:right-3">
                     <span className="px-2.5 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                      {exp.category?.name || "Experience"}
+                      {exp.category?.name || t.experiences.title}
                     </span>
                   </div>
                 </div>
@@ -242,7 +242,7 @@ export default function FeaturedExperiences({ experiences }: Props) {
                   <div className="flex items-center gap-3 text-[11px] text-brand-brown-muted mb-3 font-light">
                     <span>{exp.duration}</span>
                     <span>•</span>
-                    <span>Up to {exp.max_guests} Guests</span>
+                    <span>{t.experiences.upToGuests} {exp.max_guests} {t.common.guests}</span>
                   </div>
                 </div>
               </div>
@@ -252,17 +252,18 @@ export default function FeaturedExperiences({ experiences }: Props) {
                   <span className="text-xs font-bold text-brand-brown">
                     {exp.price_formatted}
                   </span>
-                  <span className="text-[10px] text-brand-brown-muted ml-1">
-                    {exp.currency}
+                  <span className="text-[10px] text-brand-brown-muted ml-1 rtl:mr-1 rtl:ml-0">
+                    {exp.currency === "EGP" ? t.common.currency : exp.currency}
                   </span>
                 </div>
 
                 <Link
                   href={`/experiences/${exp.slug}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="text-[11px] font-bold text-brand-terracotta hover:underline"
+                  className="text-[11px] font-bold text-brand-terracotta hover:underline inline-flex items-center gap-1"
                 >
-                  Details &rarr;
+                  <span>{t.common.viewDetails}</span>
+                  <span className="rtl:rotate-180 inline-block">&rarr;</span>
                 </Link>
               </div>
             </div>

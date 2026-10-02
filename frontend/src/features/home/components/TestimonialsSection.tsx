@@ -1,49 +1,24 @@
+"use client";
+
 import React from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TestimonialsSection() {
-  const reviews = [
-    {
-      id: 1,
-      name: "Marcus & Sophia V.",
-      origin: "Zurich, Switzerland",
-      stay: "Fanadir Bay Waterfront Villa",
-      quote:
-        "The most seamless luxury rental experience in El Gouna. The villa was immaculate with breathtaking lagoon views and a heated infinity pool our children adored. The VIP concierge handled our arrival and dinner bookings effortlessly.",
-      rating: 5,
-    },
-    {
-      id: 2,
-      name: "Alexander & Claire K.",
-      origin: "London, UK",
-      stay: "Private Tawila Yacht Expedition",
-      quote:
-        "Our private yacht charter to Tawila Island was undeniably the highlight of our holiday. Professional skipper, gourmet seafood lunch prepared on board, and swimming with wild dolphins in crystal waters. Truly world-class.",
-      rating: 5,
-    },
-    {
-      id: 3,
-      name: "Laila & Tarek M.",
-      origin: "Cairo, Egypt",
-      stay: "Tawila Lagoon Modern Villa Buyer",
-      quote:
-        "GouNow sets a brand-new standard for hospitality and real estate advisory on the Red Sea. Transparent transaction, instant communication, and genuine attention to detail. We couldn't be happier with our new home.",
-      rating: 5,
-    },
-  ];
+  const { t } = useLanguage();
+  const reviews = t.testimonials.reviews;
 
   return (
     <section className="py-20 lg:py-24 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-            Guest Reviews &amp; Reputation
+            {t.testimonials.eyebrow}
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-            Praised by Discerning Travelers
+            {t.testimonials.title}
           </h2>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 font-light leading-relaxed">
-            Direct reviews from high-net-worth travelers, property owners, and
-            repeat guests who trust us with their Red Sea stays.
+            {t.testimonials.subtitle}
           </p>
         </div>
 
