@@ -18,7 +18,7 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 $kernel->bootstrap();
 
-$distDir = dirname(__DIR__, 2) . '/frontend';
+$distDir = dirname(__DIR__, 2) . '/dist-static';
 @mkdir($distDir, 0755, true);
 
 // Clean dist directory
