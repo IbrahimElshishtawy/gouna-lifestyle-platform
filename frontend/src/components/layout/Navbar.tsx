@@ -27,6 +27,10 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const isHomePage = pathname === "/";
+  // Transparent only on the homepage hero before scroll
+  const isTransparent = isHomePage && !isScrolled;
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       {/* Top Announcement / Concierge Ribbon */}
@@ -34,16 +38,18 @@ export default function Navbar() {
         className={`transition-all duration-300 text-xs px-4 sm:px-6 lg:px-12 flex items-center justify-between border-b ${
           isScrolled
             ? "max-h-0 opacity-0 overflow-hidden py-0 border-transparent pointer-events-none"
-            : "max-h-10 opacity-100 py-2 bg-black/40 backdrop-blur-md text-[#E5DCD3] border-white/10"
+            : isTransparent
+            ? "max-h-10 opacity-100 py-2 bg-black/40 backdrop-blur-md text-[#E5DCD3] border-white/10"
+            : "max-h-10 opacity-100 py-2 bg-[#1C1412] text-[#E5DCD3] border-white/10"
         }`}
       >
-        <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-medium tracking-wide">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+          <span className="font-medium tracking-wide truncate">
             {t.nav.ribbonText}
           </span>
         </div>
-        <div className="flex items-center gap-4 sm:gap-5 text-[11px]">
+        <div className="flex items-center gap-4 sm:gap-5 text-[11px] shrink-0">
           <a
             href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
             target="_blank"
@@ -67,12 +73,12 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Main Adaptive Header (Transparent at Top, Crisp Frosted White on Scroll) */}
+      {/* Main Adaptive Header (Transparent on Home Hero, Crisp Frosted White otherwise) */}
       <header
         className={`transition-all duration-300 w-full ${
-          isScrolled
-            ? "bg-white/95 backdrop-blur-xl border-b border-brand-border/90 shadow-md py-3.5"
-            : "bg-gradient-to-b from-black/85 via-black/40 to-transparent border-b border-white/5 py-4"
+          isTransparent
+            ? "bg-gradient-to-b from-black/85 via-black/40 to-transparent border-b border-white/5 py-4"
+            : "bg-white/95 backdrop-blur-xl border-b border-brand-border/90 shadow-xs py-3.5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
@@ -94,7 +100,7 @@ export default function Navbar() {
               </span>
               <span
                 className={`block text-base font-serif font-bold tracking-wider transition-colors duration-300 ${
-                  isScrolled ? "text-brand-brown" : "text-white"
+                  isTransparent ? "text-white" : "text-brand-brown"
                 }`}
               >
                 {t.common.brandName}
@@ -102,10 +108,10 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav Links (White at Top, Dark Brown on Scroll for 100% Readability) */}
+          {/* Desktop Nav Links (White on Home Hero, Dark Brown otherwise for 100% Readability) */}
           <nav
             className={`hidden md:flex items-center gap-8 text-sm font-semibold transition-colors duration-300 ${
-              isScrolled ? "text-brand-brown" : "text-white/90"
+              isTransparent ? "text-white/90" : "text-brand-brown"
             }`}
           >
             <Link
@@ -163,9 +169,9 @@ export default function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className={`p-2 rounded-lg focus:outline-none cursor-pointer transition-colors ${
-                isScrolled
-                  ? "text-brand-brown hover:text-brand-terracotta"
-                  : "text-white hover:text-brand-terracotta"
+                isTransparent
+                  ? "text-white hover:text-brand-terracotta"
+                  : "text-brand-brown hover:text-brand-terracotta"
               }`}
               aria-label="Toggle Menu"
             >
@@ -206,15 +212,17 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div
             className={`md:hidden mx-3 mt-3 p-5 rounded-2xl border shadow-2xl flex flex-col gap-3 animate-fade-in ${
-              isScrolled
-                ? "bg-white/98 text-brand-brown border-brand-border/90 backdrop-blur-xl"
-                : "bg-[#1C1412]/98 text-white border-white/15 backdrop-blur-2xl"
+              isTransparent
+                ? "bg-[#1C1412]/98 text-white border-white/15 backdrop-blur-2xl"
+                : "bg-white/98 text-brand-brown border-brand-border/90 backdrop-blur-xl"
             }`}
           >
             <Link
               href="/stays?listing_type=rent"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
+              className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
+                isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🏡</span>
@@ -226,7 +234,9 @@ export default function Navbar() {
             <Link
               href="/stays?listing_type=sale"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
+              className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
+                isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🏛️</span>
@@ -238,7 +248,9 @@ export default function Navbar() {
             <Link
               href="/experiences"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
+              className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
+                isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">⛵</span>
@@ -250,7 +262,9 @@ export default function Navbar() {
             <Link
               href="/#events"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
+              className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
+                isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">📅</span>
@@ -262,7 +276,9 @@ export default function Navbar() {
             <Link
               href="/#concierge"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
+              className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
+                isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🛎️</span>
@@ -272,14 +288,16 @@ export default function Navbar() {
             </Link>
 
             {/* Quick Contact & Action Buttons */}
-            <div className="pt-3 mt-1 border-t border-brand-border/40 flex flex-col gap-2.5">
+            <div className={`pt-3 mt-1 border-t flex flex-col gap-2.5 ${isTransparent ? "border-white/15" : "border-brand-border/40"}`}>
               <button
                 type="button"
                 onClick={() => {
                   toggleLocale();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border border-brand-border/80 flex items-center justify-center gap-2 hover:bg-black/5 transition-colors"
+                className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold border flex items-center justify-center gap-2 transition-colors ${
+                  isTransparent ? "border-white/20 hover:bg-white/10 text-white" : "border-brand-border/80 hover:bg-black/5 text-brand-brown"
+                }`}
               >
                 <span>🌐</span>
                 <span>{t.common.switchLanguage === "العربية" ? "التبديل إلى العربية" : "Switch to English"}</span>

@@ -11,7 +11,7 @@ export default function PublicLayout({
   return (
     <>
       <Navbar />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pt-[104px] lg:pt-[108px]">{children}</main>
       <Footer />
       <WhatsAppButton />
     </>

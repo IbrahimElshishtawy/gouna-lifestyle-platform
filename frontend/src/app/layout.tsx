@@ -37,6 +37,7 @@ export const metadata: Metadata = {
     title: "GouNow | Luxury Stays, Real Estate & Bespoke Experiences in El Gouna",
     description:
       "Discover curated luxury vacation rentals, waterfront lagoon chalets, yacht charters, and desert adventures in El Gouna, Red Sea, Egypt.",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

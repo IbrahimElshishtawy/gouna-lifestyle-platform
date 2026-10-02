@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-brand-brown">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center py-20 px-6 lg:px-12 text-center">
+      <main className="flex-1 flex items-center justify-center pt-32 pb-20 px-6 lg:px-12 text-center">
         <div className="max-w-xl mx-auto space-y-6">
           <span className="inline-block px-3 py-1 bg-brand-terracotta/10 text-brand-terracotta text-xs font-bold uppercase tracking-[0.2em] rounded-full">
             404 Error
