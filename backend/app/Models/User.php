@@ -69,23 +69,15 @@ class User extends Authenticatable
     // Helper methods
     public function hasRole(string $roleName): bool
     {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains('name', $roleName);
+        }
         return $this->roles()->where('name', $roleName)->exists();
     }
 
     public function hasPermission(string $permissionName): bool
     {
-        if ($this->is_admin) {
-            return true;
-        }
-        // Check direct permission
-        $direct = $this->permissions()->where('name', $permissionName)->first();
-        if ($direct) {
-            return (bool) $direct->pivot->granted;
-        }
-        // Check via roles
-        return $this->roles()
-            ->whereHas('permissions', fn($q) => $q->where('name', $permissionName))
-            ->exists();
+        return app(\App\Services\Auth\PermissionResolver::class)->hasPermission($this, $permissionName);
     }
 
     public function getFullNameAttribute(): string
