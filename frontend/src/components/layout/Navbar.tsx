@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const { locale, toggleLocale, t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,7 +31,7 @@ export default function Navbar() {
     <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       {/* Top Announcement / Concierge Ribbon */}
       <div
-        className={`transition-all duration-300 text-xs px-6 lg:px-12 flex items-center justify-between border-b ${
+        className={`transition-all duration-300 text-xs px-4 sm:px-6 lg:px-12 flex items-center justify-between border-b ${
           isScrolled
             ? "max-h-0 opacity-0 overflow-hidden py-0 border-transparent pointer-events-none"
             : "max-h-10 opacity-100 py-2 bg-black/40 backdrop-blur-md text-[#E5DCD3] border-white/10"
@@ -38,30 +40,30 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="font-medium tracking-wide">
-            El Gouna Concierge 24/7 Service
+            {t.nav.ribbonText}
           </span>
         </div>
-        <div className="flex items-center gap-5 text-[11px]">
+        <div className="flex items-center gap-4 sm:gap-5 text-[11px]">
           <a
             href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-white transition flex items-center gap-1 font-medium"
           >
-            <span>💬 WhatsApp Concierge</span>
+            <span>💬</span>
+            <span className="hidden sm:inline">{t.common.whatsAppConcierge}</span>
+            <span className="sm:hidden">WhatsApp</span>
           </a>
           <span className="text-white/30">|</span>
-          <a
-            href="#ar"
-            onClick={(e) => {
-              e.preventDefault();
-              document.documentElement.dir =
-                document.documentElement.dir === "rtl" ? "ltr" : "rtl";
-            }}
-            className="hover:text-white font-semibold transition"
+          <button
+            type="button"
+            onClick={toggleLocale}
+            className="hover:text-white font-bold transition flex items-center gap-1 cursor-pointer bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full"
+            aria-label="Switch Language"
           >
-            العربية
-          </a>
+            <span>🌐</span>
+            <span>{t.common.switchLanguage}</span>
+          </button>
         </div>
       </div>
 
@@ -85,16 +87,16 @@ export default function Navbar() {
                 priority
               />
             </div>
-            <div className="text-left">
+            <div className="text-left rtl:text-right">
               <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
-                El Gouna
+                {t.common.elGouna}
               </span>
               <span
                 className={`block text-base font-serif font-bold tracking-wider transition-colors duration-300 ${
                   isScrolled ? "text-brand-brown" : "text-white"
                 }`}
               >
-                GOUNOW
+                {t.common.brandName}
               </span>
             </div>
           </Link>
@@ -113,13 +115,13 @@ export default function Navbar() {
                   : ""
               }`}
             >
-              Stays
+              {t.nav.stays}
             </Link>
             <Link
               href="/stays?listing_type=sale"
               className="hover:text-brand-terracotta transition-colors"
             >
-              Real Estate
+              {t.nav.realEstate}
             </Link>
             <Link
               href="/experiences"
@@ -129,19 +131,19 @@ export default function Navbar() {
                   : ""
               }`}
             >
-              Experiences
+              {t.nav.experiences}
             </Link>
             <Link
               href="/#events"
               className="hover:text-brand-terracotta transition-colors"
             >
-              What&apos;s On
+              {t.nav.whatsOn}
             </Link>
             <Link
               href="/#concierge"
               className="hover:text-brand-terracotta transition-colors"
             >
-              Concierge
+              {t.nav.concierge}
             </Link>
           </nav>
 
@@ -151,7 +153,7 @@ export default function Navbar() {
               href="/stays?listing_type=rent"
               className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             >
-              Book a Stay
+              {t.common.bookAStay}
             </Link>
           </div>
 
@@ -215,9 +217,9 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🏡</span>
-                <span>Stays &amp; Vacation Rentals</span>
+                <span>{t.nav.stays}</span>
               </div>
-              <span className="text-xs text-brand-terracotta">&rarr;</span>
+              <span className="text-xs text-brand-terracotta rtl:rotate-180">&rarr;</span>
             </Link>
 
             <Link
@@ -227,9 +229,9 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🏛️</span>
-                <span>Real Estate For Sale</span>
+                <span>{t.nav.realEstate}</span>
               </div>
-              <span className="text-xs text-brand-terracotta">&rarr;</span>
+              <span className="text-xs text-brand-terracotta rtl:rotate-180">&rarr;</span>
             </Link>
 
             <Link
@@ -239,9 +241,9 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">⛵</span>
-                <span>Curated Experiences &amp; Yachts</span>
+                <span>{t.nav.experiences}</span>
               </div>
-              <span className="text-xs text-brand-terracotta">&rarr;</span>
+              <span className="text-xs text-brand-terracotta rtl:rotate-180">&rarr;</span>
             </Link>
 
             <Link
@@ -251,9 +253,9 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">📅</span>
-                <span>What&apos;s On This Season</span>
+                <span>{t.nav.whatsOn}</span>
               </div>
-              <span className="text-xs text-brand-terracotta">&rarr;</span>
+              <span className="text-xs text-brand-terracotta rtl:rotate-180">&rarr;</span>
             </Link>
 
             <Link
@@ -263,13 +265,25 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-3">
                 <span className="text-base">🛎️</span>
-                <span>24/7 VIP Concierge</span>
+                <span>{t.nav.concierge}</span>
               </div>
-              <span className="text-xs text-brand-terracotta">&rarr;</span>
+              <span className="text-xs text-brand-terracotta rtl:rotate-180">&rarr;</span>
             </Link>
 
             {/* Quick Contact & Action Buttons */}
             <div className="pt-3 mt-1 border-t border-brand-border/40 flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  toggleLocale();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold border border-brand-border/80 flex items-center justify-center gap-2 hover:bg-black/5 transition-colors"
+              >
+                <span>🌐</span>
+                <span>{t.common.switchLanguage === "العربية" ? "التبديل إلى العربية" : "Switch to English"}</span>
+              </button>
+
               <a
                 href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
                 target="_blank"
@@ -277,7 +291,7 @@ export default function Navbar() {
                 className="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center gap-2"
               >
                 <span>💬</span>
-                <span>WhatsApp VIP Concierge</span>
+                <span>{t.common.whatsAppConcierge}</span>
               </a>
 
               <Link
@@ -285,7 +299,7 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full text-center py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-colors"
               >
-                Book a Stay Now
+                {t.common.bookAStay}
               </Link>
             </div>
           </div>

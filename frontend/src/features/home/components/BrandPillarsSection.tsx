@@ -1,14 +1,18 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function BrandPillarsSection() {
+  const { t } = useLanguage();
+
   const pillars = [
     {
       id: "stays",
-      title: "Curated Private Stays",
-      description:
-        "Direct lagoon access villas, ultra-luxury townhomes, private pools & panoramic sunset views with daily housekeeping and private chef on demand.",
+      title: t.brandPillars.pillar1Title,
+      description: t.brandPillars.pillar1Desc,
       icon: (
         <svg
           className="w-6 h-6 text-brand-terracotta"
@@ -28,9 +32,8 @@ export default function BrandPillarsSection() {
     },
     {
       id: "charters",
-      title: "Tailored Yacht Charters",
-      description:
-        "Bespoke full-day or sunset cruises. Catered dining, professional skippers & deep-sea exploration around pristine Red Sea islands.",
+      title: t.brandPillars.pillar2Title,
+      description: t.brandPillars.pillar2Desc,
       icon: (
         <svg
           className="w-6 h-6 text-brand-terracotta"
@@ -50,9 +53,8 @@ export default function BrandPillarsSection() {
     },
     {
       id: "concierge",
-      title: "24/7 Concierge on Demand",
-      description:
-        "Reservations at coveted dining spots, private airport transfers, in-villa spa treatments, and seamless VIP itinerary management.",
+      title: t.brandPillars.pillar3Title,
+      description: t.brandPillars.pillar3Desc,
       icon: (
         <svg
           className="w-6 h-6 text-brand-terracotta"
@@ -76,26 +78,22 @@ export default function BrandPillarsSection() {
     <section className="py-20 lg:py-24 px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Header with Title and Verification Pill */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12 sm:mb-16">
           <div className="max-w-3xl">
-            <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-3">
-              A Curated Lifestyle Ecosystem
+            <span className="text-[10px] sm:text-xs uppercase font-bold tracking-[0.2em] sm:tracking-[0.25em] text-brand-terracotta block mb-2 sm:mb-3">
+              {t.brandPillars.eyebrow}
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.2]">
-              Where Bohemian Serenity Meets Effortless Coastal Luxury
+            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.2]">
+              {t.brandPillars.title}
             </h2>
-            <p className="text-xs sm:text-sm text-brand-brown-muted mt-4 font-light leading-relaxed max-w-2xl">
-              GouNow is an independent hospitality and real estate platform
-              dedicated exclusively to the elite life in El Gouna. Every villa
-              is privately inspected and vetted, every yacht captain is
-              rigorously licensed, and our concierge team is on the ground in
-              town 24/7 to ensure flawless execution.
+            <p className="text-xs sm:text-sm text-brand-brown-muted mt-3 sm:mt-4 font-light leading-relaxed max-w-2xl">
+              {t.brandPillars.description}
             </p>
           </div>
 
           {/* Luxury Badge matching screenshot right side */}
-          <div className="shrink-0 flex items-center gap-3.5 px-5 py-3 rounded-2xl bg-white border border-brand-border/80 shadow-xs">
-            <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 font-bold">
+          <div className="shrink-0 flex items-center gap-3.5 px-4 sm:px-5 py-3 rounded-2xl bg-white border border-brand-border/80 shadow-xs">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 font-bold shrink-0">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -112,10 +110,10 @@ export default function BrandPillarsSection() {
             </div>
             <div>
               <span className="block text-xs font-bold text-brand-brown tracking-tight">
-                100% Vetted &amp; Verified
+                {t.common.verified}
               </span>
               <span className="block text-[11px] text-brand-brown-muted font-light">
-                Direct Owners &amp; Licensed Skippers
+                {t.common.verifiedSub}
               </span>
             </div>
           </div>
@@ -133,7 +131,7 @@ export default function BrandPillarsSection() {
             >
               <Link
                 href={pillar.link}
-                className="group h-full bg-white p-8 rounded-3xl border border-brand-border/70 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/30 transition-all duration-500 hover:-translate-y-2 relative flex flex-col justify-between"
+                className="group h-full bg-white p-6 sm:p-8 rounded-3xl border border-brand-border/70 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/30 transition-all duration-500 hover:-translate-y-2 relative flex flex-col justify-between"
               >
                 <div>
                   <div className="w-14 h-14 rounded-2xl bg-brand-sand-light/80 border border-brand-border flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-terracotta/15 transition-all duration-300">
@@ -148,8 +146,8 @@ export default function BrandPillarsSection() {
                 </div>
 
                 <div className="pt-6 mt-6 border-t border-brand-border/50 flex items-center justify-between text-xs font-semibold text-brand-terracotta">
-                  <span>Discover More</span>
-                  <span className="transform group-hover:translate-x-2 transition-transform duration-300">
+                  <span>{t.common.discoverMore}</span>
+                  <span className="transform group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform duration-300">
                     &rarr;
                   </span>
                 </div>

@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function HeroSection() {
   const router = useRouter();
+  const { t, locale } = useLanguage();
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
   const [checkIn, setCheckIn] = useState("2026-10-24");
@@ -65,20 +67,18 @@ export default function HeroSection() {
         {/* Curated Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-4 sm:mb-6 shadow-md animate-fade-in-down animate-float">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
-          <span>Curated Luxury Experiences • Private Escapes</span>
+          <span>{t.hero.badge}</span>
         </div>
 
         {/* Hero Title with Dramatic Contrast & Smooth Slide Up */}
         <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.15] sm:leading-[1.1] mb-4 sm:mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
-          Live the Unrivaled <br className="hidden sm:inline" />
-          <span className="italic font-normal">El Gouna Lifestyle</span>
+          {t.hero.titleLine1} <br className="hidden sm:inline" />
+          <span className="italic font-normal">{t.hero.titleLine2}</span>
         </h1>
 
         {/* Hero Subtitle */}
         <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-10 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
-          Where the Red Sea meets understated luxury: bespoke private villas,
-          yacht charters, and 24/7 VIP concierge experiences crafted exclusively
-          for you.
+          {t.hero.subtitle}
         </p>
 
         {/* Floating Search Bar (Compact & Ultra-Luxury on Mobile) */}
@@ -95,7 +95,7 @@ export default function HeroSection() {
               }`}
             >
               <span>🏡</span>
-              <span className="truncate">Rent Stay</span>
+              <span className="truncate">{t.hero.tabRent}</span>
             </button>
 
             <button
@@ -108,7 +108,7 @@ export default function HeroSection() {
               }`}
             >
               <span>🏛️</span>
-              <span className="truncate">Buy Property</span>
+              <span className="truncate">{t.hero.tabSale}</span>
             </button>
 
             <button
@@ -121,16 +121,16 @@ export default function HeroSection() {
               }`}
             >
               <span>⛵</span>
-              <span className="truncate">Experiences</span>
+              <span className="truncate">{t.hero.tabExp}</span>
             </button>
           </div>
 
           <form onSubmit={handleSearch}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left rtl:text-right">
               {/* Location Input */}
               <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                  Location
+                  {t.hero.locationLabel}
                 </label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">📍</span>
@@ -139,13 +139,13 @@ export default function HeroSection() {
                     onChange={(e) => setLocation(e.target.value)}
                     className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer"
                   >
-                    <option value="all">All of El Gouna</option>
-                    <option value="fanadir-bay">Fanadir Bay</option>
-                    <option value="abu-tig-marina">Abu Tig Marina</option>
-                    <option value="tawila-island">Tawila Island &amp; Lagoons</option>
-                    <option value="ancient-sands">Ancient Sands</option>
-                    <option value="west-golf">West Golf Lagoons</option>
-                    <option value="mangroovy-beach">Mangroovy Beach</option>
+                    <option value="all">{t.hero.locationAll}</option>
+                    <option value="fanadir-bay">{t.hero.locationFanadir}</option>
+                    <option value="abu-tig-marina">{t.hero.locationMarina}</option>
+                    <option value="tawila-island">{t.hero.locationTawila}</option>
+                    <option value="ancient-sands">{t.hero.locationAncient}</option>
+                    <option value="west-golf">{t.hero.locationWestGolf}</option>
+                    <option value="mangroovy-beach">{t.hero.locationMangroovy}</option>
                   </select>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function HeroSection() {
               {/* Check-In / Date */}
               <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                  Check-in
+                  {t.hero.checkInLabel}
                 </label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">📅</span>
@@ -170,10 +170,10 @@ export default function HeroSection() {
               <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
                   {activeTab === "rent"
-                    ? "Check-out"
+                    ? t.hero.checkOutLabel
                     : activeTab === "sale"
-                    ? "Property Type"
-                    : "Category"}
+                    ? (locale === "ar" ? "نوع العقار" : "Property Type")
+                    : (locale === "ar" ? "الفئة" : "Category")}
                 </label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">
@@ -188,17 +188,17 @@ export default function HeroSection() {
                     />
                   ) : activeTab === "sale" ? (
                     <select className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer">
-                      <option value="all">All Properties</option>
-                      <option value="villas">Signature Villas</option>
-                      <option value="chalets">Waterfront Chalets</option>
-                      <option value="penthouses">Marina Penthouses</option>
+                      <option value="all">{locale === "ar" ? "كل العقارات" : "All Properties"}</option>
+                      <option value="villas">{locale === "ar" ? "فلل خاصة" : "Signature Villas"}</option>
+                      <option value="chalets">{locale === "ar" ? "شاليهات بحيرات" : "Waterfront Chalets"}</option>
+                      <option value="penthouses">{locale === "ar" ? "بنتهوس مارينا" : "Marina Penthouses"}</option>
                     </select>
                   ) : (
                     <select className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer">
-                      <option value="all">All Experiences</option>
-                      <option value="yachts">Private Yacht Charters</option>
-                      <option value="safari">Desert Safaris</option>
-                      <option value="watersports">Kitesurfing &amp; Diving</option>
+                      <option value="all">{locale === "ar" ? "كل التجارب" : "All Experiences"}</option>
+                      <option value="yachts">{locale === "ar" ? "يخوت خاصة" : "Private Yacht Charters"}</option>
+                      <option value="safari">{locale === "ar" ? "رحلات سفاري" : "Desert Safaris"}</option>
+                      <option value="watersports">{locale === "ar" ? "كايت سيرف وغوص" : "Kitesurfing & Diving"}</option>
                     </select>
                   )}
                 </div>
@@ -208,7 +208,7 @@ export default function HeroSection() {
               <div className="flex items-center gap-2">
                 <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 flex-1 transition-colors">
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                    Guests
+                    {t.hero.guestsLabel}
                   </label>
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm">👥</span>
@@ -217,10 +217,10 @@ export default function HeroSection() {
                       onChange={(e) => setGuests(e.target.value)}
                       className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer"
                     >
-                      <option value="2">2 Guests</option>
-                      <option value="4">4 Guests</option>
-                      <option value="6">6 Guests</option>
-                      <option value="8">8+ Guests</option>
+                      <option value="2">2 {t.common.guests}</option>
+                      <option value="4">4 {t.common.guests}</option>
+                      <option value="6">6 {t.common.guests}</option>
+                      <option value="8">8+ {t.common.guests}</option>
                     </select>
                   </div>
                 </div>
@@ -229,6 +229,7 @@ export default function HeroSection() {
                   type="submit"
                   className="h-full px-5 py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer"
                 >
+                  <span className="hidden sm:inline">{t.hero.searchButton}</span>
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -242,13 +243,6 @@ export default function HeroSection() {
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">
-                    {activeTab === "rent"
-                      ? "Search Stays"
-                      : activeTab === "sale"
-                      ? "Find Property"
-                      : "Search"}
-                  </span>
                 </button>
               </div>
             </div>

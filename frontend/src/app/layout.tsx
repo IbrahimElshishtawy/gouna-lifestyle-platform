@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Script from "next/script";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata: Metadata = {
   title: "GouNow | Luxury Stays, Real Estate & Bespoke Experiences in El Gouna",
@@ -87,7 +88,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col text-brand-brown bg-[#FAF8F5] antialiased selection:bg-brand-terracotta/20 selection:text-brand-terracotta font-sans">
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
 
         {/* Global Google Analytics 4 DataLayer Listener */}
         <Script id="ga-datalayer-setup" strategy="afterInteractive">

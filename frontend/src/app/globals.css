@@ -15,6 +15,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+[dir="rtl"],
+[dir="rtl"] body,
+[dir="rtl"] input,
+[dir="rtl"] select,
+[dir="rtl"] textarea,
+[dir="rtl"] button {
+  font-family: "Tajawal", "Plus Jakarta Sans", sans-serif !important;
+}
+
 /* GPU Accelerated & Fluid Animations without Stutter (60/120 FPS) */
 .gpu-smooth {
   transform: translate3d(0, 0, 0);
