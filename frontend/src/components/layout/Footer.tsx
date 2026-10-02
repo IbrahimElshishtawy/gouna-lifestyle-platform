@@ -169,6 +169,14 @@ export default function Footer() {
             <Link href="/stays" className="hover:text-white transition">
               {t.footer.conditions}
             </Link>
+            <span className="text-white/20">|</span>
+            <Link
+              href="/admin/login"
+              className="hover:text-brand-terracotta transition opacity-70 hover:opacity-100 flex items-center gap-1"
+            >
+              <span>🔐</span>
+              <span>Admin Portal</span>
+            </Link>
           </div>
         </div>
       </div>
