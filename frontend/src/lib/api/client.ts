@@ -37,6 +37,7 @@ export async function apiClient<T>(
 
   try {
     const response = await fetch(url, {
+      credentials: options.credentials || "include",
       ...options,
       headers,
       signal: options.signal || controller.signal,
@@ -54,9 +55,22 @@ export async function apiClient<T>(
     }
 
     if (!response.ok) {
-      const errorData = responseData as { message?: string } | null;
+      const errorData = responseData as {
+        message?: string;
+        error?: {
+          code?: string;
+          message?: string;
+          details?: Record<string, string[]>;
+          request_id?: string;
+        };
+      } | null;
+
+      const errorMessage = errorData?.error?.message
+        || errorData?.message
+        || `Request failed with status ${response.status}`;
+
       throw new ApiError(
-        errorData?.message || `Request failed with status ${response.status}`,
+        errorMessage,
         response.status,
         responseData
       );

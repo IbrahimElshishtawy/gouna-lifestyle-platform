@@ -8,6 +8,8 @@ use App\Models\Location;
 use App\Models\Media;
 use App\Models\PaymentMethod;
 use App\Models\Property;
+use App\Http\Requests\Admin\StorePropertyRequest;
+use App\Http\Requests\Admin\UpdatePropertyRequest;
 use App\Models\PropertyCategory;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
@@ -83,61 +85,9 @@ class PropertyController extends Controller
     /**
      * Store a newly created property in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StorePropertyRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title_en' => ['required', 'string', 'max:255'],
-            'title_ar' => ['nullable', 'string', 'max:255'],
-            'property_category_id' => ['required', 'exists:property_categories,id'],
-            'location_id' => ['required', 'exists:locations,id'],
-            'listing_type' => ['required', 'in:rent,sale,both'],
-            'short_description_en' => ['nullable', 'string'],
-            'short_description_ar' => ['nullable', 'string'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
-            'bedrooms' => ['required', 'integer', 'min:0'],
-            'bathrooms' => ['required', 'integer', 'min:0'],
-            'max_guests' => ['required', 'integer', 'min:1'],
-            'area_sqm' => ['nullable', 'numeric', 'min:0'],
-            'floor' => ['nullable', 'integer'],
-            'compound' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string'],
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
-            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
-            'max_stay_nights' => ['nullable', 'integer', 'min:1'],
-            'check_in_time' => ['nullable', 'string'],
-            'check_out_time' => ['nullable', 'string'],
-            'base_price' => ['nullable', 'numeric', 'min:0'],
-            'sale_price' => ['nullable', 'numeric', 'min:0'],
-            'cleaning_fee' => ['nullable', 'numeric', 'min:0'],
-            'service_fee' => ['nullable', 'numeric', 'min:0'],
-            'tax_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            // Section 20 Payment Settings
-            'payment_requirement' => ['required', 'in:full,deposit,both'],
-            'deposit_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'deposit_fixed' => ['nullable', 'numeric', 'min:0'],
-            'payment_methods' => ['nullable', 'array'],
-            'payment_methods.*' => ['exists:payment_methods,id'],
-            // Section 21 Booking Mode
-            'booking_mode' => ['required', 'in:instant,request,whatsapp,manual'],
-            'cancellation_policy' => ['required', 'in:flexible,moderate,strict,non_refundable,custom'],
-            'cancellation_policy_text_en' => ['nullable', 'string'],
-            'cancellation_policy_text_ar' => ['nullable', 'string'],
-            'house_rules_en' => ['nullable', 'string'],
-            'house_rules_ar' => ['nullable', 'string'],
-            'developer' => ['nullable', 'string'],
-            'completion_status' => ['nullable', 'in:ready,off_plan,under_construction'],
-            'furnished_status' => ['nullable', 'in:furnished,unfurnished,semi_furnished'],
-            'status' => ['required', 'in:draft,published,archived'],
-            'is_featured' => ['nullable', 'boolean'],
-            'is_published' => ['nullable', 'boolean'],
-            'is_available' => ['nullable', 'boolean'],
-            'amenities' => ['nullable', 'array'],
-            'amenities.*' => ['exists:amenities,id'],
-            'images.*' => ['nullable', 'image', 'max:10240'], // 10MB
-            'videos.*' => ['nullable', 'mimes:mp4,mov,avi', 'max:51200'], // 50MB
-        ]);
+        $validated = $request->validated();
 
         // Auto-generate reference number and slug
         $referenceNumber = 'GON-P-' . strtoupper(Str::random(6));
@@ -253,56 +203,9 @@ class PropertyController extends Controller
     /**
      * Update an existing property.
      */
-    public function update(Request $request, Property $property): RedirectResponse
+    public function update(UpdatePropertyRequest $request, Property $property): RedirectResponse
     {
-        $validated = $request->validate([
-            'title_en' => ['required', 'string', 'max:255'],
-            'title_ar' => ['nullable', 'string', 'max:255'],
-            'property_category_id' => ['required', 'exists:property_categories,id'],
-            'location_id' => ['required', 'exists:locations,id'],
-            'listing_type' => ['required', 'in:rent,sale,both'],
-            'short_description_en' => ['nullable', 'string'],
-            'short_description_ar' => ['nullable', 'string'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
-            'bedrooms' => ['required', 'integer', 'min:0'],
-            'bathrooms' => ['required', 'integer', 'min:0'],
-            'max_guests' => ['required', 'integer', 'min:1'],
-            'area_sqm' => ['nullable', 'numeric', 'min:0'],
-            'floor' => ['nullable', 'integer'],
-            'compound' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string'],
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
-            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
-            'max_stay_nights' => ['nullable', 'integer', 'min:1'],
-            'check_in_time' => ['nullable', 'string'],
-            'check_out_time' => ['nullable', 'string'],
-            'base_price' => ['nullable', 'numeric', 'min:0'],
-            'sale_price' => ['nullable', 'numeric', 'min:0'],
-            'cleaning_fee' => ['nullable', 'numeric', 'min:0'],
-            'service_fee' => ['nullable', 'numeric', 'min:0'],
-            'tax_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'payment_requirement' => ['required', 'in:full,deposit,both'],
-            'deposit_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'deposit_fixed' => ['nullable', 'numeric', 'min:0'],
-            'payment_methods' => ['nullable', 'array'],
-            'payment_methods.*' => ['exists:payment_methods,id'],
-            'booking_mode' => ['required', 'in:instant,request,whatsapp,manual'],
-            'cancellation_policy' => ['required', 'in:flexible,moderate,strict,non_refundable,custom'],
-            'cancellation_policy_text_en' => ['nullable', 'string'],
-            'cancellation_policy_text_ar' => ['nullable', 'string'],
-            'house_rules_en' => ['nullable', 'string'],
-            'house_rules_ar' => ['nullable', 'string'],
-            'developer' => ['nullable', 'string'],
-            'completion_status' => ['nullable', 'in:ready,off_plan,under_construction'],
-            'furnished_status' => ['nullable', 'in:furnished,unfurnished,semi_furnished'],
-            'status' => ['required', 'in:draft,published,archived'],
-            'amenities' => ['nullable', 'array'],
-            'amenities.*' => ['exists:amenities,id'],
-            'images.*' => ['nullable', 'image', 'max:10240'],
-            'videos.*' => ['nullable', 'mimes:mp4,mov,avi', 'max:51200'],
-        ]);
+        $validated = $request->validated();
 
         $basePriceCents = isset($validated['base_price']) ? (int) round($validated['base_price'] * 100) : $property->base_price_cents;
         $salePriceCents = ! empty($validated['sale_price']) ? (int) round($validated['sale_price'] * 100) : null;
