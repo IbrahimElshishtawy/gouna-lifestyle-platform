@@ -12,18 +12,24 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
+      const scrollY =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        window.scrollY ||
+        0;
+      setIsScrolled(scrollY > 25);
     };
+
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+    <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       {/* Top Announcement / Concierge Ribbon */}
       <div
-        className={`transition-all duration-500 text-xs px-6 lg:px-12 flex items-center justify-between border-b ${
+        className={`transition-all duration-300 text-xs px-6 lg:px-12 flex items-center justify-between border-b ${
           isScrolled
             ? "max-h-0 opacity-0 overflow-hidden py-0 border-transparent pointer-events-none"
             : "max-h-10 opacity-100 py-2 bg-black/40 backdrop-blur-md text-[#E5DCD3] border-white/10"
@@ -59,11 +65,11 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Main Transparent / Luxury Glass Header */}
+      {/* Main Adaptive Header (Transparent at Top, Crisp Frosted White on Scroll) */}
       <header
-        className={`transition-all duration-500 ${
+        className={`transition-all duration-300 w-full ${
           isScrolled
-            ? "bg-[#1C1412]/92 backdrop-blur-xl border-b border-white/10 shadow-2xl py-3"
+            ? "bg-white/95 backdrop-blur-xl border-b border-brand-border/90 shadow-md py-3.5"
             : "bg-gradient-to-b from-black/85 via-black/40 to-transparent border-b border-white/5 py-4"
         }`}
       >
@@ -83,19 +89,27 @@ export default function Navbar() {
               <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
                 El Gouna
               </span>
-              <span className="block text-base font-serif font-bold text-white tracking-wider">
+              <span
+                className={`block text-base font-serif font-bold tracking-wider transition-colors duration-300 ${
+                  isScrolled ? "text-brand-brown" : "text-white"
+                }`}
+              >
                 GOUNOW
               </span>
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/90">
+          {/* Desktop Nav Links (White at Top, Dark Brown on Scroll for 100% Readability) */}
+          <nav
+            className={`hidden md:flex items-center gap-8 text-sm font-semibold transition-colors duration-300 ${
+              isScrolled ? "text-brand-brown" : "text-white/90"
+            }`}
+          >
             <Link
               href="/stays?listing_type=rent"
-              className={`hover:text-brand-terracotta transition drop-shadow-sm ${
+              className={`hover:text-brand-terracotta transition-colors ${
                 pathname?.startsWith("/stays")
-                  ? "text-brand-terracotta font-semibold"
+                  ? "text-brand-terracotta font-bold"
                   : ""
               }`}
             >
@@ -103,15 +117,15 @@ export default function Navbar() {
             </Link>
             <Link
               href="/stays?listing_type=sale"
-              className="hover:text-brand-terracotta transition drop-shadow-sm"
+              className="hover:text-brand-terracotta transition-colors"
             >
               Real Estate
             </Link>
             <Link
               href="/experiences"
-              className={`hover:text-brand-terracotta transition drop-shadow-sm ${
+              className={`hover:text-brand-terracotta transition-colors ${
                 pathname?.startsWith("/experiences")
-                  ? "text-brand-terracotta font-semibold"
+                  ? "text-brand-terracotta font-bold"
                   : ""
               }`}
             >
@@ -119,23 +133,23 @@ export default function Navbar() {
             </Link>
             <Link
               href="/#events"
-              className="hover:text-brand-terracotta transition drop-shadow-sm"
+              className="hover:text-brand-terracotta transition-colors"
             >
               What&apos;s On
             </Link>
             <Link
               href="/#concierge"
-              className="hover:text-brand-terracotta transition drop-shadow-sm"
+              className="hover:text-brand-terracotta transition-colors"
             >
               Concierge
             </Link>
           </nav>
 
-          {/* Actions */}
+          {/* Actions Button */}
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/stays?listing_type=rent"
-              className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition shadow-lg hover:shadow-brand-terracotta/30 border border-white/20 hover:-translate-y-0.5 active:translate-y-0"
+              className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             >
               Book a Stay
             </Link>
@@ -145,7 +159,11 @@ export default function Navbar() {
           <div className="flex items-center gap-3 md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-white hover:text-brand-terracotta rounded-lg focus:outline-none cursor-pointer"
+              className={`p-2 rounded-lg focus:outline-none cursor-pointer transition-colors ${
+                isScrolled
+                  ? "text-brand-brown hover:text-brand-terracotta"
+                  : "text-white hover:text-brand-terracotta"
+              }`}
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? (
@@ -181,9 +199,15 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu with Frosted Glass */}
+        {/* Mobile Dropdown Menu with Adaptive Colors */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-3 px-6 py-6 bg-[#1C1412]/98 backdrop-blur-2xl border-t border-white/10 shadow-2xl flex flex-col gap-4 text-white animate-fade-in">
+          <div
+            className={`md:hidden mt-3 px-6 py-6 border-t shadow-2xl flex flex-col gap-4 animate-fade-in ${
+              isScrolled
+                ? "bg-white/98 text-brand-brown border-brand-border"
+                : "bg-[#1C1412]/98 text-white border-white/10 backdrop-blur-2xl"
+            }`}
+          >
             <Link
               href="/stays?listing_type=rent"
               onClick={() => setMobileMenuOpen(false)}
@@ -220,7 +244,7 @@ export default function Navbar() {
               24/7 VIP Concierge
             </Link>
 
-            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+            <div className="pt-4 border-t border-brand-border/40 flex items-center justify-between">
               <Link
                 href="/stays?listing_type=rent"
                 onClick={() => setMobileMenuOpen(false)}
