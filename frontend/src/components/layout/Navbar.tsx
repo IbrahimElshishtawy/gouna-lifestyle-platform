@@ -78,12 +78,13 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-md border border-white/20 group-hover:scale-105 transition-transform duration-300">
+            <div className="relative h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-brand-terracotta/25 to-brand-brown/40 border border-brand-terracotta/40 shadow-md group-hover:scale-105 transition-all duration-300 p-1.5 backdrop-blur-md">
               <Image
-                src="/assets/images/logo.jpg"
-                alt="GOUNOW"
-                fill
-                className="object-cover"
+                src="/assets/images/official-elgouna-icon.png"
+                alt="El Gouna"
+                width={26}
+                height={26}
+                className="object-contain drop-shadow"
                 priority
               />
             </div>

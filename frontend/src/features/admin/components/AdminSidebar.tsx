@@ -49,12 +49,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
         {/* Brand Header */}
         <div className="h-20 px-6 border-b border-brand-border flex items-center justify-between">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="h-10 w-10 relative rounded-xl overflow-hidden border border-brand-border shrink-0">
+            <div className="h-10 w-10 relative rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/15 to-brand-terracotta/20 border border-brand-terracotta/30 shrink-0 p-1.5 shadow-sm">
               <Image
-                src="/assets/images/logo.jpg"
-                alt="GOUNOW"
-                fill
-                className="object-cover"
+                src="/assets/images/official-elgouna-icon.png"
+                alt="El Gouna"
+                width={26}
+                height={26}
+                className="object-contain drop-shadow"
               />
             </div>
             <div>

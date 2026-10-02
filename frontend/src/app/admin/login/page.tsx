@@ -55,12 +55,13 @@ export default function AdminLoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         {/* Official Brand Logo */}
         <div className="inline-block p-1 bg-white rounded-2xl shadow-sm border border-brand-border mb-4">
-          <div className="h-16 w-16 relative rounded-xl overflow-hidden">
+          <div className="h-16 w-16 relative rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/15 to-brand-terracotta/20 p-2.5">
             <Image
-              src="/assets/images/logo.jpg"
-              alt="GOUNOW"
-              fill
-              className="object-cover"
+              src="/assets/images/official-elgouna-icon.png"
+              alt="El Gouna"
+              width={48}
+              height={48}
+              className="object-contain drop-shadow"
             />
           </div>
         </div>
