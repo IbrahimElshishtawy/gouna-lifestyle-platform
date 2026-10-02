@@ -14,6 +14,8 @@ import FaqSection from "@/features/home/components/FaqSection";
 import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
 
+import ScrollReveal from "@/components/ui/ScrollReveal";
+
 export const revalidate = 60; // ISR cache revalidation
 
 export default async function HomePage() {
@@ -25,33 +27,49 @@ export default async function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden">
         {/* 1. Hero with Luxury Booking Search */}
         <HeroSection />
 
         {/* 2. Brand Narrative & 3 Core Ecosystem Pillars */}
-        <BrandPillarsSection />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <BrandPillarsSection />
+        </ScrollReveal>
 
         {/* 3. Featured Vacation Stays Split Showcase & Secondary Cards */}
-        <FeaturedVacationRentals properties={properties} />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <FeaturedVacationRentals properties={properties} />
+        </ScrollReveal>
 
         {/* 4. Curated Experiences Split Showcase (Tawila Island Yacht & Adventures) */}
-        <FeaturedExperiences experiences={experiences} />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <FeaturedExperiences experiences={experiences} />
+        </ScrollReveal>
 
         {/* 5. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
-        <FeaturedSales properties={properties} />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <FeaturedSales properties={properties} />
+        </ScrollReveal>
 
         {/* 6. Guest Testimonials & Social Proof */}
-        <TestimonialsSection />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <TestimonialsSection />
+        </ScrollReveal>
 
         {/* 7. What's On This Season (Events & Gatherings) */}
-        <EventsSection />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <EventsSection />
+        </ScrollReveal>
 
         {/* 8. Personal Concierge & Tailored Arrangements Lead Form */}
-        <ConciergeInquiry />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <ConciergeInquiry />
+        </ScrollReveal>
 
         {/* 9. Frequently Asked Questions */}
-        <FaqSection />
+        <ScrollReveal animation="fade-up" duration={800}>
+          <FaqSection />
+        </ScrollReveal>
       </main>
       <Footer />
       <WhatsAppButton />
