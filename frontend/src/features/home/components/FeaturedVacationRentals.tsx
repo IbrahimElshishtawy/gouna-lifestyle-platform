@@ -55,14 +55,14 @@ export default function FeaturedVacationRentals({ properties }: Props) {
   if (!activeProperty) return null;
 
   return (
-    <section className="py-20 lg:py-24 px-6 lg:px-12 max-w-7xl mx-auto">
+    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
       {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12">
         <div>
-          <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
+          <span className="text-[10px] sm:text-xs uppercase font-bold tracking-[0.2em] sm:tracking-[0.25em] text-brand-terracotta block mb-2">
             Handpicked Residences • 100% Exclusive Waterfronts
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
+          <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
             Featured Vacation Stays
           </h2>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 max-w-2xl font-light leading-relaxed">
@@ -73,19 +73,19 @@ export default function FeaturedVacationRentals({ properties }: Props) {
         </div>
 
         {/* Carousel & View All Controls */}
-        <div className="mt-6 md:mt-0 flex items-center gap-4">
+        <div className="mt-4 sm:mt-6 md:mt-0 flex items-center justify-between sm:justify-start gap-4">
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrevProperty}
               aria-label="Previous Stay"
-              className="w-10 h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs text-sm"
             >
               &larr;
             </button>
             <button
               onClick={handleNextProperty}
               aria-label="Next Stay"
-              className="w-10 h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-brand-border bg-white text-brand-brown hover:bg-brand-sand-light hover:border-brand-brown transition-colors flex items-center justify-center cursor-pointer shadow-xs text-sm"
             >
               &rarr;
             </button>
@@ -93,7 +93,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
 
           <Link
             href="/stays?listing_type=rent"
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition-colors group"
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-terracotta hover:text-brand-terracotta-dark transition-colors group"
           >
             <span>View All</span>
             <span className="transform group-hover:translate-x-1 transition-transform">
@@ -103,12 +103,12 @@ export default function FeaturedVacationRentals({ properties }: Props) {
         </div>
       </div>
 
-      {/* Flagship Split Showcase Card (Matching Screenshot) */}
-      <div className="bg-white rounded-3xl border border-brand-border/80 shadow-md overflow-hidden p-6 sm:p-8 lg:p-10 mb-12 transition-all duration-300">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* Flagship Split Showcase Card (Ultra-Luxurious on Mobile) */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border/80 shadow-md overflow-hidden p-4 sm:p-8 lg:p-10 mb-8 sm:mb-12 transition-all duration-300">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
           {/* Left Column: Interactive Image Gallery (7 cols) */}
           <div className="lg:col-span-7 flex flex-col gap-3">
-            <div className="relative h-[340px] sm:h-[440px] rounded-2xl overflow-hidden bg-brand-sand">
+            <div className="relative h-[250px] sm:h-[380px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand">
               <Image
                 src={currentImage.url}
                 alt={activeProperty.title}
@@ -275,7 +275,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 <Link
                   href={`/checkout/${activeProperty.slug}`}
                   className="py-3 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"

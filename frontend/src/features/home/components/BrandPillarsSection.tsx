@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default function BrandPillarsSection() {
   const pillars = [
@@ -120,33 +121,40 @@ export default function BrandPillarsSection() {
           </div>
         </div>
 
-        {/* 3 Value Proposition Feature Cards */}
+        {/* 3 Value Proposition Feature Cards with Staggered Entrance */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {pillars.map((pillar) => (
-            <Link
+          {pillars.map((pillar, index) => (
+            <ScrollReveal
               key={pillar.id}
-              href={pillar.link}
-              className="group bg-white p-8 rounded-3xl border border-brand-border/70 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative flex flex-col justify-between"
+              animation="fade-up"
+              delay={index * 120}
+              duration={700}
+              className="h-full"
             >
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-brand-sand-light/80 border border-brand-border flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-terracotta/10 transition-transform duration-300">
-                  {pillar.icon}
+              <Link
+                href={pillar.link}
+                className="group h-full bg-white p-8 rounded-3xl border border-brand-border/70 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/30 transition-all duration-500 hover:-translate-y-2 relative flex flex-col justify-between"
+              >
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-brand-sand-light/80 border border-brand-border flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand-terracotta/15 transition-all duration-300">
+                    {pillar.icon}
+                  </div>
+                  <h3 className="font-serif text-xl font-bold text-brand-brown mb-3 group-hover:text-brand-terracotta transition-colors">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed">
+                    {pillar.description}
+                  </p>
                 </div>
-                <h3 className="font-serif text-xl font-bold text-brand-brown mb-3 group-hover:text-brand-terracotta transition-colors">
-                  {pillar.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed">
-                  {pillar.description}
-                </p>
-              </div>
 
-              <div className="pt-6 mt-6 border-t border-brand-border/50 flex items-center justify-between text-xs font-semibold text-brand-terracotta">
-                <span>Discover More</span>
-                <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">
-                  &rarr;
-                </span>
-              </div>
-            </Link>
+                <div className="pt-6 mt-6 border-t border-brand-border/50 flex items-center justify-between text-xs font-semibold text-brand-terracotta">
+                  <span>Discover More</span>
+                  <span className="transform group-hover:translate-x-2 transition-transform duration-300">
+                    &rarr;
+                  </span>
+                </div>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </div>

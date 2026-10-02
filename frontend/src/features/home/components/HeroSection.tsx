@@ -61,67 +61,67 @@ export default function HeroSection() {
       <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[88%] h-32 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none rounded-full z-10" />
 
       {/* Main Content Container with Staggered Entrance Animations */}
-      <div className="relative z-20 max-w-6xl mx-auto px-6 text-center flex flex-col items-center">
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
         {/* Curated Luxury Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[11px] font-semibold uppercase tracking-[0.25em] mb-6 shadow-md animate-fade-in-down animate-float">
+        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-4 sm:mb-6 shadow-md animate-fade-in-down animate-float">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
           <span>Curated Luxury Experiences • Private Escapes</span>
         </div>
 
         {/* Hero Title with Dramatic Contrast & Smooth Slide Up */}
-        <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.1] mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
+        <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.15] sm:leading-[1.1] mb-4 sm:mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
           Live the Unrivaled <br className="hidden sm:inline" />
           <span className="italic font-normal">El Gouna Lifestyle</span>
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="text-sm sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-10 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms]">
+        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-10 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
           Where the Red Sea meets understated luxury: bespoke private villas,
           yacht charters, and 24/7 VIP concierge experiences crafted exclusively
           for you.
         </p>
 
-        {/* Floating Search Bar (Card Widget with Subtle Scale Up & Hover Glow) */}
-        <div className="w-full max-w-4xl bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-[0_25px_60px_-15px_rgba(28,20,18,0.35)] hover:shadow-[0_30px_70px_-15px_rgba(28,20,18,0.45)] border border-white/90 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
-          {/* Tab Selector */}
-          <div className="flex items-center justify-start gap-2 mb-4 border-b border-brand-border/60 pb-3">
+        {/* Floating Search Bar (Compact & Ultra-Luxury on Mobile) */}
+        <div className="w-full max-w-4xl bg-white/95 backdrop-blur-md p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[0_25px_60px_-15px_rgba(28,20,18,0.35)] hover:shadow-[0_30px_70px_-15px_rgba(28,20,18,0.45)] border border-white/90 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
+          {/* Tab Selector: 3 Compact Columns on Mobile */}
+          <div className="grid grid-cols-3 gap-1 sm:flex sm:items-center sm:gap-2 mb-3 sm:mb-4 border-b border-brand-border/60 pb-2.5 sm:pb-3">
             <button
               type="button"
               onClick={() => setActiveTab("rent")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
                 activeTab === "rent"
                   ? "bg-brand-terracotta text-white shadow-xs"
                   : "bg-brand-sand-light text-brand-brown hover:bg-brand-sand/60"
               }`}
             >
               <span>🏡</span>
-              <span>Rent a Stay</span>
+              <span className="truncate">Rent Stay</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("sale")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
                 activeTab === "sale"
                   ? "bg-brand-terracotta text-white shadow-xs"
                   : "bg-brand-sand-light text-brand-brown hover:bg-brand-sand/60"
               }`}
             >
               <span>🏛️</span>
-              <span>Buy a Property</span>
+              <span className="truncate">Buy Property</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("experiences")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+              className={`px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
                 activeTab === "experiences"
                   ? "bg-brand-terracotta text-white shadow-xs"
                   : "bg-brand-sand-light text-brand-brown hover:bg-brand-sand/60"
               }`}
             >
               <span>⛵</span>
-              <span>Experiences</span>
+              <span className="truncate">Experiences</span>
             </button>
           </div>
 

@@ -199,56 +199,91 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu with Adaptive Colors */}
+        {/* Mobile Dropdown Menu with Ultra-Luxury Styling */}
         {mobileMenuOpen && (
           <div
-            className={`md:hidden mt-3 px-6 py-6 border-t shadow-2xl flex flex-col gap-4 animate-fade-in ${
+            className={`md:hidden mx-3 mt-3 p-5 rounded-2xl border shadow-2xl flex flex-col gap-3 animate-fade-in ${
               isScrolled
-                ? "bg-white/98 text-brand-brown border-brand-border"
-                : "bg-[#1C1412]/98 text-white border-white/10 backdrop-blur-2xl"
+                ? "bg-white/98 text-brand-brown border-brand-border/90 backdrop-blur-xl"
+                : "bg-[#1C1412]/98 text-white border-white/15 backdrop-blur-2xl"
             }`}
           >
             <Link
               href="/stays?listing_type=rent"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-brand-terracotta py-1"
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
             >
-              Stays &amp; Vacation Rentals
+              <div className="flex items-center gap-3">
+                <span className="text-base">🏡</span>
+                <span>Stays &amp; Vacation Rentals</span>
+              </div>
+              <span className="text-xs text-brand-terracotta">&rarr;</span>
             </Link>
+
             <Link
               href="/stays?listing_type=sale"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-brand-terracotta py-1"
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
             >
-              Real Estate For Sale
+              <div className="flex items-center gap-3">
+                <span className="text-base">🏛️</span>
+                <span>Real Estate For Sale</span>
+              </div>
+              <span className="text-xs text-brand-terracotta">&rarr;</span>
             </Link>
+
             <Link
               href="/experiences"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-brand-terracotta py-1"
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
             >
-              Curated Experiences &amp; Yachts
+              <div className="flex items-center gap-3">
+                <span className="text-base">⛵</span>
+                <span>Curated Experiences &amp; Yachts</span>
+              </div>
+              <span className="text-xs text-brand-terracotta">&rarr;</span>
             </Link>
+
             <Link
               href="/#events"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-brand-terracotta py-1"
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
             >
-              What&apos;s On This Season
+              <div className="flex items-center gap-3">
+                <span className="text-base">📅</span>
+                <span>What&apos;s On This Season</span>
+              </div>
+              <span className="text-xs text-brand-terracotta">&rarr;</span>
             </Link>
+
             <Link
               href="/#concierge"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-brand-terracotta py-1"
+              className="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-black/5 transition-colors font-medium text-sm"
             >
-              24/7 VIP Concierge
+              <div className="flex items-center gap-3">
+                <span className="text-base">🛎️</span>
+                <span>24/7 VIP Concierge</span>
+              </div>
+              <span className="text-xs text-brand-terracotta">&rarr;</span>
             </Link>
 
-            <div className="pt-4 border-t border-brand-border/40 flex items-center justify-between">
+            {/* Quick Contact & Action Buttons */}
+            <div className="pt-3 mt-1 border-t border-brand-border/40 flex flex-col gap-2.5">
+              <a
+                href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center gap-2"
+              >
+                <span>💬</span>
+                <span>WhatsApp VIP Concierge</span>
+              </a>
+
               <Link
                 href="/stays?listing_type=rent"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 bg-brand-terracotta text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md"
+                className="w-full text-center py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-colors"
               >
                 Book a Stay Now
               </Link>
