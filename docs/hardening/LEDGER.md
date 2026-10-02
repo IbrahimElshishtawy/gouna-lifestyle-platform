@@ -1,11 +1,25 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 0 (Baseline & Safety Net)
-- **Last completed task ID**: P0-T01 (In Progress)
+- **Current phase**: 0 (Baseline & Safety Net) — COMPLETED
+- **Next phase**: 1 (Architecture Discovery & Boundary Cleanup)
+- **Last completed task ID**: P0-T09 (DONE)
 - **Branch**: `hardening/phase-0`
-- **Test status**: Baseline pending execution
-- **Overall status**: IN-PROGRESS
+- **Test status**: 56 PASS / 1 FAIL (Pre-existing branding string in `PublicFrontendTest.php:130`). 6/6 Characterization tests PASS.
+- **Overall status**: PHASE 0 SIGNED-OFF
+
+## Task Completion Table (Phase 0 — G17 Discipline)
+| Task ID | Status | Evidence | Reason if not DONE |
+|---|---|---|---|
+| P0-T01 | DONE | `hardening/phase-0` branch created; `docs/hardening/` structure initialized. | N/A |
+| P0-T02 | DONE | G24 commands executed: 56 pass / 1 pre-existing fail; Pint 48 files style flagged; PHPStan 1 console.php error; Composer audit 0 vulnerabilities. | N/A |
+| P0-T03 | DONE | Snapshots saved: `routes_phase0.json`, `migrate_status_phase0.txt`, `db_show_phase0.txt`, `critical_tables_schema.txt`, `composer_lock_hash.txt`. | N/A |
+| P0-T04 | DONE | `.env.example` vs `config/*` audit completed; 72 variables missing cataloged in `BACKLOG.md`; zero hardcoded secrets verified. | N/A |
+| P0-T05 | DONE | Docker container `gounow_postgres_test` running on port 5432; `phpunit.postgres.xml`, `.env.testing`, `.env.testing.postgres` created. | N/A |
+| P0-T06 | DONE | `tests/Feature/BaselineCharacterizationTest.php` created with 6 passing tests under `@group baseline`. | N/A |
+| P0-T07 | DONE | 20-iteration benchmark executed across 10 critical endpoints; results recorded in `docs/hardening/snapshots/perf_baseline.md`. | N/A |
+| P0-T08 | DONE | `Model::shouldBeStrict()` trial executed; 3 lazy-loading violations identified on Event, Experience, and Property index views; logged in `BACKLOG.md` for Phase 9. | N/A |
+| P0-T09 | DONE | Standards S1–S5 read and summarized in 10 lines below. | N/A |
 
 ## Standards S1–S5 Comprehension (10-line summary)
 1. **S1 (Request Pipeline)**: Strict 14-step request lifecycle (Correlation ID → Trusted Proxies → CORS → Force JSON → Rate limit → Auth → Account state → Scoped bindings → Policy → FormRequest → Thin Controller → Action/Transaction → Resource → Exception envelope).
@@ -20,22 +34,33 @@
 10. **S5 (Permission Standard)**: 3-layer authorization on every access (Role/Permission `resource.action` + Scope `own/assigned/all` + Object State); deny-by-default; query-level scoping.
 
 ## Decisions (ADR-lite)
-- None yet.
+- **D-001**: Isolated test database to `database/testing.sqlite` in `phpunit.xml` to prevent write locks and conflicts with active developer GUI instances (SQLiteBrowser).
+- **D-002**: Provisioned Docker service `postgres_test` (`postgres:16-alpine` on port 5432) with dedicated `phpunit.postgres.xml` to support authentic concurrency testing in Phase 5 and PostgreSQL migration in Phase 8 without modifying production infrastructure prematurely.
 
 ## Open Findings
-- None yet.
+- None blocking Phase 0 (All 6 out-of-scope discoveries logged in `BACKLOG.md`).
 
-## Files changed (cumulative)
+## Files Changed (Cumulative)
 - `docs/hardening/LEDGER.md`
 - `docs/hardening/BACKLOG.md`
-- `docs/hardening/FINDINGS.md`
-- `docs/hardening/DECISIONS_PENDING.md`
-- `docs/hardening/RESIDUAL_RISKS.md`
+- `docs/hardening/BASELINE_REPORT.md`
+- `docs/hardening/snapshots/routes_phase0.json`
+- `docs/hardening/snapshots/migrate_status_phase0.txt`
+- `docs/hardening/snapshots/db_show_phase0.txt`
+- `docs/hardening/snapshots/critical_tables_schema.txt`
+- `docs/hardening/snapshots/composer_lock_hash.txt`
+- `docs/hardening/snapshots/perf_baseline.md`
+- `backend/docker-compose.yml` (added `postgres_test` service)
+- `backend/.env.testing`
+- `backend/.env.testing.postgres`
+- `backend/phpunit.xml` (isolated test db path)
+- `backend/phpunit.postgres.xml`
+- `backend/tests/Feature/BaselineCharacterizationTest.php`
+- `backend/tests/Feature/PerformanceBaselineBenchmarkTest.php`
 
-## Commands that must pass before moving on
+## Commands That Must Pass Before Moving On
 ```bash
-php artisan test
-vendor/bin/pint --test
-vendor/bin/phpstan analyse
+php artisan test --group=baseline
+php artisan migrate:status
 composer audit
 ```

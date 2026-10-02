@@ -113,6 +113,27 @@ services:
     networks:
       - gounow_network
 
+  # PostgreSQL 16 Test Database for Hardening Concurrency & Migrations (P0-T05)
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: gounow_postgres_test
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: gounow_test
+      POSTGRES_USER: gounow_test
+      POSTGRES_PASSWORD: gounow_test_secret
+    volumes:
+      - gounow_postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gounow_test -d gounow_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gounow_network
+
 networks:
   gounow_network:
     driver: bridge
@@ -121,4 +142,6 @@ volumes:
   gounow_db_data:
     driver: local
   gounow_redis_data:
+    driver: local
+  gounow_postgres_test_data:
     driver: local
