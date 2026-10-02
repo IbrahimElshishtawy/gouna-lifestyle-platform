@@ -44,7 +44,7 @@ export const PROPERTIES_DATA: Property[] = [
     images: [
       {
         id: 1,
-        url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=85",
+        url: "/assets/images/fanadir-villa.jpg",
         is_primary: true,
         alt: "Fanadir Bay Waterfront Villa Twilight Panorama",
       },

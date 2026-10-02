@@ -27,9 +27,9 @@ export const EXPERIENCES_DATA: Experience[] = [
       "Cruise the azure lagoons and open turquoise waters of Tawila. Enjoy freshly prepared seafood lunch on board, premium snorkeling gear, and sunset champagne.",
     overview:
       "Depart from Abu Tig Marina for an unforgettable day cruise across the pristine waters of the Red Sea. Anchor at Tawila Island’s sandbank for swimming in crystal turquoise lagoons, paddleboarding, snorkeling vivid coral reefs, and savoring freshly prepared seafood.",
-    image: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1400&q=85",
+    image: "/assets/images/tawila-yacht.jpg",
     images: [
-      { id: 1, url: "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1400&q=85" },
+      { id: 1, url: "/assets/images/tawila-yacht.jpg" },
       { id: 2, url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=85" },
       { id: 3, url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85" },
       { id: 4, url: "https://images.unsplash.com/photo-1510525009512-ad7fc13eefab?auto=format&fit=crop&w=1200&q=85" },

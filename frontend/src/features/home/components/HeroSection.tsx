@@ -31,44 +31,58 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-[680px] lg:min-h-[780px] flex items-center justify-center bg-brand-brown-dark text-white overflow-hidden">
-      {/* Background Hero Image with Warm Luxury Dusk Vignette */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative min-h-[720px] lg:min-h-[820px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-36 sm:pt-40 lg:pt-44 pb-20 lg:pb-28">
+      {/* Background Hero Image with Feathered Dissolve ("مشبح") */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)"
+        }}
+      >
         <Image
-          src="https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2200&q=85"
+          src="/assets/images/hero-villa-dusk.jpg"
           alt="Live the Unrivaled El Gouna Lifestyle"
           fill
           priority
           sizes="100vw"
           className="w-full h-full object-cover object-center scale-[1.02] transform transition-transform duration-1000 ease-out"
         />
-        {/* Gradients to match luxury golden hour twilight in screenshot */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-brown-dark/95 via-brand-brown-dark/45 to-black/50" />
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/20 to-black/60 pointer-events-none" />
+        {/* Top Vignette for Transparent Header Contrast */}
+        <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-10" />
+
+        {/* Cinematic Dusk Ambient Glow */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/25 to-black/60 pointer-events-none" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 lg:py-28 text-center flex flex-col items-center">
+      {/* Multi-tier Smoky Feathered Bottom Transition into Page ("شكل مشبح") */}
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#1C1412] via-[#1C1412]/70 to-transparent pointer-events-none z-0" />
+      <div className="absolute inset-x-0 -bottom-1 h-40 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-[#FAF8F5]/30 to-transparent pointer-events-none z-10" />
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[88%] h-32 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none rounded-full z-10" />
+
+      {/* Main Content Container */}
+      <div className="relative z-20 max-w-6xl mx-auto px-6 text-center flex flex-col items-center">
         {/* Curated Luxury Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold uppercase tracking-[0.25em] mb-6 shadow-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[11px] font-semibold uppercase tracking-[0.25em] mb-6 shadow-md">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
           <span>Curated Luxury Experiences • Private Escapes</span>
         </div>
 
-        {/* Hero Title */}
-        <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.1] mb-6 drop-shadow-md">
+        {/* Hero Title with Dramatic Contrast */}
+        <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.1] mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
           Live the Unrivaled <br className="hidden sm:inline" />
           <span className="italic font-normal">El Gouna Lifestyle</span>
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="text-sm sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-10 text-center">
+        <p className="text-sm sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-10 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
           Where the Red Sea meets understated luxury: bespoke private villas,
           yacht charters, and 24/7 VIP concierge experiences crafted exclusively
           for you.
         </p>
 
         {/* Floating Search Bar (Card Widget Matching Screenshot) */}
-        <div className="w-full max-w-4xl bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-2xl border border-white/60 text-brand-brown transition-all duration-300">
+        <div className="w-full max-w-4xl bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-[0_25px_60px_-15px_rgba(28,20,18,0.35)] border border-white/90 text-brand-brown transition-all duration-300">
           {/* Tab Selector */}
           <div className="flex items-center justify-start gap-2 mb-4 border-b border-brand-border/60 pb-3">
             <button
@@ -139,7 +153,7 @@ export default function HeroSection() {
               {/* Check-In / Date */}
               <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                  {activeTab === "experiences" ? "Date" : "Check-in"}
+                  Check-in
                 </label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">📅</span>
@@ -152,59 +166,47 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              {/* Check-Out or Category */}
-              {activeTab === "rent" ? (
-                <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                    Check-out
-                  </label>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">📅</span>
+              {/* Check-Out / Type */}
+              <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                  {activeTab === "rent"
+                    ? "Check-out"
+                    : activeTab === "sale"
+                    ? "Property Type"
+                    : "Category"}
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm">
+                    {activeTab === "rent" ? "📅" : "🏷️"}
+                  </span>
+                  {activeTab === "rent" ? (
                     <input
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
                       className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer"
                     />
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
-                    {activeTab === "sale" ? "Property Type" : "Experience Type"}
-                  </label>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm">✨</span>
-                    <select
-                      className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer"
-                      defaultValue="all"
-                    >
-                      <option value="all">
-                        {activeTab === "sale"
-                          ? "All Real Estate"
-                          : "All Activities"}
-                      </option>
-                      {activeTab === "sale" ? (
-                        <>
-                          <option value="villas">Lagoon Waterfront Villas</option>
-                          <option value="penthouses">Marina Penthouses</option>
-                          <option value="islands">Private Island Estates</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="yachts">Private Yacht Charters</option>
-                          <option value="safari">Desert Quad Safaris</option>
-                          <option value="watersports">Kitesurfing &amp; Diving</option>
-                        </>
-                      )}
+                  ) : activeTab === "sale" ? (
+                    <select className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer">
+                      <option value="all">All Properties</option>
+                      <option value="villas">Signature Villas</option>
+                      <option value="chalets">Waterfront Chalets</option>
+                      <option value="penthouses">Marina Penthouses</option>
                     </select>
-                  </div>
+                  ) : (
+                    <select className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer">
+                      <option value="all">All Experiences</option>
+                      <option value="yachts">Private Yacht Charters</option>
+                      <option value="safari">Desert Safaris</option>
+                      <option value="watersports">Kitesurfing &amp; Diving</option>
+                    </select>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* Guests / CTA Button */}
-              <div className="flex gap-2 items-center">
-                <div className="flex-1 p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 transition-colors">
+              {/* Guests & Action Button */}
+              <div className="flex items-center gap-2">
+                <div className="p-3 bg-brand-sand-light/60 hover:bg-brand-sand-light rounded-2xl border border-brand-border/80 flex-1 transition-colors">
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
                     Guests
                   </label>
@@ -215,7 +217,6 @@ export default function HeroSection() {
                       onChange={(e) => setGuests(e.target.value)}
                       className="w-full text-xs font-semibold bg-transparent focus:outline-none text-brand-brown cursor-pointer"
                     >
-                      <option value="1">1 Guest</option>
                       <option value="2">2 Guests</option>
                       <option value="4">4 Guests</option>
                       <option value="6">6 Guests</option>
