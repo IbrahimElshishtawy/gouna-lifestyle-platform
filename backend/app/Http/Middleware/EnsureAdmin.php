@@ -14,6 +14,10 @@ class EnsureAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! auth()->check()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                abort(401, 'Unauthenticated.');
+            }
+
             return redirect()->guest(route('admin.login'));
         }
 
@@ -21,17 +25,29 @@ class EnsureAdmin
 
         // Check if user is marked as admin or has any assigned role
         if (! $user->is_admin && ! $user->roles()->exists()) {
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($request->hasSession()) {
+                if (method_exists(auth()->guard(), 'logout')) {
+                    auth()->logout();
+                }
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             abort(403, 'Unauthorized access. Admin privileges required.');
         }
 
         if (! $user->is_active) {
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($request->hasSession()) {
+                if (method_exists(auth()->guard(), 'logout')) {
+                    auth()->logout();
+                }
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            if ($request->expectsJson() || $request->is('api/*')) {
+                abort(403, 'Your administrator account has been deactivated.');
+            }
 
             return redirect()->route('admin.login')->withErrors([
                 'email' => 'Your administrator account has been deactivated. Please contact the super admin.',

@@ -1,0 +1,419 @@
+{
+  "timestamp": "2026-10-03T23:52:24.367567",
+  "base_url": "http://127.0.0.1:8000",
+  "total": 28,
+  "passed": 26,
+  "failed": 2,
+  "results": [
+    {
+      "category": "Public Catalog",
+      "name": "List Stays & Properties",
+      "method": "GET",
+      "endpoint": "/api/v1/stays",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 498.96,
+      "details": "",
+      "response_preview": "{\"data\":[],\"links\":{\"first\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/stays?page=1\",\"last\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/stays?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":null,\"last"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Stay Details",
+      "method": "GET",
+      "endpoint": "/api/v1/stays/baseline-luxury-villa",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 60.93,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"10a56964-ae09-43b2-a425-6a34f2018ab2\",\"timestamp\":\"2026-10-03T20:52:22+00:00\"}}"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Stay Not Found (404 Error Envelope)",
+      "method": "GET",
+      "endpoint": "/api/v1/stays/nonexistent-slug-xyz-99999",
+      "expected_status": [
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 39.37,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"2202b4b0-971c-4655-8495-d6f5d4377212\",\"timestamp\":\"2026-10-03T20:52:22+00:00\"}}"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "List Curated Experiences",
+      "method": "GET",
+      "endpoint": "/api/v1/experiences",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 41.01,
+      "details": "",
+      "response_preview": "{\"data\":[],\"links\":{\"first\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/experiences?page=1\",\"last\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/experiences?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Experience Details",
+      "method": "GET",
+      "endpoint": "/api/v1/experiences/desert-safari-adventure",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 22.65,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"d55011a8-af64-486b-9151-e4677fefabce\",\"timestamp\":\"2026-10-03T20:52:22+00:00\"}}"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "List Upcoming Events",
+      "method": "GET",
+      "endpoint": "/api/v1/events",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 36.44,
+      "details": "",
+      "response_preview": "{\"data\":[],\"links\":{\"first\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/events?page=1\",\"last\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/events?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current_page\":1,\"from\":null,\"la"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Event Details",
+      "method": "GET",
+      "endpoint": "/api/v1/events/gouna-film-festival",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 39.17,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"2cc10573-d497-4174-a24a-c8e8f19f3686\",\"timestamp\":\"2026-10-03T20:52:22+00:00\"}}"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Calculate Quote",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/quote",
+      "expected_status": [
+        200,
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 91.72,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"property_id\":[\"The selected property id is invalid.\"]},\"request_id\":\"dd3cd9a9-c60b-4540-9f02-4b30a9ca4cbe\",\"time"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Price Tampering Defense (Prohibited Fields)",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/quote",
+      "expected_status": [
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 29.91,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"property_id\":[\"The selected property id is invalid.\"],\"total\":[\"The total field is prohibited.\"],\"subtotal\":[\"Th"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Create Booking with Idempotency-Key",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/bookings",
+      "expected_status": [
+        200,
+        201,
+        409,
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 92.28,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"property_id\":[\"The selected property id is invalid.\"]},\"request_id\":\"10a4811d-f893-448d-99c1-64cc4915a798\",\"time"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Lookup Booking by Reference",
+      "method": "GET",
+      "endpoint": "/api/v1/checkout/bookings/GON-TEST-NONEXISTENT",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 25.08,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"20a9212d-dd36-4dd7-b09b-49df27ac9b95\",\"timestamp\":\"2026-10-03T20:52:22+00:00\"}}"
+    },
+    {
+      "category": "Leads",
+      "name": "Store Lead Inquiry",
+      "method": "POST",
+      "endpoint": "/api/v1/leads",
+      "expected_status": [
+        201
+      ],
+      "actual_status": 201,
+      "passed": true,
+      "elapsed_ms": 47.77,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":3,\"message\":\"Thank you for your inquiry. Our team will contact you shortly.\"},\"meta\":{\"request_id\":\"f98acc3b-2432-4301-9943-3a0817a39a8e\",\"timestamp\":\"2026-10-03T20:52:23+00:00\"}}"
+    },
+    {
+      "category": "Leads",
+      "name": "Lead Validation Rejection (422 Error)",
+      "method": "POST",
+      "endpoint": "/api/v1/leads",
+      "expected_status": [
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 26.77,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"name\":[\"The name field is required.\"],\"email\":[\"The email field is required.\"],\"message\":[\"The message field is"
+    },
+    {
+      "category": "Authentication",
+      "name": "Invalid Login Rejection (401 / 422 Generic Message)",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/login",
+      "expected_status": [
+        401,
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 470.41,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"email\":[\"Invalid email or password.\"]},\"request_id\":\"f6439c23-8fcc-41e7-aae7-f2e2a4c1f7ae\",\"timestamp\":\"2026-10-"
+    },
+    {
+      "category": "Authentication",
+      "name": "Forgot Password Request",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/forgot-password",
+      "expected_status": [
+        200,
+        422
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 32.39,
+      "details": "",
+      "response_preview": "{\"data\":{\"message\":\"If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes.\"},\"meta\":{\"request_id\":\"59d0064e-744f-4d1c-8002-ed54"
+    },
+    {
+      "category": "Authentication",
+      "name": "2FA Challenge Verification",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/2fa/challenge",
+      "expected_status": [
+        401,
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 64.54,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"two_factor_token\":[\"The two factor token field is required.\"]},\"request_id\":\"26bd9805-0579-4cbd-bd95-ac2be2ead9c"
+    },
+    {
+      "category": "Authentication",
+      "name": "2FA Recovery Code Verification",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/2fa/recovery",
+      "expected_status": [
+        401,
+        422
+      ],
+      "actual_status": 429,
+      "passed": false,
+      "elapsed_ms": 50.85,
+      "details": "Expected HTTP [401, 422], received HTTP 429.",
+      "response_preview": "{\"error\":{\"code\":\"RATE_LIMIT_EXCEEDED\",\"message\":\"Too many requests. Please slow down.\",\"details\":{\"retry_after\":41},\"request_id\":\"d36bccc3-3bdd-4223-b7a0-8dfd8be09d2c\",\"timestamp\":\"2026-10-03T20:52:2"
+    },
+    {
+      "category": "Authentication",
+      "name": "Reset Password Validation",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/reset-password",
+      "expected_status": [
+        400,
+        422
+      ],
+      "actual_status": 429,
+      "passed": false,
+      "elapsed_ms": 47.66,
+      "details": "Expected HTTP [400, 422], received HTTP 429.",
+      "response_preview": "{\"error\":{\"code\":\"RATE_LIMIT_EXCEEDED\",\"message\":\"Too many requests. Please slow down.\",\"details\":{\"retry_after\":41},\"request_id\":\"8ce7522d-2ab8-4502-b0c9-9fc47929ea20\",\"timestamp\":\"2026-10-03T20:52:2"
+    },
+    {
+      "category": "Authenticated User",
+      "name": "Get Current User Profile (/me)",
+      "method": "GET",
+      "endpoint": "/api/v1/me",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 138.16,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"name\":\"API Test Runner\",\"email\":\"api_runner_test@gounow.com\",\"phone\":null,\"avatar\":null,\"locale\":\"en\",\"is_admin\":false,\"two_factor_enabled\":false,\"roles\":[],\"abilities\":[]},\"meta\":{\"r"
+    },
+    {
+      "category": "Authenticated User",
+      "name": "Get Abilities & Permissions (/me/abilities)",
+      "method": "GET",
+      "endpoint": "/api/v1/me/abilities",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 75.38,
+      "details": "",
+      "response_preview": "{\"data\":{\"roles\":[],\"permissions\":[],\"scopes\":{\"properties\":\"none\",\"bookings\":\"none\",\"payments\":\"none\",\"customers\":\"none\",\"events\":\"none\",\"experiences\":\"none\",\"reports\":\"none\"},\"is_admin\":false},\"meta"
+    },
+    {
+      "category": "Authenticated User",
+      "name": "List Active Sessions (/me/sessions)",
+      "method": "GET",
+      "endpoint": "/api/v1/me/sessions",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 36.35,
+      "details": "",
+      "response_preview": "{\"data\":{\"tokens\":[{\"id\":1,\"name\":\"api-test-suite\",\"last_used_at\":\"2026-10-03T20:52:04.000000Z\",\"created_at\":\"2026-10-03T20:52:02.000000Z\"},{\"id\":2,\"name\":\"api-test-suite\",\"last_used_at\":\"2026-10-03T2"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "Get Customer Profile (/customer/me)",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/me",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 74.1,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"name\":\"API Test Runner\",\"email\":\"api_runner_test@gounow.com\",\"phone\":null,\"avatar\":null,\"locale\":\"en\",\"is_admin\":false,\"two_factor_enabled\":false,\"roles\":[],\"abilities\":[]},\"meta\":{\"r"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "Get Customer Abilities (/customer/me/abilities)",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/me/abilities",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 72.55,
+      "details": "",
+      "response_preview": "{\"data\":{\"roles\":[],\"permissions\":[],\"scopes\":{\"properties\":\"none\",\"bookings\":\"none\",\"payments\":\"none\",\"customers\":\"none\",\"events\":\"none\",\"experiences\":\"none\",\"reports\":\"none\"},\"is_admin\":false},\"meta"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "List Customer Bookings",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/bookings",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 75.99,
+      "details": "",
+      "response_preview": "{\"data\":[],\"links\":{\"first\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/customer\\/bookings?page=1\",\"last\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/customer\\/bookings?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current"
+    },
+    {
+      "category": "Admin Protected",
+      "name": "Admin Ping Permission Guard (/admin/ping)",
+      "method": "GET",
+      "endpoint": "/api/v1/admin/ping",
+      "expected_status": [
+        401,
+        403,
+        200
+      ],
+      "actual_status": 403,
+      "passed": true,
+      "elapsed_ms": 64.15,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"HTTP_ERROR_403\",\"message\":\"Unauthorized access. Admin privileges required.\",\"details\":null,\"request_id\":\"4d941ee3-ff8b-4877-9dfc-aa63db6ce8b1\",\"timestamp\":\"2026-10-03T20:52:24+00:00\""
+    },
+    {
+      "category": "Webhooks",
+      "name": "Missing Signature Rejection (HTTP 401)",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 44.15,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"56927ef1-b574-427b-ba43-c6131b313729\",\"timestamp\":\"2026-10-03T"
+    },
+    {
+      "category": "Webhooks",
+      "name": "Forged Signature Rejection (HTTP 401)",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 33.82,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"e7cfdca3-270f-45b4-83e9-7f8d866f3ea9\",\"timestamp\":\"2026-10-03T"
+    },
+    {
+      "category": "Webhooks",
+      "name": "Cryptographic Webhook Evaluation",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        200,
+        401,
+        404,
+        422
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 33.42,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"afa2e340-4db7-41ca-b17c-980de9d273f7\",\"timestamp\":\"2026-10-03T"
+    }
+  ]
+}

@@ -1,0 +1,424 @@
+{
+  "timestamp": "2026-10-04T00:04:05.752320",
+  "base_url": "http://127.0.0.1:8000",
+  "total": 28,
+  "passed": 28,
+  "failed": 0,
+  "results": [
+    {
+      "category": "Public Catalog",
+      "name": "List Stays & Properties",
+      "method": "GET",
+      "endpoint": "/api/v1/stays",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 487.95,
+      "details": "",
+      "response_preview": "{\"data\":[{\"id\":5,\"type\":\"properties\",\"attributes\":{\"reference_number\":\"GON-PROP-005\",\"slug\":\"west-golf-lagoon-villa\",\"title\":\"West Golf Sunset Lagoon Villa\",\"title_en\":\"West Golf Sunset Lagoon Villa\","
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Stay Details",
+      "method": "GET",
+      "endpoint": "/api/v1/stays/west-golf-lagoon-villa",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 37.6,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":5,\"type\":\"properties\",\"attributes\":{\"reference_number\":\"GON-PROP-005\",\"slug\":\"west-golf-lagoon-villa\",\"title\":\"West Golf Sunset Lagoon Villa\",\"title_en\":\"West Golf Sunset Lagoon Villa\",\""
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Stay Not Found (404 Error Envelope)",
+      "method": "GET",
+      "endpoint": "/api/v1/stays/nonexistent-slug-xyz-99999",
+      "expected_status": [
+        404
+      ],
+      "actual_status": 404,
+      "passed": true,
+      "elapsed_ms": 19.01,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"RESOURCE_NOT_FOUND\",\"message\":\"Resource not found.\",\"details\":null,\"request_id\":\"dc1d2e0e-2fe7-459b-bf6c-1a014b413590\",\"timestamp\":\"2026-10-03T21:04:04+00:00\"}}"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "List Curated Experiences",
+      "method": "GET",
+      "endpoint": "/api/v1/experiences",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 29.91,
+      "details": "",
+      "response_preview": "{\"data\":[{\"id\":1,\"type\":\"experiences\",\"attributes\":{\"slug\":\"luxury-private-yacht-charter-tawila-island\",\"title\":\"Private Yacht Charter to Tawila Island\",\"title_en\":\"Private Yacht Charter to Tawila Isl"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Experience Details",
+      "method": "GET",
+      "endpoint": "/api/v1/experiences/luxury-private-yacht-charter-tawila-island",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 35.28,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"type\":\"experiences\",\"attributes\":{\"slug\":\"luxury-private-yacht-charter-tawila-island\",\"title\":\"Private Yacht Charter to Tawila Island\",\"title_en\":\"Private Yacht Charter to Tawila Isla"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "List Upcoming Events",
+      "method": "GET",
+      "endpoint": "/api/v1/events",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 32.83,
+      "details": "",
+      "response_preview": "{\"data\":[{\"id\":1,\"type\":\"events\",\"attributes\":{\"slug\":\"gounow-sunset-sessions-mangroovy-beach\",\"title\":\"Gounow Sunset Sessions @ Mangroovy Beach Club\",\"title_en\":\"Gounow Sunset Sessions @ Mangroovy Be"
+    },
+    {
+      "category": "Public Catalog",
+      "name": "Show Event Details",
+      "method": "GET",
+      "endpoint": "/api/v1/events/gounow-sunset-sessions-mangroovy-beach",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 36.0,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"type\":\"events\",\"attributes\":{\"slug\":\"gounow-sunset-sessions-mangroovy-beach\",\"title\":\"Gounow Sunset Sessions @ Mangroovy Beach Club\",\"title_en\":\"Gounow Sunset Sessions @ Mangroovy Bea"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Calculate Quote",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/quote",
+      "expected_status": [
+        200,
+        422
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 54.32,
+      "details": "",
+      "response_preview": "{\"data\":{\"type\":\"quotes\",\"attributes\":{\"property_id\":5,\"check_in\":\"2026-10-14\",\"check_out\":\"2026-10-18\",\"nights\":4,\"guests\":2,\"pricing\":{\"nightly_rate_cents\":750000,\"subtotal_cents\":3000000,\"cleaning_"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Price Tampering Defense (Prohibited Fields)",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/quote",
+      "expected_status": [
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 30.59,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"total\":[\"The total field is prohibited.\"],\"subtotal\":[\"The subtotal field is prohibited.\"]},\"request_id\":\"62bba4"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Create Booking with Idempotency-Key",
+      "method": "POST",
+      "endpoint": "/api/v1/checkout/bookings",
+      "expected_status": [
+        200,
+        201,
+        409,
+        422
+      ],
+      "actual_status": 201,
+      "passed": true,
+      "elapsed_ms": 145.83,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":2,\"type\":\"bookings\",\"attributes\":{\"reference\":\"GON-2026-204331\",\"status\":\"awaiting_payment\",\"payment_status\":\"pending\",\"check_in\":\"2026-10-24\",\"check_out\":\"2026-10-27\",\"nights\":3,\"guests"
+    },
+    {
+      "category": "Checkout Engine",
+      "name": "Lookup Booking by Reference",
+      "method": "GET",
+      "endpoint": "/api/v1/checkout/bookings/GON-2026-204331",
+      "expected_status": [
+        200,
+        404
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 63.42,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":2,\"type\":\"bookings\",\"attributes\":{\"reference\":\"GON-2026-204331\",\"status\":\"awaiting_payment\",\"payment_status\":\"pending\",\"check_in\":\"2026-10-24\",\"check_out\":\"2026-10-27\",\"nights\":3,\"guests"
+    },
+    {
+      "category": "Leads",
+      "name": "Store Lead Inquiry",
+      "method": "POST",
+      "endpoint": "/api/v1/leads",
+      "expected_status": [
+        201
+      ],
+      "actual_status": 201,
+      "passed": true,
+      "elapsed_ms": 87.06,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":6,\"message\":\"Thank you for your inquiry. Our team will contact you shortly.\"},\"meta\":{\"request_id\":\"99ee316b-041f-4e23-9d01-797ff019cf81\",\"timestamp\":\"2026-10-03T21:04:04+00:00\"}}"
+    },
+    {
+      "category": "Leads",
+      "name": "Lead Validation Rejection (422 Error)",
+      "method": "POST",
+      "endpoint": "/api/v1/leads",
+      "expected_status": [
+        422
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 35.11,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"name\":[\"The name field is required.\"],\"email\":[\"The email field is required.\"],\"message\":[\"The message field is"
+    },
+    {
+      "category": "Authentication",
+      "name": "Invalid Login Rejection (401 / 422 Generic Message)",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/login",
+      "expected_status": [
+        401,
+        422,
+        429
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 418.85,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"email\":[\"Invalid email or password.\"]},\"request_id\":\"d97a86b5-949a-4cc2-bed9-fea60a1fd6f4\",\"timestamp\":\"2026-10-"
+    },
+    {
+      "category": "Authentication",
+      "name": "Forgot Password Request",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/forgot-password",
+      "expected_status": [
+        200,
+        422,
+        429
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 17.4,
+      "details": "",
+      "response_preview": "{\"data\":{\"message\":\"If your email address exists in our database, you will receive a password recovery link at your email address in a few minutes.\"},\"meta\":{\"request_id\":\"a52f93a0-f15c-43fa-9cd5-88bb"
+    },
+    {
+      "category": "Authentication",
+      "name": "2FA Challenge Verification",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/2fa/challenge",
+      "expected_status": [
+        401,
+        422,
+        429
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 15.76,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"two_factor_token\":[\"The two factor token field is required.\"]},\"request_id\":\"f79de05a-b8cc-4809-8bb7-c24df4ee6a5"
+    },
+    {
+      "category": "Authentication",
+      "name": "2FA Recovery Code Verification",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/2fa/recovery",
+      "expected_status": [
+        401,
+        422,
+        429
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 42.43,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"two_factor_token\":[\"The two factor token field is required.\"]},\"request_id\":\"c96cdd16-9657-4e72-87e6-6cd1e265b70"
+    },
+    {
+      "category": "Authentication",
+      "name": "Reset Password Validation",
+      "method": "POST",
+      "endpoint": "/api/v1/auth/reset-password",
+      "expected_status": [
+        400,
+        422,
+        429
+      ],
+      "actual_status": 422,
+      "passed": true,
+      "elapsed_ms": 51.51,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"The given data was invalid.\",\"details\":{\"email\":[\"The password reset token is invalid or expired.\"]},\"request_id\":\"94913e18-1566-41d5-b929-cfb6db0bf69f\","
+    },
+    {
+      "category": "Authenticated User",
+      "name": "Get Current User Profile (/me)",
+      "method": "GET",
+      "endpoint": "/api/v1/me",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 65.46,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"name\":\"API Test Runner\",\"email\":\"api_runner_test@gounow.com\",\"phone\":null,\"avatar\":null,\"locale\":\"en\",\"is_admin\":false,\"two_factor_enabled\":false,\"roles\":[],\"abilities\":[]},\"meta\":{\"r"
+    },
+    {
+      "category": "Authenticated User",
+      "name": "Get Abilities & Permissions (/me/abilities)",
+      "method": "GET",
+      "endpoint": "/api/v1/me/abilities",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 69.87,
+      "details": "",
+      "response_preview": "{\"data\":{\"roles\":[],\"permissions\":[],\"scopes\":{\"properties\":\"none\",\"bookings\":\"none\",\"payments\":\"none\",\"customers\":\"none\",\"events\":\"none\",\"experiences\":\"none\",\"reports\":\"none\"},\"is_admin\":false},\"meta"
+    },
+    {
+      "category": "Authenticated User",
+      "name": "List Active Sessions (/me/sessions)",
+      "method": "GET",
+      "endpoint": "/api/v1/me/sessions",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 89.6,
+      "details": "",
+      "response_preview": "{\"data\":{\"tokens\":[{\"id\":1,\"name\":\"api-test-suite\",\"last_used_at\":\"2026-10-03T20:52:04.000000Z\",\"created_at\":\"2026-10-03T20:52:02.000000Z\"},{\"id\":2,\"name\":\"api-test-suite\",\"last_used_at\":\"2026-10-03T2"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "Get Customer Profile (/customer/me)",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/me",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 65.77,
+      "details": "",
+      "response_preview": "{\"data\":{\"id\":1,\"name\":\"API Test Runner\",\"email\":\"api_runner_test@gounow.com\",\"phone\":null,\"avatar\":null,\"locale\":\"en\",\"is_admin\":false,\"two_factor_enabled\":false,\"roles\":[],\"abilities\":[]},\"meta\":{\"r"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "Get Customer Abilities (/customer/me/abilities)",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/me/abilities",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 33.69,
+      "details": "",
+      "response_preview": "{\"data\":{\"roles\":[],\"permissions\":[],\"scopes\":{\"properties\":\"none\",\"bookings\":\"none\",\"payments\":\"none\",\"customers\":\"none\",\"events\":\"none\",\"experiences\":\"none\",\"reports\":\"none\"},\"is_admin\":false},\"meta"
+    },
+    {
+      "category": "Customer Portal",
+      "name": "List Customer Bookings",
+      "method": "GET",
+      "endpoint": "/api/v1/customer/bookings",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "passed": true,
+      "elapsed_ms": 25.75,
+      "details": "",
+      "response_preview": "{\"data\":[],\"links\":{\"first\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/customer\\/bookings?page=1\",\"last\":\"http:\\/\\/127.0.0.1:8000\\/api\\/v1\\/customer\\/bookings?page=1\",\"prev\":null,\"next\":null},\"meta\":{\"current"
+    },
+    {
+      "category": "Admin Protected",
+      "name": "Admin Ping Permission Guard (/admin/ping)",
+      "method": "GET",
+      "endpoint": "/api/v1/admin/ping",
+      "expected_status": [
+        401,
+        403,
+        200
+      ],
+      "actual_status": 403,
+      "passed": true,
+      "elapsed_ms": 46.81,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"HTTP_ERROR_403\",\"message\":\"Unauthorized access. Admin privileges required.\",\"details\":null,\"request_id\":\"8e114b4d-7910-4b82-8657-f0ac052a4b39\",\"timestamp\":\"2026-10-03T21:04:05+00:00\""
+    },
+    {
+      "category": "Webhooks",
+      "name": "Missing Signature Rejection (HTTP 401)",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 17.44,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"a751e5de-a900-41a3-9562-b334a92f0c66\",\"timestamp\":\"2026-10-03T"
+    },
+    {
+      "category": "Webhooks",
+      "name": "Forged Signature Rejection (HTTP 401)",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 19.65,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"9d8a386f-8381-4671-87b4-46b3bb0304c0\",\"timestamp\":\"2026-10-03T"
+    },
+    {
+      "category": "Webhooks",
+      "name": "Cryptographic Webhook Evaluation",
+      "method": "POST",
+      "endpoint": "/api/v1/webhooks/payments",
+      "expected_status": [
+        200,
+        401,
+        404,
+        422
+      ],
+      "actual_status": 401,
+      "passed": true,
+      "elapsed_ms": 22.47,
+      "details": "",
+      "response_preview": "{\"error\":{\"code\":\"INVALID_WEBHOOK_SIGNATURE\",\"message\":\"Invalid or missing cryptographic webhook signature.\",\"details\":null,\"request_id\":\"709a9176-f381-4be2-b10c-dda41ea81654\",\"timestamp\":\"2026-10-03T"
+    }
+  ]
+}
