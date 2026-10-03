@@ -129,4 +129,33 @@ class Booking extends Model
         return $query->whereIn('status', ['confirmed', 'paid'])
             ->where('check_in', '>=', now()->toDateString());
     }
+
+    /**
+     * Scope query to bookings visible to the given user based on role, assignment, or ownership.
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager') || $user->hasRole('finance')) {
+            return $query;
+        }
+
+        // Sales and Content Managers are strictly forbidden from viewing bookings
+        if ($user->hasRole('sales') || $user->hasRole('content_manager')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Staff can only view bookings assigned to them
+        if ($user->hasRole('staff')) {
+            return $query->where('assigned_to', $user->id);
+        }
+
+        // Standard customers can only view their own bookings
+        return $query->whereHas('customer', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
 }

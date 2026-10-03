@@ -48,4 +48,33 @@ class Lead extends Model
     {
         return $query->where('status', 'new');
     }
+
+    /**
+     * Scope query to leads visible to the user.
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager')) {
+            return $query;
+        }
+
+        if ($user->hasRole('staff') || $user->hasRole('content_manager')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->hasRole('sales')) {
+            return $query->where(function ($q) use ($user) {
+                $q->where('assigned_to', $user->id)
+                    ->orWhereIn('type', ['sale', 'viewing', 'buyer']);
+            });
+        }
+
+        return $query->whereHas('customer', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
 }

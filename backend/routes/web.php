@@ -26,37 +26,38 @@ Route::prefix('admin')->group(function () {
 // Protected Admin Dashboard & Management Shell
 Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard Home
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('can:dashboard.view');
 
     // Section 41 Navigation Routes
     // Bookings
-    Route::prefix('bookings')->name('bookings.')->group(function () {
+    Route::prefix('bookings')->name('bookings.')->middleware('can:bookings.view')->group(function () {
         Route::get('/', [DashboardController::class, 'bookingsIndex'])->name('index');
         Route::get('/pending', [DashboardController::class, 'bookingsPending'])->name('pending');
         Route::get('/confirmed', [DashboardController::class, 'bookingsConfirmed'])->name('confirmed');
         Route::get('/cancelled', [DashboardController::class, 'bookingsIndex'])->name('cancelled');
         Route::get('/calendar', [DashboardController::class, 'bookingsCalendar'])->name('calendar');
-        Route::get('/payments', [DashboardController::class, 'bookingsPayments'])->name('payments');
+        Route::get('/payments', [DashboardController::class, 'bookingsPayments'])->name('payments')->middleware('can:payments.view');
+        Route::post('/{booking}/refund', [DashboardController::class, 'bookingsRefund'])->name('refund')->middleware('can:payments.refund');
     });
 
     // Properties (Sections 20, 21, 41, 44)
     Route::prefix('properties')->name('properties.')->group(function () {
-        Route::get('/', [PropertyController::class, 'index'])->name('index');
-        Route::get('/rent', fn() => redirect()->route('admin.properties.index', ['type' => 'rent']))->name('rent');
-        Route::get('/sale', fn() => redirect()->route('admin.properties.index', ['type' => 'sale']))->name('sale');
-        Route::get('/create', [PropertyController::class, 'create'])->name('create');
-        Route::post('/', [PropertyController::class, 'store'])->name('store');
-        Route::get('/{property}/edit', [PropertyController::class, 'edit'])->name('edit');
-        Route::match(['put', 'patch'], '/{property}', [PropertyController::class, 'update'])->name('update');
-        Route::delete('/{property}', [PropertyController::class, 'destroy'])->name('destroy');
-        Route::delete('/{property}/media/{media}', [PropertyController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/categories', [DashboardController::class, 'propertyCategories'])->name('categories');
-        Route::get('/locations', [DashboardController::class, 'propertyLocations'])->name('locations');
-        Route::get('/amenities', [DashboardController::class, 'propertyAmenities'])->name('amenities');
+        Route::get('/', [PropertyController::class, 'index'])->name('index')->middleware('can:properties.view');
+        Route::get('/rent', fn() => redirect()->route('admin.properties.index', ['type' => 'rent']))->name('rent')->middleware('can:properties.view');
+        Route::get('/sale', fn() => redirect()->route('admin.properties.index', ['type' => 'sale']))->name('sale')->middleware('can:properties.view');
+        Route::get('/create', [PropertyController::class, 'create'])->name('create')->middleware('can:properties.create');
+        Route::post('/', [PropertyController::class, 'store'])->name('store')->middleware('can:properties.create');
+        Route::get('/{property}/edit', [PropertyController::class, 'edit'])->name('edit')->middleware('can:properties.update');
+        Route::match(['put', 'patch'], '/{property}', [PropertyController::class, 'update'])->name('update')->middleware('can:properties.update');
+        Route::delete('/{property}', [PropertyController::class, 'destroy'])->name('destroy')->middleware('can:properties.delete');
+        Route::delete('/{property}/media/{media}', [PropertyController::class, 'deleteMedia'])->name('media.destroy')->middleware('can:media.manage')->scopeBindings();
+        Route::get('/categories', [DashboardController::class, 'propertyCategories'])->name('categories')->middleware('can:properties.view');
+        Route::get('/locations', [DashboardController::class, 'propertyLocations'])->name('locations')->middleware('can:properties.view');
+        Route::get('/amenities', [DashboardController::class, 'propertyAmenities'])->name('amenities')->middleware('can:properties.view');
     });
 
     // Pricing & Availability
-    Route::prefix('pricing')->name('pricing.')->group(function () {
+    Route::prefix('pricing')->name('pricing.')->middleware('can:pricing.manage')->group(function () {
         Route::get('/base', [DashboardController::class, 'pricingBase'])->name('base');
         Route::get('/seasons', [DashboardController::class, 'pricingSeasons'])->name('seasons');
         Route::get('/calendar', [DashboardController::class, 'pricingCalendar'])->name('calendar');
@@ -66,47 +67,47 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
 
     // Experiences & Vehicles (Sections 20, 21, 41, 44)
     Route::prefix('experiences')->name('experiences.')->group(function () {
-        Route::get('/', [ExperienceController::class, 'index'])->name('index');
-        Route::get('/create', [ExperienceController::class, 'create'])->name('create');
-        Route::post('/', [ExperienceController::class, 'store'])->name('store');
-        Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit');
-        Route::match(['put', 'patch'], '/{experience}', [ExperienceController::class, 'update'])->name('update');
-        Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy');
-        Route::delete('/{experience}/media/{media}', [ExperienceController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/boats', [DashboardController::class, 'experiencesBoats'])->name('boats');
-        Route::get('/safari', [DashboardController::class, 'experiencesSafari'])->name('safari');
-        Route::get('/vehicles', [DashboardController::class, 'experiencesVehicles'])->name('vehicles');
-        Route::get('/categories', [DashboardController::class, 'experiencesCategories'])->name('categories');
+        Route::get('/', [ExperienceController::class, 'index'])->name('index')->middleware('can:experiences.view');
+        Route::get('/create', [ExperienceController::class, 'create'])->name('create')->middleware('can:experiences.create');
+        Route::post('/', [ExperienceController::class, 'store'])->name('store')->middleware('can:experiences.create');
+        Route::get('/{experience}/edit', [ExperienceController::class, 'edit'])->name('edit')->middleware('can:experiences.update');
+        Route::match(['put', 'patch'], '/{experience}', [ExperienceController::class, 'update'])->name('update')->middleware('can:experiences.update');
+        Route::delete('/{experience}', [ExperienceController::class, 'destroy'])->name('destroy')->middleware('can:experiences.delete');
+        Route::delete('/{experience}/media/{media}', [ExperienceController::class, 'deleteMedia'])->name('media.destroy')->middleware('can:media.manage')->scopeBindings();
+        Route::get('/boats', [DashboardController::class, 'experiencesBoats'])->name('boats')->middleware('can:experiences.view');
+        Route::get('/safari', [DashboardController::class, 'experiencesSafari'])->name('safari')->middleware('can:experiences.view');
+        Route::get('/vehicles', [DashboardController::class, 'experiencesVehicles'])->name('vehicles')->middleware('can:vehicles.manage');
+        Route::get('/categories', [DashboardController::class, 'experiencesCategories'])->name('categories')->middleware('can:experiences.view');
     });
 
     // Events & Tickets (Sections 20, 21, 41, 44)
     Route::prefix('events')->name('events.')->group(function () {
-        Route::get('/', [EventController::class, 'index'])->name('index');
-        Route::get('/create', [EventController::class, 'create'])->name('create');
-        Route::post('/', [EventController::class, 'store'])->name('store');
-        Route::get('/{event}/edit', [EventController::class, 'edit'])->name('edit');
-        Route::match(['put', 'patch'], '/{event}', [EventController::class, 'update'])->name('update');
-        Route::delete('/{event}', [EventController::class, 'destroy'])->name('destroy');
-        Route::delete('/{event}/media/{media}', [EventController::class, 'deleteMedia'])->name('media.destroy');
-        Route::get('/tickets', [DashboardController::class, 'eventsTickets'])->name('tickets');
-        Route::get('/orders', [DashboardController::class, 'eventsOrders'])->name('orders');
-        Route::get('/checkin', [DashboardController::class, 'eventsCheckin'])->name('checkin');
+        Route::get('/', [EventController::class, 'index'])->name('index')->middleware('can:events.view');
+        Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('can:events.create');
+        Route::post('/', [EventController::class, 'store'])->name('store')->middleware('can:events.create');
+        Route::get('/{event}/edit', [EventController::class, 'edit'])->name('edit')->middleware('can:events.update');
+        Route::match(['put', 'patch'], '/{event}', [EventController::class, 'update'])->name('update')->middleware('can:events.update');
+        Route::delete('/{event}', [EventController::class, 'destroy'])->name('destroy')->middleware('can:events.delete');
+        Route::delete('/{event}/media/{media}', [EventController::class, 'deleteMedia'])->name('media.destroy')->middleware('can:media.manage')->scopeBindings();
+        Route::get('/tickets', [DashboardController::class, 'eventsTickets'])->name('tickets')->middleware('can:events.view');
+        Route::get('/orders', [DashboardController::class, 'eventsOrders'])->name('orders')->middleware('can:events.view');
+        Route::get('/checkin', [DashboardController::class, 'eventsCheckin'])->name('checkin')->middleware('can:tickets.scan');
     });
 
     // Customers & Leads
     Route::prefix('customers')->name('customers.')->group(function () {
-        Route::get('/', [DashboardController::class, 'customersIndex'])->name('index');
-        Route::get('/leads', [DashboardController::class, 'customersLeads'])->name('leads');
-        Route::get('/inquiries', [DashboardController::class, 'customersInquiries'])->name('inquiries');
+        Route::get('/', [DashboardController::class, 'customersIndex'])->name('index')->middleware('can:customers.view');
+        Route::get('/leads', [DashboardController::class, 'customersLeads'])->name('leads')->middleware('can:leads.view');
+        Route::get('/inquiries', [DashboardController::class, 'customersInquiries'])->name('inquiries')->middleware('can:leads.view');
     });
 
     // Media
-    Route::prefix('media')->name('media.')->group(function () {
+    Route::prefix('media')->name('media.')->middleware('can:media.manage')->group(function () {
         Route::get('/', [DashboardController::class, 'mediaIndex'])->name('index');
     });
 
     // CMS Content
-    Route::prefix('cms')->name('cms.')->group(function () {
+    Route::prefix('cms')->name('cms.')->middleware('can:cms.manage')->group(function () {
         Route::get('/homepage', [DashboardController::class, 'cmsHomepage'])->name('homepage');
         Route::get('/pages', [DashboardController::class, 'cmsPages'])->name('pages');
         Route::get('/faqs', [DashboardController::class, 'cmsFaqs'])->name('faqs');
@@ -115,7 +116,7 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
     });
 
     // SEO
-    Route::prefix('seo')->name('seo.')->group(function () {
+    Route::prefix('seo')->name('seo.')->middleware('can:seo.manage')->group(function () {
         Route::get('/global', [DashboardController::class, 'seoGlobal'])->name('global');
         Route::get('/sitemap', [DashboardController::class, 'seoSitemap'])->name('sitemap');
         Route::get('/redirects', [DashboardController::class, 'seoRedirects'])->name('redirects');
@@ -123,12 +124,12 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
 
     // Analytics
     Route::prefix('analytics')->name('analytics.')->group(function () {
-        Route::get('/tracking', [DashboardController::class, 'analyticsTracking'])->name('tracking');
-        Route::get('/reports', [DashboardController::class, 'analyticsReports'])->name('reports');
+        Route::get('/tracking', [DashboardController::class, 'analyticsTracking'])->name('tracking')->middleware('can:seo.manage');
+        Route::get('/reports', [DashboardController::class, 'analyticsReports'])->name('reports')->middleware('can:reports.view');
     });
 
     // Settings
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware('can:settings.manage')->group(function () {
         Route::get('/general', [DashboardController::class, 'settingsGeneral'])->name('general');
         Route::get('/payments', [DashboardController::class, 'settingsPayments'])->name('payments');
         Route::get('/booking', [DashboardController::class, 'settingsBooking'])->name('booking');
@@ -136,13 +137,13 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
     });
 
     // Users & Roles
-    Route::prefix('users')->name('users.')->group(function () {
+    Route::prefix('users')->name('users.')->middleware('can:users.manage')->group(function () {
         Route::get('/', [DashboardController::class, 'usersIndex'])->name('index');
         Route::get('/roles', [DashboardController::class, 'usersRoles'])->name('roles');
     });
 
     // System
-    Route::prefix('system')->name('system.')->group(function () {
+    Route::prefix('system')->name('system.')->middleware('can:settings.manage')->group(function () {
         Route::get('/logs', [DashboardController::class, 'systemLogs'])->name('logs');
         Route::get('/health', [DashboardController::class, 'systemHealth'])->name('health');
     });

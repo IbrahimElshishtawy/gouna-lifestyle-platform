@@ -57,4 +57,33 @@ class Customer extends Model
     {
         return $query->where('is_active', true);
     }
+
+    /**
+     * Scope query to customers visible to the user. Staff and unauthenticated are blocked.
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager') || $user->hasRole('finance')) {
+            return $query;
+        }
+
+        // Staff and Content Manager cannot list or export customers
+        if ($user->hasRole('staff') || $user->hasRole('content_manager')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Sales can only view customers with assigned leads
+        if ($user->hasRole('sales')) {
+            return $query->whereHas('leads', function ($q) use ($user) {
+                $q->where('assigned_to', $user->id);
+            });
+        }
+
+        // Normal customer can only see their own profile
+        return $query->where('user_id', $user->id);
+    }
 }

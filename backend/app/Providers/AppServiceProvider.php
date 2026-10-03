@@ -2,7 +2,32 @@
 
 namespace App\Providers;
 
+use App\Models\BlogPost;
+use App\Models\Booking;
+use App\Models\Customer;
+use App\Models\Event;
+use App\Models\EventTicket;
+use App\Models\Experience;
+use App\Models\Faq;
+use App\Models\Lead;
+use App\Models\Media;
+use App\Models\Page;
+use App\Models\PaymentTransaction;
+use App\Models\Property;
+use App\Models\Setting;
 use App\Models\User;
+use App\Policies\BookingPolicy;
+use App\Policies\CmsPolicy;
+use App\Policies\CustomerPolicy;
+use App\Policies\EventPolicy;
+use App\Policies\EventTicketPolicy;
+use App\Policies\ExperiencePolicy;
+use App\Policies\LeadPolicy;
+use App\Policies\MediaPolicy;
+use App\Policies\PaymentPolicy;
+use App\Policies\PropertyPolicy;
+use App\Policies\SettingPolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -70,19 +95,38 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin_login', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });
+        // Model Policy Registrations (Standard S5)
+        Gate::policy(Property::class, PropertyPolicy::class);
+        Gate::policy(Booking::class, BookingPolicy::class);
+        Gate::policy(Customer::class, CustomerPolicy::class);
+        Gate::policy(PaymentTransaction::class, PaymentPolicy::class);
+        Gate::policy(Lead::class, LeadPolicy::class);
+        Gate::policy(Event::class, EventPolicy::class);
+        Gate::policy(Experience::class, ExperiencePolicy::class);
+        Gate::policy(EventTicket::class, EventTicketPolicy::class);
+        Gate::policy(Media::class, MediaPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Setting::class, SettingPolicy::class);
+        Gate::policy(Page::class, CmsPolicy::class);
+        Gate::policy(BlogPost::class, CmsPolicy::class);
+        Gate::policy(Faq::class, CmsPolicy::class);
 
-        // Super admins implicitly have all abilities
-        Gate::before(function (User $user, string $ability) {
+        // Super admins have universal access except on sensitive invariant-protected user operations
+        Gate::before(function (User $user, string $ability, array $arguments = []) {
+            if (isset($arguments[0]) && $arguments[0] instanceof User && in_array($ability, ['delete', 'manageRoles'], true)) {
+                return null;
+            }
+
             if ($user->is_admin || $user->hasRole('super_admin')) {
                 return true;
             }
-            return null; // fallback to standard check
+            return null;
         });
 
-        // Dynamic Gate check against role permissions
+        // Dynamic Gate fallback check for unhandled string abilities against user permissions
         Gate::after(function (User $user, string $ability, ?bool $result) {
-            if ($result === true) {
-                return true;
+            if ($result !== null) {
+                return $result;
             }
             return $user->hasPermission($ability);
         });

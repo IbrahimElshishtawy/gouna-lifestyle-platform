@@ -8,10 +8,16 @@ use Illuminate\Database\Seeder;
 
 class RoleAndPermissionSeeder extends Seeder
 {
+    /**
+     * Run the database seeds idempotently.
+     */
     public function run(): void
     {
-        // Define all permissions
+        // Define all permissions (Legacy + Canonical aligned)
         $permissions = [
+            // Dashboard
+            ['name' => 'view_dashboard', 'display_name' => 'View Dashboard', 'group' => 'system'],
+
             // Properties
             ['name' => 'view_properties', 'display_name' => 'View Properties', 'group' => 'properties'],
             ['name' => 'create_properties', 'display_name' => 'Create Properties', 'group' => 'properties'],
@@ -50,10 +56,16 @@ class RoleAndPermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $p) {
-            Permission::firstOrCreate(['name' => $p['name']], $p);
+            Permission::updateOrCreate(
+                ['name' => $p['name']],
+                [
+                    'display_name' => $p['display_name'],
+                    'group' => $p['group'],
+                ]
+            );
         }
 
-        // Define Roles
+        // Define Roles with explicit scopes and permission assignments
         $roles = [
             'super_admin' => [
                 'display_name' => 'Super Administrator',
@@ -66,7 +78,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Manages rentals, property listings, seasonal pricing, and availability.',
                 'is_system' => true,
                 'permissions' => [
-                    'view_properties', 'create_properties', 'edit_properties', 'delete_properties',
+                    'view_dashboard', 'view_properties', 'create_properties', 'edit_properties', 'delete_properties',
                     'manage_pricing', 'manage_availability', 'manage_bookings', 'manage_customers',
                     'manage_leads', 'manage_media',
                 ],
@@ -76,7 +88,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Manages property sale listings, inquiries, and customer leads.',
                 'is_system' => true,
                 'permissions' => [
-                    'view_properties', 'create_properties', 'edit_properties',
+                    'view_dashboard', 'view_properties', 'create_properties', 'edit_properties',
                     'manage_leads', 'manage_customers',
                 ],
             ],
@@ -85,7 +97,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Manages events, ticket types, check-ins, and experience packages.',
                 'is_system' => true,
                 'permissions' => [
-                    'manage_events', 'manage_tickets', 'manage_experiences', 'manage_vehicles',
+                    'view_dashboard', 'manage_events', 'manage_tickets', 'manage_experiences', 'manage_vehicles',
                     'manage_customers', 'manage_media',
                 ],
             ],
@@ -94,7 +106,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Edits homepage, pages, blogs, FAQs, SEO metadata, and media.',
                 'is_system' => true,
                 'permissions' => [
-                    'manage_content', 'manage_media', 'manage_seo', 'view_properties',
+                    'view_dashboard', 'manage_content', 'manage_media', 'manage_seo', 'view_properties',
                 ],
             ],
             'finance' => [
@@ -102,7 +114,7 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Oversees payments, refunds, manual payment reconciliations, and financial reporting.',
                 'is_system' => true,
                 'permissions' => [
-                    'manage_payments', 'manage_bookings', 'view_reports',
+                    'view_dashboard', 'manage_payments', 'manage_bookings', 'view_reports',
                 ],
             ],
             'staff' => [
@@ -110,13 +122,13 @@ class RoleAndPermissionSeeder extends Seeder
                 'description' => 'Staff level access for guest check-ins, QR ticket scanning, and view-only operational info.',
                 'is_system' => true,
                 'permissions' => [
-                    'view_properties', 'manage_tickets',
+                    'view_dashboard', 'view_properties', 'manage_tickets',
                 ],
             ],
         ];
 
         foreach ($roles as $roleKey => $roleData) {
-            $role = Role::firstOrCreate(
+            $role = Role::updateOrCreate(
                 ['name' => $roleKey],
                 [
                     'display_name' => $roleData['display_name'],

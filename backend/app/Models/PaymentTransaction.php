@@ -64,4 +64,28 @@ class PaymentTransaction extends Model
     {
         return $query->where('status', 'completed');
     }
+
+    /**
+     * Scope query to payment transactions visible to the user. Strictly restricted to Finance and Super Admin.
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('finance')) {
+            return $query;
+        }
+
+        // Sales, Property Manager, Content Manager, and Staff have ZERO financial visibility
+        if ($user->hasRole('sales') || $user->hasRole('property_manager') || $user->hasRole('content_manager') || $user->hasRole('staff')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Normal customer can view only transactions for their customer record
+        return $query->whereHas('customer', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
 }

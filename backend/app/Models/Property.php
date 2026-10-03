@@ -207,4 +207,24 @@ class Property extends Model
     {
         return $query->where('is_featured', true);
     }
+
+    /**
+     * Scope query to records visible to the specified user based on role and status.
+     */
+    public function scopeVisibleTo($query, ?User $user)
+    {
+        if (! $user) {
+            return $query->published();
+        }
+
+        if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager') || $user->hasRole('content_manager')) {
+            return $query;
+        }
+
+        if ($user->hasRole('sales')) {
+            return $query->whereIn('listing_type', ['sale', 'both']);
+        }
+
+        return $query->published();
+    }
 }

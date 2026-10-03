@@ -11,6 +11,9 @@ use App\Models\EventTicket;
 use App\Models\Experience;
 use App\Models\Lead;
 use App\Models\Property;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -153,6 +156,27 @@ class DashboardController extends Controller
         $tabTitle = app()->getLocale() === 'ar' ? 'العمليات المالية والفواتير' : 'Financial Audits & Payments';
 
         return view('admin.bookings.index', compact('bookings', 'totalCount', 'revenue', 'pendingCount', 'tabTitle'));
+    }
+
+    /**
+     * Process a refund for a booking with strict policy authorization.
+     */
+    public function bookingsRefund(Request $request, Booking $booking): RedirectResponse
+    {
+        Gate::authorize('refund', $booking);
+
+        $amount = (int) $request->input('amount_cents', $booking->amount_paid_cents);
+        $reason = (string) $request->input('reason', 'Customer requested cancellation/refund');
+
+        $booking->update([
+            'status' => 'cancelled',
+            'payment_status' => 'refunded',
+            'refund_amount_cents' => $amount,
+            'cancellation_reason' => $reason,
+            'cancelled_at' => now(),
+        ]);
+
+        return back()->with('success', 'Refund processed successfully.');
     }
 
     /* -------------------------------------------------------------
