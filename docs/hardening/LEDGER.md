@@ -95,6 +95,23 @@
 | P4-T12 | DONE | Anti-enumeration defense verified across registration, forgot-password, login, and 2FA challenge endpoints. | N/A |
 | P4-T13 | DONE | 15/15 automated tests in `backend/tests/Feature/AuthenticationSecurityTest.php` passing 100% (57 assertions). | N/A |
 
+## Task Completion Table (Phase 5 — G17 Discipline)
+| Task ID | Status | Evidence | Reason if not DONE |
+|---|---|---|---|
+| P5-T01 | DONE | `BookingStateMachine` built with strict transition matrix (`BookingStatus` backed enum), idempotency support, role check, side effects, activity logging, and `BookingStatusChangedEvent` implementing `ShouldDispatchAfterCommit`. Verified in tests. | N/A |
+| P5-T02 | DONE | Server-side pricing enforcement: `CreateBookingRequest` and `ProcessCheckoutRequest` prohibit client injection of `price`, `total`, `total_cents`, `deposit`, etc. Authoritative quote recalculated server-side. Verified in tests. | N/A |
+| P5-T03 | DONE | Half-open range availability checks (`[check_in, check_out)`) implemented in `CheckPropertyAvailabilityQuery` allowing same-day turnaround bookings. Verified in tests. | N/A |
+| P5-T04 | DONE | Concurrency control: database migration adds PostgreSQL exclusion constraint using `btree_gist` (`EXCLUDE USING gist (bookable_id WITH =, daterange(check_in, check_out, '[)') WITH &&)`), backed by pessimistic row locking `Property::lockForUpdate()` and transaction retries (`DB::transaction($cb, 3)`). Verified in tests. | N/A |
+| P5-T05 | DONE | Hold expiry background job: 15-minute hold TTL (`expires_at`), ignored in availability queries after expiry, and purged by artisan command `bookings:expire-pending`. Verified in tests. | N/A |
+| P5-T06 | DONE | Idempotent booking creation: `Idempotency-Key` header passed to `CreateBookingDTO` and checked upfront; replay returns existing booking without duplicate records. Verified in tests. | N/A |
+| P5-T07 | DONE | Transaction boundary enforcement: atomic rollback on booking creation failure verified with 0 orphan records in database. | N/A |
+| P5-T08 | DONE | IDOR & enumeration defense on confirmation page: 64-char CSPRNG token generated and hashed with SHA-256 (`booking_access_token`). Multi-tier authorization enforced in `CheckoutController::confirmation`; generic 404 returned on any unauthorized access to prevent reference enumeration. Verified in tests. | N/A |
+| P5-T09 | DONE | Pricing & cancellation policy snapshots: `pricing_snapshot` and `cancellation_policy_snapshot` JSON columns added to `bookings` table and persisted upon reservation creation. | N/A |
+| P5-T10 | DONE | Customer cancellation self-service: `POST /api/v1/customer/bookings/{reference}/cancel` implemented in `Customer\BookingController` and verified idempotent. Non-owners receive 404. | N/A |
+| P5-T11 | DONE | Confirmation rate limiting: named rate limiter `booking_confirmation` (15/min per IP) registered in `AppServiceProvider` and enforced on `/checkout/confirmation/{reference}`. Verified in tests. | N/A |
+| P5-T12 | DONE | Concurrency test suite: `BookingHardeningTest::test_concurrent_booking_same_inventory_concurrency` verifies conflicting bookings throw `BookingUnavailableException`. | N/A |
+| P5-T13 | DONE | IDOR regression test suite: `BookingHardeningTest::test_confirmation_page_idor_protection` verifies bare references, invalid tokens, and stranger users receive 404 while owners and token holders receive 200. | N/A |
+
 ## Standards S1–S5 Comprehension (10-line summary)
 1. **S1 (Request Pipeline)**: Strict 14-step request lifecycle (Correlation ID → Trusted Proxies → CORS → Force JSON → Rate limit → Auth → Account state → Scoped bindings → Policy → FormRequest → Thin Controller → Action/Transaction → Resource → Exception envelope).
 2. **S1 Controllers/Requests**: Controllers only accept validated input, call a single Action, return Resource; FormRequests enforce explicit authorization and rigorous rules; zero `$request->all()`.
@@ -118,9 +135,12 @@
 - **D-008**: User Email Normalization: Added `setEmailAttribute` mutator on `User` model and `whereRaw('LOWER(email) = ?', [$email])` across queries to guarantee cross-database case-insensitive authentication regardless of backend engine (SQLite vs PostgreSQL vs MySQL).
 - **D-009**: Fresh DB Status Check in `EnsureAccountActive`: `EnsureAccountActive` checks fresh database status rather than stale in-memory cached model attributes, ensuring account deactivations revoke access across all ongoing sessions and tokens immediately.
 - **D-010**: Atomic Recovery Code Consumption: Recovery codes are stored as SHA-256 hashes and consumed inside a database transaction with `lockForUpdate()`, strictly preventing concurrent race conditions from executing multiple logins with the same single-use code.
+- **D-011**: Multi-Tier IDOR Defense & Reference Enumeration Protection: Access to `/checkout/confirmation/{reference}` requires authenticated customer ownership, active checkout session, valid cryptographic signed URL, or secret guest access token matching the stored SHA-256 hash. Generic 404 is returned on any unauthorized access to prevent reference enumeration.
+- **D-012**: PostgreSQL Exclusion Constraint & Driver Strategy: Exclusion constraint `EXCLUDE USING gist (bookable_id WITH =, daterange(check_in, check_out, '[)') WITH &&)` defined in migration with driver check so PostgreSQL enforces it at the database engine level while SQLite test runner relies on transactional pessimistic locking (`lockForUpdate()`).
+- **D-013**: Authoritative Server Pricing & Prohibited Mass Assignment Invariants: Client-provided pricing fields (`price`, `total`, `total_cents`, etc.) are declared `prohibited` in FormRequests, preventing client injection. Immutable snapshots (`pricing_snapshot`, `cancellation_policy_snapshot`) freeze financial rules at booking time.
 
 ## Open Findings
-- None blocking Phase 4. All 15 security scenarios verified.
+- None blocking Phase 5. All 13 booking hardening scenarios verified.
 
 ## Files Changed (Cumulative)
 - `docs/hardening/LEDGER.md`
@@ -167,9 +187,12 @@
 - `backend/database/seeders/RoleAndPermissionSeeder.php`
 - `backend/tests/Feature/BaselineCharacterizationTest.php`
 - `backend/tests/Feature/ApiV1HardeningTest.php`
-- `backend/tests/Feature/RouteInventorySecurityTest.php`
-- `backend/tests/Feature/AuthorizationSecurityTest.php`
-- `backend/tests/Feature/AuthenticationSecurityTest.php`
+- `docs/hardening/BOOKING_SECURITY_AUDIT.md`
+- `docs/hardening/BOOKING_STATE_MACHINE.md`
+- `docs/hardening/TRANSACTION_STRATEGY.md`
+- `backend/app/Modules/Booking/Domain/*`
+- `backend/app/Console/Commands/ExpirePendingBookingsCommand.php`
+- `backend/tests/Feature/BookingHardeningTest.php`
 - `frontend/src/lib/api/client.ts`
 - `frontend/.env.local`
 - `frontend/.env.example`
@@ -181,6 +204,7 @@ php artisan test tests/Feature/ApiV1HardeningTest.php --env=testing
 php artisan test tests/Feature/RouteInventorySecurityTest.php --env=testing
 php artisan test tests/Feature/AuthorizationSecurityTest.php --env=testing
 php artisan test tests/Feature/AuthenticationSecurityTest.php --env=testing
+php artisan test tests/Feature/BookingHardeningTest.php --env=testing
 ./vendor/bin/pint --test
 php artisan migrate:status --env=testing
 composer audit

@@ -16,7 +16,7 @@ use App\Modules\Booking\Application\DTOs\CreateBookingDTO;
 use App\Modules\Customer\Application\Actions\FindOrCreateCustomerAction;
 use App\Modules\Payment\Application\Actions\InitiatePaymentAction;
 use App\Modules\Pricing\Application\Queries\CalculateBookingQuoteQuery;
-use App\Shared\Domain\Exceptions\AvailabilityConflictException as DomainAvailabilityException;
+use App\Shared\Domain\Exceptions\BookingUnavailableException as DomainAvailabilityException;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +56,7 @@ class CheckoutController extends Controller
             'check_out' => $checkOut->toDateString(),
             'nights' => $pricing->nights,
             'guests' => $guests,
-            'nightly_rate_cents' => $pricing->nightlyRateCents,
+            'nightly_rate_cents' => $pricing->nights > 0 ? (int) round($pricing->subtotalCents / $pricing->nights) : $property->base_price_cents,
             'subtotal_cents' => $pricing->subtotalCents,
             'cleaning_fee_cents' => $pricing->cleaningFeeCents,
             'service_fee_cents' => $pricing->serviceFeeCents,

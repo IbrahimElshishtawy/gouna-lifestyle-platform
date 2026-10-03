@@ -17,8 +17,8 @@ class AssignRequestId
     {
         $incomingId = $request->header('X-Request-ID');
 
-        // Accept client-provided ID if it matches UUID format, otherwise generate a secure UUID v4
-        $requestId = ($incomingId && Str::isUuid($incomingId))
+        // Accept client-provided ID if safe (alphanumeric/hyphen/underscore up to 64 chars), otherwise generate UUID v4
+        $requestId = ($incomingId && preg_match('/^[a-zA-Z0-9\-_]{8,64}$/', $incomingId))
             ? $incomingId
             : Str::uuid()->toString();
 
