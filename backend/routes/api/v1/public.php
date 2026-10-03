@@ -39,7 +39,7 @@ Route::post('/leads', [LeadController::class, 'store'])
     ->middleware('throttle:inquiries')
     ->name('leads.store');
 
-// Authentication (ADR-003)
+// Authentication (ADR-003, P4-T02, P4-T03, P4-T05, P4-T09)
 Route::prefix('auth')->as('auth.')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:auth')
@@ -48,4 +48,27 @@ Route::prefix('auth')->as('auth.')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->middleware('auth:sanctum')
         ->name('logout');
+
+    Route::post('/2fa/challenge', [AuthController::class, 'challenge2fa'])
+        ->middleware('throttle:auth')
+        ->name('2fa.challenge');
+
+    Route::post('/2fa/recovery', [AuthController::class, 'recovery2fa'])
+        ->middleware('throttle:auth')
+        ->name('2fa.recovery');
+
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:auth')
+        ->name('password.forgot');
+
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+        ->middleware('throttle:auth')
+        ->name('password.reset');
+
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('/2fa/setup', [AuthController::class, 'setup2fa'])->name('2fa.setup');
+        Route::post('/2fa/confirm', [AuthController::class, 'confirm2fa'])->name('2fa.confirm');
+        Route::post('/2fa/disable', [AuthController::class, 'disable2fa'])->name('2fa.disable');
+        Route::post('/confirm-password', [AuthController::class, 'confirmPassword'])->name('password.confirm');
+    });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Logging\SensitiveDataRedactionProcessor;
 use App\Models\BlogPost;
 use App\Models\Booking;
 use App\Models\Customer;
@@ -35,6 +36,7 @@ use App\Shared\Infrastructure\Locking\DatabaseLockManager;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -61,15 +63,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Named Rate Limiters (Standard S1)
+        // Central Log Redaction Processor for Log Hygiene (P4-T11)
+        try {
+            Log::getLogger()->pushProcessor(new SensitiveDataRedactionProcessor);
+        } catch (\Throwable) {
+            // Safe fallback during early boot
+        }
+
+        // Named Rate Limiters (Standard S1, P4-T02)
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
         RateLimiter::for('auth', function (Request $request) {
-            $key = $request->ip().'|'.strtolower((string) $request->input('email', ''));
+            $email = strtolower((string) $request->input('email', ''));
+            $ip = (string) $request->ip();
 
-            return Limit::perMinute(5)->by($key);
+            return [
+                Limit::perMinute(5)->by('auth_email:'.$email.'|'.$ip),
+                Limit::perMinute(20)->by('auth_ip:'.$ip),
+            ];
         });
 
         RateLimiter::for('booking', function (Request $request) {

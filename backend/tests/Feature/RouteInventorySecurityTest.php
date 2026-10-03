@@ -13,6 +13,11 @@ class RouteInventorySecurityTest extends TestCase
     private const ALLOWED_EXCEPTIONS = [
         'admin/login',
         'admin/logout',
+        'admin/2fa/challenge',
+        'admin/2fa/recovery',
+        'admin/2fa/setup',
+        'admin/2fa/confirm',
+        'admin/2fa/disable',
     ];
 
     /**

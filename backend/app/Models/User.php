@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -18,7 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'phone', 'avatar', 'locale',
         'is_admin', 'is_active', 'force_password_change',
-        'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at',
+        'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at', 'two_factor_last_step',
         'last_login_ip', 'last_login_at',
     ];
 
@@ -31,6 +33,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_last_step' => 'integer',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
@@ -38,6 +42,11 @@ class User extends Authenticatable
             'force_password_change' => 'boolean',
             'two_factor_recovery_codes' => 'array',
         ];
+    }
+
+    public function setEmailAttribute(string $value): void
+    {
+        $this->attributes['email'] = Str::lower($value);
     }
 
     // Relationships
@@ -85,5 +94,83 @@ class User extends Authenticatable
     public function getFullNameAttribute(): string
     {
         return $this->name;
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && ! empty($this->two_factor_secret);
+    }
+
+    public function requiresTwoFactor(): bool
+    {
+        if ($this->is_admin) {
+            return true;
+        }
+
+        $requiredRoles = config('auth.require_2fa_roles', ['super_admin', 'finance', 'property_manager']);
+        foreach ($requiredRoles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate CSPRNG recovery codes, store their sha256 hashes, and return plain codes.
+     *
+     * @return array<string>
+     */
+    public function generateRecoveryCodes(int $count = 8): array
+    {
+        $plainCodes = [];
+        $hashedCodes = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $code = strtoupper(Str::random(4)).'-'.strtoupper(Str::random(4));
+            $plainCodes[] = $code;
+            $hashedCodes[] = hash('sha256', $code);
+        }
+
+        $this->forceFill([
+            'two_factor_recovery_codes' => $hashedCodes,
+        ])->save();
+
+        return $plainCodes;
+    }
+
+    /**
+     * Atomically consume a single-use recovery code.
+     */
+    public function consumeRecoveryCode(string $code): bool
+    {
+        $code = trim($code);
+        $codeHash = hash('sha256', $code);
+
+        return DB::transaction(function () use ($codeHash) {
+            $lockedUser = static::where('id', $this->id)->lockForUpdate()->first();
+            if (! $lockedUser) {
+                return false;
+            }
+
+            $currentCodes = $lockedUser->two_factor_recovery_codes ?? [];
+            if (! is_array($currentCodes)) {
+                return false;
+            }
+
+            $key = array_search($codeHash, $currentCodes, true);
+            if ($key === false) {
+                return false;
+            }
+
+            unset($currentCodes[$key]);
+            $lockedUser->two_factor_recovery_codes = array_values($currentCodes);
+            $lockedUser->save();
+
+            $this->two_factor_recovery_codes = $lockedUser->two_factor_recovery_codes;
+
+            return true;
+        });
     }
 }

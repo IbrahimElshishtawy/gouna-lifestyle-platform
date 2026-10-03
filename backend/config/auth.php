@@ -114,4 +114,19 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Authentication Roles (P4-T03)
+    |--------------------------------------------------------------------------
+    |
+    | Roles that strictly require TOTP two-factor authentication for admin access.
+    |
+    */
+
+    'require_2fa_roles' => [
+        'super_admin',
+        'finance',
+        'property_manager',
+    ],
+
 ];

@@ -1,12 +1,12 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 3 (RBAC & Authorization Enforcement) — COMPLETED
-- **Next phase**: 4 (Authentication, 2FA & Account Security)
-- **Last completed task ID**: P3-T14 (DONE)
-- **Branch**: `hardening/phase-3`
-- **Test status**: 28/28 Hardening tests PASS (119 assertions). 6/6 Baseline tests PASS. 11/11 Authorization tests PASS. 1/1 Route Inventory tests PASS. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
-- **Overall status**: PHASE 3 SIGNED-OFF
+- **Current phase**: 4 (Authentication, 2FA & Account Security) — COMPLETED
+- **Next phase**: 5 (Booking, IDOR & Concurrency)
+- **Last completed task ID**: P4-T13 (DONE)
+- **Branch**: `hardening/phase-4`
+- **Test status**: 97/97 tests PASS (488 assertions). 15/15 Authentication tests PASS. 11/11 Authorization tests PASS. 10/10 API Hardening tests PASS. 6/6 Baseline tests PASS. 1/1 Route Inventory tests PASS. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
+- **Overall status**: PHASE 4 SIGNED-OFF
 
 ## Task Completion Table (Phase 0 — G17 Discipline)
 | Task ID | Status | Evidence | Reason if not DONE |
@@ -78,6 +78,23 @@
 | P3-T13 | DONE | `Tests\Feature\AuthorizationSecurityTest` created with 11 privilege escalation scenarios passing 100%. | N/A |
 | P3-T14 | DONE | `RoleAndPermissionSeeder` updated with `updateOrCreate`, verified completely idempotent across repeated runs. | N/A |
 
+## Task Completion Table (Phase 4 — G17 Discipline)
+| Task ID | Status | Evidence | Reason if not DONE |
+|---|---|---|---|
+| P4-T01 | DONE | `docs/hardening/AUTHENTICATION_SECURITY.md` created; security audit matrix across Web/API complete. | N/A |
+| P4-T02 | DONE | Timing equalization (`Hash::check` against dummy bcrypt hash), dual rate limiting (`login_email_ip` and `login_ip`), and generic error messages implemented in `LoginController` and `AuthController`. Verified in tests. | N/A |
+| P4-T03 | DONE | RFC 6238 TOTP 2FA engine built (`TotpService.php`), replay protection via `two_factor_last_step`, window tolerance (+-1 step), mandatory 2FA enforcement for admin roles in `EnsureTwoFactorVerified.php`. Verified in tests. | N/A |
+| P4-T04 | DONE | Single-use recovery codes (8 CSPRNG codes stored as SHA-256 hashes) implemented in `User::generateRecoveryCodes` and `User::consumeRecoveryCode` with pessimistic row locking (`lockForUpdate`). Concurrent race test verified. | N/A |
+| P4-T05 | DONE | Secure password reset pipeline: 64-char CSPRNG token stored as SHA-256 hash, 60-min TTL, atomic one-time deletion, generic response (no enumeration), and instant revocation of other sessions/tokens. | N/A |
+| P4-T06 | DONE | Strict password policy (`Password::min(12)->mixedCase()->numbers()->symbols()`) enforced across registration, password resets, and changes. | N/A |
+| P4-T07 | DONE | Email verification architecture documented; signed URLs and throttle enforced. | N/A |
+| P4-T08 | DONE | Session and token management: `GET /api/v1/me/sessions`, `POST /api/v1/me/logout-all`, and token revocation upon password change implemented and verified. | N/A |
+| P4-T09 | DONE | Sensitive action re-authentication: `POST /api/v1/auth/confirm-password` issues confirmation state for sensitive operations (15 min validity). | N/A |
+| P4-T10 | DONE | Account lifecycle: immediate revocation of active tokens and sessions upon user deactivation (`EnsureAccountActive` checks fresh DB state). | N/A |
+| P4-T11 | DONE | Monolog log hygiene processor (`SensitiveDataRedactionProcessor`) implemented and registered; automatically redacts passwords, tokens, secrets, codes, cards, and authorization headers. | N/A |
+| P4-T12 | DONE | Anti-enumeration defense verified across registration, forgot-password, login, and 2FA challenge endpoints. | N/A |
+| P4-T13 | DONE | 15/15 automated tests in `backend/tests/Feature/AuthenticationSecurityTest.php` passing 100% (57 assertions). | N/A |
+
 ## Standards S1–S5 Comprehension (10-line summary)
 1. **S1 (Request Pipeline)**: Strict 14-step request lifecycle (Correlation ID → Trusted Proxies → CORS → Force JSON → Rate limit → Auth → Account state → Scoped bindings → Policy → FormRequest → Thin Controller → Action/Transaction → Resource → Exception envelope).
 2. **S1 Controllers/Requests**: Controllers only accept validated input, call a single Action, return Resource; FormRequests enforce explicit authorization and rigorous rules; zero `$request->all()`.
@@ -97,9 +114,13 @@
 - **D-004 (ADR-003)**: Dual-mode authentication: HTTP-only session cookies with CSRF double-submit protection for Next.js web application; Sanctum personal access tokens for native mobile and third-party API clients.
 - **D-005**: Persistent database idempotency ledger via `idempotency_keys` table with SHA-256 payload hashing, 24-hour TTL, and atomic response caching to prevent duplicate bookings and financial double-charges.
 - **D-006**: Three-layer Zero-Trust Authorization Architecture: Model Policies evaluate permission + scope + state invariants; `Gate::after` acts strictly as an unhandled fallback for simple string abilities without overriding policy decisions; `Gate::before` allows super-admin bypass while strictly preserving User safety invariants (cannot delete self, cannot delete last super-admin).
+- **D-007**: Eloquent Model Cast `'password' => 'hashed'` automatically hashes any raw string assigned to `$user->password`. Tests and factories must pass plain strings to avoid double-hashing.
+- **D-008**: User Email Normalization: Added `setEmailAttribute` mutator on `User` model and `whereRaw('LOWER(email) = ?', [$email])` across queries to guarantee cross-database case-insensitive authentication regardless of backend engine (SQLite vs PostgreSQL vs MySQL).
+- **D-009**: Fresh DB Status Check in `EnsureAccountActive`: `EnsureAccountActive` checks fresh database status rather than stale in-memory cached model attributes, ensuring account deactivations revoke access across all ongoing sessions and tokens immediately.
+- **D-010**: Atomic Recovery Code Consumption: Recovery codes are stored as SHA-256 hashes and consumed inside a database transaction with `lockForUpdate()`, strictly preventing concurrent race conditions from executing multiple logins with the same single-use code.
 
 ## Open Findings
-- None blocking Phase 2.
+- None blocking Phase 4. All 15 security scenarios verified.
 
 ## Files Changed (Cumulative)
 - `docs/hardening/LEDGER.md`
@@ -114,51 +135,53 @@
 - `docs/hardening/ROUTE_MIGRATION_MAP.md`
 - `docs/hardening/API_CONTRACT.md`
 - `docs/hardening/AUTHENTICATION_FLOW.md`
+- `docs/hardening/AUTHENTICATION_SECURITY.md`
+- `docs/hardening/TWO_FACTOR_FLOW.md`
 - `docs/hardening/ERROR_STANDARD.md`
 - `docs/hardening/NEXTJS_INTEGRATION.md`
 - `docs/hardening/adr/ADR-003-AUTH-MODE.md`
+- `docs/hardening/AUTHORIZATION_MATRIX.md`
 - `backend/bootstrap/app.php`
 - `backend/config/cors.php`
+- `backend/config/auth.php`
 - `backend/app/Providers/AppServiceProvider.php`
 - `backend/app/Models/User.php`
-- `backend/app/Exceptions/DomainException.php`
-- `backend/app/Exceptions/AvailabilityConflictException.php`
-- `backend/app/Exceptions/IdempotencyConflictException.php`
-- `backend/app/Exceptions/MissingIdempotencyKeyException.php`
-- `backend/app/Http/Middleware/AssignRequestId.php`
-- `backend/app/Http/Middleware/ForceJsonResponse.php`
-- `backend/app/Http/Middleware/EnsureAccountActive.php`
-- `backend/app/Http/Middleware/EnsureTwoFactorVerified.php`
-- `backend/app/Http/Middleware/VerifyWebhookSignature.php`
-- `backend/app/Http/Middleware/EnsureIdempotency.php`
+- `backend/app/Services/Auth/TotpService.php`
+- `backend/app/Services/Auth/PermissionResolver.php`
+- `backend/app/Logging/SensitiveDataRedactionProcessor.php`
+- `backend/app/Policies/*`
+- `backend/app/Exceptions/*`
+- `backend/app/Http/Middleware/*`
 - `backend/app/Support/Traits/AppliesListingStandard.php`
 - `backend/app/Http/Resources/Api/V1/*`
 - `backend/app/Http/Requests/Api/V1/*`
-- `backend/app/Http/Requests/Admin/StorePropertyRequest.php`
-- `backend/app/Http/Requests/Admin/UpdatePropertyRequest.php`
+- `backend/app/Http/Requests/Admin/*`
 - `backend/app/Http/Controllers/Api/V1/*`
-- `backend/app/Http/Controllers/Admin/PropertyController.php`
+- `backend/app/Http/Controllers/Auth/*`
+- `backend/app/Http/Controllers/Admin/*`
+- `backend/resources/views/auth/*`
 - `backend/routes/api.php`
 - `backend/routes/api/v1/*`
-- `backend/database/migrations/2026_10_02_223000_create_idempotency_keys_table.php`
+- `backend/routes/web.php`
+- `backend/database/migrations/*`
+- `backend/database/seeders/RoleAndPermissionSeeder.php`
+- `backend/tests/Feature/BaselineCharacterizationTest.php`
 - `backend/tests/Feature/ApiV1HardeningTest.php`
+- `backend/tests/Feature/RouteInventorySecurityTest.php`
+- `backend/tests/Feature/AuthorizationSecurityTest.php`
+- `backend/tests/Feature/AuthenticationSecurityTest.php`
 - `frontend/src/lib/api/client.ts`
 - `frontend/.env.local`
 - `frontend/.env.example`
-- `docs/hardening/AUTHORIZATION_MATRIX.md`
-- `backend/app/Services/Auth/PermissionResolver.php`
-- `backend/app/Policies/*`
-- `backend/database/seeders/RoleAndPermissionSeeder.php`
-- `backend/tests/Feature/RouteInventorySecurityTest.php`
-- `backend/tests/Feature/AuthorizationSecurityTest.php`
 
 ## Commands That Must Pass Before Moving On
 ```bash
-php artisan test --group=baseline
-php artisan test tests/Feature/ApiV1HardeningTest.php
-php artisan test tests/Feature/RouteInventorySecurityTest.php
-php artisan test tests/Feature/AuthorizationSecurityTest.php
+php artisan test --group=baseline --env=testing
+php artisan test tests/Feature/ApiV1HardeningTest.php --env=testing
+php artisan test tests/Feature/RouteInventorySecurityTest.php --env=testing
+php artisan test tests/Feature/AuthorizationSecurityTest.php --env=testing
+php artisan test tests/Feature/AuthenticationSecurityTest.php --env=testing
 ./vendor/bin/pint --test
-php artisan migrate:status
+php artisan migrate:status --env=testing
 composer audit
 ```

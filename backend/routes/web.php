@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ExperienceController;
 use App\Http\Controllers\Admin\LocaleController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ExperienceListingController;
 use App\Http\Controllers\HomeController;
@@ -21,10 +22,19 @@ Route::prefix('admin')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:admin_login')->name('admin.login.submit');
     Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('admin.logout');
+
+    // 2FA Challenge & Recovery during Login (P4-T03)
+    Route::get('/2fa/challenge', [TwoFactorController::class, 'showChallenge'])->name('admin.2fa.challenge');
+    Route::post('/2fa/challenge', [TwoFactorController::class, 'verifyChallenge']);
+    Route::post('/2fa/recovery', [TwoFactorController::class, 'verifyRecovery'])->name('admin.2fa.recovery');
 });
 
 // Protected Admin Dashboard & Management Shell
-Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['web', 'admin', '2fa', 'locale'])->prefix('admin')->name('admin.')->group(function () {
+    // 2FA Management (Setup, Confirm, Disable)
+    Route::get('/2fa/setup', [TwoFactorController::class, 'showSetup'])->name('2fa.setup');
+    Route::post('/2fa/confirm', [TwoFactorController::class, 'confirmSetup'])->name('2fa.confirm');
+    Route::post('/2fa/disable', [TwoFactorController::class, 'disable'])->name('2fa.disable');
     // Dashboard Home
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('can:dashboard.view');
 
