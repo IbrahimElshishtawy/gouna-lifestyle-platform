@@ -24,7 +24,7 @@ class AnalyzeSeasonalOverlapQuery
             ->where('is_active', true)
             ->whereDate('start_date', '<=', $endDate->toDateString())
             ->whereDate('end_date', '>=', $startDate->toDateString())
-            ->when($ignoreSeasonId, fn($q) => $q->where('id', '!=', $ignoreSeasonId))
+            ->when($ignoreSeasonId, fn ($q) => $q->where('id', '!=', $ignoreSeasonId))
             ->orderByDesc('priority')
             ->get();
 

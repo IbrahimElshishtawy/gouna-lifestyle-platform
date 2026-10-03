@@ -35,12 +35,12 @@ class EventResource extends BaseJsonResource
                 'is_published' => (bool) $this->is_published,
             ],
             'relationships' => [
-                'location' => $this->whenLoaded('location', fn() => [
+                'location' => $this->whenLoaded('location', fn () => [
                     'id' => $this->location->id,
                     'name' => $locale === 'ar' ? $this->location->name_ar : $this->location->name_en,
                     'slug' => $this->location->slug,
                 ]),
-                'media' => $this->whenLoaded('media', fn() => $this->media->map(fn($item) => [
+                'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
                     'url' => asset('storage/'.$item->file_path),
                     'is_primary' => (bool) $item->is_primary,

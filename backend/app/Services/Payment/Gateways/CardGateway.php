@@ -5,6 +5,7 @@ namespace App\Services\Payment\Gateways;
 use App\Models\Booking;
 use App\Models\PaymentTransaction;
 use App\Services\Payment\PaymentGatewayInterface;
+use Illuminate\Support\Str;
 
 /**
  * Card Gateway adapter — architecture-ready placeholder.
@@ -17,6 +18,7 @@ use App\Services\Payment\PaymentGatewayInterface;
 class CardGateway implements PaymentGatewayInterface
 {
     private array $config;
+
     private bool $testMode;
 
     public function __construct(array $config = [])
@@ -29,7 +31,7 @@ class CardGateway implements PaymentGatewayInterface
     {
         if ($this->testMode) {
             // Test mode: simulate a checkout session
-            $sessionId = 'CARD-' . strtoupper(\Illuminate\Support\Str::random(16));
+            $sessionId = 'CARD-'.strtoupper(Str::random(16));
             $checkoutUrl = route('checkout.card-mock', [
                 'reference' => $booking->reference,
                 'session' => $sessionId,
@@ -68,7 +70,7 @@ class CardGateway implements PaymentGatewayInterface
     public function refundPayment(PaymentTransaction $transaction, int $refundAmountCents): array
     {
         if ($this->testMode) {
-            return ['status' => 'refunded', 'refund_id' => 'TEST-REFUND-' . time()];
+            return ['status' => 'refunded', 'refund_id' => 'TEST-REFUND-'.time()];
         }
 
         throw new \RuntimeException('Card gateway not configured for live refunds.');
@@ -79,6 +81,7 @@ class CardGateway implements PaymentGatewayInterface
         if ($this->testMode) {
             return 'completed';
         }
+
         return 'unknown';
     }
 

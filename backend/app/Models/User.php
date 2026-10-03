@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Auth\PermissionResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -72,12 +73,13 @@ class User extends Authenticatable
         if ($this->relationLoaded('roles')) {
             return $this->roles->contains('name', $roleName);
         }
+
         return $this->roles()->where('name', $roleName)->exists();
     }
 
     public function hasPermission(string $permissionName): bool
     {
-        return app(\App\Services\Auth\PermissionResolver::class)->hasPermission($this, $permissionName);
+        return app(PermissionResolver::class)->hasPermission($this, $permissionName);
     }
 
     public function getFullNameAttribute(): string

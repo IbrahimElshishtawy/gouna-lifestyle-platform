@@ -5,8 +5,6 @@ namespace Tests\Feature;
 use App\Helpers\WhatsAppHelper;
 use App\Models\Experience;
 use App\Models\Property;
-use App\Models\Setting;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SeoAndAnalyticsTest extends TestCase
@@ -42,7 +40,7 @@ class SeoAndAnalyticsTest extends TestCase
         $response->assertSee('User-agent: *', false);
         $response->assertSee('Disallow: /admin/', false);
         $response->assertSee('Disallow: /checkout/mock/', false);
-        $response->assertSee('Sitemap: ' . route('seo.sitemap'), false);
+        $response->assertSee('Sitemap: '.route('seo.sitemap'), false);
     }
 
     /**
@@ -57,7 +55,7 @@ class SeoAndAnalyticsTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type": "LodgingBusiness"', false);
-        $response->assertSee('"numberOfRooms": ' . $property->bedrooms, false);
+        $response->assertSee('"numberOfRooms": '.$property->bedrooms, false);
         $response->assertSee(route('properties.show', $property->slug), false);
         $response->assertSee('view_item', false);
     }

@@ -5,17 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\Location;
 use App\Models\Property;
-use App\Models\PropertyCategory;
+use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
+use App\Modules\Lead\Presentation\Requests\StorePropertyInquiryRequest;
+use App\Modules\Property\Application\Queries\SearchPropertiesQuery;
+use App\Modules\Property\Presentation\Requests\PropertySearchRequest;
 use App\Services\AvailabilityService;
 use App\Services\PricingService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
-use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
-use App\Shared\Infrastructure\Caching\CacheKeys;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class PropertyListingController extends Controller
@@ -24,13 +23,13 @@ class PropertyListingController extends Controller
         private AvailabilityService $availabilityService,
         private PricingService $pricingService,
         private StoreInquiryLeadAction $storeLeadAction,
-        private \App\Modules\Property\Application\Queries\SearchPropertiesQuery $searchPropertiesQuery,
+        private SearchPropertiesQuery $searchPropertiesQuery,
     ) {}
 
     /**
      * Display a filtered listing of properties (Vacation Rentals & Real Estate).
      */
-    public function index(\App\Modules\Property\Presentation\Requests\PropertySearchRequest $request): View
+    public function index(PropertySearchRequest $request): View
     {
         $viewData = $this->searchPropertiesQuery->execute($request->toDTO());
 
@@ -51,9 +50,9 @@ class PropertyListingController extends Controller
             'category',
             'location',
             'amenities',
-            'seasonalPrices' => fn($q) => $q->active()->orderByDesc('priority'),
+            'seasonalPrices' => fn ($q) => $q->active()->orderByDesc('priority'),
             'images',
-            'paymentMethods' => fn($q) => $q->wherePivot('is_enabled', true)->where('payment_methods.is_enabled', true),
+            'paymentMethods' => fn ($q) => $q->wherePivot('is_enabled', true)->where('payment_methods.is_enabled', true),
         ]);
 
         // Default query params for initial booking widget state
@@ -78,7 +77,7 @@ class PropertyListingController extends Controller
             ->where('id', '!=', $property->id)
             ->where(function ($q) use ($property) {
                 $q->where('location_id', $property->location_id)
-                  ->orWhere('property_category_id', $property->property_category_id);
+                    ->orWhere('property_category_id', $property->property_category_id);
             })
             ->with(['category', 'location', 'images'])
             ->take(3)
@@ -97,7 +96,7 @@ class PropertyListingController extends Controller
     /**
      * Store lead inquiry for a property (Sale viewing or rental question).
      */
-    public function inquire(\App\Modules\Lead\Presentation\Requests\StorePropertyInquiryRequest $request, Property $property): RedirectResponse|JsonResponse
+    public function inquire(StorePropertyInquiryRequest $request, Property $property): RedirectResponse|JsonResponse
     {
         $this->storeLeadAction->execute($request->toDTO($property));
 

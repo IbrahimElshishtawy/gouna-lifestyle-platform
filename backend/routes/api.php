@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Public\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,9 @@ Route::prefix('v1')->as('api.v1.')->group(function () {
 
     // Authenticated Admin routes
     Route::prefix('admin')->as('admin.')->middleware(['auth:sanctum'])->group(base_path('routes/api/v1/admin.php'));
+
+    // Direct Frontend Abilities (P3-T11)
+    Route::middleware(['auth:sanctum'])->get('/me/abilities', [AuthController::class, 'abilities'])->name('me.abilities');
 
     // External Webhooks
     Route::prefix('webhooks')->as('webhooks.')->group(base_path('routes/api/v1/webhooks.php'));

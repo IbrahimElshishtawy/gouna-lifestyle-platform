@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\PermissionResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,7 @@ class AuthController extends Controller
 
         if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = RateLimiter::availableIn($throttleKey);
+
             return response()->json([
                 'error' => [
                     'code' => 'RATE_LIMIT_EXCEEDED',
@@ -152,12 +154,11 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $abilities = [];
-        if ($user->is_admin || $user->hasRole('super_admin')) {
-            $abilities = ['*'];
-        } else {
-            $abilities = $user->permissions->pluck('name')->toArray();
-        }
+        $resolver = app(PermissionResolver::class);
+        $resolved = $resolver->resolvePermissions($user);
+        $abilities = isset($resolved['*']) && $resolved['*'] === true
+            ? ['*']
+            : array_values(array_keys(array_filter($resolved)));
 
         $requestId = $request->attributes->get('request_id');
 
@@ -175,6 +176,69 @@ class AuthController extends Controller
             ],
             'meta' => [
                 'request_id' => $requestId,
+                'timestamp' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Retrieve permission abilities and query scopes for frontend UI (P3-T11).
+     */
+    public function abilities(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHENTICATED',
+                    'message' => 'Unauthenticated.',
+                    'details' => null,
+                    'request_id' => $request->attributes->get('request_id'),
+                    'timestamp' => now()->toIso8601String(),
+                ],
+            ], 401);
+        }
+
+        $roles = $user->roles->pluck('name')->toArray();
+        $isSuperAdmin = (bool) ($user->is_admin || in_array('super_admin', $roles, true));
+
+        if ($isSuperAdmin) {
+            $permissions = ['*'];
+            $scopes = [
+                'properties' => 'all',
+                'bookings' => 'all',
+                'payments' => 'all',
+                'customers' => 'all',
+                'events' => 'all',
+                'experiences' => 'all',
+                'reports' => 'all',
+            ];
+        } else {
+            $resolver = app(PermissionResolver::class);
+            $resolved = $resolver->resolvePermissions($user);
+            $permissions = array_values(array_keys(array_filter($resolved)));
+
+            $scopes = [
+                'properties' => in_array('property_manager', $roles, true) ? 'all' : (in_array('sales', $roles, true) ? 'assigned' : 'none'),
+                'bookings' => in_array('finance', $roles, true) || in_array('property_manager', $roles, true) ? 'all' : (in_array('staff', $roles, true) ? 'assigned' : 'none'),
+                'payments' => in_array('finance', $roles, true) ? 'all' : 'none',
+                'customers' => in_array('property_manager', $roles, true) ? 'all' : (in_array('sales', $roles, true) ? 'assigned' : 'none'),
+                'events' => in_array('events_manager', $roles, true) ? 'all' : 'none',
+                'experiences' => in_array('events_manager', $roles, true) ? 'all' : 'none',
+                'reports' => in_array('finance', $roles, true) ? 'all' : 'none',
+            ];
+        }
+
+        return response()->json([
+            'data' => [
+                'roles' => $roles,
+                'permissions' => $permissions,
+                'scopes' => $scopes,
+                'is_admin' => $isSuperAdmin,
+            ],
+            'meta' => [
+                'request_id' => $request->attributes->get('request_id'),
                 'timestamp' => now()->toIso8601String(),
             ],
         ]);

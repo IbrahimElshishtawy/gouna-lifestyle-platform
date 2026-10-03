@@ -30,6 +30,7 @@ class Fee extends Model
         if ($this->type === 'percentage') {
             return (int) round($amountCents * ($this->value / 100));
         }
+
         return (int) ($this->value * 100);
     }
 

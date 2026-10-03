@@ -20,7 +20,7 @@ enum BookingStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Draft => 'Draft',
             self::Pending => 'Pending',
             self::AwaitingPayment => 'Awaiting Payment',
@@ -39,7 +39,7 @@ enum BookingStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Draft => 'gray',
             self::Pending => 'yellow',
             self::AwaitingPayment => 'orange',

@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Modules\Experience\Application\DTOs\ExperienceSearchFiltersDTO;
 use App\Shared\Infrastructure\Caching\CacheKeys;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class SearchExperiencesQuery
@@ -17,8 +18,8 @@ class SearchExperiencesQuery
     /**
      * @return array{
      *     experiences: LengthAwarePaginator,
-     *     categories: \Illuminate\Database\Eloquent\Collection,
-     *     locations: \Illuminate\Database\Eloquent\Collection,
+     *     categories: Collection,
+     *     locations: Collection,
      *     categorySlug: ?string,
      *     locationSlug: ?string
      * }
@@ -28,11 +29,11 @@ class SearchExperiencesQuery
         $query = Experience::published()->with(['category', 'location', 'images']);
 
         if (! empty($filters->categorySlug) && $filters->categorySlug !== 'all') {
-            $query->whereHas('category', fn($q) => $q->where('slug', $filters->categorySlug));
+            $query->whereHas('category', fn ($q) => $q->where('slug', $filters->categorySlug));
         }
 
         if (! empty($filters->locationSlug) && $filters->locationSlug !== 'all') {
-            $query->whereHas('location', fn($q) => $q->where('slug', $filters->locationSlug));
+            $query->whereHas('location', fn ($q) => $q->where('slug', $filters->locationSlug));
         }
 
         $experiences = $query->orderByDesc('is_featured')
@@ -43,13 +44,13 @@ class SearchExperiencesQuery
         $categories = Cache::remember(
             CacheKeys::EXPERIENCE_CATEGORIES_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => ExperienceCategory::active()->get()
+            fn () => ExperienceCategory::active()->get()
         );
 
         $locations = Cache::remember(
             CacheKeys::LOCATIONS_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => Location::active()->get()
+            fn () => Location::active()->get()
         );
 
         return [

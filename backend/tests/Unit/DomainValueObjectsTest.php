@@ -8,7 +8,6 @@ use App\Shared\Domain\ValueObjects\BookingReference;
 use App\Shared\Domain\ValueObjects\DateRange;
 use App\Shared\Domain\ValueObjects\GuestCount;
 use App\Shared\Domain\ValueObjects\Money;
-use Carbon\Carbon;
 use InvalidArgumentException;
 use Tests\TestCase;
 

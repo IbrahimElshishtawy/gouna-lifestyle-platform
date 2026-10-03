@@ -12,10 +12,8 @@ interface IdempotencyServiceInterface
      * Execute an action with idempotency protection.
      * If the key was already executed, returns the cached result.
      *
-     * @param string $key Unique idempotency key (e.g. from client request header or generated)
-     * @param Closure(): mixed $callback
-     * @param int $ttlSeconds
-     * @return mixed
+     * @param  string  $key  Unique idempotency key (e.g. from client request header or generated)
+     * @param  Closure(): mixed  $callback
      */
     public function execute(string $key, Closure $callback, int $ttlSeconds = 86400): mixed;
 }

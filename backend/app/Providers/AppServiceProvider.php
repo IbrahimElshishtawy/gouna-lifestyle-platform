@@ -28,6 +28,10 @@ use App\Policies\PaymentPolicy;
 use App\Policies\PropertyPolicy;
 use App\Policies\SettingPolicy;
 use App\Policies\UserPolicy;
+use App\Shared\Application\Contracts\IdempotencyServiceInterface;
+use App\Shared\Application\Contracts\LockManagerInterface;
+use App\Shared\Infrastructure\Idempotency\IdempotencyService;
+use App\Shared\Infrastructure\Locking\DatabaseLockManager;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -42,13 +46,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(
-            \App\Shared\Application\Contracts\LockManagerInterface::class,
-            \App\Shared\Infrastructure\Locking\DatabaseLockManager::class
+            LockManagerInterface::class,
+            DatabaseLockManager::class
         );
 
         $this->app->singleton(
-            \App\Shared\Application\Contracts\IdempotencyServiceInterface::class,
-            \App\Shared\Infrastructure\Idempotency\IdempotencyService::class
+            IdempotencyServiceInterface::class,
+            IdempotencyService::class
         );
     }
 
@@ -64,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth', function (Request $request) {
             $key = $request->ip().'|'.strtolower((string) $request->input('email', ''));
+
             return Limit::perMinute(5)->by($key);
         });
 
@@ -120,6 +125,7 @@ class AppServiceProvider extends ServiceProvider
             if ($user->is_admin || $user->hasRole('super_admin')) {
                 return true;
             }
+
             return null;
         });
 
@@ -128,6 +134,7 @@ class AppServiceProvider extends ServiceProvider
             if ($result !== null) {
                 return $result;
             }
+
             return $user->hasPermission($ability);
         });
     }

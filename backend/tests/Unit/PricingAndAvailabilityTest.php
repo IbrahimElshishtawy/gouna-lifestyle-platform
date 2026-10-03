@@ -18,7 +18,9 @@ use Tests\TestCase;
 class PricingAndAvailabilityTest extends TestCase
 {
     private PricingService $pricingService;
+
     private AvailabilityService $availabilityService;
+
     private Property $testProperty;
 
     protected function setUp(): void

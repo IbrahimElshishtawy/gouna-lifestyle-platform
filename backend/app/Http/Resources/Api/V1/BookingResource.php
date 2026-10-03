@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\Property;
 use Illuminate\Http\Request;
 
 class BookingResource extends BaseJsonResource
@@ -46,12 +47,13 @@ class BookingResource extends BaseJsonResource
             ],
             'relationships' => [
                 'bookable' => $this->whenLoaded('bookable', function () {
-                    if ($this->bookable instanceof \App\Models\Property) {
+                    if ($this->bookable instanceof Property) {
                         return new PropertyResource($this->bookable);
                     }
+
                     return null;
                 }),
-                'customer' => $this->whenLoaded('customer', fn() => [
+                'customer' => $this->whenLoaded('customer', fn () => [
                     'id' => $this->customer->id,
                     'name' => $this->customer->name,
                     'email' => $this->customer->email,

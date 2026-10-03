@@ -7,8 +7,6 @@ use App\Models\Location;
 use App\Models\PaymentMethod;
 use App\Models\Property;
 use App\Models\PropertyCategory;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -19,6 +17,7 @@ class ApiV1HardeningTest extends TestCase
     use RefreshDatabase;
 
     private Property $property;
+
     private PaymentMethod $paymentMethod;
 
     protected function setUp(): void

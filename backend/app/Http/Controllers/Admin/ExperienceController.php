@@ -10,6 +10,7 @@ use App\Models\Media;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -30,8 +31,8 @@ class ExperienceController extends Controller
             $s = $request->input('search');
             $query->where(function ($q) use ($s) {
                 $q->where('title_en', 'like', "%{$s}%")
-                  ->orWhere('title_ar', 'like', "%{$s}%")
-                  ->orWhere('slug', 'like', "%{$s}%");
+                    ->orWhere('title_ar', 'like', "%{$s}%")
+                    ->orWhere('slug', 'like', "%{$s}%");
             });
         }
 
@@ -93,7 +94,7 @@ class ExperienceController extends Controller
             'images.*' => ['nullable', 'image', 'max:10240'],
         ]);
 
-        $slug = Str::slug($validated['title_en']) . '-' . strtolower(Str::random(4));
+        $slug = Str::slug($validated['title_en']).'-'.strtolower(Str::random(4));
         $basePriceCents = (int) round($validated['base_price'] * 100);
 
         $experience = Experience::create([
@@ -235,6 +236,8 @@ class ExperienceController extends Controller
      */
     public function destroy(Experience $experience): RedirectResponse
     {
+        Gate::authorize('delete', $experience);
+
         $title = $experience->title_en;
         $experience->delete();
 
@@ -248,9 +251,10 @@ class ExperienceController extends Controller
     {
         if ($media->mediable_id === $experience->id && $media->mediable_type === Experience::class) {
             $this->mediaService->deleteMedia($media);
+
             return back()->with('success', 'Media file removed successfully.');
         }
 
-        abort(403);
+        abort(404);
     }
 }

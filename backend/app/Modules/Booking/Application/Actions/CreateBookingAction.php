@@ -18,7 +18,6 @@ use App\Shared\Domain\Exceptions\PaymentMethodNotAllowedException;
 use App\Shared\Domain\Exceptions\PaymentRequirementMismatchException;
 use App\Shared\Domain\ValueObjects\BookingReference;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class CreateBookingAction
 {

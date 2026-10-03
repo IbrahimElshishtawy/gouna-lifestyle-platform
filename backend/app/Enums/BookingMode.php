@@ -11,7 +11,7 @@ enum BookingMode: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Instant => 'Instant Booking',
             self::Request => 'Request to Book',
             self::WhatsApp => 'WhatsApp Inquiry',

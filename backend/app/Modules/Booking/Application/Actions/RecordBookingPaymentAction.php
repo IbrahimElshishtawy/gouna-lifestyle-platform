@@ -11,7 +11,7 @@ class RecordBookingPaymentAction
 {
     public function execute(Booking $booking, int $amountCents, string $type = 'payment'): void
     {
-        DB::transaction(function () use ($booking, $amountCents, $type) {
+        DB::transaction(function () use ($booking, $amountCents) {
             $booking->increment('amount_paid_cents', $amountCents);
             $booking->amount_remaining_cents = max(0, $booking->total_cents - $booking->amount_paid_cents);
 

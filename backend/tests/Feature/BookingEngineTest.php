@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\AvailabilityBlock;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Discount;
@@ -11,17 +10,20 @@ use App\Models\Location;
 use App\Models\PaymentMethod;
 use App\Models\Property;
 use App\Models\PropertyCategory;
-use App\Models\SeasonalPrice;
-use Carbon\Carbon;
 use Tests\TestCase;
 
 class BookingEngineTest extends TestCase
 {
     private Property $property;
+
     private PaymentMethod $cardMethod;
+
     private PaymentMethod $paypalMethod;
+
     private PaymentMethod $cashMethod;
+
     private PaymentMethod $bankMethod;
+
     private Discount $promoCode;
 
     protected function setUp(): void
@@ -248,7 +250,7 @@ class BookingEngineTest extends TestCase
 
         // Card gateway redirects to mock 3DS simulation
         $booking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'menas@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'menas@test-booking.com'))
             ->latest()
             ->first();
 
@@ -262,7 +264,7 @@ class BookingEngineTest extends TestCase
         $this->assertEquals(500000, $booking->nightlyPrices->first()->price_cents);
 
         // Assert redirect to 3DS mock
-        $this->assertStringContainsString('/checkout/mock/card/' . $booking->reference, $response->headers->get('Location'));
+        $this->assertStringContainsString('/checkout/mock/card/'.$booking->reference, $response->headers->get('Location'));
 
         // Visit 3DS mock view
         $mockViewResponse = $this->get(route('checkout.card-mock', $booking->reference));
@@ -311,7 +313,7 @@ class BookingEngineTest extends TestCase
         $this->post(route('checkout.process'), $checkoutData);
 
         $booking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'decline@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'decline@test-booking.com'))
             ->latest()
             ->first();
 
@@ -347,11 +349,11 @@ class BookingEngineTest extends TestCase
         $response = $this->post(route('checkout.process'), $checkoutData);
 
         $booking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'paypal-buyer@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'paypal-buyer@test-booking.com'))
             ->latest()
             ->first();
 
-        $this->assertStringContainsString('/checkout/mock/paypal/' . $booking->reference, $response->headers->get('Location'));
+        $this->assertStringContainsString('/checkout/mock/paypal/'.$booking->reference, $response->headers->get('Location'));
 
         $paypalView = $this->get(route('checkout.paypal-mock', $booking->reference));
         $paypalView->assertStatus(200);
@@ -390,7 +392,7 @@ class BookingEngineTest extends TestCase
         $response = $this->post(route('checkout.process'), $checkoutData);
 
         $booking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'cash-client@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'cash-client@test-booking.com'))
             ->latest()
             ->first();
 
@@ -458,7 +460,7 @@ class BookingEngineTest extends TestCase
         $this->post(route('checkout.process'), $checkoutData);
 
         $booking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'promo@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'promo@test-booking.com'))
             ->latest()
             ->first();
 
@@ -502,7 +504,7 @@ class BookingEngineTest extends TestCase
         $this->post(route('checkout.process'), $firstBookingData);
 
         $firstBooking = Booking::where('bookable_id', $this->property->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'first@test-booking.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'first@test-booking.com'))
             ->latest()
             ->first();
 

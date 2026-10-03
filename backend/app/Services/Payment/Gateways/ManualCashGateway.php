@@ -5,6 +5,7 @@ namespace App\Services\Payment\Gateways;
 use App\Models\Booking;
 use App\Models\PaymentTransaction;
 use App\Services\Payment\PaymentGatewayInterface;
+use Illuminate\Support\Str;
 
 /**
  * Manual Cash Gateway — no real payment processing.
@@ -14,14 +15,14 @@ class ManualCashGateway implements PaymentGatewayInterface
 {
     public function createPayment(Booking $booking, int $amountCents, string $currency): array
     {
-        $transactionId = 'CASH-' . strtoupper(\Illuminate\Support\Str::random(12));
+        $transactionId = 'CASH-'.strtoupper(Str::random(12));
 
         return [
             'redirect_url' => null,
             'transaction_id' => $transactionId,
             'status' => 'pending_manual',
             'meta' => [
-                'message' => 'Please pay in cash at our office. Your booking reference is: ' . $booking->reference,
+                'message' => 'Please pay in cash at our office. Your booking reference is: '.$booking->reference,
                 'amount_cents' => $amountCents,
                 'currency' => $currency,
             ],
@@ -38,7 +39,7 @@ class ManualCashGateway implements PaymentGatewayInterface
     {
         return [
             'status' => 'manual_refund',
-            'message' => 'Refund must be processed manually. Amount: ' . number_format($refundAmountCents / 100, 2),
+            'message' => 'Refund must be processed manually. Amount: '.number_format($refundAmountCents / 100, 2),
         ];
     }
 

@@ -18,9 +18,9 @@ interface LockManagerInterface
      * Execute a callback inside an atomic database transaction with a row lock.
      *
      * @template T
-     * @param class-string<Model> $modelClass
-     * @param int|string $id
-     * @param Closure(Model): T $callback
+     *
+     * @param  class-string<Model>  $modelClass
+     * @param  Closure(Model): T  $callback
      * @return T
      */
     public function withRowLock(string $modelClass, int|string $id, Closure $callback): mixed;

@@ -14,6 +14,7 @@ use Tests\TestCase;
 class PerformanceBaselineBenchmarkTest extends TestCase
 {
     private User $admin;
+
     private Property $property;
 
     protected function setUp(): void
@@ -124,15 +125,15 @@ class PerformanceBaselineBenchmarkTest extends TestCase
         ];
 
         $reportLines = [];
-        $reportLines[] = "# GouNow Performance Baseline Report (Phase 0 — P0-T07)";
-        $reportLines[] = "";
-        $reportLines[] = "- **Environment**: Local SQLite testing database (`testing.sqlite`)";
-        $reportLines[] = "- **Timestamp**: " . Carbon::now()->toIso8601String();
-        $reportLines[] = "- **Iterations**: 20 requests per critical endpoint";
-        $reportLines[] = "- **Strict Mode Test**: Monitored query logs and executed query counts";
-        $reportLines[] = "";
-        $reportLines[] = "| Endpoint | Method | Status | Queries Count | p50 Latency (ms) | p95 Latency (ms) | Response Size (Bytes) |";
-        $reportLines[] = "|---|---|---|---|---|---|---|";
+        $reportLines[] = '# GouNow Performance Baseline Report (Phase 0 — P0-T07)';
+        $reportLines[] = '';
+        $reportLines[] = '- **Environment**: Local SQLite testing database (`testing.sqlite`)';
+        $reportLines[] = '- **Timestamp**: '.Carbon::now()->toIso8601String();
+        $reportLines[] = '- **Iterations**: 20 requests per critical endpoint';
+        $reportLines[] = '- **Strict Mode Test**: Monitored query logs and executed query counts';
+        $reportLines[] = '';
+        $reportLines[] = '| Endpoint | Method | Status | Queries Count | p50 Latency (ms) | p95 Latency (ms) | Response Size (Bytes) |';
+        $reportLines[] = '|---|---|---|---|---|---|---|';
 
         foreach ($scenarios as $scenario) {
             $durations = [];
@@ -170,11 +171,11 @@ class PerformanceBaselineBenchmarkTest extends TestCase
             }
 
             sort($durations);
-            $p50 = $durations[(int)floor(0.50 * count($durations))];
-            $p95 = $durations[(int)floor(0.95 * count($durations))];
+            $p50 = $durations[(int) floor(0.50 * count($durations))];
+            $p95 = $durations[(int) floor(0.95 * count($durations))];
 
             $reportLines[] = sprintf(
-                "| %s | %s | %d | %d | %.2f ms | %.2f ms | %d |",
+                '| %s | %s | %d | %d | %.2f ms | %.2f ms | %d |',
                 $scenario['name'],
                 $scenario['method'] === 'POST_JSON' ? 'POST' : 'GET',
                 $statusCode,
@@ -185,7 +186,7 @@ class PerformanceBaselineBenchmarkTest extends TestCase
             );
         }
 
-        $reportContent = implode("\n", $reportLines) . "\n";
+        $reportContent = implode("\n", $reportLines)."\n";
         $reportPath = base_path('../docs/hardening/snapshots/perf_baseline.md');
         file_put_contents($reportPath, $reportContent);
 

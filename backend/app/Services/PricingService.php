@@ -55,6 +55,7 @@ class PricingService
         ?string $promoCode = null
     ): array {
         $quoteDTO = $this->getQuoteQuery()->execute($property, $checkIn, $checkOut, $guests, $promoCode);
+
         return $quoteDTO->toArray();
     }
 

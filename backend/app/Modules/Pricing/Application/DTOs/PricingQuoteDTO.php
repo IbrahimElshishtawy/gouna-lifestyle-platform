@@ -9,7 +9,7 @@ use JsonSerializable;
 final class PricingQuoteDTO implements JsonSerializable
 {
     /**
-     * @param array<int, array<string, mixed>> $nightlyPrices
+     * @param  array<int, array<string, mixed>>  $nightlyPrices
      */
     public function __construct(
         public readonly int $nights,

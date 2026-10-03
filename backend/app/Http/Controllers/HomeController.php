@@ -11,7 +11,7 @@ use App\Models\Location;
 use App\Models\Property;
 use App\Models\PropertyCategory;
 use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
-use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
+use App\Modules\Lead\Presentation\Requests\StoreInquiryRequest;
 use App\Shared\Infrastructure\Caching\CacheKeys;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -66,13 +66,13 @@ class HomeController extends Controller
         $locations = Cache::remember(
             CacheKeys::LOCATIONS_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => Location::active()->get()
+            fn () => Location::active()->get()
         );
 
         $categories = Cache::remember(
             CacheKeys::PROPERTY_CATEGORIES_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => PropertyCategory::active()->get()
+            fn () => PropertyCategory::active()->get()
         );
 
         // CMS Homepage Sections
@@ -95,7 +95,7 @@ class HomeController extends Controller
     /**
      * Store a general contact lead or concierge request (Section 131).
      */
-    public function inquire(\App\Modules\Lead\Presentation\Requests\StoreInquiryRequest $request): RedirectResponse|JsonResponse
+    public function inquire(StoreInquiryRequest $request): RedirectResponse|JsonResponse
     {
         $this->storeLeadAction->execute($request->toDTO());
 

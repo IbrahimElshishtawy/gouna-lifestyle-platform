@@ -63,6 +63,7 @@ class AvailabilityService
         ?int $excludeBookingId = null
     ): bool {
         $result = $this->getCheckQuery()->execute($property, $checkIn, $checkOut, $excludeBookingId);
+
         return $result->isAvailable;
     }
 
@@ -76,6 +77,7 @@ class AvailabilityService
         ?int $excludeBookingId = null
     ): array {
         $result = $this->getCheckQuery()->execute($property, $checkIn, $checkOut, $excludeBookingId);
+
         return $result->toArray();
     }
 

@@ -5,6 +5,7 @@ namespace App\Services\Payment\Gateways;
 use App\Models\Booking;
 use App\Models\PaymentTransaction;
 use App\Services\Payment\PaymentGatewayInterface;
+use Illuminate\Support\Str;
 
 /**
  * Manual Bank Transfer Gateway.
@@ -21,7 +22,7 @@ class ManualBankTransferGateway implements PaymentGatewayInterface
 
     public function createPayment(Booking $booking, int $amountCents, string $currency): array
     {
-        $transactionId = 'BANK-' . strtoupper(\Illuminate\Support\Str::random(12));
+        $transactionId = 'BANK-'.strtoupper(Str::random(12));
 
         return [
             'redirect_url' => null,

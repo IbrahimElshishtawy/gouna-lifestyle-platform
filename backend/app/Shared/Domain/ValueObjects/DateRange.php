@@ -17,7 +17,9 @@ use Stringable;
 final class DateRange implements JsonSerializable, Stringable
 {
     private readonly Carbon $checkIn;
+
     private readonly Carbon $checkOut;
+
     private readonly int $nights;
 
     public function __construct(Carbon|string $checkIn, Carbon|string $checkOut)
@@ -79,13 +81,12 @@ final class DateRange implements JsonSerializable, Stringable
     public function containsNight(Carbon|string $date): bool
     {
         $d = $date instanceof Carbon ? $date->copy()->startOfDay() : Carbon::parse($date)->startOfDay();
+
         return $d->gte($this->checkIn) && $d->lt($this->checkOut);
     }
 
     /**
      * Iterate each overnight stay from checkIn up to (checkOut - 1 day).
-     *
-     * @return CarbonPeriod
      */
     public function getNightsPeriod(): CarbonPeriod
     {

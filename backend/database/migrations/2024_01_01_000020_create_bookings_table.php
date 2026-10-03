@@ -42,11 +42,11 @@ return new class extends Migration
             $table->enum('status', [
                 'draft', 'pending', 'awaiting_payment', 'payment_processing',
                 'partially_paid', 'paid', 'confirmed', 'cancelled', 'rejected',
-                'expired', 'completed', 'refund_requested', 'refunded'
+                'expired', 'completed', 'refund_requested', 'refunded',
             ])->default('draft')->index();
 
             $table->enum('payment_status', [
-                'unpaid', 'pending', 'partially_paid', 'paid', 'failed', 'refunded', 'partially_refunded'
+                'unpaid', 'pending', 'partially_paid', 'paid', 'failed', 'refunded', 'partially_refunded',
             ])->default('unpaid')->index();
 
             // Discount

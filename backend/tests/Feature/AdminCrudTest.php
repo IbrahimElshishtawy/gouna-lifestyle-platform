@@ -11,6 +11,7 @@ use App\Models\PaymentMethod;
 use App\Models\Property;
 use App\Models\PropertyCategory;
 use App\Models\User;
+use App\Services\MediaService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -18,9 +19,13 @@ use Tests\TestCase;
 class AdminCrudTest extends TestCase
 {
     private User $admin;
+
     private PropertyCategory $propCategory;
+
     private Location $location;
+
     private Amenity $amenity;
+
     private PaymentMethod $paymentMethod;
 
     protected function setUp(): void
@@ -152,8 +157,8 @@ class AdminCrudTest extends TestCase
     public function test_admin_can_edit_and_update_property(): void
     {
         $property = Property::create([
-            'reference_number' => 'GON-P-TEST' . rand(1000, 9999),
-            'slug' => 'test-edit-villa-' . uniqid(),
+            'reference_number' => 'GON-P-TEST'.rand(1000, 9999),
+            'slug' => 'test-edit-villa-'.uniqid(),
             'property_category_id' => $this->propCategory->id,
             'location_id' => $this->location->id,
             'title_en' => 'Original Villa Title',
@@ -207,8 +212,8 @@ class AdminCrudTest extends TestCase
     public function test_admin_can_delete_property_and_attached_media(): void
     {
         $property = Property::create([
-            'reference_number' => 'GON-P-DEL' . rand(1000, 9999),
-            'slug' => 'test-delete-villa-' . uniqid(),
+            'reference_number' => 'GON-P-DEL'.rand(1000, 9999),
+            'slug' => 'test-delete-villa-'.uniqid(),
             'property_category_id' => $this->propCategory->id,
             'location_id' => $this->location->id,
             'title_en' => 'Delete Me Villa',
@@ -225,7 +230,7 @@ class AdminCrudTest extends TestCase
         ]);
 
         $image = UploadedFile::fake()->create('photo.png', 500, 'image/png');
-        $mediaService = app(\App\Services\MediaService::class);
+        $mediaService = app(MediaService::class);
         $media = $mediaService->uploadMedia($property, $image, true, 'Delete Me');
 
         $this->assertDatabaseHas('media', ['id' => $media->id]);
@@ -380,7 +385,7 @@ class AdminCrudTest extends TestCase
                     'price' => 950.00,
                     'capacity' => 200,
                     'max_per_order' => 6,
-                ]
+                ],
             ],
         ]);
         $updateResponse->assertRedirect(route('admin.events.index'));

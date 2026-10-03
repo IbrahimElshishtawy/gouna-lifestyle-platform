@@ -56,7 +56,7 @@ class CheckPropertyAvailabilityQuery
             ->whereIn('status', self::BLOCKING_BOOKING_STATUSES)
             ->whereDate('check_in', '<', $checkOutStr)
             ->whereDate('check_out', '>', $checkInStr)
-            ->when($excludeBookingId, fn($q) => $q->where('id', '!=', $excludeBookingId))
+            ->when($excludeBookingId, fn ($q) => $q->where('id', '!=', $excludeBookingId))
             ->first();
 
         if ($conflictingBooking) {
@@ -86,7 +86,7 @@ class CheckPropertyAvailabilityQuery
 
             return new AvailabilityCheckResultDTO(
                 isAvailable: false,
-                reason: "Property is blocked for {$statusLabel}{$reasonNote} from " . Carbon::parse($conflictingBlock->start_date)->format('M d') . ' to ' . Carbon::parse($conflictingBlock->end_date)->format('M d') . '.',
+                reason: "Property is blocked for {$statusLabel}{$reasonNote} from ".Carbon::parse($conflictingBlock->start_date)->format('M d').' to '.Carbon::parse($conflictingBlock->end_date)->format('M d').'.',
                 conflictType: 'manual_block',
                 conflictingBlock: [
                     'id' => $conflictingBlock->id,

@@ -5,28 +5,26 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Experience;
-use App\Models\ExperienceCategory;
-use App\Models\Location;
+use App\Modules\Experience\Application\Queries\SearchExperiencesQuery;
+use App\Modules\Experience\Presentation\Requests\ExperienceSearchRequest;
 use App\Modules\Lead\Application\Actions\StoreInquiryLeadAction;
-use App\Modules\Lead\Application\DTOs\LeadInquiryDTO;
-use App\Shared\Infrastructure\Caching\CacheKeys;
+use App\Modules\Lead\Presentation\Requests\StoreExperienceInquiryRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ExperienceListingController extends Controller
 {
     public function __construct(
         private readonly StoreInquiryLeadAction $storeLeadAction,
-        private readonly \App\Modules\Experience\Application\Queries\SearchExperiencesQuery $searchExperiencesQuery,
+        private readonly SearchExperiencesQuery $searchExperiencesQuery,
     ) {}
 
     /**
      * Display a listing of curated El Gouna experiences (Section 29 & 30).
      */
-    public function index(\App\Modules\Experience\Presentation\Requests\ExperienceSearchRequest $request): View
+    public function index(ExperienceSearchRequest $request): View
     {
         $viewData = $this->searchExperiencesQuery->execute($request->toDTO());
 
@@ -57,7 +55,7 @@ class ExperienceListingController extends Controller
     /**
      * Store experience booking inquiry lead.
      */
-    public function inquire(\App\Modules\Lead\Presentation\Requests\StoreExperienceInquiryRequest $request, Experience $experience): RedirectResponse|JsonResponse
+    public function inquire(StoreExperienceInquiryRequest $request, Experience $experience): RedirectResponse|JsonResponse
     {
         $this->storeLeadAction->execute($request->toDTO($experience));
 

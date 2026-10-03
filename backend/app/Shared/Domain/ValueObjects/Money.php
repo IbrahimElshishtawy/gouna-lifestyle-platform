@@ -56,6 +56,7 @@ final class Money implements JsonSerializable, Stringable
     public function add(self $other): self
     {
         $this->assertSameCurrency($other);
+
         return new self($this->amountCents + $other->amountCents, $this->currency);
     }
 
@@ -63,6 +64,7 @@ final class Money implements JsonSerializable, Stringable
     {
         $this->assertSameCurrency($other);
         $result = $this->amountCents - $other->amountCents;
+
         return new self(max(0, $result), $this->currency);
     }
 
@@ -84,18 +86,21 @@ final class Money implements JsonSerializable, Stringable
     public function isGreaterThan(self $other): bool
     {
         $this->assertSameCurrency($other);
+
         return $this->amountCents > $other->amountCents;
     }
 
     public function isGreaterThanOrEqual(self $other): bool
     {
         $this->assertSameCurrency($other);
+
         return $this->amountCents >= $other->amountCents;
     }
 
     public function isLessThan(self $other): bool
     {
         $this->assertSameCurrency($other);
+
         return $this->amountCents < $other->amountCents;
     }
 

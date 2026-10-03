@@ -16,7 +16,7 @@ class FilterAvailablePropertiesQuery
      * Batch-filters property IDs to only those that are available between checkIn and checkOut.
      * Executes in 2 single set-based queries instead of N individual queries.
      *
-     * @param array<int>|Collection<int, int> $candidateIds
+     * @param  array<int>|Collection<int, int>  $candidateIds
      * @return array<int> Available Property IDs
      */
     public function execute(array|Collection $candidateIds, Carbon $checkIn, Carbon $checkOut): array
@@ -51,7 +51,7 @@ class FilterAvailablePropertiesQuery
 
         return array_values(array_filter(
             $candidateIdsArray,
-            fn($id) => ! isset($excludedIds[$id])
+            fn ($id) => ! isset($excludedIds[$id])
         ));
     }
 }

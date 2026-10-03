@@ -21,7 +21,7 @@ class MediaService
         ?string $altTextAr = null
     ): Media {
         $folder = Str::plural(Str::lower(class_basename($mediable)));
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs("uploads/{$folder}", $filename, 'public');
 
         $mime = $file->getMimeType();

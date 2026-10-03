@@ -66,11 +66,11 @@ class PaymentService
     {
         $config = $method->configuration ?? [];
 
-        return match($method->code) {
+        return match ($method->code) {
             'card' => new CardGateway(array_merge($config, ['test_mode' => $method->test_mode])),
             'paypal' => new PayPalGateway(array_merge($config, ['test_mode' => $method->test_mode])),
             'bank_transfer' => new ManualBankTransferGateway($config),
-            'cash' => new ManualCashGateway(),
+            'cash' => new ManualCashGateway,
             default => throw new InvalidArgumentException("No gateway driver for payment method: {$method->code}"),
         };
     }
@@ -81,6 +81,7 @@ class PaymentService
     public function initiatePayment(Booking $booking, ?int $amountCents = null): array
     {
         $result = $this->getInitiateAction()->execute($booking, $amountCents);
+
         return $result->toArray();
     }
 

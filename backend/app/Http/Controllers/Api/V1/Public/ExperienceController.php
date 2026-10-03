@@ -24,7 +24,7 @@ class ExperienceController extends Controller
         if ($search = $request->input('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title_en', 'like', "%{$search}%")
-                  ->orWhere('title_ar', 'like', "%{$search}%");
+                    ->orWhere('title_ar', 'like', "%{$search}%");
             });
         }
 

@@ -10,6 +10,7 @@ use App\Models\Media;
 use App\Services\MediaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -30,8 +31,8 @@ class EventController extends Controller
             $s = $request->input('search');
             $query->where(function ($q) use ($s) {
                 $q->where('title_en', 'like', "%{$s}%")
-                  ->orWhere('title_ar', 'like', "%{$s}%")
-                  ->orWhere('venue_name', 'like', "%{$s}%");
+                    ->orWhere('title_ar', 'like', "%{$s}%")
+                    ->orWhere('venue_name', 'like', "%{$s}%");
             });
         }
 
@@ -95,7 +96,7 @@ class EventController extends Controller
             'tickets.*.description_en' => ['nullable', 'string'],
         ]);
 
-        $slug = Str::slug($validated['title_en']) . '-' . strtolower(Str::random(4));
+        $slug = Str::slug($validated['title_en']).'-'.strtolower(Str::random(4));
 
         $event = Event::create([
             'slug' => $slug,
@@ -283,6 +284,8 @@ class EventController extends Controller
      */
     public function destroy(Event $event): RedirectResponse
     {
+        Gate::authorize('delete', $event);
+
         $title = $event->title_en;
         $event->delete();
 
@@ -296,9 +299,10 @@ class EventController extends Controller
     {
         if ($media->mediable_id === $event->id && $media->mediable_type === Event::class) {
             $this->mediaService->deleteMedia($media);
+
             return back()->with('success', 'Banner image removed successfully.');
         }
 
-        abort(403);
+        abort(404);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +43,7 @@ class SeasonalPrice extends Model
         return app()->getLocale() === 'ar' && $this->name_ar ? $this->name_ar : $this->name_en;
     }
 
-    public function coversDate(\Carbon\Carbon $date): bool
+    public function coversDate(Carbon $date): bool
     {
         return $date->between($this->start_date, $this->end_date);
     }

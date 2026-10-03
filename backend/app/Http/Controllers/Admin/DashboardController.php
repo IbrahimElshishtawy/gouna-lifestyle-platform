@@ -144,6 +144,7 @@ class DashboardController extends Controller
     public function bookingsCalendar(): View
     {
         $properties = Property::with('location')->get();
+
         return view('admin.bookings.calendar', compact('properties'));
     }
 
@@ -185,18 +186,21 @@ class DashboardController extends Controller
     public function propertyCategories(): View
     {
         $title = app()->getLocale() === 'ar' ? 'تصنيفات العقارات والفلل' : 'Property Categories';
+
         return view('admin.properties.taxonomies', compact('title'));
     }
 
     public function propertyLocations(): View
     {
         $title = app()->getLocale() === 'ar' ? 'المناطق ومواقع الجونة' : 'El Gouna Compounds & Locations';
+
         return view('admin.properties.taxonomies', compact('title'));
     }
 
     public function propertyAmenities(): View
     {
         $title = app()->getLocale() === 'ar' ? 'المميزات والمرافق المعتمدة' : 'Verified Amenities & Features';
+
         return view('admin.properties.taxonomies', compact('title'));
     }
 
@@ -207,6 +211,7 @@ class DashboardController extends Controller
     {
         $properties = Property::with('location')->get();
         $tabTitle = app()->getLocale() === 'ar' ? 'الأسعار الأساسية للوحدات' : 'Base Nightly Rates';
+
         return view('admin.pricing.index', compact('properties', 'tabTitle'));
     }
 
@@ -214,6 +219,7 @@ class DashboardController extends Controller
     {
         $properties = Property::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'المواسم والأولويات (Seasons)' : 'Seasonal Pricing Rules';
+
         return view('admin.pricing.index', compact('properties', 'tabTitle'));
     }
 
@@ -226,6 +232,7 @@ class DashboardController extends Controller
     {
         $properties = Property::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'أكواد الخصم والترويج' : 'Promo Codes & Discounts';
+
         return view('admin.pricing.index', compact('properties', 'tabTitle'));
     }
 
@@ -233,6 +240,7 @@ class DashboardController extends Controller
     {
         $properties = Property::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'رسوم النظافة والخدمات والضرائب' : 'Hospitality Fees & Taxes';
+
         return view('admin.pricing.index', compact('properties', 'tabTitle'));
     }
 
@@ -243,6 +251,7 @@ class DashboardController extends Controller
     {
         $experiences = Experience::all();
         $title = app()->getLocale() === 'ar' ? 'رحلات اليخوت الخاصة' : 'Private Yacht & Boat Charters';
+
         return view('admin.experiences.taxonomies', compact('experiences', 'title'));
     }
 
@@ -250,6 +259,7 @@ class DashboardController extends Controller
     {
         $experiences = Experience::all();
         $title = app()->getLocale() === 'ar' ? 'سفاري الصحراء والعشاء البدوي' : 'Desert Quad Safari';
+
         return view('admin.experiences.taxonomies', compact('experiences', 'title'));
     }
 
@@ -257,6 +267,7 @@ class DashboardController extends Controller
     {
         $experiences = Experience::all();
         $title = app()->getLocale() === 'ar' ? 'سيارات الجولف والكابريو' : 'Golf Carts & Electric Vehicles';
+
         return view('admin.experiences.taxonomies', compact('experiences', 'title'));
     }
 
@@ -264,6 +275,7 @@ class DashboardController extends Controller
     {
         $experiences = Experience::all();
         $title = app()->getLocale() === 'ar' ? 'تصنيفات التجارب' : 'Experience Categories';
+
         return view('admin.experiences.taxonomies', compact('experiences', 'title'));
     }
 
@@ -273,18 +285,21 @@ class DashboardController extends Controller
     public function eventsTickets(): View
     {
         $title = app()->getLocale() === 'ar' ? 'فئات التذاكر المتاحة' : 'Event Ticket Tiers';
+
         return view('admin.events.taxonomies', compact('title'));
     }
 
     public function eventsOrders(): View
     {
         $title = app()->getLocale() === 'ar' ? 'طلبات شراء التذاكر' : 'Ticket Sales Orders';
+
         return view('admin.events.taxonomies', compact('title'));
     }
 
     public function eventsCheckin(): View
     {
         $title = app()->getLocale() === 'ar' ? 'كونسول مسح رمز QR للدخول' : 'Gate QR Scanner';
+
         return view('admin.events.taxonomies', compact('title'));
     }
 
@@ -295,6 +310,7 @@ class DashboardController extends Controller
     {
         $customers = Customer::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'سجل العملاء والضيوف' : 'VIP Guest Profiles';
+
         return view('admin.customers.index', compact('customers', 'tabTitle'));
     }
 
@@ -302,6 +318,7 @@ class DashboardController extends Controller
     {
         $customers = Customer::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'طلبات شراء العقارات والاستثمار' : 'Property Sales Leads';
+
         return view('admin.customers.index', compact('customers', 'tabTitle'));
     }
 
@@ -309,6 +326,7 @@ class DashboardController extends Controller
     {
         $customers = Customer::all();
         $tabTitle = app()->getLocale() === 'ar' ? 'استفسارات واتساب والكونسيرج' : 'WhatsApp & Direct Inquiries';
+
         return view('admin.customers.index', compact('customers', 'tabTitle'));
     }
 
@@ -326,30 +344,35 @@ class DashboardController extends Controller
     public function cmsHomepage(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'أقسام الصفحة الرئيسية' : 'Homepage Hero & Featured';
+
         return view('admin.cms.index', compact('tabTitle'));
     }
 
     public function cmsPages(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'الصفحات الثابتة' : 'Static Legal & Info Pages';
+
         return view('admin.cms.index', compact('tabTitle'));
     }
 
     public function cmsFaqs(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'الأسئلة الشائعة (FAQs)' : 'Frequently Asked Questions';
+
         return view('admin.cms.index', compact('tabTitle'));
     }
 
     public function cmsBlog(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'المقالات وأخبار الجونة' : 'El Gouna Journal & Stories';
+
         return view('admin.cms.index', compact('tabTitle'));
     }
 
     public function cmsNavigation(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'قوائم التصفح' : 'Header & Footer Navigation';
+
         return view('admin.cms.index', compact('tabTitle'));
     }
 
@@ -359,18 +382,21 @@ class DashboardController extends Controller
     public function seoGlobal(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'إعدادات SEO العامة' : 'Global Meta & Social Cards';
+
         return view('admin.seo.index', compact('tabTitle'));
     }
 
     public function seoSitemap(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'خريطة الموقع XML Sitemap' : 'Dynamic XML Sitemap';
+
         return view('admin.seo.index', compact('tabTitle'));
     }
 
     public function seoRedirects(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'إعادة التوجيه (301 Redirects)' : '301 Redirects Manager';
+
         return view('admin.seo.index', compact('tabTitle'));
     }
 
@@ -380,12 +406,14 @@ class DashboardController extends Controller
     public function analyticsTracking(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'إعدادات GA4 و GTM' : 'GA4 & Ads Tracking';
+
         return view('admin.analytics.index', compact('tabTitle'));
     }
 
     public function analyticsReports(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'تقارير المبيعات والتحويل' : 'Reports & Conversion Funnels';
+
         return view('admin.analytics.index', compact('tabTitle'));
     }
 
@@ -395,24 +423,28 @@ class DashboardController extends Controller
     public function settingsGeneral(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'معلومات الشركة والعملة' : 'General & Currency';
+
         return view('admin.settings.index', compact('tabTitle'));
     }
 
     public function settingsPayments(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'بوابات الدفع الإلكتروني' : 'Payment Gateways';
+
         return view('admin.settings.index', compact('tabTitle'));
     }
 
     public function settingsBooking(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'قواعد الحجز والإلغاء' : 'Booking & Cancellation Policies';
+
         return view('admin.settings.index', compact('tabTitle'));
     }
 
     public function settingsNotifications(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'الواتساب والبريد الإلكتروني' : 'Automated Notifications';
+
         return view('admin.settings.index', compact('tabTitle'));
     }
 
@@ -422,12 +454,14 @@ class DashboardController extends Controller
     public function usersIndex(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'مديرو النظام وفريق العمل' : 'Staff Accounts';
+
         return view('admin.users.index', compact('tabTitle'));
     }
 
     public function usersRoles(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'الأدوار والصلاحيات (RBAC)' : 'Roles & Access Levels';
+
         return view('admin.users.index', compact('tabTitle'));
     }
 
@@ -437,12 +471,14 @@ class DashboardController extends Controller
     public function systemLogs(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'سجل العمليات والنشاطات' : 'Activity Audit Logs';
+
         return view('admin.system.index', compact('tabTitle'));
     }
 
     public function systemHealth(): View
     {
         $tabTitle = app()->getLocale() === 'ar' ? 'حالة النظام والخادم' : 'Server & Database Health';
+
         return view('admin.system.index', compact('tabTitle'));
     }
 }

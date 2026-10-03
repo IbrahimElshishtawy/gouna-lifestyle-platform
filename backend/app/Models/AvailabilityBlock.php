@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,7 +33,7 @@ class AvailabilityBlock extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function overlapsRange(\Carbon\Carbon $checkIn, \Carbon\Carbon $checkOut): bool
+    public function overlapsRange(Carbon $checkIn, Carbon $checkOut): bool
     {
         return $this->start_date->lt($checkOut) && $this->end_date->gt($checkIn);
     }

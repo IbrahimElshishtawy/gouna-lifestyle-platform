@@ -86,6 +86,7 @@ class PaymentPolicy
     private function isRefundable(PaymentTransaction $transaction): bool
     {
         $netPaid = $transaction->amount_cents - ($transaction->refund_amount_cents ?? 0);
+
         return $transaction->status === 'completed' && $netPaid > 0;
     }
 }

@@ -44,6 +44,7 @@ class Media extends Model
         if ($this->thumb_path) {
             return Storage::disk($this->disk)->url($this->thumb_path);
         }
+
         return $this->url;
     }
 

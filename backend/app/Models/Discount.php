@@ -39,10 +39,19 @@ class Discount extends Model
 
     public function isValid(): bool
     {
-        if (! $this->is_active) return false;
-        if ($this->valid_from && now()->lt($this->valid_from)) return false;
-        if ($this->valid_until && now()->gt($this->valid_until)) return false;
-        if ($this->max_uses && $this->used_count >= $this->max_uses) return false;
+        if (! $this->is_active) {
+            return false;
+        }
+        if ($this->valid_from && now()->lt($this->valid_from)) {
+            return false;
+        }
+        if ($this->valid_until && now()->gt($this->valid_until)) {
+            return false;
+        }
+        if ($this->max_uses && $this->used_count >= $this->max_uses) {
+            return false;
+        }
+
         return true;
     }
 
@@ -51,6 +60,7 @@ class Discount extends Model
         if ($this->type === 'percentage') {
             return (int) round($amountCents * ($this->value / 100));
         }
+
         // fixed
         return min((int) ($this->value * 100), $amountCents);
     }

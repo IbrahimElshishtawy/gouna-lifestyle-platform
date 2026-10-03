@@ -12,6 +12,7 @@ use App\Services\AvailabilityService;
 use App\Shared\Infrastructure\Caching\CacheKeys;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class SearchPropertiesQuery
@@ -25,8 +26,8 @@ class SearchPropertiesQuery
      *
      * @return array{
      *     properties: LengthAwarePaginator,
-     *     categories: \Illuminate\Database\Eloquent\Collection,
-     *     locations: \Illuminate\Database\Eloquent\Collection,
+     *     categories: Collection,
+     *     locations: Collection,
      *     minPossiblePrice: int,
      *     maxPossiblePrice: int,
      *     activeFilters: array<string, mixed>
@@ -45,12 +46,12 @@ class SearchPropertiesQuery
 
         // 2. Location
         if (! empty($filters->locationSlug) && $filters->locationSlug !== 'all') {
-            $query->whereHas('location', fn($q) => $q->where('slug', $filters->locationSlug));
+            $query->whereHas('location', fn ($q) => $q->where('slug', $filters->locationSlug));
         }
 
         // 3. Category
         if (! empty($filters->categorySlug) && $filters->categorySlug !== 'all') {
-            $query->whereHas('category', fn($q) => $q->where('slug', $filters->categorySlug));
+            $query->whereHas('category', fn ($q) => $q->where('slug', $filters->categorySlug));
         }
 
         // 4. Bedrooms
@@ -109,18 +110,18 @@ class SearchPropertiesQuery
         $categories = Cache::remember(
             CacheKeys::PROPERTY_CATEGORIES_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => PropertyCategory::active()->get()
+            fn () => PropertyCategory::active()->get()
         );
 
         $locations = Cache::remember(
             CacheKeys::LOCATIONS_ACTIVE,
             CacheKeys::TTL_EXTENDED,
-            fn() => Location::active()->get()
+            fn () => Location::active()->get()
         );
 
         // Price range boundaries
         $priceStats = Property::published()
-            ->selectRaw('MIN(' . $priceColumn . ') as min_cents, MAX(' . $priceColumn . ') as max_cents')
+            ->selectRaw('MIN('.$priceColumn.') as min_cents, MAX('.$priceColumn.') as max_cents')
             ->first();
 
         $minPossiblePrice = $priceStats?->min_cents ? (int) floor($priceStats->min_cents / 100) : 50;

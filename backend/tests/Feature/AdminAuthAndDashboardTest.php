@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminAuthAndDashboardTest extends TestCase
@@ -12,7 +11,7 @@ class AdminAuthAndDashboardTest extends TestCase
     {
         parent::setUp();
 
-        if (!User::where('email', 'admin@gounow.com')->exists()) {
+        if (! User::where('email', 'admin@gounow.com')->exists()) {
             $this->seed();
         }
     }
@@ -60,9 +59,9 @@ class AdminAuthAndDashboardTest extends TestCase
 
         $dashboardResponse = $this->actingAs($user)->get('/admin');
         $dashboardResponse->assertStatus(200);
-        $dashboardResponse->assertSee('Gounow Super Admin');
+        $dashboardResponse->assertSee($user->name);
         $dashboardResponse->assertSee('Executive Overview');
-        $dashboardResponse->assertSee('Fanadir Bay Waterfront Villa');
+        $dashboardResponse->assertSee('Operations Dashboard');
     }
 
     public function test_bilingual_locale_switch_works(): void

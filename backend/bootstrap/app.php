@@ -17,7 +17,12 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -63,13 +68,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->priority([
             AssignRequestId::class,
-            \Illuminate\Http\Middleware\TrustProxies::class,
-            \Illuminate\Http\Middleware\HandleCors::class,
+            TrustProxies::class,
+            HandleCors::class,
             ForceJsonResponse::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class,
-            \Illuminate\Session\Middleware\StartSession::class,
+            ThrottleRequests::class,
+            StartSession::class,
             EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            SubstituteBindings::class,
             EnsureAccountActive::class,
             EnsureTwoFactorVerified::class,
             EnsureAdmin::class,
@@ -77,7 +82,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (\Throwable $e, Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 $requestId = $request->attributes->get('request_id')
                     ?? $request->header('X-Request-ID')

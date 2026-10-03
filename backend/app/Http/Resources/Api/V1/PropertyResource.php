@@ -52,22 +52,22 @@ class PropertyResource extends BaseJsonResource
                 'is_available' => (bool) $this->is_available,
             ],
             'relationships' => [
-                'category' => $this->whenLoaded('category', fn() => [
+                'category' => $this->whenLoaded('category', fn () => [
                     'id' => $this->category->id,
                     'name' => $locale === 'ar' ? $this->category->name_ar : $this->category->name_en,
                     'slug' => $this->category->slug,
                 ]),
-                'location' => $this->whenLoaded('location', fn() => [
+                'location' => $this->whenLoaded('location', fn () => [
                     'id' => $this->location->id,
                     'name' => $locale === 'ar' ? $this->location->name_ar : $this->location->name_en,
                     'slug' => $this->location->slug,
                 ]),
-                'amenities' => $this->whenLoaded('amenities', fn() => $this->amenities->map(fn($amenity) => [
+                'amenities' => $this->whenLoaded('amenities', fn () => $this->amenities->map(fn ($amenity) => [
                     'id' => $amenity->id,
                     'name' => $locale === 'ar' ? $amenity->name_ar : $amenity->name_en,
                     'icon' => $amenity->icon,
                 ])),
-                'media' => $this->whenLoaded('media', fn() => $this->media->map(fn($item) => [
+                'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
                     'url' => asset('storage/'.$item->file_path),
                     'is_primary' => (bool) $item->is_primary,

@@ -43,8 +43,8 @@ Route::middleware(['web', 'admin', 'locale'])->prefix('admin')->name('admin.')->
     // Properties (Sections 20, 21, 41, 44)
     Route::prefix('properties')->name('properties.')->group(function () {
         Route::get('/', [PropertyController::class, 'index'])->name('index')->middleware('can:properties.view');
-        Route::get('/rent', fn() => redirect()->route('admin.properties.index', ['type' => 'rent']))->name('rent')->middleware('can:properties.view');
-        Route::get('/sale', fn() => redirect()->route('admin.properties.index', ['type' => 'sale']))->name('sale')->middleware('can:properties.view');
+        Route::get('/rent', fn () => redirect()->route('admin.properties.index', ['type' => 'rent']))->name('rent')->middleware('can:properties.view');
+        Route::get('/sale', fn () => redirect()->route('admin.properties.index', ['type' => 'sale']))->name('sale')->middleware('can:properties.view');
         Route::get('/create', [PropertyController::class, 'create'])->name('create')->middleware('can:properties.create');
         Route::post('/', [PropertyController::class, 'store'])->name('store')->middleware('can:properties.create');
         Route::get('/{property}/edit', [PropertyController::class, 'edit'])->name('edit')->middleware('can:properties.update');

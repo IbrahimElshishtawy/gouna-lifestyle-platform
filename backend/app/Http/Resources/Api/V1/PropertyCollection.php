@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Str;
 
 class PropertyCollection extends ResourceCollection
 {
@@ -30,7 +31,7 @@ class PropertyCollection extends ResourceCollection
     {
         $requestId = $request->attributes->get('request_id')
             ?? $request->header('X-Request-ID')
-            ?? (string) \Illuminate\Support\Str::uuid();
+            ?? (string) Str::uuid();
 
         return [
             'meta' => [

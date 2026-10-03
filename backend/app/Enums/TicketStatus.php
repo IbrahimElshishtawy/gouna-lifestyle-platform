@@ -12,7 +12,7 @@ enum TicketStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Valid => 'Valid',
             self::Used => 'Used',
             self::Cancelled => 'Cancelled',
@@ -23,7 +23,7 @@ enum TicketStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Valid => 'green',
             self::Used => 'gray',
             self::Cancelled => 'red',

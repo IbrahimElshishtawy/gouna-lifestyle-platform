@@ -58,10 +58,17 @@ class EventTicketType extends Model
 
     public function isOnSale(): bool
     {
-        if (! $this->is_active) return false;
+        if (! $this->is_active) {
+            return false;
+        }
         $now = now();
-        if ($this->sales_start_at && $now->lt($this->sales_start_at)) return false;
-        if ($this->sales_end_at && $now->gt($this->sales_end_at)) return false;
+        if ($this->sales_start_at && $now->lt($this->sales_start_at)) {
+            return false;
+        }
+        if ($this->sales_end_at && $now->gt($this->sales_end_at)) {
+            return false;
+        }
+
         return true;
     }
 }

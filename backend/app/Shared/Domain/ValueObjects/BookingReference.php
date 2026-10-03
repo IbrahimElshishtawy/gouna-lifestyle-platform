@@ -32,6 +32,7 @@ final class BookingReference implements JsonSerializable, Stringable
     {
         $yearStr = (string) ($year ?? (int) date('Y'));
         $number = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+
         return new self("GON-{$yearStr}-{$number}");
     }
 

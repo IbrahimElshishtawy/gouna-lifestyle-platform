@@ -14,7 +14,7 @@ enum PaymentStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Unpaid => 'Unpaid',
             self::Pending => 'Pending',
             self::PartiallyPaid => 'Partially Paid',
@@ -27,7 +27,7 @@ enum PaymentStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Unpaid => 'red',
             self::Pending => 'yellow',
             self::PartiallyPaid => 'indigo',

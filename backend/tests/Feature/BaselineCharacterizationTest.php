@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Amenity;
 use App\Models\Booking;
-use App\Models\Customer;
 use App\Models\Location;
 use App\Models\PaymentMethod;
 use App\Models\PaymentTransaction;
@@ -26,8 +25,11 @@ use Tests\TestCase;
 class BaselineCharacterizationTest extends TestCase
 {
     private User $adminUser;
+
     private Property $testProperty;
+
     private PaymentMethod $cardMethod;
+
     private Amenity $amenity;
 
     protected function setUp(): void
@@ -204,12 +206,12 @@ class BaselineCharacterizationTest extends TestCase
         ]);
 
         $booking = Booking::where('bookable_id', $this->testProperty->id)
-            ->whereHas('customer', fn($q) => $q->where('email', 'baseline@gounow.com'))
+            ->whereHas('customer', fn ($q) => $q->where('email', 'baseline@gounow.com'))
             ->latest()
             ->first();
         $this->assertNotNull($booking);
 
-        $this->assertStringContainsString('/checkout/mock/card/' . $booking->reference, $processResponse->headers->get('Location'));
+        $this->assertStringContainsString('/checkout/mock/card/'.$booking->reference, $processResponse->headers->get('Location'));
 
         // Simulate successful 3DS callback
         $callbackResponse = $this->post(route('checkout.card-mock.complete', ['reference' => $booking->reference]));

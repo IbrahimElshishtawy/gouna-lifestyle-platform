@@ -72,6 +72,6 @@ final class NightlyRate implements JsonSerializable, Stringable
 
     public function __toString(): string
     {
-        return "{$this->date}: {$this->price->formattedWithCurrency()} (" . ($this->isBasePrice ? 'Base' : $this->seasonName) . ')';
+        return "{$this->date}: {$this->price->formattedWithCurrency()} (".($this->isBasePrice ? 'Base' : $this->seasonName).')';
     }
 }

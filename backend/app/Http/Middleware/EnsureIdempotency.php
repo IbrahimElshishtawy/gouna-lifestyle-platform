@@ -28,7 +28,7 @@ class EnsureIdempotency
             ?? $request->server('HTTP_IDEMPOTENCY_KEY');
 
         if (! $idempotencyKey) {
-            throw new MissingIdempotencyKeyException();
+            throw new MissingIdempotencyKeyException;
         }
 
         // Format validation (alphanumeric with hyphens/underscores, 16 to 64 chars)
@@ -57,7 +57,7 @@ class EnsureIdempotency
         if ($existing) {
             // Check for payload conflict
             if ($existing->request_hash !== $requestHash) {
-                throw new IdempotencyConflictException();
+                throw new IdempotencyConflictException;
             }
 
             if ($existing->status === 'completed') {

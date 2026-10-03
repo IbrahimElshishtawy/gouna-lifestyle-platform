@@ -31,8 +31,8 @@ class StoreExperienceInquiryRequest extends FormRequest
     {
         $validated = $this->validated();
 
-        $message = "Requested Date: " . ($validated['requested_date'] ?? 'Flexible') . "\n";
-        $message .= "Party Size: " . ($validated['guests'] ?? 1) . " guests\n\n";
+        $message = 'Requested Date: '.($validated['requested_date'] ?? 'Flexible')."\n";
+        $message .= 'Party Size: '.($validated['guests'] ?? 1)." guests\n\n";
         $message .= ($validated['message'] ?? 'Experience booking request via website.');
 
         return new LeadInquiryDTO(

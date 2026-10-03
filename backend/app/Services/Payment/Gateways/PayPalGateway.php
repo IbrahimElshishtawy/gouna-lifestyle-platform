@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 class PayPalGateway implements PaymentGatewayInterface
 {
     private array $config;
+
     private bool $testMode;
 
     public function __construct(array $config = [])
@@ -27,7 +28,7 @@ class PayPalGateway implements PaymentGatewayInterface
      */
     public function createPayment(Booking $booking, int $amountCents, string $currency): array
     {
-        $orderId = 'PAYPAL-ORD-' . strtoupper(Str::random(14));
+        $orderId = 'PAYPAL-ORD-'.strtoupper(Str::random(14));
 
         if ($this->testMode) {
             $redirectUrl = route('checkout.paypal-mock', [
@@ -66,7 +67,7 @@ class PayPalGateway implements PaymentGatewayInterface
             return [
                 'status' => 'completed',
                 'gateway_reference' => $gatewayReference,
-                'capture_id' => 'CAPTURE-' . strtoupper(Str::random(12)),
+                'capture_id' => 'CAPTURE-'.strtoupper(Str::random(12)),
             ];
         }
 
@@ -81,7 +82,7 @@ class PayPalGateway implements PaymentGatewayInterface
         if ($this->testMode) {
             return [
                 'status' => 'refunded',
-                'refund_id' => 'PAYPAL-REFUND-' . strtoupper(Str::random(10)),
+                'refund_id' => 'PAYPAL-REFUND-'.strtoupper(Str::random(10)),
                 'amount_cents' => $refundAmountCents,
             ];
         }
@@ -113,7 +114,7 @@ class PayPalGateway implements PaymentGatewayInterface
 
         return [
             'status' => $payload['status'] ?? 'completed',
-            'event_id' => $payload['id'] ?? ('PAYPAL-EVT-' . Str::random(10)),
+            'event_id' => $payload['id'] ?? ('PAYPAL-EVT-'.Str::random(10)),
             'amount_cents' => $payload['amount_cents'] ?? 0,
         ];
     }

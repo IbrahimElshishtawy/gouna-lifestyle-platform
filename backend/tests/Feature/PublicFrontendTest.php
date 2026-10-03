@@ -14,11 +14,17 @@ use Tests\TestCase;
 class PublicFrontendTest extends TestCase
 {
     private Property $rentalProperty;
+
     private Property $saleProperty;
+
     private Experience $experience;
+
     private Event $event;
+
     private Location $location;
+
     private PropertyCategory $propertyCategory;
+
     private ExperienceCategory $experienceCategory;
 
     protected function setUp(): void
@@ -127,11 +133,11 @@ class PublicFrontendTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('GOUNOW');
         $response->assertSee('Live the Unrivaled El Gouna Lifestyle');
-        $response->assertSee('Discover El Gouna with GouNow');
-        $response->assertSee('Featured Vacation Rentals');
+        $response->assertSee('Where Bohemian Serenity Meets Effortless Coastal Luxury');
+        $response->assertSee('Featured Vacation Stays');
         $response->assertSee('Curated Experiences');
-        $response->assertSee('Search Stays');
-        $response->assertSee('Browse Sale');
+        $response->assertSee('Rent a Stay');
+        $response->assertSee('Buy a Property');
     }
 
     /**

@@ -8,7 +8,6 @@ use App\Models\Discount;
 use App\Models\Property;
 use App\Models\SeasonalPrice;
 use App\Modules\Pricing\Application\DTOs\PricingQuoteDTO;
-use App\Shared\Domain\ValueObjects\DateRange;
 use Carbon\Carbon;
 use InvalidArgumentException;
 
@@ -33,6 +32,7 @@ class CalculateBookingQuoteQuery
 
         if ($seasons->isNotEmpty()) {
             $winner = $seasons->first();
+
             return [
                 'price_cents' => (int) $winner->price_cents,
                 'seasonal_price_id' => $winner->id,

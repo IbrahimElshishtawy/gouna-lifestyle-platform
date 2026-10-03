@@ -7,7 +7,9 @@ use Exception;
 class DomainException extends Exception
 {
     protected string $errorCode;
+
     protected int $statusCode;
+
     protected ?array $details;
 
     public function __construct(

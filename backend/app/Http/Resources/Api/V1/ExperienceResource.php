@@ -37,12 +37,12 @@ class ExperienceResource extends BaseJsonResource
                 'is_published' => (bool) $this->is_published,
             ],
             'relationships' => [
-                'category' => $this->whenLoaded('category', fn() => [
+                'category' => $this->whenLoaded('category', fn () => [
                     'id' => $this->category->id,
                     'name' => $locale === 'ar' ? $this->category->name_ar : $this->category->name_en,
                     'slug' => $this->category->slug,
                 ]),
-                'media' => $this->whenLoaded('media', fn() => $this->media->map(fn($item) => [
+                'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
                     'url' => asset('storage/'.$item->file_path),
                     'is_primary' => (bool) $item->is_primary,

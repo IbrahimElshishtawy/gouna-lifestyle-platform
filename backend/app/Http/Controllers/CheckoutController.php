@@ -47,6 +47,7 @@ class CheckoutController extends Controller
 
         try {
             $quote = $this->bookingService->getQuote($property, $checkIn, $checkOut, $guests, $promoCode);
+
             return response()->json([
                 'success' => true,
                 'quote' => $quote,
@@ -149,6 +150,7 @@ class CheckoutController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
             }
+
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
@@ -192,7 +194,7 @@ class CheckoutController extends Controller
         $booking = Booking::where('reference', $reference)->firstOrFail();
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->firstOrFail();
 
-        $this->paymentService->confirmPayment($transaction->transaction_id, 'GATEWAY-REF-' . time());
+        $this->paymentService->confirmPayment($transaction->transaction_id, 'GATEWAY-REF-'.time());
 
         return redirect()->route('checkout.confirmation', $booking->reference)
             ->with('success', 'Card payment approved and verified! Your reservation is now confirmed.');
@@ -241,7 +243,7 @@ class CheckoutController extends Controller
         $booking = Booking::where('reference', $reference)->firstOrFail();
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->firstOrFail();
 
-        $this->paymentService->confirmPayment($transaction->transaction_id, 'PAYPAL-CAPTURE-' . time());
+        $this->paymentService->confirmPayment($transaction->transaction_id, 'PAYPAL-CAPTURE-'.time());
 
         return redirect()->route('checkout.confirmation', $booking->reference)
             ->with('success', 'PayPal order captured and verified! Your reservation is now confirmed.');

@@ -30,7 +30,7 @@ class RecordManualPaymentAction
             $booking, $amountCents, $paymentMethodCode, $reference, $paymentDate, $adminUserId, $notes
         ) {
             $transaction = PaymentTransaction::create([
-                'transaction_id' => 'MANUAL-' . Str::upper(Str::random(12)),
+                'transaction_id' => 'MANUAL-'.Str::upper(Str::random(12)),
                 'booking_id' => $booking->id,
                 'customer_id' => $booking->customer_id,
                 'payment_method_id' => $booking->payment_method_id,

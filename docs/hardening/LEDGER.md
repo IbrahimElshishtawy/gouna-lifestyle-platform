@@ -1,12 +1,12 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 2 (API Layer, Request Pipeline & Next.js Integration) — COMPLETED
-- **Next phase**: 3 (RBAC & Authorization Enforcement)
-- **Last completed task ID**: P2-T14 (DONE)
-- **Branch**: `hardening/phase-2`
-- **Test status**: 56 PASS / 1 FAIL (Pre-existing branding string in `PublicFrontendTest.php:130`). 6/6 Baseline tests PASS. 10/10 ApiV1HardeningTest PASS (59 assertions).
-- **Overall status**: PHASE 2 SIGNED-OFF
+- **Current phase**: 3 (RBAC & Authorization Enforcement) — COMPLETED
+- **Next phase**: 4 (Authentication, 2FA & Account Security)
+- **Last completed task ID**: P3-T14 (DONE)
+- **Branch**: `hardening/phase-3`
+- **Test status**: 28/28 Hardening tests PASS (119 assertions). 6/6 Baseline tests PASS. 11/11 Authorization tests PASS. 1/1 Route Inventory tests PASS. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
+- **Overall status**: PHASE 3 SIGNED-OFF
 
 ## Task Completion Table (Phase 0 — G17 Discipline)
 | Task ID | Status | Evidence | Reason if not DONE |
@@ -60,6 +60,24 @@
 | P2-T13 | DONE | Contract documentation created: `API_CONTRACT.md`, `AUTHENTICATION_FLOW.md`, `ERROR_STANDARD.md`, `NEXTJS_INTEGRATION.md`, `ROUTE_MIGRATION_MAP.md`. | N/A |
 | P2-T14 | DONE | 10 feature tests in `backend/tests/Feature/ApiV1HardeningTest.php` passing 100% (59 assertions); 6 baseline characterization tests green. | N/A |
 
+## Task Completion Table (Phase 3 — G17 Discipline)
+| Task ID | Status | Evidence | Reason if not DONE |
+|---|---|---|---|
+| P3-T01 | DONE | Permission catalog analyzed across 7 roles and 24 canonical permissions; canonical aliases (`resource.action`) mapped in `PermissionResolver`. | N/A |
+| P3-T02 | DONE | `docs/hardening/AUTHORIZATION_MATRIX.md` created mapping all admin routes, scopes, role permissions, and G22 security answers. | N/A |
+| P3-T03 | DONE | `App\Services\Auth\PermissionResolver` implemented with 2-query eager loading, request-level caching, explicit deny support, and zero N+1 verified. | N/A |
+| P3-T04 | DONE | 12 Model Policies implemented in `app/Policies/` with 3-layer authorization (permission + scope + state); zero fixed `true` returns. Registered in `AppServiceProvider`. | N/A |
+| P3-T05 | DONE | Granular `can:...` permission middleware enforced on all admin route groups in `routes/web.php` and `routes/api/v1/`. | N/A |
+| P3-T06 | DONE | Query scoping implemented via `scopeVisibleTo(?User $user)` on `Property`, `Booking`, `Customer`, `PaymentTransaction`, and `Lead`. | N/A |
+| P3-T07 | DONE | `->scopeBindings()` applied on nested media routes; 404 returned on parent-child mismatch, verified in tests. | N/A |
+| P3-T08 | DONE | Admin user management rules implemented in `UserPolicy`: prevents self-escalation and disallows deleting the last active super-admin. | N/A |
+| P3-T09 | DONE | Mass assignment defense on authz fields verified: `role_ids` and `is_admin` cannot be overwritten by client requests. | N/A |
+| P3-T10 | DONE | 403 vs 404 leakage policy enforced: 404 returned on querying someone else's booking; 403 on unauthorized admin access. | N/A |
+| P3-T11 | DONE | `GET /api/v1/me/abilities` implemented returning sanitized roles, permissions, and scopes for Next.js client rendering. | N/A |
+| P3-T12 | DONE | `Tests\Feature\RouteInventorySecurityTest` created and passing; programmatically asserts zero unprotected admin routes. | N/A |
+| P3-T13 | DONE | `Tests\Feature\AuthorizationSecurityTest` created with 11 privilege escalation scenarios passing 100%. | N/A |
+| P3-T14 | DONE | `RoleAndPermissionSeeder` updated with `updateOrCreate`, verified completely idempotent across repeated runs. | N/A |
+
 ## Standards S1–S5 Comprehension (10-line summary)
 1. **S1 (Request Pipeline)**: Strict 14-step request lifecycle (Correlation ID → Trusted Proxies → CORS → Force JSON → Rate limit → Auth → Account state → Scoped bindings → Policy → FormRequest → Thin Controller → Action/Transaction → Resource → Exception envelope).
 2. **S1 Controllers/Requests**: Controllers only accept validated input, call a single Action, return Resource; FormRequests enforce explicit authorization and rigorous rules; zero `$request->all()`.
@@ -78,6 +96,7 @@
 - **D-003**: Decided on Action-sharing architecture: Blade web controllers and `/api/v1` controllers will invoke the identical domain actions, preventing code duplication while decoupling presentation formats.
 - **D-004 (ADR-003)**: Dual-mode authentication: HTTP-only session cookies with CSRF double-submit protection for Next.js web application; Sanctum personal access tokens for native mobile and third-party API clients.
 - **D-005**: Persistent database idempotency ledger via `idempotency_keys` table with SHA-256 payload hashing, 24-hour TTL, and atomic response caching to prevent duplicate bookings and financial double-charges.
+- **D-006**: Three-layer Zero-Trust Authorization Architecture: Model Policies evaluate permission + scope + state invariants; `Gate::after` acts strictly as an unhandled fallback for simple string abilities without overriding policy decisions; `Gate::before` allows super-admin bypass while strictly preserving User safety invariants (cannot delete self, cannot delete last super-admin).
 
 ## Open Findings
 - None blocking Phase 2.
@@ -126,11 +145,20 @@
 - `frontend/src/lib/api/client.ts`
 - `frontend/.env.local`
 - `frontend/.env.example`
+- `docs/hardening/AUTHORIZATION_MATRIX.md`
+- `backend/app/Services/Auth/PermissionResolver.php`
+- `backend/app/Policies/*`
+- `backend/database/seeders/RoleAndPermissionSeeder.php`
+- `backend/tests/Feature/RouteInventorySecurityTest.php`
+- `backend/tests/Feature/AuthorizationSecurityTest.php`
 
 ## Commands That Must Pass Before Moving On
 ```bash
 php artisan test --group=baseline
 php artisan test tests/Feature/ApiV1HardeningTest.php
+php artisan test tests/Feature/RouteInventorySecurityTest.php
+php artisan test tests/Feature/AuthorizationSecurityTest.php
+./vendor/bin/pint --test
 php artisan migrate:status
 composer audit
 ```

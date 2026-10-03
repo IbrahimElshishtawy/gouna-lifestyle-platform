@@ -19,7 +19,6 @@ use App\Modules\Pricing\Application\Queries\CalculateBookingQuoteQuery;
 use App\Shared\Domain\Exceptions\AvailabilityConflictException as DomainAvailabilityException;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller

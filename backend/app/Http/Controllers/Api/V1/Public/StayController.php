@@ -26,9 +26,9 @@ class StayController extends Controller
         if ($search = $request->input('q')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title_en', 'like', "%{$search}%")
-                  ->orWhere('title_ar', 'like', "%{$search}%")
-                  ->orWhere('compound', 'like', "%{$search}%")
-                  ->orWhere('reference_number', 'like', "%{$search}%");
+                    ->orWhere('title_ar', 'like', "%{$search}%")
+                    ->orWhere('compound', 'like', "%{$search}%")
+                    ->orWhere('reference_number', 'like', "%{$search}%");
             });
         }
 
@@ -70,9 +70,9 @@ class StayController extends Controller
                 $q->orWhere('id', (int) $slug);
             }
         })
-        ->where('is_published', true)
-        ->with(['category', 'location', 'amenities', 'media'])
-        ->firstOrFail();
+            ->where('is_published', true)
+            ->with(['category', 'location', 'amenities', 'media'])
+            ->firstOrFail();
 
         return new PropertyResource($property);
     }
