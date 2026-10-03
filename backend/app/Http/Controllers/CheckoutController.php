@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -102,6 +103,28 @@ class CheckoutController extends Controller
         $checkIn = Carbon::parse($validated['check_in']);
         $checkOut = Carbon::parse($validated['check_out']);
 
+        // Concurrency / Double-submission protection (FINDING-004)
+        $submissionKey = 'checkout_lock_'.md5(
+            $property->id.'|'.
+            $checkIn->toDateString().'|'.
+            $checkOut->toDateString().'|'.
+            strtolower(trim($validated['email']))
+        );
+
+        $lock = Cache::lock($submissionKey, 10);
+        if (! $lock->get()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'error' => [
+                        'code' => 'CHECKOUT_IN_PROGRESS',
+                        'message' => 'A checkout submission is already being processed. Please wait.',
+                    ],
+                ], 409);
+            }
+
+            return back()->withInput()->with('error', 'A checkout submission is already being processed. Please wait a moment.');
+        }
+
         try {
             [$booking, $paymentResult] = DB::transaction(function () use ($validated, $property, $paymentMethod, $checkIn, $checkOut, $request) {
                 // Find or create customer
@@ -161,6 +184,8 @@ class CheckoutController extends Controller
             }
 
             return back()->withInput()->with('error', $e->getMessage());
+        } finally {
+            optional($lock)->release();
         }
     }
 

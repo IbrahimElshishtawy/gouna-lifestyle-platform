@@ -5,6 +5,7 @@ namespace App\Services\Payment\Gateways;
 use App\Models\Booking;
 use App\Models\PaymentTransaction;
 use App\Services\Payment\PaymentGatewayInterface;
+use App\Services\Payment\WebhookSignatureVerifier;
 use Illuminate\Support\Str;
 
 /**
@@ -87,16 +88,31 @@ class CardGateway implements PaymentGatewayInterface
 
     public function handleWebhook(array $payload, string $signature): array
     {
-        // Verify signature before processing
-        // Production implementation must verify the signature against provider secret
-        if (! $this->testMode) {
-            throw new \RuntimeException('Card gateway webhook not configured.');
+        $secret = (string) ($this->config['webhook_secret'] ?? config('services.payment.webhook_secret', 'whsec_placeholder'));
+
+        if (empty($signature)) {
+            throw new \InvalidArgumentException('Missing webhook signature.');
         }
 
+        // Verify SHA-256 or Paymob SHA-512 signature
+        $expected = hash_hmac('sha256', json_encode($payload), $secret);
+        if (! hash_equals(strtolower($expected), strtolower(trim($signature)))) {
+            $paymobObj = $payload['obj'] ?? $payload;
+            $paymobExpected = WebhookSignatureVerifier::generatePaymobSignature($paymobObj, $secret);
+            if (! hash_equals(strtolower($paymobExpected), strtolower(trim($signature)))) {
+                throw new \InvalidArgumentException('Invalid webhook signature.');
+            }
+        }
+
+        $isSuccess = ($payload['status'] ?? null) === 'completed'
+            || ($payload['status'] ?? null) === 'success'
+            || ($payload['success'] ?? false) === true;
+
         return [
-            'status' => $payload['status'] ?? 'unknown',
-            'event_id' => $payload['id'] ?? null,
-            'amount_cents' => $payload['amount'] ?? 0,
+            'status' => $isSuccess ? 'completed' : 'failed',
+            'event_id' => (string) ($payload['transaction_id'] ?? $payload['id'] ?? uniqid('evt_')),
+            'transaction_id' => (string) ($payload['transaction_id'] ?? $payload['id'] ?? ''),
+            'amount_cents' => (int) ($payload['amount_cents'] ?? $payload['amount'] ?? 0),
         ];
     }
 

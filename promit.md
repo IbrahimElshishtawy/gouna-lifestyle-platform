@@ -1,2852 +1,2845 @@
-# 🛡️ PHASE 5.5 — ADVERSARIAL PRODUCTION AUDIT
+# PHASE 6 — PAYMENT & FINANCIAL INTEGRITY HARDENING
 
-## GouNow Platform — Pre-Production Adversarial Security, Architecture, Data Integrity & Reliability Audit
+## GouNow Lifestyle Platform — Laravel Backend
 
-> **Purpose:** This phase is NOT a feature-development phase.
->
-> This phase exists to aggressively challenge, attack, verify, and validate everything implemented during Phases 0–5 before the system proceeds to Payment, PII, PostgreSQL, Performance, Observability, and Final Production Hardening.
->
-> The objective is to determine whether the current implementation is genuinely secure and production-safe, rather than merely passing the existing test suite.
->
-> **You are not allowed to assume that passing tests means the implementation is correct.**
->
-> Treat the existing backend as potentially vulnerable until every important security and reliability boundary has been independently verified.
+You are now entering **PHASE 6 — PAYMENT & FINANCIAL INTEGRITY HARDENING**.
 
----
+This phase follows the completed **Phase 5.5 Adversarial Production Audit**.
 
-# 0. ROLE — ACT AS AN ADVERSARIAL AUDIT TEAM
+You are NOT allowed to treat Phase 6 as a simple feature implementation.
 
-You are simultaneously acting as:
+This is a combined:
 
-* Principal Laravel Architect
-* Senior Application Security Engineer
-* Offensive Security Engineer
-* API Security Auditor
-* Database Security Engineer
-* PostgreSQL/SQLite Reliability Engineer
-* Concurrency Engineer
-* Authentication Security Engineer
-* Authorization/RBAC Auditor
-* Payment Security Auditor
-* QA/Test Architect
-* Performance Engineer
-* Production Reliability Engineer
-* Code Reviewer
+* Payment Security Audit
+* Webhook Security Implementation
+* Financial State-Machine Hardening
+* Idempotency Hardening
+* Payment/Booking Consistency Audit
+* Refund Integrity Audit
+* Reconciliation Design
+* Concurrency Audit
+* Database Integrity Audit
+* Adversarial Testing Phase
+* Production Readiness Gate
 
-Your objective is NOT to make the existing implementation look good.
+The goal is to make the payment and financial parts of the backend resistant to:
 
-Your objective is to find where it can fail.
-
-Assume that:
-
-* existing code may contain hidden bugs
-* existing tests may have blind spots
-* security controls may only work in the happy path
-* middleware may not cover every route
-* policies may contain logic gaps
-* database constraints may be incomplete
-* race-condition protection may be incorrectly placed
-* SQLite behavior may hide PostgreSQL problems
-* API responses may leak fields in edge cases
-* logs may contain sensitive information
-* idempotency may fail under concurrency
-* authentication may be correct in one flow but vulnerable in another
-* authorization may work for normal users but fail through alternate routes
-* frontend validation may be incorrectly trusted
-* exception handling may leak internal implementation details
-* tests may assert implementation details instead of security properties
-
-Do not attempt to prove the previous developer was wrong.
-
-Attempt to prove whether the current system is actually safe.
+* forged webhooks
+* replay attacks
+* duplicate callbacks
+* manipulated payment amounts
+* manipulated booking references
+* fake payment success
+* duplicate payments
+* duplicate bookings
+* refund abuse
+* authorization bypass
+* race conditions
+* inconsistent payment/booking states
+* idempotency collisions
+* transaction failures
+* partial database updates
+* provider/API failures
+* malicious request manipulation
+* incorrect callback assumptions
+* inconsistent SQLite/PostgreSQL behavior
 
 ---
 
-# 1. CRITICAL RULE — DO NOT MODIFY FIRST
+# 0. ABSOLUTE RULES
 
-Before modifying code:
+These rules apply to the entire phase.
+
+## 0.1 Do NOT blindly modify the code
+
+Before changing anything:
 
 1. Inspect the repository.
-2. Read `promit.md`.
-3. Read:
+2. Inspect the current architecture.
+3. Inspect all payment-related routes.
+4. Inspect all payment-related controllers.
+5. Inspect all payment-related services/actions.
+6. Inspect payment models.
+7. Inspect booking models.
+8. Inspect migrations.
+9. Inspect middleware.
+10. Inspect policies.
+11. Inspect Form Requests.
+12. Inspect resources/DTOs.
+13. Inspect events/listeners/jobs.
+14. Inspect database transactions.
+15. Inspect tests.
+16. Inspect configuration.
+17. Inspect environment variables.
+18. Inspect existing Phase 0–5 hardening.
+19. Inspect Phase 5.5 findings.
+20. Trace the real request/data flow.
 
-   * `docs/hardening/LEDGER.md`
-   * `docs/hardening/BACKLOG.md`
-   * `docs/hardening/ROUTE_INVENTORY.md`
-   * `docs/hardening/DATABASE_SCHEMA_AND_SECURITY.md`
-4. Inspect the current Git status.
-5. Inspect recent Git diff.
-6. Identify all changes made after Phase 5.
-7. Identify all tests added during Phases 0–5.
-8. Inspect the current Laravel configuration.
-9. Inspect environment configuration.
-10. Inspect migrations.
-11. Inspect routes.
-12. Inspect middleware.
-13. Inspect authentication.
-14. Inspect authorization.
-15. Inspect booking flows.
-16. Inspect pricing flows.
-17. Inspect idempotency implementation.
-18. Inspect exception handling.
-19. Inspect logging.
-20. Inspect database transactions and locking.
-21. Inspect API Resources/DTOs.
-22. Inspect test infrastructure.
-
-Only after establishing the current baseline may you begin adversarial testing.
+Do not start coding before understanding the existing implementation.
 
 ---
 
-# 2. ABSOLUTE RULE — DO NOT TRUST EXISTING TESTS
+# 0.2 Existing architecture is authoritative
 
-Existing tests are evidence, not proof.
+The existing system already contains hardening from Phases 0–5.
 
-For every important security control ask:
+Do NOT replace the architecture simply because you prefer another pattern.
 
-> "What test would pass even if this security control were incorrectly implemented?"
+Do NOT introduce:
 
-Then create a stronger test.
-
-Do not simply rerun:
-
-```bash
-php artisan test
-```
-
-and conclude that the system is secure.
-
-You must perform:
-
-* positive testing
-* negative testing
-* boundary testing
-* authorization bypass testing
-* malformed input testing
-* concurrent request testing
-* state transition testing
-* replay testing
-* enumeration testing
-* privilege escalation testing
-* alternate-route testing
-* alternate-content-type testing
-* database constraint testing
-* transaction failure testing
-* exception-path testing
-
----
-
-# 3. NO NEW FEATURES
-
-This phase must NOT introduce:
-
-* Redis
+* unnecessary repositories
+* unnecessary interfaces
+* CQRS
+* event sourcing
+* microservices
 * Kafka
 * RabbitMQ
 * Kubernetes
 * Elasticsearch
-* microservices
-* CQRS
-* event sourcing
-* new databases
-* unnecessary repositories
-* unnecessary interfaces
+* unnecessary Redis
+* unnecessary distributed locks
 * unnecessary abstractions
-* unrelated refactoring
 
-Only create code when required to:
+unless the existing architecture demonstrates a real requirement.
 
-1. reproduce a vulnerability
-2. prove a security property
-3. fix a confirmed defect
-4. improve testability without changing behavior
-5. instrument an audit finding
+Prefer:
 
----
+> simple + explicit + testable + secure + scalable
 
-# 4. ESTABLISH THE ATTACK SURFACE
+over:
 
-Create or update:
-
-```text
-docs/hardening/PHASE_5_5_ATTACK_SURFACE.md
-```
-
-Document:
-
-## 4.1 HTTP Attack Surface
-
-Inventory:
-
-* public GET routes
-* public POST routes
-* public PUT/PATCH routes
-* public DELETE routes
-* customer routes
-* authenticated routes
-* admin routes
-* webhook routes
-* upload routes
-* authentication routes
-* password recovery routes
-* 2FA routes
-* booking routes
-* payment routes
-* CMS routes
-* lead/contact routes
-
-For every route record:
-
-```text
-METHOD
-URI
-Controller
-Action
-Middleware
-Authentication
-Authorization
-Validation
-Rate Limit
-Idempotency
-Transaction
-Database Mutation
-External Service
-Response Resource
-Potential Sensitive Data
-```
-
-Do not rely only on the route inventory document.
-
-Generate the inventory from the actual Laravel route collection where possible.
+> complex + abstract + theoretically scalable
 
 ---
 
-# 5. ROUTE SECURITY AUDIT
+# 0.3 Do NOT weaken existing security
 
-Run:
+You must preserve all existing security properties.
 
-```bash
-php artisan route:list
-```
+Do not remove or bypass:
 
-and inspect the complete output.
-
-For every mutation route:
-
-* POST
-* PUT
-* PATCH
-* DELETE
-
-verify:
-
-* authentication requirements
-* authorization requirements
+* authentication
+* authorization
+* policies
+* scopes
+* rate limits
 * validation
-* rate limiting
-* CSRF assumptions where relevant
-* idempotency requirements where appropriate
+* CSRF protection
+* idempotency
+* request IDs
+* logging redaction
 * transaction boundaries
-* response filtering
-
-Identify:
-
-```text
-unprotected mutation
-missing authorization
-missing validation
-missing rate limit
-missing idempotency
-wrong middleware ordering
-wrong guard
-wrong policy
-wrong scope
-wrong route model binding
-```
-
----
-
-# 6. AUTHORIZATION ADVERSARIAL AUDIT
-
-The authorization model is described as:
-
-```text
-Role + Scope + State
-```
-
-Do not assume this model is correctly enforced.
-
-Test all combinations.
-
----
-
-## 6.1 Horizontal Privilege Escalation
-
-Create:
-
-```text
-User A
-User B
-Admin A
-Admin B
-```
-
-Where applicable.
-
-Attempt:
-
-```text
-User A → User B resource
-User B → User A resource
-Admin A → Admin B scoped resource
-Customer → another customer's booking
-Customer → another customer's profile
-Customer → another customer's private data
-```
-
-Test using:
-
-* direct IDs
-* UUIDs
-* slugs
-* booking codes
-* public identifiers
-* alternate endpoints
-* nested resources
-* query parameters
-
-Expected result:
-
-```text
-403 or 404
-```
-
-depending on the intended contract.
-
-Never leak:
-
-* existence
-* ownership
-* internal IDs
-* private metadata
-
-unless the endpoint is intentionally public.
-
----
-
-# 7. IDOR / BOLA ATTACK MATRIX
-
-Build an automated matrix.
-
-For each protected resource:
-
-```text
-Own resource
-Other user's resource
-Non-existent resource
-Deleted resource
-Soft-deleted resource
-Unauthorized resource
-Resource belonging to another scope
-```
-
-Test:
-
-```text
-GET
-POST
-PUT
-PATCH
-DELETE
-```
-
-where applicable.
-
-Do not test only the obvious endpoint.
-
-Check alternate paths that access the same model.
-
-Example:
-
-```text
-/bookings/{id}
-/customer/bookings/{id}
-/bookings/{code}
-/bookings/{token}
-/admin/bookings/{id}
-```
-
-The same underlying object must not accidentally become accessible through a weaker route.
-
----
-
-# 8. VERTICAL PRIVILEGE ESCALATION
-
-Test:
-
-```text
-guest
-customer
-staff
-manager
-admin
-super-admin
-```
-
-or whatever roles actually exist.
-
-Attempt:
-
-```text
-customer → admin endpoint
-staff → admin-only mutation
-admin → super-admin operation
-lower scope → higher scope resource
-```
-
-Try modifying:
-
-```text
-role_id
-permissions
-scope_id
-owner_id
-user_id
-status
-approval_state
-is_admin
-is_active
-```
-
-through:
-
-* JSON
-* form data
-* query parameters
-* nested arrays
-* mass assignment
-* hidden fields
-* alternate endpoints
-
-Never trust:
-
-```php
-$request->validated()
-```
-
-alone.
-
-Verify that the validated fields are actually authorized to be modified.
-
----
-
-# 9. MASS ASSIGNMENT AUDIT
-
-Inspect all models for:
-
-```php
-$fillable
-$guarded
-casts
-```
-
-Search for:
-
-```php
-create()
-update()
-fill()
-forceFill()
-firstOrCreate()
-updateOrCreate()
-upsert()
-```
-
-Identify sensitive attributes that could be mass assigned.
-
-Examples:
-
-```text
-role
-permissions
-user_id
-owner_id
-customer_id
-status
-payment_status
-verified_at
-approved_at
-is_admin
-is_active
-price
-total
-discount
-refund_amount
-booking_state
-```
-
-For every sensitive attribute determine:
-
-```text
-Can client submit it?
-Can it reach validated data?
-Can it reach DTO?
-Can it reach Action?
-Can it reach Model?
-Can it modify DB?
-```
-
-Create regression tests for every confirmed risk.
-
----
-
-# 10. AUTHENTICATION ADVERSARIAL AUDIT
-
-Inspect:
-
-* login
-* logout
-* password reset
-* password update
-* registration
-* email verification
+* booking concurrency protections
+* encrypted secrets
+* session security
 * 2FA
-* recovery codes
-* session/token management
+* existing security middleware
 
-Test:
+If a change requires modifying an existing security control, document:
 
-### Login
-
-* valid credentials
-* invalid password
-* nonexistent email
-* disabled user
-* deleted user
-* unverified user
-* locked user
-* repeated attempts
-* distributed attempts
-* timing differences
-
-Verify that failures do not disclose:
-
-```text
-account existence
-account status
-internal exception
-database information
-```
+1. Why
+2. Current behavior
+3. New behavior
+4. Security impact
+5. Tests
+6. Migration impact
 
 ---
 
-# 11. PASSWORD RESET ATTACKS
+# 0.4 Production safety
 
-Test:
+Never implement a fake security mechanism.
 
-```text
-expired token
-already-used token
-malformed token
-short token
-long token
-random token
-token replay
-parallel token use
-wrong user
-token after password change
-token after logout
-```
-
-Verify:
-
-* single use
-* expiration
-* invalidation
-* hashing
-* race-condition protection
-* generic responses
-
-Test two concurrent reset attempts using the same token.
-
-Only one operation should succeed where the contract requires one-time use.
-
----
-
-# 12. 2FA ADVERSARIAL AUDIT
-
-Inspect TOTP implementation.
-
-Verify:
-
-* secret encryption at rest
-* secret never returned in normal API responses
-* secret never logged
-* replay prevention
-* recovery code hashing
-* recovery code one-time use
-* rate limiting
-* brute-force resistance
-* clock-window configuration
-* enrollment confirmation
-* disable flow
-* recovery flow
-
-Attack:
-
-```text
-same OTP twice
-same recovery code twice
-invalid OTP flood
-OTP from wrong user
-OTP after 2FA disabled
-OTP after secret rotation
-```
-
-Test concurrent recovery-code usage.
-
----
-
-# 13. SESSION / TOKEN SECURITY
-
-Inspect authentication guard and token lifecycle.
-
-Verify:
-
-* token expiration
-* revocation
-* logout behavior
-* password-change invalidation
-* account-disable behavior
-* session fixation resistance
-* secure cookie configuration if cookies are used
-* SameSite
-* HttpOnly
-* Secure
-* CORS assumptions
-
-Never assume the frontend will enforce these controls.
-
----
-
-# 14. INPUT VALIDATION ADVERSARIAL AUDIT
-
-For every important endpoint test:
-
-```text
-missing fields
-null
-empty string
-whitespace
-zero
-negative number
-huge number
-decimal
-scientific notation
-boolean instead of string
-array instead of scalar
-object instead of scalar
-unexpected nested object
-unexpected nested array
-duplicate fields
-unknown fields
-extra JSON fields
-very long strings
-Unicode
-emoji
-control characters
-HTML
-SQL-like strings
-JSON injection patterns
-```
-
-The objective is not merely SQL injection testing.
-
-The objective is ensuring the application's input contract is strict.
-
----
-
-# 15. MASSIVE INPUT / RESOURCE EXHAUSTION
-
-Identify every endpoint accepting:
-
-* arrays
-* lists
-* filters
-* sorting
-* pagination
-* search
-* uploads
-* nested structures
-
-Test:
-
-```text
-per_page=1
-per_page=100
-per_page=101
-per_page=1000000
-page=-1
-page=0
-page=999999999
-huge search strings
-huge filter arrays
-deeply nested JSON
-```
-
-Verify:
-
-* bounded input
-* bounded database work
-* bounded memory
-* bounded response size
-
----
-
-# 16. SQL / QUERY SAFETY
-
-Search for:
+Never do:
 
 ```php
-DB::raw()
-whereRaw()
-selectRaw()
-orderByRaw()
-havingRaw()
-groupByRaw()
-raw SQL
-```
-
-For each usage verify:
-
-* parameters are bound
-* identifiers are allowlisted
-* sorting fields are allowlisted
-* user input cannot become SQL syntax
-
-Test malicious values against:
-
-```text
-sort
-filter
-search
-column
-direction
-group
-date range
-```
-
----
-
-# 17. AUTHORITATIVE PRICING AUDIT
-
-The server must remain authoritative for all financial values.
-
-For every booking/quote/payment-related endpoint test tampering with:
-
-```text
-price
-unit_price
-nightly_rate
-subtotal
-discount
-tax
-fees
-total
-currency
-quantity
-guest count
-dates
-property ID
-season
-coupon
-payment amount
-```
-
-Attempt:
-
-```json
-{
-  "total": 1,
-  "price": 1,
-  "discount": 999999,
-  "nightly_rate": 0
+if (app()->environment('local', 'testing')) {
+    return $next($request);
 }
 ```
 
-Verify that server-side calculations remain authoritative.
+to bypass security logic that must exist in production unless the bypass is explicitly part of a safe test architecture.
 
-The client must never determine the final amount.
+Never accept:
 
----
-
-# 18. BOOKING STATE MACHINE ATTACK
-
-Enumerate all valid states.
-
-For each state:
-
-```text
-Allowed transitions
-Forbidden transitions
-Actor allowed
-Actor forbidden
-Side effects
-```
-
-Attempt illegal transitions.
-
-Examples:
-
-```text
-cancelled → confirmed
-completed → pending
-expired → confirmed
-refunded → paid
-paid → pending
-```
-
-depending on actual domain rules.
-
-Attempt transitions through:
-
-* direct API calls
-* duplicate requests
-* concurrent requests
-* stale frontend state
-* repeated webhooks
-* admin endpoints
-* customer endpoints
-
----
-
-# 19. BOOKING CONCURRENCY AUDIT
-
-This is one of the highest-priority tests.
-
-Do not only test sequential requests.
-
-Create concurrent requests attempting to book:
-
-```text
-same property
-same dates
-same inventory
-same customer
-same idempotency key
-different idempotency keys
-```
-
-Run at least:
-
-```text
-2 concurrent requests
-5 concurrent requests
-10 concurrent requests
-```
-
-where practical.
-
-Verify:
-
-```text
-exactly one valid booking
-no double booking
-no negative inventory
-no inconsistent status
-no partial writes
-no duplicated financial records
-```
-
-Inspect actual transaction boundaries.
-
-Do not assume:
-
-```php
-DB::transaction()
-```
-
-automatically solves concurrency.
-
-Verify lock ordering and database constraints.
-
----
-
-# 20. IDEMPOTENCY ADVERSARIAL AUDIT
-
-For every idempotent endpoint test:
-
-### Same request
-
-```text
-same key
-same payload
-```
-
-Expected:
-
-```text
-same logical result
-no duplicate mutation
-```
-
-### Same key + different payload
-
-Example:
-
-```text
-Key = ABC
-Request 1 = Booking A
-Request 2 = Booking B
-```
-
-This must NOT silently mutate the first operation into the second.
-
-Expected behavior must be explicitly defined and tested.
-
-### Concurrent replay
-
-Send the same idempotency key concurrently.
-
-Verify:
-
-```text
-one mutation
-consistent response
-no race
-no duplicate database rows
-```
-
-### Expired key
-
-Verify cleanup and replay behavior.
-
-### Cross-user key reuse
-
-Test:
-
-```text
-User A → key X
-User B → key X
-```
-
-Ensure users cannot interfere with each other's operations.
-
----
-
-# 21. DATABASE INTEGRITY AUDIT
-
-Inspect all migrations.
-
-For every important relationship verify:
-
-* foreign key
-* nullability
-* uniqueness
-* check constraints where appropriate
-* indexes
-* cascade behavior
-* delete behavior
-* update behavior
-
-Identify business rules enforced only in PHP but not protected at the database level.
-
-For critical invariants ask:
-
-> "Could two application instances violate this rule simultaneously?"
-
-If yes, determine whether a database-level constraint is required.
-
----
-
-# 22. UNIQUE CONSTRAINT AUDIT
-
-Search for logical uniqueness requirements such as:
-
-```text
-email
-phone
-booking code
-idempotency key
-external transaction ID
-payment reference
-slug
-username
-role assignment
-permission assignment
-```
-
-Verify uniqueness at the database level where required.
-
-Do not rely only on:
-
-```php
-Rule::unique()
-```
-
-because validation can race.
-
----
-
-# 23. FOREIGN KEY / DELETE AUDIT
-
-For every foreign key determine whether deletion should:
-
-```text
-CASCADE
-RESTRICT
-SET NULL
-soft delete
-```
-
-Test destructive operations.
-
-Attempt to delete parent records with dependent records.
-
-Verify no orphan records are created.
-
----
-
-# 24. TRANSACTION FAILURE AUDIT
-
-For every critical mutation:
-
-1. identify transaction boundary
-2. identify every database write
-3. identify every external side effect
-4. intentionally force failure between operations
-
-Examples:
-
-```text
-booking created
-→ payment record fails
-
-booking created
-→ nightly prices fail
-
-booking status updated
-→ notification fails
-
-payment updated
-→ audit log fails
-```
-
-Determine whether failure results in:
-
-```text
-complete rollback
-partial state
-recoverable state
-irrecoverable state
-```
-
-Critical database invariants must remain intact.
-
----
-
-# 25. EXCEPTION HANDLING AUDIT
-
-Search:
-
-```php
-catch
-throw
-report
-render
-```
-
-Verify that exceptions are classified correctly.
-
-Public API must never expose:
-
-```text
-SQLSTATE
-SQL query
-filesystem path
-stack trace
-vendor path
-environment variable
-database credentials
-internal class names
-private IDs
-```
-
-Test:
-
-```text
-404
-401
-403
-409
-422
-429
-500
-database failure
-external service failure
-unexpected exception
-```
-
-Verify the error envelope remains stable.
-
----
-
-# 26. ERROR RESPONSE SIDE-CHANNEL AUDIT
-
-Compare responses for:
-
-```text
-existing email
-non-existing email
-existing booking
-non-existing booking
-authorized resource
-unauthorized resource
-deleted resource
-```
-
-Look for differences in:
-
-* status
-* message
-* response size
-* response timing
-* headers
-
-Only expose distinctions intentionally required by the public API.
-
----
-
-# 27. API RESOURCE / DATA LEAKAGE AUDIT
-
-Inspect every:
-
-```text
-JsonResource
-ResourceCollection
-DTO
-Transformer
-Model serialization
-toArray()
-```
-
-Search for sensitive fields:
-
-```text
-password
-password_hash
-remember_token
-2fa_secret
-recovery_codes
-internal_notes
-admin_notes
-private_path
-storage_path
-payment secrets
-webhook secrets
-internal IDs
-PII
-```
-
-Test API responses for accidental leakage.
-
-Do not assume `$hidden` alone is sufficient.
-
-Verify the actual JSON response.
-
----
-
-# 28. LOGGING / PII AUDIT
-
-Search:
-
-```php
-Log::
-logger()
-info()
-warning()
-error()
-debug()
-dump()
-dd()
-```
-
-Also inspect:
-
-```text
-storage/logs
-exception reports
-request logging
-queue logging
-webhook logging
-authentication logging
-```
-
-Ensure logs do not contain:
-
-```text
-passwords
-tokens
-session IDs
-2FA secrets
-recovery codes
-payment secrets
-full authorization headers
-private documents
-sensitive PII
-```
-
-Inspect exception context.
-
-Test intentionally failing requests and inspect the resulting log.
-
----
-
-# 29. REQUEST-ID / CORRELATION-ID AUDIT
-
-Verify:
-
-```text
-incoming X-Request-ID
-generated request ID
-response propagation
-logs
-exceptions
-database audit records where applicable
-```
-
-Test malicious IDs:
-
-```text
-empty
-huge
-invalid characters
-newline
-control characters
-structured injection
-```
-
-The request ID must not become a log-injection vector.
-
-Verify normalization and length limits.
-
----
-
-# 30. RATE LIMITING AUDIT
-
-Enumerate all sensitive endpoints:
-
-```text
-login
-password reset
-2FA
-OTP
-recovery
-booking
-lead submission
-search
-uploads
-webhooks
-admin mutations
-```
-
-For each determine:
-
-```text
-rate limiter
-key
-window
-limit
-response
-headers
-proxy awareness
-```
-
-Attack using:
-
-```text
-same IP
-different IP
-same account
-different accounts
-same token
-different tokens
-X-Forwarded-For manipulation
-```
-
-Verify that proxy headers cannot trivially bypass rate limits.
-
----
-
-# 31. TRUSTED PROXY AUDIT
-
-Inspect:
-
-```php
-trustProxies
-X-Forwarded-For
-X-Real-IP
-Forwarded
-```
-
-Determine the actual deployment topology.
-
-Do NOT blindly trust arbitrary proxy headers in direct-to-Laravel deployments.
-
-Verify:
-
-```text
-client IP
-rate limiting
-audit logs
-security logs
-```
-
-remain correct.
-
-Document the expected production proxy chain.
-
----
-
-# 32. CORS AUDIT
-
-Inspect CORS configuration.
-
-Verify:
-
-* allowed origins
-* methods
-* headers
-* credentials
-* wildcard usage
-* production origins
-* development origins
-
-Test:
-
-```text
-unknown origin
-null origin
-malicious subdomain
-http origin
-https origin
-```
-
-Do not use:
-
-```text
-*
-```
-
-with credentials unless explicitly justified and safe.
-
----
-
-# 33. SECURITY HEADERS AUDIT
-
-Inspect actual HTTP responses.
-
-Verify appropriate deployment headers such as:
-
-```text
-Strict-Transport-Security
-Content-Security-Policy where applicable
-X-Content-Type-Options
-Referrer-Policy
-Permissions-Policy
-Cache-Control for sensitive responses
-```
-
-Do not blindly add headers without understanding whether the API/frontend architecture requires them.
-
-Document what belongs to:
-
-```text
-Laravel
-Reverse Proxy
-Cloudflare
-Next.js
-```
-
----
-
-# 34. CACHE SECURITY AUDIT
-
-Inspect all caching.
-
-Verify that private/user-specific data is not accidentally cached publicly.
-
-Test:
-
-```text
-User A request
-User B request
-```
-
-for any endpoint involving private data.
-
-Inspect:
-
-```text
-Cache-Control
-ETag
-Vary
-application cache keys
-route cache
-query cache
-```
-
-Look for cross-user cache poisoning or leakage.
-
----
-
-# 35. FILE UPLOAD SECURITY AUDIT
-
-If uploads exist, inspect:
-
-* validation
-* MIME detection
-* extension validation
-* size limits
-* storage location
-* filename generation
-* public/private storage
-* executable file prevention
-* path traversal protection
-* authorization
-* download authorization
-
-Attempt:
-
-```text
-.php
-.phtml
-.phar
-.svg
-.html
-.js
-double extension
-null byte
-path traversal
-very large file
-invalid MIME
-forged MIME
-```
-
-Do not rely solely on client-provided MIME type.
-
----
-
-# 36. WEBHOOK SECURITY AUDIT
-
-For every webhook:
-
-Verify:
-
-```text
-signature
-timestamp
-replay protection
-raw request body verification
-constant-time comparison
-idempotency
-event uniqueness
-authorization
-logging redaction
-```
-
-Test:
-
-```text
-missing signature
-wrong signature
-modified body
-modified header
-replay
-duplicate event
-old timestamp
-malformed payload
-```
-
-If the current implementation uses a placeholder/sandbox signature mechanism, mark it:
-
-```text
-BLOCKER — NOT PRODUCTION READY
-```
-
-Do not falsely mark it secure.
-
----
-
-# 37. WEBHOOK CONCURRENCY
-
-Send the same webhook event concurrently.
-
-Verify:
-
-```text
-one logical mutation
-no duplicate payment
-no duplicate booking state transition
-no duplicate refund
-no inconsistent state
-```
-
-Database uniqueness should protect against duplicate delivery where appropriate.
-
----
-
-# 38. PAYMENT STATE INTEGRITY
-
-Even before Phase 6 is implemented, inspect current payment-related code.
-
-Determine whether clients can influence:
-
-```text
-payment status
-amount
-currency
-transaction ID
-provider status
-refund state
-```
-
-Attempt direct manipulation through APIs.
-
-Any client-controlled financial state must be treated as a critical finding.
-
----
-
-# 39. CSRF / CORS / AUTH MODEL REVIEW
-
-Determine whether the frontend authentication model is:
-
-```text
-Bearer token
-Sanctum SPA
-cookie session
-hybrid
-```
-
-Do not mix assumptions.
-
-Document:
-
-```text
-browser request
-Next.js request
-mobile request
-server-to-server request
-webhook request
-```
-
-and the security mechanism expected for each.
-
----
-
-# 40. API CONTENT NEGOTIATION AUDIT
-
-Test requests with:
-
-```text
-application/json
-application/x-www-form-urlencoded
-multipart/form-data
-missing Content-Type
-invalid JSON
-duplicate JSON keys
-```
-
-Verify the same authorization and validation guarantees remain enforced.
-
-Do not allow an alternate content type to bypass validation.
-
----
-
-# 41. HTTP METHOD OVERRIDE AUDIT
-
-Inspect whether Laravel method spoofing is enabled/used.
-
-Test whether:
-
-```text
-POST + _method=DELETE
-POST + _method=PUT
-```
-
-can bypass security middleware or route-specific authorization.
-
-Ensure authorization is based on the effective route/method.
-
----
-
-# 42. MASS REQUEST / REPLAY AUDIT
-
-For every state-changing endpoint test:
-
-```text
-rapid repeated requests
-same request body
-slightly modified request body
-same idempotency key
-different idempotency keys
-expired authentication
-revoked authentication
-```
-
-Observe:
-
-```text
-database state
-logs
-notifications
-emails
-side effects
-```
-
----
-
-# 43. QUEUE / ASYNC SAFETY REVIEW
-
-Even if queues are not yet production-enabled, inspect code that dispatches jobs/events.
-
-Verify:
-
-* serialization safety
-* retry behavior
-* duplicate execution
-* idempotency
-* transaction timing
-* after-commit behavior
-* stale model assumptions
-
-Look for:
-
-```text
-dispatch() inside transaction
-job reads uncommitted state
-duplicate job side effect
-job assumes model still exists
-```
-
-Mark risks for Phase 10 where appropriate.
-
----
-
-# 44. EVENT / AFTER-COMMIT AUDIT
-
-Inspect:
-
-```text
-events
-listeners
-dispatches
-ShouldQueue
-afterCommit
-```
-
-Verify that external side effects do not occur before the database transaction commits when correctness requires after-commit execution.
-
-Test rollback scenarios.
-
----
-
-# 45. OBSERVABILITY AUDIT
-
-Verify that critical operations produce enough information to investigate failures without leaking sensitive data.
-
-For important operations capture where appropriate:
-
-```text
-request_id
-actor_id
-resource_id
-operation
-result
-duration
-failure category
-```
-
-Do NOT log:
-
-```text
-password
-tokens
-secrets
-full payment credentials
-private documents
-```
-
----
-
-# 46. PERFORMANCE ADVERSARIAL AUDIT
-
-This is not a full Phase 9 load test.
-
-The goal is to identify obvious architectural performance failures.
-
-Inspect:
-
-```text
-N+1 queries
-unbounded relationships
-large eager loads
-missing indexes
-repeated queries
-query loops
-expensive serialization
-large API responses
-unbounded pagination
-```
-
-Use Laravel query logging or Telescope-equivalent tooling if available.
-
-For important endpoints record:
-
-```text
-query count
-query duration
-response time
-response size
-```
-
-Do not optimize based on intuition alone.
-
----
-
-# 47. N+1 DETECTION
-
-For:
-
-```text
-stays
-properties
-experiences
-events
-bookings
-admin listings
-```
-
-measure representative endpoints.
-
-Identify:
-
-```text
-1 + N
-N + N
-relationship loops
-lazy-loaded nested relationships
-```
-
-Create regression tests for confirmed N+1 problems where practical.
-
----
-
-# 48. DATABASE INDEX AUDIT
-
-Inspect real query patterns.
-
-For important queries verify indexes support:
-
-```text
-WHERE
-JOIN
-ORDER BY
-UNIQUE
-foreign keys
-date ranges
-status filters
-ownership filters
-lookup codes
-```
-
-Do not add indexes blindly.
-
-Document:
-
-```text
-query
-current index
-expected execution pattern
-missing index
-reason
-```
-
-This phase may identify indexes for Phase 8.
-
-Do not perform broad schema optimization without evidence.
-
----
-
-# 49. SQLITE VS POSTGRESQL COMPATIBILITY AUDIT
-
-The development database is SQLite and production is PostgreSQL.
-
-Identify code relying on SQLite-specific behavior.
-
-Search for:
-
-```text
-SQLite-specific SQL
-boolean assumptions
-date behavior
-JSON behavior
-NULL behavior
-case sensitivity
-foreign-key behavior
-unique behavior
-locking behavior
-```
-
-Compare important migrations and queries against PostgreSQL expectations.
-
-Do not declare production-ready PostgreSQL compatibility without actually testing against PostgreSQL where practical.
-
----
-
-# 50. TESTING INFRASTRUCTURE AUDIT
-
-Inspect the test suite itself.
-
-Determine:
-
-```text
-unit tests
-feature tests
-integration tests
-authorization tests
-database tests
-concurrency tests
-API tests
-security tests
-```
-
-Look for tests that:
-
-* mock too much
-* never touch the database
-* assert only status codes
-* fail to verify database state
-* don't test authorization
-* don't test alternate users
-* don't test concurrent behavior
-* don't test failure paths
-
-A test that only verifies:
-
-```text
-$response->assertStatus(200)
-```
-
-is not sufficient for a critical security operation.
-
----
-
-# 51. TEST QUALITY AUDIT
-
-For each major security property ask:
-
-```text
-What exact invariant is being protected?
-What test proves it?
-Could the test pass while the vulnerability still exists?
-Does the test exercise the real route?
-Does it exercise the real middleware?
-Does it exercise the real database?
-```
-
-Where tests are weak, improve them.
-
----
-
-# 52. NEGATIVE TEST REQUIREMENT
-
-Every critical endpoint should have negative tests covering at minimum:
-
-```text
-unauthenticated
-unauthorized
-invalid input
-missing input
-tampered input
-wrong owner
-wrong role
-wrong state
-duplicate request
-concurrent request
-database failure
-unexpected exception
-```
-
-Not every category applies to every endpoint, but the audit must explicitly classify applicability.
-
----
-
-# 53. SECURITY PROPERTY MATRIX
-
-Create:
-
-```text
-docs/hardening/PHASE_5_5_SECURITY_MATRIX.md
-```
-
-Use this structure:
-
-| Security Property | Attack                | Expected Result     | Actual Result | Evidence | Status |
-| ----------------- | --------------------- | ------------------- | ------------- | -------- | ------ |
-| Authentication    | Invalid credentials   | Generic 401         | ...           | Test/log | PASS   |
-| Authorization     | Other user's booking  | 403/404             | ...           | Test     | PASS   |
-| IDOR              | Modified ID           | Denied              | ...           | Test     | PASS   |
-| Mass Assignment   | role=admin            | Ignored/Denied      | ...           | Test     | PASS   |
-| Idempotency       | Same key concurrently | One mutation        | ...           | Test     | PASS   |
-| Pricing           | total=1               | Server recalculates | ...           | Test     | PASS   |
-| Booking race      | Same inventory        | No double booking   | ...           | Test     | PASS   |
-| Webhook           | Invalid signature     | 401/403             | ...           | Test     | PASS   |
-
-Do not mark a control PASS without evidence.
-
----
-
-# 54. FINDING SEVERITY
-
-Every finding must receive one of:
-
-## P0 — Critical
-
-Examples:
-
-* authentication bypass
-* authorization bypass
-* arbitrary account takeover
-* financial manipulation
-* double booking causing financial/data corruption
-* forged webhook accepted
-* secrets exposed
-* remote code execution
-* critical data exposure
-
-P0 blocks production.
-
----
-
-## P1 — High
-
-Examples:
-
-* serious IDOR
-* privilege escalation
-* payment integrity weakness
-* sensitive PII leakage
-* race condition affecting business integrity
-* authentication bypass under realistic conditions
-* critical missing security boundary
-
-P1 blocks production unless explicitly accepted by the project owner.
-
----
-
-## P2 — Medium
-
-Examples:
-
-* limited information disclosure
-* incomplete rate limiting
-* weak validation with limited impact
-* non-critical authorization inconsistency
-* moderate performance vulnerability
-
----
-
-## P3 — Low
-
-Examples:
-
-* hardening opportunity
-* minor logging issue
-* minor consistency issue
-* documentation gap
-
----
-
-# 55. FINDING FORMAT
-
-Every confirmed vulnerability must be documented as:
-
-```markdown
-## FINDING-XXX — <Title>
-
-Severity:
-P0/P1/P2/P3
-
-Category:
-Authentication / Authorization / IDOR / Database / API / etc.
-
-Affected Component:
-<file/class/route>
-
-Attack Scenario:
-<exact scenario>
-
-Precondition:
-<required conditions>
-
-Steps to Reproduce:
-1.
-2.
-3.
-4.
+* arbitrary webhook signatures
+* missing signatures
+* fake payment statuses
+* client-provided payment confirmation
+* client-provided final prices
+* client-provided payment ownership
+* client-provided settlement state
 
-Expected:
-<secure behavior>
+as trusted information.
 
-Actual:
-<actual behavior>
-
-Security Impact:
-<what attacker can achieve>
-
-Business Impact:
-<impact on GouNow>
-
-Root Cause:
-<technical root cause>
-
-Evidence:
-<test/log/query/output>
-
-Recommended Fix:
-<minimal safe fix>
-
-Regression Test:
-<test that must be added>
-
-Production Blocking:
-YES / NO
-```
-
----
-
-# 56. FIX POLICY
-
-Do NOT immediately fix every finding.
-
-First:
-
-1. document it
-2. reproduce it
-3. determine severity
-4. determine root cause
-5. determine affected surface
-6. determine whether it is real
-7. determine the smallest safe fix
-
-Then fix:
-
-```text
-P0
-P1
-security-critical P2
-```
-
-unless the finding requires a later architectural phase.
-
-Do not perform unrelated refactoring while fixing vulnerabilities.
-
----
-
-# 57. AFTER EACH FIX
-
-For every fix:
-
-1. reproduce vulnerability before fix
-2. implement minimal fix
-3. rerun reproduction
-4. verify exploit no longer works
-5. add regression test
-6. run related tests
-7. run full test suite
-8. run static analysis
-9. run formatter
-10. inspect git diff
-11. verify no unrelated changes
-
-Required commands where applicable:
-
-```bash
-php artisan test --env=testing
-./vendor/bin/pint --test
-./vendor/bin/phpstan analyse app routes --memory-limit=1G
-composer audit
-```
-
-Also run the external API suite:
-
-```bash
-python3 api_test_suite.py
-```
-
----
-
-# 58. DATABASE CLEANUP AFTER TESTING
-
-Adversarial testing may create:
-
-* users
-* bookings
-* payments
-* idempotency keys
-* logs
-* jobs
-* failed jobs
-
-Ensure test data does not pollute development/production data.
-
-Never run destructive cleanup against production.
-
-Clearly separate:
-
-```text
-testing
-development
-production
-```
-
----
-
-# 59. GIT SAFETY
-
-Before changes:
-
-```bash
-git status --short
-```
-
-After changes:
-
-```bash
-git diff --stat
-git diff
-git status --short
-```
-
-Do not overwrite unrelated user work.
-
-Do not reset the repository.
-
-Do not use destructive Git commands.
-
----
-
-# 60. REQUIRED ADVERSARIAL TEST CATEGORIES
-
-The final audit must explicitly report results for:
-
-```text
-[ ] Authentication
-[ ] Session/token security
-[ ] Password reset
-[ ] 2FA
-[ ] RBAC
-[ ] Scope enforcement
-[ ] State authorization
-[ ] IDOR/BOLA
-[ ] Mass assignment
-[ ] Input validation
-[ ] SQL injection
-[ ] Query safety
-[ ] Rate limiting
-[ ] Request ID
-[ ] CORS
-[ ] Security headers
-[ ] API error leakage
-[ ] Resource leakage
-[ ] Logging/PII
-[ ] File upload
-[ ] Webhooks
-[ ] Payment integrity
-[ ] Pricing integrity
-[ ] Booking state machine
-[ ] Booking concurrency
-[ ] Idempotency
-[ ] Database constraints
-[ ] Transactions
-[ ] Rollbacks
-[ ] Events
-[ ] Queue safety
-[ ] Cache isolation
-[ ] N+1
-[ ] Pagination
-[ ] Database indexes
-[ ] SQLite/PostgreSQL compatibility
-[ ] Test quality
-[ ] Production configuration
-```
-
-Every item must be:
-
-```text
-PASS
-FAIL
-PARTIAL
-NOT APPLICABLE
-DEFERRED TO PHASE X
-```
-
-Never silently skip a category.
-
----
-
-# 61. PRODUCTION CONFIGURATION REVIEW
-
-Inspect `.env.example`, configuration files, and deployment assumptions.
-
-Look for unsafe production defaults:
-
-```text
-APP_DEBUG=true
-weak APP_KEY assumptions
-insecure session configuration
-unsafe cookie configuration
-broad CORS
-unrestricted filesystem
-development credentials
-test routes
-debug routes
-profiler
-exposed health/debug information
-```
-
-Never expose actual secrets in the audit document.
-
-Use:
-
-```text
-REDACTED
-```
-
----
-
-# 62. SECRET SCANNING
-
-Search the repository for likely secrets:
-
-```text
-API keys
-tokens
-passwords
-private keys
-JWT secrets
-webhook secrets
-AWS keys
-database credentials
-OAuth secrets
-```
-
-Check:
-
-```text
-.env
-.env.example
-config
-tests
-fixtures
-logs
-documentation
-Git-tracked files
-```
-
-Never print discovered secrets into the report.
-
-If found:
-
-```text
-SECRET EXPOSURE — P0/P1
-```
-
-depending on exposure and validity.
-
----
-
-# 63. ROUTE / CONTROLLER / POLICY CONSISTENCY
-
-For every protected controller action verify:
-
-```text
-Route middleware
-Controller authorization
-Policy
-FormRequest authorization
-Service-level authorization
-```
-
-Avoid relying on one layer where the operation can be reached through another path.
-
-The authorization model must be consistent.
-
----
-
-# 64. SERVICE-LEVEL AUTHORIZATION REVIEW
-
-Important business actions must not become insecure if called from another controller, job, command, or internal code path.
-
-For every critical Action/Service ask:
-
-> "Does this operation rely entirely on the HTTP controller to be secure?"
-
-If yes, determine whether the business invariant itself should be enforced deeper.
-
-Do not blindly duplicate authorization everywhere.
-
-Separate:
-
-```text
-authentication
-authorization
-business invariant
-```
-
----
-
-# 65. COMMAND / JOB / SCHEDULE SECURITY
-
-Inspect:
-
-```text
-app/Console
-routes/console.php
-scheduled commands
-jobs
-listeners
-queued actions
-```
-
-Verify that privileged commands cannot be triggered through untrusted input.
-
-Inspect the changes already made to:
-
-```text
-console.php
-```
-
-because this file was modified during previous hardening work.
-
----
-
-# 66. ADMIN SURFACE AUDIT
-
-Treat the admin area as a separate attack surface.
-
-Verify:
-
-```text
-admin authentication
-admin authorization
-role hierarchy
-scope restrictions
-mass assignment
-bulk actions
-destructive actions
-exports
-reports
-uploads
-CMS
-user management
-permissions management
-payment/refund operations
-```
-
-Test bulk operations carefully.
-
-A secure single-record endpoint does not guarantee a secure bulk endpoint.
-
----
-
-# 67. BULK OPERATION AUDIT
-
-Search for:
-
-```text
-bulk
-batch
-mass
-sync
-deleteMany
-updateMany
-upsert
-```
-
-Verify:
-
-* authorization for every affected record
-* scope filtering
-* transaction behavior
-* maximum batch size
-* partial failure handling
-* audit logging
-* idempotency
-
-Never authorize a bulk operation merely because the user can access one record.
-
----
-
-# 68. DATA EXPORT AUDIT
-
-If exports exist:
-
-Verify:
-
-* authorization
-* scope
-* pagination/chunking
-* sensitive fields
-* rate limiting
-* asynchronous processing if needed
-* audit logging
-
-An export endpoint can bypass normal API field restrictions.
-
----
-
-# 69. SEARCH / FILTER SECURITY
-
-Inspect all search endpoints.
-
-Verify that filters cannot bypass authorization.
-
-Bad pattern:
-
-```text
-query all bookings
-→ filter by customer_id
-```
-
-when authorization should be:
-
-```text
-query only records the actor is allowed to see
-→ then apply user filters
-```
-
-Authorization filtering must occur at the correct database/query boundary.
-
----
-
-# 70. TENANT / SCOPE ISOLATION
-
-If any domain uses:
-
-```text
-property ownership
-organization
-branch
-admin scope
-location
-assigned resources
-```
-
-verify scope isolation.
-
-Attempt:
-
-```text
-scope A → scope B
-scope A → global resource
-global admin → scoped resource
-scoped admin → global mutation
-```
-
-Document the exact scope rules.
-
----
-
-# 71. STATE + AUTHORIZATION COMBINATION
-
-Authorization must not depend only on:
-
-```text
-role
-```
-
-or only on:
-
-```text
-ownership
-```
-
-Test state-dependent authorization.
-
-Examples:
-
-```text
-owner + pending
-owner + paid
-owner + cancelled
-admin + locked
-staff + completed
-```
-
-The policy must reflect actual domain state.
-
----
-
-# 72. DATA CONSISTENCY AUDIT
-
-After every adversarial mutation test, verify database invariants.
-
-Check:
-
-```text
-booking
-customer
-property
-availability
-nightly prices
-payments
-discount usage
-notifications
-audit records
-```
-
-No orphan or contradictory state should remain.
-
----
-
-# 73. FAILURE INJECTION
-
-Where practical, intentionally simulate:
-
-```text
-database exception
-timeout
-deadlock
-duplicate key
-validation failure
-external API failure
-serialization failure
-unexpected exception
-```
-
-Observe system behavior.
-
-The objective is to ensure failure does not create invalid business state.
-
----
-
-# 74. DEADLOCK / LOCK ORDER REVIEW
-
-Inspect transactions containing:
-
-```text
-lockForUpdate()
-```
-
-Determine:
-
-* tables locked
-* order of locks
-* possible circular locking
-* transaction duration
-* external calls inside transaction
-
-Avoid:
-
-```text
-database transaction
-→ HTTP request
-→ wait
-→ database operation
-```
-
-where possible.
-
----
-
-# 75. LONG TRANSACTION AUDIT
-
-Identify transactions that perform:
-
-* API calls
-* file operations
-* email sending
-* heavy calculations
-* large queries
-* unnecessary serialization
-
-Transactions should remain focused on atomic database state changes.
-
 ---
 
-# 76. SECURITY BOUNDARY MAP
+# 0.5 Provider documentation is authoritative
 
-Create:
+If the project integrates with Paymob, Stripe, or another payment provider:
 
-```text
-docs/hardening/PHASE_5_5_SECURITY_BOUNDARY_MAP.md
-```
-
-Document:
-
-```text
-Internet
- ↓
-Reverse Proxy
- ↓
-Laravel
- ↓
-Middleware
- ↓
-Authentication
- ↓
-Authorization
- ↓
-Validation
- ↓
-Application Actions
- ↓
-Database
- ↓
-External Providers
-```
+DO NOT invent the provider's signature algorithm.
 
-For each boundary identify:
+DO NOT assume:
 
 ```text
-trust level
-input
-output
-validation
-authentication
-authorization
-logging
-failure behavior
+HMAC-SHA256(raw body)
 ```
-
----
-
-# 77. FINAL ADVERSARIAL REVIEW
-
-After all automated tests and manual inspections, perform one final pass asking:
-
-### "If I were trying to steal another customer's booking, what endpoint would I attack?"
-
-### "If I wanted to change a booking price, what would I modify?"
-
-### "If I wanted to create two bookings for one inventory slot, what race would I exploit?"
-
-### "If I wanted to become an admin, where would I inject role/permission data?"
-
-### "If I wanted to replay a payment webhook, what happens?"
-
-### "If I wanted to discover whether an email exists, what response/timing difference could I use?"
-
-### "If I wanted to extract private data, which export/admin/resource endpoint would I target?"
 
-### "If I wanted to bypass rate limiting, which proxy/header/token behavior would I exploit?"
+is automatically correct for every provider.
 
-### "If I wanted to crash the API, which endpoint accepts the most expensive input?"
+First determine:
 
-### "If I wanted to poison a cache, which cache key or HTTP header would I manipulate?"
+* provider
+* callback type
+* endpoint type
+* signature location
+* signature algorithm
+* canonicalization rules
+* signed fields
+* raw body requirements
+* header/query parameter requirements
+* encoding
+* secret type
+* timestamp requirements
+* replay protection requirements
 
-### "If I wanted to exploit SQLite/production differences, which query or constraint would I target?"
+Use the provider's current official documentation when necessary.
 
-Document the answers.
+For Paymob specifically, verify the exact callback type being integrated. Paymob documents transaction processed callbacks as server-side POST callbacks and states that callbacks should be authenticated with HMAC. Its current documentation also shows callback-specific HMAC construction rules, so do not apply a generic formula without verifying the exact callback contract.
 
 ---
 
-# 78. REQUIRED DELIVERABLES
+# 1. PHASE 5.5 FINDINGS — MANDATORY INPUT
 
-At the end of Phase 5.5 create/update:
+Read and understand:
 
 ```text
-docs/hardening/PHASE_5_5_ATTACK_SURFACE.md
-docs/hardening/PHASE_5_5_SECURITY_MATRIX.md
 docs/hardening/PHASE_5_5_FINDINGS.md
+docs/hardening/PHASE_5_5_FINAL_REPORT.md
+docs/hardening/PHASE_5_5_SECURITY_MATRIX.md
+docs/hardening/PHASE_5_5_ATTACK_SURFACE.md
 docs/hardening/PHASE_5_5_SECURITY_BOUNDARY_MAP.md
 docs/hardening/LEDGER.md
 docs/hardening/BACKLOG.md
 ```
 
-If test files were added, organize them under the existing test structure.
-
-Use clear names such as:
-
-```text
-AdversarialAuthorizationTest
-AdversarialIdorTest
-AdversarialIdempotencyTest
-AdversarialConcurrencyTest
-AdversarialPricingTest
-AdversarialAuthenticationTest
-AdversarialWebhookTest
-AdversarialDataLeakageTest
-AdversarialInputValidationTest
-```
-
-Do not duplicate tests unnecessarily.
+The known findings are:
 
 ---
 
-# 79. FINAL REPORT FORMAT
+## FINDING-001 — P0
+
+Webhook Cryptographic HMAC Verification is a Placeholder.
+
+Affected:
+
+```text
+backend/app/Http/Middleware/VerifyWebhookSignature.php
+```
+
+Current risk:
+
+An attacker may send:
+
+```text
+X-Webhook-Signature: fake
+```
+
+and potentially cause:
+
+```text
+booking -> confirmed
+payment -> paid
+```
+
+without a real provider transaction.
+
+This is the primary Phase 6 production blocker.
+
+---
+
+## FINDING-003 — P1
+
+Cross-user Idempotency Key Isolation Gap.
+
+Current behavior:
+
+```text
+where('key', $idempotencyKey)
+```
+
+without appropriate actor/tenant partitioning.
+
+Potential result:
+
+* cross-user conflict
+* denial of service
+* response collision
+* possible data leakage
+
+---
+
+## FINDING-004 — P2
+
+Web checkout:
+
+```text
+POST /checkout/process
+```
+
+does not use the same idempotency protection as API checkout.
+
+Potential result:
+
+duplicate pending booking creation.
+
+---
+
+## FINDING-005 — P2
+
+PostgreSQL exclusion constraints are not fully verified in the normal SQLite test suite.
+
+Production uses PostgreSQL.
+
+Therefore PostgreSQL-specific concurrency behavior must be tested explicitly.
+
+---
+
+# 2. PHASE 6 OBJECTIVES
+
+Phase 6 must accomplish all of the following.
+
+### Objective A
+
+Implement real provider webhook verification.
+
+### Objective B
+
+Prevent forged payment confirmation.
+
+### Objective C
+
+Prevent webhook replay.
+
+### Objective D
+
+Prevent duplicate webhook processing.
+
+### Objective E
+
+Prevent payment/booking state corruption.
+
+### Objective F
+
+Make idempotency actor-safe.
+
+### Objective G
+
+Protect the legacy Blade checkout flow.
+
+### Objective H
+
+Verify financial amount/currency/reference integrity.
+
+### Objective I
+
+Audit payment authorization.
+
+### Objective J
+
+Design safe refund handling.
+
+### Objective K
+
+Design reconciliation.
+
+### Objective L
+
+Verify database concurrency behavior on PostgreSQL.
+
+### Objective M
+
+Create adversarial tests.
+
+### Objective N
+
+Create a production-readiness gate.
+
+---
+
+# 3. STEP 1 — COMPLETE PAYMENT ARCHITECTURE DISCOVERY
+
+Before coding, inventory every payment-related component.
+
+Search for:
+
+```text
+payment
+payments
+checkout
+webhook
+transaction
+refund
+capture
+authorize
+settlement
+gateway
+paymob
+stripe
+hmac
+signature
+idempotency
+invoice
+receipt
+booking
+confirmed
+paid
+failed
+cancelled
+refunded
+```
+
+Inventory:
+
+### Routes
+
+Identify:
+
+* API payment routes
+* webhook routes
+* checkout routes
+* mock payment routes
+* redirect routes
+* callback routes
+* refund routes
+* admin payment routes
+* payment status routes
+
+For every route record:
+
+```text
+HTTP method
+URI
+name
+controller
+middleware
+authentication
+authorization
+rate limiter
+CSRF behavior
+idempotency behavior
+request validation
+response type
+financial mutation
+```
+
+---
+
+# 4. STEP 2 — TRACE THE REAL PAYMENT FLOW
+
+Document the real current flow.
+
+At minimum trace:
+
+```text
+Client
+ ↓
+Checkout
+ ↓
+Booking creation
+ ↓
+Price calculation
+ ↓
+Payment intent/order creation
+ ↓
+Provider
+ ↓
+Customer payment
+ ↓
+Provider callback/webhook
+ ↓
+Webhook verification
+ ↓
+Payment lookup
+ ↓
+Amount verification
+ ↓
+Currency verification
+ ↓
+Booking lookup
+ ↓
+State transition
+ ↓
+Transaction
+ ↓
+Payment record
+ ↓
+Booking confirmation
+ ↓
+Response
+```
+
+Also trace failure paths:
+
+```text
+payment failed
+payment pending
+payment timeout
+webhook delayed
+webhook duplicated
+webhook arrives before redirect
+redirect arrives before webhook
+webhook arrives after cancellation
+refund
+partial refund
+full refund
+provider timeout
+database failure
+transaction rollback
+```
+
+Document the current behavior before modifying it.
+
+---
+
+# 5. STEP 3 — DEFINE FINANCIAL TRUST BOUNDARIES
 
 Create:
 
 ```text
-docs/hardening/PHASE_5_5_FINAL_REPORT.md
+docs/hardening/PHASE_6_FINANCIAL_TRUST_BOUNDARIES.md
 ```
 
-Use this structure:
+Document at least:
 
-```markdown
-# Phase 5.5 — Adversarial Production Audit
+### Boundary 1
 
-## Executive Summary
+Customer → Application
 
-Audit Date:
-Commit/Revision:
-Environment:
-Database:
-Laravel Version:
-PHP Version:
+### Boundary 2
 
-## Scope
+Frontend → Backend
 
-Phases audited:
-0
-1
-2
-3
-4
-5
+### Boundary 3
 
-## Test Summary
+Backend → Payment Provider
 
-Total adversarial tests:
-Passed:
-Failed:
-Blocked:
-Skipped:
-Deferred:
+### Boundary 4
 
-## Security Summary
+Payment Provider → Webhook Endpoint
 
-P0:
-P1:
-P2:
-P3:
+### Boundary 5
 
-## Critical Findings
+Webhook → Booking Database
 
-...
+### Boundary 6
 
-## High Findings
+Admin → Refund System
 
-...
+### Boundary 7
 
-## Medium Findings
+Background Jobs → Financial State
 
-...
+### Boundary 8
 
-## Low Findings
+Database → Application
 
-...
+For each boundary document:
 
-## Fixed During Phase 5.5
-
-...
-
-## Deferred
-
-Finding:
-Reason:
-Target Phase:
-
-## Architecture Findings
-
-...
-
-## Database Findings
-
-...
-
-## API Findings
-
-...
-
-## Authentication Findings
-
-...
-
-## Authorization Findings
-
-...
-
-## Concurrency Findings
-
-...
-
-## Performance Findings
-
-...
-
-## Observability Findings
-
-...
-
-## Test Quality Findings
-
-...
-
-## Production Blockers
-
-...
-
-## Required Before Phase 6
-
-...
-
-## Required Before Production
-
-...
-
-## Final Gate
-
-PASS / CONDITIONAL PASS / FAIL
+```text
+trusted data
+untrusted data
+authentication mechanism
+authorization mechanism
+integrity verification
+replay protection
+failure behavior
+logging requirements
 ```
 
 ---
 
-# 80. FINAL GATE RULES
+# 6. STEP 4 — REAL WEBHOOK CRYPTOGRAPHIC VERIFICATION
 
-The final gate is NOT allowed to be:
+This is the P0 requirement.
+
+Inspect:
+
+```text
+VerifyWebhookSignature.php
+```
+
+and all webhook controllers/services.
+
+Do not simply patch the middleware.
+
+Understand the complete webhook flow.
+
+---
+
+## 6.1 Identify the exact provider
+
+Determine:
+
+```text
+Provider:
+Integration type:
+Callback type:
+Environment:
+Test/Sandbox:
+Production:
+```
+
+If the code supports multiple providers, identify each separately.
+
+---
+
+## 6.2 Provider-specific verification
+
+Implement provider-specific verification.
+
+Do not create a generic:
+
+```php
+verifyHmac($payload)
+```
+
+and assume every provider uses the same algorithm.
+
+Instead use a structure appropriate to the existing architecture, for example:
+
+```text
+Webhook
+ ├── Provider identification
+ ├── Signature extraction
+ ├── Provider verification
+ ├── Replay protection
+ ├── Payload validation
+ └── Domain processing
+```
+
+Do not introduce excessive abstraction.
+
+---
+
+# 7. RAW REQUEST INTEGRITY
+
+If the provider signs the raw body:
+
+The signature must be calculated from the actual raw request payload.
+
+Do NOT verify a re-serialized JSON structure if the provider expects raw bytes.
+
+Do NOT:
+
+```php
+json_decode()
+json_encode()
+```
+
+and then verify the reconstructed body if that changes the signed representation.
+
+Preserve:
+
+```text
+raw request body
+```
+
+before mutation.
+
+---
+
+# 8. SIGNATURE COMPARISON
+
+Use constant-time comparison where appropriate:
+
+```php
+hash_equals($expected, $received)
+```
+
+Never:
+
+```php
+$expected === $received
+```
+
+for cryptographic signatures.
+
+Reject:
+
+* missing signature
+* empty signature
+* malformed signature
+* wrong length where provider specifies fixed length
+* invalid encoding
+* invalid algorithm
+* incorrect secret
+* invalid canonical payload
+
+Return a generic authentication failure.
+
+Do not reveal:
+
+```text
+expected signature
+actual signature
+secret
+internal verification details
+```
+
+to the caller.
+
+---
+
+# 9. WEBHOOK ENVIRONMENT SAFETY
+
+There must be NO production bypass.
+
+Production must never contain:
+
+```php
+if (! $signature) {
+    return $next($request);
+}
+```
+
+or equivalent.
+
+Testing must test the real verification mechanism.
+
+If local/test fixtures need bypass behavior, isolate that behavior from production code.
+
+Prefer deterministic test secrets/configuration rather than disabling verification.
+
+---
+
+# 10. WEBHOOK REPLAY PROTECTION
+
+Signature validity alone does NOT necessarily prevent replay.
+
+Determine whether the provider supplies:
+
+* event ID
+* transaction ID
+* timestamp
+* nonce
+* callback ID
+* unique transaction reference
+
+Use the strongest provider-supported identifier.
+
+Implement duplicate detection.
+
+A webhook received twice must NOT cause:
+
+```text
+payment amount added twice
+booking confirmed twice
+refund created twice
+inventory changed twice
+notification duplicated incorrectly
+```
+
+---
+
+# 11. WEBHOOK IDEMPOTENCY
+
+Design webhook processing as idempotent.
+
+The same event should produce the same final state.
+
+Example:
+
+```text
+Webhook #1
+payment success
+→ confirm booking
+
+Webhook #2
+same event
+→ no second financial mutation
+→ safe acknowledgement
+```
+
+Do not treat duplicate delivery as an application error requiring destructive rollback.
+
+Persist sufficient provider event/transaction identity to safely identify duplicates.
+
+If the current schema already has suitable payment transaction identifiers, reuse them rather than adding redundant identifiers.
+
+---
+
+# 12. WEBHOOK STATE TRANSITION SECURITY
+
+Never allow a webhook to arbitrarily set:
+
+```text
+booking.status
+payment.status
+```
+
+based solely on client/provider fields.
+
+Instead define an explicit state transition policy.
+
+For example:
+
+```text
+pending → paid
+pending → failed
+pending → cancelled
+paid → refunded
+```
+
+must be explicitly allowed.
+
+Prevent illegal transitions such as:
+
+```text
+refunded → paid
+cancelled → paid
+failed → refunded
+paid → pending
+```
+
+unless there is a documented legitimate business flow.
+
+---
+
+# 13. PAYMENT REFERENCE OWNERSHIP
+
+Never trust a webhook reference without verifying ownership.
+
+A webhook containing:
+
+```text
+reference = BK-123
+```
+
+must resolve to the correct internal payment/booking record.
+
+Validate:
+
+```text
+provider
+provider transaction ID
+merchant/order reference
+booking ID/reference
+amount
+currency
+customer/account where applicable
+integration/account ID where applicable
+```
+
+These values must correspond to the same transaction.
+
+Prevent:
+
+```text
+valid signature + wrong booking reference
+```
+
+from confirming another booking.
+
+---
+
+# 14. AMOUNT INTEGRITY
+
+The client must never be authoritative for the final payable amount.
+
+At payment creation:
+
+```text
+server calculated amount
+```
+
+must become the authoritative expected amount.
+
+At webhook processing:
+
+```text
+provider amount
+```
+
+must match:
+
+```text
+expected server amount
+```
+
+according to provider units.
+
+Example:
+
+```text
+100 EGP
+```
+
+may be represented as:
+
+```text
+10000 cents
+```
+
+Do not compare incompatible units.
+
+Document the canonical money representation.
+
+---
+
+# 15. CURRENCY INTEGRITY
+
+Verify:
+
+```text
+expected currency
+==
+provider currency
+```
+
+Reject mismatches.
+
+Never silently convert an unexpected currency.
+
+Example:
+
+```text
+Expected: EGP
+Received: USD
+```
+
+must not become a successful payment.
+
+---
+
+# 16. PAYMENT PROVIDER IDENTITY
+
+Verify the callback belongs to the configured merchant/account/integration.
+
+Where provider payload supports it, verify:
+
+```text
+integration_id
+profile_id
+merchant ID
+account ID
+gateway identifier
+environment
+```
+
+Prevent:
+
+```text
+valid provider signature
++
+transaction belonging to another merchant/account
+```
+
+from mutating local records.
+
+---
+
+# 17. PAYMENT STATE MACHINE
+
+Create a clear payment state model.
+
+Do not invent unnecessary states.
+
+Inspect existing states first.
+
+Document:
+
+```text
+docs/hardening/PHASE_6_PAYMENT_STATE_MACHINE.md
+```
+
+Include:
+
+```text
+State
+Allowed incoming transitions
+Allowed outgoing transitions
+Who may trigger transition
+Provider evidence required
+Database mutation
+Booking mutation
+Refund implications
+```
+
+Example conceptual model:
+
+```text
+initiated
+   ↓
+pending
+   ├──→ paid
+   ├──→ failed
+   └──→ expired
+
+paid
+   └──→ refunded
+```
+
+Actual states must match the existing application.
+
+---
+
+# 18. BOOKING/PAYMENT CONSISTENCY
+
+Audit whether booking and payment records can become inconsistent.
+
+Examples:
+
+```text
+payment = paid
+booking = pending
+```
+
+or:
+
+```text
+payment = failed
+booking = confirmed
+```
+
+or:
+
+```text
+booking = cancelled
+payment = paid
+```
+
+Determine whether each state is legitimate or corruption.
+
+Where the transition requires multiple DB mutations, use a transaction.
+
+---
+
+# 19. TRANSACTION BOUNDARIES
+
+Financial state transitions must be atomic.
+
+Example:
+
+```text
+BEGIN
+
+lock payment
+lock booking
+
+validate current states
+validate amount
+validate currency
+validate provider transaction
+validate duplicate event
+
+update payment
+update booking
+
+create financial ledger record if applicable
+create audit record
+
+COMMIT
+```
+
+If anything fails:
+
+```text
+ROLLBACK
+```
+
+Do not allow:
+
+```text
+payment updated
+booking update failed
+```
+
+without a defined recovery strategy.
+
+---
+
+# 20. LOCKING AND CONCURRENCY
+
+Audit:
+
+```php
+lockForUpdate()
+```
+
+usage.
+
+Determine the correct lock order.
+
+Avoid deadlocks caused by inconsistent lock order.
+
+Example:
+
+```text
+Payment → Booking
+```
+
+must not be reversed elsewhere:
+
+```text
+Booking → Payment
+```
+
+without justification.
+
+Document the canonical lock order.
+
+Test:
+
+* two identical webhooks
+* two different webhook statuses
+* webhook + cancellation
+* webhook + refund
+* checkout + webhook
+* duplicate payment callback
+
+---
+
+# 21. IDEMPOTENCY KEY ISOLATION — FINDING-003
+
+Audit:
+
+```text
+EnsureIdempotency.php
+idempotency_keys migration
+idempotency model
+```
+
+Do NOT immediately implement:
+
+```text
+hash(actorId + key)
+```
+
+without understanding the actor model.
+
+First determine:
+
+```text
+authenticated user
+guest
+session
+admin
+service-to-service
+webhook
+system job
+tenant
+customer
+```
+
+Define the actual idempotency namespace.
+
+---
+
+## 21.1 Required behavior
+
+User A:
+
+```text
+key = ABC
+```
+
+User B:
+
+```text
+key = ABC
+```
+
+must NOT accidentally collide if they are independent actors.
+
+But the same actor:
+
+```text
+key = ABC
+payload A
+```
+
+followed by:
+
+```text
+key = ABC
+payload B
+```
+
+must remain a conflict if the request semantics require it.
+
+---
+
+## 21.2 Do not use IP as the primary identity if avoidable
+
+Do not blindly implement:
+
+```text
+IP + key
+```
+
+because:
+
+* multiple users can share an IP
+* NAT exists
+* mobile networks change IPs
+* proxies exist
+* IPv6 behavior differs
+
+Prefer a stable authenticated actor identity where available.
+
+For guests, inspect the existing guest/session architecture and design accordingly.
+
+---
+
+# 22. IDEMPOTENCY RESPONSE SECURITY
+
+If an existing idempotency key is reused:
+
+Return the correct semantics.
+
+Do NOT return another user's cached response.
+
+Verify ownership before returning cached data.
+
+Test:
+
+```text
+User A key
+User B same key
+different payload
+```
+
+and:
+
+```text
+User A key
+User A same key
+same payload
+```
+
+and:
+
+```text
+User A key
+User A same key
+different payload
+```
+
+---
+
+# 23. IDEMPOTENCY DATABASE CONSTRAINTS
+
+The database constraint must match the logical namespace.
+
+For example, conceptually:
+
+```text
+UNIQUE(actor_scope, key_hash)
+```
+
+but DO NOT apply this exact schema blindly.
+
+Determine the correct schema based on the actual actor model.
+
+Document the migration impact.
+
+---
+
+# 24. WEB CHECKOUT — FINDING-004
+
+Inspect:
+
+```text
+POST /checkout/process
+```
+
+Determine whether this route is:
+
+* legacy
+* still actively used
+* internally used
+* reachable publicly
+* used by tests
+* used by administrators
+* used by any frontend
+
+Do not remove it blindly.
+
+If it remains active, protect duplicate mutation.
+
+Preferred solution must fit the existing architecture.
+
+Options to evaluate:
+
+```text
+EnsureIdempotency
+```
+
+or:
+
+```text
+single-use checkout token
+```
+
+or another transaction-safe mechanism.
+
+Do not use frontend JavaScript as the security mechanism.
+
+Server-side protection is mandatory.
+
+---
+
+# 25. MOCK PAYMENT ROUTES
+
+Verify FINDING-002 is actually fixed.
+
+Search all:
+
+```text
+mock
+fake
+simulation
+test payment
+cardMock
+paypalMock
+```
+
+Mock payment endpoints must NEVER be available in production.
+
+Test that production returns:
+
+```text
+404
+```
+
+or equivalent safe behavior.
+
+Do not rely only on frontend hiding.
+
+---
+
+# 26. PAYMENT AUTHORIZATION AUDIT
+
+Audit every payment-related route.
+
+For each mutation verify:
+
+```text
+Authentication
++
+Authorization
++
+Ownership
++
+Scope
++
+State
+```
+
+Examples:
+
+A customer must not:
+
+```text
+mark payment as paid
+refund payment
+change amount
+change payment provider reference
+change payment status
+```
+
+An admin must not automatically gain unrestricted financial authority if the application requires maker-checker behavior.
+
+---
+
+# 27. REFUND SECURITY
+
+Inspect existing refund functionality.
+
+If refunds exist:
+
+Audit:
+
+* who can request refund
+* who can approve refund
+* who can execute refund
+* refund amount
+* remaining refundable amount
+* duplicate refunds
+* partial refunds
+* full refunds
+* authorization
+* audit logging
+* provider transaction ID
+* booking state
+* payment state
+* concurrency
+
+Prevent:
+
+```text
+refund > paid amount
+```
+
+and:
+
+```text
+refund total > original captured amount
+```
+
+unless provider/business rules explicitly permit it.
+
+---
+
+# 28. MAKER-CHECKER / REFUND APPROVAL
+
+If the current business model requires administrative refunds:
+
+Do not allow a single privileged request to silently perform unlimited refunds without review if a maker-checker model is required.
+
+Inspect whether the current project has:
+
+```text
+admin roles
+finance roles
+manager roles
+approval states
+audit logs
+```
+
+If maker-checker is required by the current business rules, implement it with the minimum architecture necessary.
+
+Do NOT create an elaborate workflow engine.
+
+At minimum consider:
+
+```text
+requested
+approved
+rejected
+executed
+failed
+```
+
+with:
+
+```text
+requester != approver
+```
+
+where required.
+
+---
+
+# 29. FINANCIAL LEDGER AUDIT
+
+Determine whether the project currently has a financial ledger.
+
+If one already exists:
+
+Audit it.
+
+If there is no ledger:
+
+DO NOT automatically create a full accounting system.
+
+Determine whether a minimal immutable payment event/audit record is required for reconciliation.
+
+If introducing a record, it should preserve facts such as:
+
+```text
+provider
+provider transaction ID
+internal payment ID
+booking ID
+event type
+amount
+currency
+event timestamp
+received timestamp
+event ID
+status
+raw payload reference/hash if appropriate
+actor/system source
+```
+
+Do NOT store sensitive payment credentials.
+
+Do NOT store full card numbers.
+
+---
+
+# 30. RAW WEBHOOK PAYLOAD STORAGE
+
+Do not blindly store complete webhook payloads.
+
+First classify fields.
+
+Avoid storing:
+
+* card numbers
+* CVV
+* secrets
+* authentication tokens
+* unnecessary PII
+
+If payload persistence is required for reconciliation/debugging:
+
+Prefer:
+
+```text
+sanitized payload
++
+cryptographic payload hash
++
+provider event ID
++
+metadata
+```
+
+and define retention.
+
+---
+
+# 31. LOGGING SECURITY
+
+Search all payment logs.
+
+Never log:
+
+```text
+HMAC secret
+API secret
+private key
+authorization token
+payment credentials
+full card number
+CVV
+raw sensitive payload
+```
+
+Mask:
+
+```text
+transaction identifiers
+email
+phone
+PII
+```
+
+where appropriate.
+
+Ensure failed signature verification does not log the secret or full attacker-controlled payload.
+
+---
+
+# 32. WEBHOOK ERROR RESPONSES
+
+Do not expose internal details.
+
+Bad:
+
+```json
+{
+  "error": "Expected HMAC X but received Y using secret Z"
+}
+```
+
+Good conceptual behavior:
+
+```json
+{
+  "message": "Invalid webhook signature"
+}
+```
+
+Use the existing S2 error envelope.
+
+Do not invent another API response format.
+
+---
+
+# 33. RATE LIMITING AND RESOURCE EXHAUSTION
+
+Audit webhook endpoint against:
+
+* request flooding
+* huge body
+* malformed JSON
+* repeated invalid signatures
+* repeated valid duplicate events
+* expensive payload processing
+
+Protect the endpoint without breaking legitimate provider retries.
+
+Do not create a rate limit that causes legitimate payment callbacks to be dropped without a recovery strategy.
+
+---
+
+# 34. REQUEST BODY LIMITS
+
+Inspect:
+
+```text
+web server
+PHP
+Laravel
+middleware
+```
+
+for webhook body limits.
+
+Prevent excessively large payloads.
+
+But do not choose arbitrary tiny limits that can reject legitimate provider callbacks.
+
+Base the limit on observed provider payload sizes with reasonable headroom.
+
+---
+
+# 35. WEBHOOK TIMEOUTS
+
+Webhook processing must be fast enough for provider retry behavior.
+
+Avoid doing expensive unrelated work synchronously.
+
+If existing jobs are available, evaluate whether secondary work can be queued AFTER the financial state transition is safely committed.
+
+Never queue the actual payment verification before authenticity is established.
+
+---
+
+# 36. EXTERNAL PROVIDER FAILURE
+
+Test:
+
+```text
+provider timeout
+provider 500
+provider 429
+DNS failure
+network timeout
+malformed provider response
+```
+
+Determine whether the local payment state becomes:
+
+```text
+failed
+pending
+unknown
+```
+
+Do not mark payment as failed simply because a network request timed out if the provider may have processed it.
+
+Use a safe state such as:
+
+```text
+pending / reconciliation required
+```
+
+if appropriate to the existing model.
+
+---
+
+# 37. REDIRECT VS WEBHOOK
+
+The customer redirect must NOT become the financial source of truth.
+
+For providers such as Paymob, current documentation explicitly distinguishes the client-side transaction response redirect from the server-side transaction processed callback and states that the callback should be relied upon for final payment status.
+
+Therefore audit:
+
+```text
+GET payment-success
+GET redirect
+frontend callback
+```
+
+and ensure they cannot independently mark a booking paid.
+
+The redirect may:
+
+```text
+display status
+poll status
+redirect user
+```
+
+but must not bypass webhook/provider verification.
+
+---
+
+# 38. PAYMENT STATUS QUERY
+
+If the backend has:
+
+```text
+GET /payment/status
+```
+
+or similar:
+
+Audit whether it:
+
+* leaks another user's payment
+* accepts arbitrary transaction IDs
+* reveals sensitive provider data
+* allows enumeration
+* trusts client status
+* bypasses authorization
+
+Use internal ownership checks.
+
+---
+
+# 39. RECONCILIATION DESIGN
+
+Create:
+
+```text
+docs/hardening/PHASE_6_RECONCILIATION.md
+```
+
+Document how the system handles:
+
+```text
+local payment pending
+provider says paid
+
+local says paid
+provider says failed
+
+provider transaction missing locally
+
+local transaction missing at provider
+
+duplicate provider event
+
+refund mismatch
+
+amount mismatch
+
+currency mismatch
+
+booking/payment mismatch
+```
+
+Define:
+
+```text
+detected
+→ isolated
+→ investigated
+→ corrected
+```
+
+Do not silently mutate financial records during reconciliation without auditability.
+
+---
+
+# 40. PAYMENT/BOOKING RECONCILIATION INVARIANTS
+
+Define explicit invariants.
+
+Examples:
+
+```text
+A booking cannot be confirmed by an unauthenticated client.
+```
+
+```text
+A payment cannot become paid without valid provider evidence.
+```
+
+```text
+A webhook cannot change another booking.
+```
+
+```text
+Captured amount cannot exceed expected amount.
+```
+
+```text
+Refund total cannot exceed refundable amount.
+```
+
+```text
+Duplicate webhook cannot duplicate financial effects.
+```
+
+```text
+A payment cannot move backward to an invalid state.
+```
+
+Adapt these to the actual project state machine.
+
+---
+
+# 41. POSTGRESQL CONCURRENCY — FINDING-005
+
+Inspect:
+
+```text
+backend/phpunit.postgres.xml
+```
+
+and the Docker PostgreSQL setup.
+
+Run the dedicated PostgreSQL suite.
+
+Do NOT consider SQLite passing sufficient evidence for PostgreSQL-specific guarantees.
+
+Verify:
+
+```text
+EXCLUDE USING gist
+```
+
+or whatever actual production constraint exists.
+
+Test:
+
+* overlapping booking race
+* same inventory
+* same dates
+* adjacent dates
+* same checkout day
+* concurrent transactions
+* rollback
+* deadlock behavior
+* duplicate payment processing
+
+---
+
+# 42. SQLITE VS POSTGRESQL DIFFERENCE AUDIT
+
+Create:
+
+```text
+docs/hardening/PHASE_6_DATABASE_ENGINE_MATRIX.md
+```
+
+Document differences relevant to:
+
+```text
+locking
+constraints
+unique indexes
+NULL behavior
+transactions
+date/time
+JSON
+foreign keys
+exclusion constraints
+case sensitivity
+upserts
+concurrency
+```
+
+Do not attempt to make SQLite behave like PostgreSQL artificially.
+
+SQLite is acceptable for fast local tests.
+
+PostgreSQL must be the authoritative production compatibility suite.
+
+---
+
+# 43. TESTING STRATEGY
+
+Add or improve tests for every security invariant.
+
+Minimum test categories:
+
+### Webhook
+
+1. missing signature
+2. invalid signature
+3. malformed signature
+4. valid signature
+5. modified payload
+6. modified signature
+7. replayed event
+8. duplicate transaction
+9. wrong booking reference
+10. wrong merchant/integration
+11. wrong amount
+12. wrong currency
+13. invalid state transition
+14. provider mismatch
+
+### Payment
+
+15. fake success
+16. fake transaction ID
+17. fake amount
+18. fake currency
+19. unauthorized status mutation
+20. customer attempting refund
+21. refund overpayment
+22. duplicate refund
+23. concurrent refund
+
+### Idempotency
+
+24. same user + same key + same payload
+25. same user + same key + different payload
+26. different users + same key
+27. guest collision
+28. concurrent same key
+29. cached response ownership
+
+### Checkout
+
+30. double submit
+31. concurrent checkout
+32. legacy Blade duplicate submit
+
+### Concurrency
+
+33. duplicate webhook concurrently
+34. webhook + cancellation
+35. webhook + refund
+36. two bookings same inventory
+37. PostgreSQL exclusion constraint
+
+---
+
+# 44. ADVERSARIAL WEBHOOK TESTING
+
+Write a dedicated suite:
+
+```text
+backend/tests/Feature/AdversarialPaymentSecurityTest.php
+```
+
+or integrate into the existing test structure if a better location already exists.
+
+Attack examples:
+
+```text
+fake signature
+empty signature
+signature copied from another payload
+valid signature with modified booking ID
+valid signature with modified amount
+valid signature with modified currency
+valid signature from another merchant
+replayed valid callback
+duplicate callback
+wrong transaction ID
+wrong internal reference
+state transition manipulation
+```
+
+---
+
+# 45. PROPERTY-STYLE INVARIANTS
+
+Where practical, test properties rather than only individual examples.
+
+For example:
+
+```text
+No unauthenticated request can cause payment = paid.
+```
+
+```text
+No invalid webhook can cause booking = confirmed.
+```
+
+```text
+No payment callback can mutate a booking outside its verified reference.
+```
+
+```text
+Processing the same webhook N times has the same financial result as processing it once.
+```
+
+```text
+Refunded amount never exceeds captured amount.
+```
+
+---
+
+# 46. FAILURE INJECTION
+
+Test database failure during payment processing.
+
+Simulate:
+
+```text
+payment update succeeds
+booking update fails
+```
+
+and verify transaction rollback.
+
+Simulate:
+
+```text
+booking lock timeout
+```
+
+and verify safe behavior.
+
+Simulate:
+
+```text
+duplicate webhook arrives during transaction
+```
+
+and verify only one financial mutation occurs.
+
+---
+
+# 47. OBSERVABILITY
+
+Add appropriate structured logs/metrics if the current observability architecture supports them.
+
+Track events such as:
+
+```text
+webhook_received
+webhook_signature_failed
+webhook_duplicate
+webhook_processed
+payment_state_changed
+payment_amount_mismatch
+payment_currency_mismatch
+payment_reference_mismatch
+refund_requested
+refund_approved
+refund_executed
+reconciliation_required
+```
+
+Do not log secrets or sensitive payment data.
+
+Every relevant event should contain the existing:
+
+```text
+request_id
+```
+
+and appropriate internal identifiers.
+
+---
+
+# 48. AUDIT TRAIL
+
+Financial state changes must be traceable.
+
+Determine whether existing audit infrastructure can record:
+
+```text
+who
+what
+when
+old state
+new state
+reason
+provider event
+request ID
+```
+
+Do not create duplicate audit systems if one already exists.
+
+---
+
+# 49. DATABASE MIGRATIONS
+
+If schema changes are required:
+
+Create proper migrations.
+
+Do NOT edit old migrations that may already have been deployed unless the repository policy explicitly permits it.
+
+Consider:
+
+```text
+existing data
+unique constraints
+indexes
+foreign keys
+nullability
+backfill
+rollback
+production size
+lock duration
+```
+
+For large tables, avoid unsafe blocking migrations.
+
+---
+
+# 50. DATA MIGRATION SAFETY
+
+If changing:
+
+```text
+idempotency_keys
+payments
+transactions
+refunds
+webhook events
+```
+
+provide a safe migration path.
+
+Test:
+
+```text
+old data
+new code
+migration
+new data
+rollback where applicable
+```
+
+Do not destroy existing payment history.
+
+---
+
+# 51. PERFORMANCE
+
+Do not sacrifice security for performance.
+
+But avoid:
+
+* repeated database queries
+* unnecessary JSON parsing
+* repeated provider calls
+* unbounded webhook processing
+* N+1 queries
+* unnecessary locks
+
+Profile critical payment paths.
+
+Expected goal:
+
+```text
+fast verification
++
+minimal DB queries
++
+short transactions
++
+safe concurrency
+```
+
+---
+
+# 52. SECURITY OF CONFIGURATION
+
+Inspect:
+
+```text
+config/services.php
+.env.example
+payment config
+secret handling
+```
+
+Ensure:
+
+* secrets are configuration-driven
+* secrets are not committed
+* production secret is required
+* missing production secret fails safely
+* test secrets are isolated
+* provider credentials are not exposed to frontend
+* logging never prints secrets
+
+Production should fail closed if a required payment secret is missing.
+
+---
+
+# 53. SECRET SCANNING
+
+Search repository for:
+
+```text
+sk_live
+secret
+hmac
+api_key
+private_key
+token
+password
+authorization
+```
+
+Distinguish:
+
+```text
+placeholder
+test secret
+real secret
+```
+
+If a real credential is found:
+
+1. do not print it
+2. do not copy it into reports
+3. flag it immediately
+4. recommend rotation
+5. remove it from source control if appropriate
+6. inspect git history according to repository policy
+
+---
+
+# 54. API CONTRACT PRESERVATION
+
+Do not arbitrarily change API responses.
+
+If webhook/payment errors use the existing S2 response envelope, preserve it.
+
+If a breaking API change is unavoidable:
+
+Document:
+
+```text
+old contract
+new contract
+reason
+frontend impact
+migration
+tests
+```
+
+---
+
+# 55. FRONTEND COMPATIBILITY
+
+The frontend is Next.js 15.
+
+Inspect current payment API usage.
+
+Search frontend for:
+
+```text
+checkout
+payment
+booking
+idempotency-key
+payment status
+redirect
+webhook
+```
+
+Do not put secrets in Next.js client-side code.
+
+Do not move financial authority into the frontend.
+
+Frontend may:
+
+```text
+start checkout
+display payment UI
+poll safe status
+show result
+```
+
+Backend remains authoritative.
+
+---
+
+# 56. SECURITY HEADERS / CSRF / CORS
+
+Audit payment routes for:
+
+```text
+CSRF
+CORS
+SameSite cookies
+origin validation
+method handling
+content type
+```
+
+Do not disable CSRF globally to make payment endpoints work.
+
+Webhook routes should use the appropriate authentication mechanism rather than relying on browser CSRF semantics.
+
+---
+
+# 57. HTTP METHOD SECURITY
+
+Verify payment mutation routes cannot be triggered unexpectedly using:
+
+```text
+GET
+HEAD
+OPTIONS
+method override
+```
+
+especially:
+
+```text
+refund
+payment confirmation
+checkout
+status mutation
+```
+
+Only intended methods should cause state changes.
+
+---
+
+# 58. MASS ASSIGNMENT / INPUT VALIDATION
+
+Audit payment models and requests for:
+
+```text
+fillable
+guarded
+validated
+casts
+DTOs
+```
+
+Prevent user input from setting:
+
+```text
+payment_status
+paid_at
+amount
+currency
+provider_transaction_id
+provider
+refund_amount
+confirmed_at
+booking_status
+```
+
+unless explicitly controlled by server-side domain logic.
+
+---
+
+# 59. EXCEPTION HANDLING
+
+Payment exceptions must not leak:
+
+* provider secrets
+* SQL details
+* internal paths
+* credentials
+* raw provider payloads
+
+Use existing exception mapping.
+
+Distinguish:
+
+```text
+invalid request
+unauthorized
+forbidden
+conflict
+provider unavailable
+internal error
+```
+
+without exposing unnecessary internals.
+
+---
+
+# 60. TEST COMMANDS
+
+At minimum run:
+
+```bash
+php artisan test --env=testing
+```
+
+```bash
+./vendor/bin/pint --test
+```
+
+```bash
+./vendor/bin/phpstan analyse app routes --memory-limit=1G
+```
+
+```bash
+composer audit
+```
+
+```bash
+python3 api_test_suite.py --auto-start
+```
+
+And PostgreSQL:
+
+```bash
+phpunit -c phpunit.postgres.xml
+```
+
+or the repository's actual PostgreSQL test command.
+
+Do not invent the command if the repository already defines another canonical command.
+
+---
+
+# 61. TEST ENVIRONMENT MATRIX
+
+Run:
+
+```text
+SQLite
+PostgreSQL
+```
+
+where relevant.
+
+Classify tests:
+
+```text
+SQLite-compatible
+PostgreSQL-required
+Provider-contract
+Security
+Concurrency
+Integration
+```
+
+---
+
+# 62. STATIC ANALYSIS
+
+Run:
+
+```bash
+./vendor/bin/phpstan analyse app routes --memory-limit=1G
+```
+
+Must be:
+
+```text
+0 errors
+```
+
+unless a pre-existing documented baseline exists.
+
+Do not suppress errors simply to make the command pass.
+
+---
+
+# 63. CODE STYLE
+
+Run:
+
+```bash
+./vendor/bin/pint --test
+```
+
+Fix actual style issues.
+
+Do not introduce broad unrelated formatting changes.
+
+---
+
+# 64. DEPENDENCY SECURITY
+
+Run:
+
+```bash
+composer audit
+```
+
+Do not upgrade unrelated dependencies unless required.
+
+If a payment dependency is vulnerable:
+
+* identify impact
+* identify safe version
+* test compatibility
+* update deliberately
+
+---
+
+# 65. DOCUMENTATION
+
+Create/update:
+
+```text
+docs/hardening/PHASE_6_PAYMENT_ARCHITECTURE.md
+docs/hardening/PHASE_6_PAYMENT_STATE_MACHINE.md
+docs/hardening/PHASE_6_FINANCIAL_TRUST_BOUNDARIES.md
+docs/hardening/PHASE_6_RECONCILIATION.md
+docs/hardening/PHASE_6_DATABASE_ENGINE_MATRIX.md
+docs/hardening/PHASE_6_SECURITY_MATRIX.md
+docs/hardening/PHASE_6_FINAL_REPORT.md
+```
+
+Update:
+
+```text
+docs/hardening/LEDGER.md
+docs/hardening/BACKLOG.md
+```
+
+---
+
+# 66. SECURITY MATRIX
+
+Create:
+
+```text
+PHASE_6_SECURITY_MATRIX.md
+```
+
+Every control must map to:
+
+```text
+Control
+Threat
+Implementation
+File
+Test
+Expected Result
+Actual Result
+Status
+```
+
+Example:
+
+```text
+Webhook HMAC
+Forged callback
+VerifyWebhookSignature
+...
+AdversarialWebhookTest
+Invalid signature rejected
+PASS
+```
+
+---
+
+# 67. FINDINGS MANAGEMENT
+
+For each Phase 5.5 finding:
+
+```text
+FINDING-001
+FINDING-002
+FINDING-003
+FINDING-004
+FINDING-005
+```
+
+record:
+
+```text
+Original severity
+Original risk
+Current status
+Fix
+Files changed
+Migration
+Tests
+Residual risk
+```
+
+Statuses should be:
+
+```text
+FIXED
+ACCEPTED
+DEFERRED
+REJECTED WITH EVIDENCE
+```
+
+Do not mark something FIXED unless the corresponding security test passes.
+
+---
+
+# 68. FINDING-001 CLOSURE REQUIREMENTS
+
+FINDING-001 may only be marked:
+
+```text
+FIXED
+```
+
+when all are true:
+
+* real provider signature verification exists
+* no production bypass exists
+* correct provider algorithm verified
+* correct canonicalization verified
+* constant-time comparison used
+* missing signature rejected
+* invalid signature rejected
+* modified payload rejected
+* valid payload accepted
+* replay protection exists where applicable
+* duplicate event is idempotent
+* amount is verified
+* currency is verified
+* transaction/reference is verified
+* booking ownership/reference is verified
+* tests pass
+
+---
+
+# 69. FINDING-003 CLOSURE REQUIREMENTS
+
+Only mark fixed after proving:
+
+```text
+same actor + same key + same payload
+```
+
+is safely idempotent.
+
+And:
+
+```text
+same actor + same key + different payload
+```
+
+is rejected.
+
+And:
+
+```text
+different actors + same key
+```
+
+do not collide incorrectly.
+
+And cached responses cannot cross actor boundaries.
+
+---
+
+# 70. FINDING-004 CLOSURE REQUIREMENTS
+
+Only mark fixed when:
+
+```text
+POST /checkout/process
+```
+
+cannot generate duplicate mutation from repeated submission.
+
+Test simultaneous requests.
+
+Do not rely only on UI button disabling.
+
+---
+
+# 71. FINDING-005 CLOSURE REQUIREMENTS
+
+Only mark fixed when the PostgreSQL-specific test suite proves the production constraint/locking behavior.
+
+SQLite passing alone is insufficient evidence.
+
+---
+
+# 72. ADVERSARIAL FINAL AUDIT
+
+After implementation, STOP coding temporarily.
+
+Pretend the implementation was written by another developer.
+
+Audit it from the perspective of an attacker.
+
+Try to:
+
+```text
+forge payment
+forge webhook
+reuse webhook
+change amount
+change currency
+change booking reference
+reuse transaction ID
+refund twice
+refund another user's payment
+confirm another user's booking
+reuse idempotency key
+cause cross-user idempotency collision
+double submit checkout
+race two callbacks
+race webhook and cancellation
+race refund and webhook
+bypass authorization
+bypass validation
+trigger mutation using GET
+trigger mock endpoint
+leak payment information
+enumerate transaction IDs
+cause database inconsistency
+```
+
+Do not assume tests prove security.
+
+Try to break the implementation.
+
+---
+
+# 73. PRODUCTION READINESS GATE
+
+Phase 6 is NOT complete if any of the following remains unresolved:
+
+### P0
+
+* forged payment possible
+* webhook signature bypass
+* client can mark payment paid
+* unauthorized financial mutation
+* payment amount can be manipulated
+* booking can be confirmed without valid payment evidence
+* refund can exceed paid amount through exploitable path
+* critical payment state corruption
+
+### P1
+
+Any unresolved high-severity payment authorization, ownership, replay, or financial integrity issue must block the phase unless explicitly accepted by the project owner with documented risk.
+
+---
+
+# 74. FINAL REQUIRED REPORT
+
+Create:
+
+```text
+docs/hardening/PHASE_6_FINAL_REPORT.md
+```
+
+Use this exact structure:
+
+```text
+# PHASE 6 FINAL REPORT
+
+## Executive Summary
+
+## Scope
+
+## Architecture Reviewed
+
+## Payment Flow
+
+## Webhook Security
+
+## HMAC Verification
+
+## Replay Protection
+
+## Payment State Machine
+
+## Booking/Payment Consistency
+
+## Amount Integrity
+
+## Currency Integrity
+
+## Idempotency
+
+## Refund Security
+
+## Reconciliation
+
+## PostgreSQL Concurrency
+
+## SQLite Compatibility
+
+## Authorization
+
+## Logging & Secrets
+
+## Performance
+
+## Tests
+
+## Static Analysis
+
+## Dependency Audit
+
+## Phase 5.5 Findings
+
+### FINDING-001
+### FINDING-002
+### FINDING-003
+### FINDING-004
+### FINDING-005
+
+## New Findings
+
+## Deferred Findings
+
+## Residual Risks
+
+## Production Blockers
+
+## Final Gate
+```
+
+---
+
+# 75. FINAL REPORT MUST INCLUDE EXACT NUMBERS
+
+Do NOT write:
+
+```text
+Tests passed successfully.
+```
+
+Write:
+
+```text
+Application tests:
+X passed
+Y assertions
+
+PostgreSQL tests:
+X passed
+Y assertions
+
+Adversarial tests:
+X passed
+Y failed
+
+PHPStan:
+0 errors
+
+Pint:
+Passed
+
+Composer audit:
+0 advisories
+```
+
+Use actual observed numbers.
+
+Never invent counts.
+
+---
+
+# 76. FINAL GATE VALUES
+
+The final gate must be exactly one of:
 
 ```text
 PASS
 ```
 
-merely because:
+or:
 
 ```text
-PHPStan passes
-Pint passes
-PHPUnit passes
-API tests pass
-Composer audit passes
+CONDITIONAL PASS
 ```
 
-The final gate must consider:
+or:
 
 ```text
-security
-authorization
-data integrity
-concurrency
-financial integrity
-privacy
-failure behavior
-production configuration
-database correctness
-test quality
+FAIL
 ```
+
+Use:
 
 ### PASS
 
@@ -2854,256 +2847,317 @@ Only if:
 
 * no P0
 * no unresolved P1
-* no known critical security bypass
-* no known financial integrity vulnerability
-* no known double-booking vulnerability
-* no known authentication bypass
-* no known authorization bypass
-* critical tests pass
-* regression tests exist for fixed vulnerabilities
+* required Phase 5.5 findings closed or explicitly accepted
+* security tests pass
+* PostgreSQL tests pass
+* payment invariants verified
 
 ### CONDITIONAL PASS
 
 Only if:
 
-* no P0
-* remaining findings are understood
-* each deferred item has an owner and target phase
-* none of the deferred items creates an unacceptable production risk
+* no exploitable P0 remains
+* remaining risks are clearly documented
+* none of them invalidate financial integrity
+* explicit follow-up exists
 
 ### FAIL
 
 If:
 
-* any P0 exists
-* critical authorization bypass exists
-* critical authentication bypass exists
-* financial integrity is not trustworthy
-* booking concurrency can corrupt inventory
-* forged webhooks can mutate financial state
-* secrets are exposed
-* critical production assumptions are unverified
+* forged payment remains possible
+* webhook authenticity is not cryptographically verified
+* payment authorization is bypassable
+* financial state can be corrupted
+* critical concurrency issue remains
+* production secrets/security are compromised
+* tests demonstrate a critical exploit
 
 ---
 
-# 81. IMPORTANT — DO NOT HIDE UNCERTAINTY
+# 77. DO NOT HIDE FAILURES
 
-If you cannot verify something, write:
+If something cannot be implemented safely because information is missing:
 
-```text
-UNVERIFIED
-```
+Do NOT invent behavior.
 
-Do NOT write:
-
-```text
-PASS
-```
-
-If a test cannot be executed because infrastructure is missing, write:
-
-```text
-BLOCKED — REQUIRES ENVIRONMENT
-```
-
-If something belongs to a later phase:
-
-```text
-DEFERRED — PHASE X
-```
-
-Do not confuse:
-
-```text
-not tested
-```
-
-with:
-
-```text
-secure
-```
-
----
-
-# 82. IMPORTANT — DO NOT OVER-ENGINEER THE FIX
-
-When fixing findings:
-
-Prefer:
-
-```text
-existing architecture
-+
-smallest correct change
-+
-strong regression test
-```
-
-over:
-
-```text
-new framework
-+
-new infrastructure
-+
-new abstraction
-+
-large rewrite
-```
-
-The goal is a backend that is:
-
-```text
-secure
-predictable
-maintainable
-testable
-observable
-scalable
-```
-
-without unnecessary complexity.
-
----
-
-# 83. REQUIRED FINAL COMMANDS
-
-Before declaring Phase 5.5 complete, run:
-
-```bash
-php artisan test --env=testing
-```
-
-```bash
-./vendor/bin/pint --test
-```
-
-```bash
-./vendor/bin/phpstan analyse app routes --memory-limit=1G
-```
-
-```bash
-composer audit
-```
-
-```bash
-python3 api_test_suite.py
-```
-
-Also run any newly created adversarial/security test suites.
-
-If PostgreSQL test infrastructure exists:
-
-```bash
-php artisan test --env=testing
-```
-
-against PostgreSQL as well.
-
-Record exact results.
-
----
-
-# 84. FINAL RESPONSE FROM THE CODING AGENT
-
-At the end of the work, DO NOT respond with a generic:
-
-> "Phase 5.5 completed successfully."
+Do NOT mark it fixed.
 
 Instead report:
 
 ```text
-PHASE 5.5 STATUS
-
-Repository:
-<path>
-
-Commit/Base Revision:
-<revision>
-
-Audit Scope:
-Phases 0–5
-
-Adversarial Tests:
-X passed
-Y failed
-Z blocked
-N deferred
-
-P0 Findings:
-X
-
-P1 Findings:
-X
-
-P2 Findings:
-X
-
-P3 Findings:
-X
-
-Fixed:
-X
-
-Deferred:
-X
-
-Production Blockers:
-<list>
-
-Security Improvements:
-<list>
-
-Architecture Improvements:
-<list>
-
-Database Improvements:
-<list>
-
-Remaining Risks:
-<list>
-
-Required Phase 6 Preconditions:
-<list>
-
-Final Gate:
-PASS / CONDITIONAL PASS / FAIL
-
-Evidence:
-<files/tests/commands>
+BLOCKED
 ```
 
-Do not hide failures.
+and explain exactly what information is missing.
 
-Do not downgrade severity merely to obtain PASS.
+Examples:
 
-Do not claim production readiness unless the evidence supports it.
+```text
+Provider callback specification unavailable
+Payment provider not configured
+Production secret unavailable
+Business refund policy undefined
+```
 
 ---
 
-# 85. MOST IMPORTANT PRINCIPLE
+# 78. IMPORTANT: DO NOT MIX BUSINESS ASSUMPTIONS WITH SECURITY FACTS
 
-The purpose of Phase 5.5 is not to make the project look secure.
-
-The purpose is to discover whether it is secure.
-
-A failed adversarial test is valuable.
-
-A discovered vulnerability is valuable.
-
-A documented uncertainty is valuable.
-
-A blocked verification is valuable.
-
-The worst outcome is:
+Separate:
 
 ```text
-Everything passed
+Verified fact
 ```
 
-when the tests simply failed to attack the system correctly.
+from:
 
-Therefore:
+```text
+Assumption
+```
 
-> **Assume nothing. Verify everything. Attack every trust boundary. Test every critical invariant. Prove security with evidence.**
+from:
+
+```text
+Recommendation
+```
+
+from:
+
+```text
+Business rule requiring owner confirmation
+```
+
+Do not invent business rules merely to make tests pass.
+
+---
+
+# 79. CHANGE DISCIPLINE
+
+Every code modification must answer:
+
+```text
+Why was this file changed?
+What vulnerability/problem does it solve?
+What existing behavior could it affect?
+What test proves it?
+```
+
+Avoid unrelated refactoring.
+
+Do not rename large portions of the project unnecessarily.
+
+Do not reformat unrelated files.
+
+Do not rewrite working modules.
+
+---
+
+# 80. FINAL IMPLEMENTATION PRINCIPLE
+
+The final architecture should remain conceptually:
+
+```text
+Client
+   ↓
+HTTPS / Reverse Proxy
+   ↓
+Laravel
+   ↓
+Authentication
+   ↓
+Authorization
+   ↓
+Validation
+   ↓
+Checkout / Payment Service
+   ↓
+Server-authoritative pricing
+   ↓
+Payment Provider
+   ↓
+Cryptographically verified webhook
+   ↓
+Replay / Idempotency protection
+   ↓
+Reference + Amount + Currency verification
+   ↓
+Transaction
+   ↓
+Payment state transition
+   ↓
+Booking state transition
+   ↓
+Audit / reconciliation
+   ↓
+Response
+```
+
+The payment provider is authoritative for external payment evidence.
+
+The backend is authoritative for:
+
+* booking
+* pricing
+* ownership
+* authorization
+* local state
+* financial consistency
+
+The frontend is NEVER authoritative for financial state.
+
+---
+
+# 81. STARTING PROCEDURE
+
+Before modifying anything, execute this sequence:
+
+### Step 1
+
+Read:
+
+```text
+promit.md
+```
+
+### Step 2
+
+Read:
+
+```text
+docs/hardening/PHASE_5_5_FINDINGS.md
+```
+
+### Step 3
+
+Read:
+
+```text
+docs/hardening/PHASE_5_5_FINAL_REPORT.md
+```
+
+### Step 4
+
+Read:
+
+```text
+docs/hardening/LEDGER.md
+docs/hardening/BACKLOG.md
+```
+
+### Step 5
+
+Inventory payment-related files.
+
+### Step 6
+
+Trace the complete payment lifecycle.
+
+### Step 7
+
+Identify the exact payment provider and callback contract.
+
+### Step 8
+
+Verify provider documentation if necessary.
+
+### Step 9
+
+Create an implementation plan.
+
+### Step 10
+
+Only then begin modifications.
+
+---
+
+# 82. BEFORE CODING — REQUIRED OUTPUT
+
+Before making code changes, produce a concise internal implementation map containing:
+
+```text
+1. Current payment architecture
+2. Current webhook flow
+3. Current payment states
+4. Current booking/payment relationship
+5. Current idempotency design
+6. Current refund design
+7. Current PostgreSQL constraints
+8. Phase 5.5 findings mapping
+9. Files that must change
+10. Files that should NOT change
+11. Required migrations
+12. Required tests
+13. Provider-specific verification requirements
+14. Risks
+```
+
+Then implement.
+
+---
+
+# 83. FINAL SUCCESS CONDITION
+
+Phase 6 is successful only when the system can demonstrate:
+
+```text
+An attacker cannot forge a payment webhook.
+```
+
+```text
+An attacker cannot mark a booking as paid from the client.
+```
+
+```text
+A valid webhook cannot be redirected to another booking.
+```
+
+```text
+A modified payment amount is rejected.
+```
+
+```text
+A modified currency is rejected.
+```
+
+```text
+A replayed webhook produces no duplicate financial effect.
+```
+
+```text
+A duplicate webhook is safely idempotent.
+```
+
+```text
+Different users cannot corrupt each other's idempotency state.
+```
+
+```text
+Legacy checkout cannot create duplicate financial mutations.
+```
+
+```text
+Refunds cannot exceed refundable amounts.
+```
+
+```text
+Concurrent financial operations remain consistent.
+```
+
+```text
+PostgreSQL production constraints are actually tested.
+```
+
+```text
+Payment secrets never leak through logs or responses.
+```
+
+```text
+All critical security properties have automated regression tests.
+```
+
+```text
+The final production gate is based on evidence, not assumptions.
+```
+
+# END OF PHASE 6

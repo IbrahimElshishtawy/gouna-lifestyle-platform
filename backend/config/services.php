@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'payment' => [
+        'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', env('PAYMOB_HMAC_SECRET', 'whsec_placeholder')),
+        'paymob' => [
+            'hmac_secret' => env('PAYMOB_HMAC_SECRET', 'whsec_placeholder'),
+            'merchant_id' => env('PAYMOB_MERCHANT_ID', null),
+        ],
+        'stripe' => [
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET', 'whsec_placeholder'),
+        ],
+    ],
+
 ];

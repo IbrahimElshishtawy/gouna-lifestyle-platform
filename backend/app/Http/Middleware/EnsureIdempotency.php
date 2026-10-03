@@ -49,9 +49,24 @@ class EnsureIdempotency
         $routePath = $request->path();
         $requestHash = hash('sha256', $request->method().'|'.$routePath.'|'.json_encode($request->all()));
 
-        // Lookup existing key
+        // Resolve actor scope (FINDING-003: actor-partitioned namespace)
+        $user = $request->user();
+        if ($user) {
+            $actorScope = 'user:'.$user->id;
+        } elseif ($request->hasSession() && $request->session()->getId()) {
+            $actorScope = 'session:'.$request->session()->getId();
+        } else {
+            // Stable client identity for stateless API guests
+            $actorScope = 'guest:'.hash('sha256', ($request->header('User-Agent') ?? '').'|'.($request->header('Authorization') ?? '').'|'.$request->ip());
+        }
+
+        // Lookup existing key scoped strictly to actor (or legacy global)
         $existing = DB::table('idempotency_keys')
             ->where('key', $idempotencyKey)
+            ->where(function ($query) use ($actorScope) {
+                $query->where('actor_scope', $actorScope)
+                    ->orWhere('actor_scope', 'global');
+            })
             ->first();
 
         if ($existing) {
@@ -61,8 +76,8 @@ class EnsureIdempotency
             }
 
             if ($existing->status === 'completed') {
-                $cachedBody = json_decode($existing->response_body, true);
-                $cachedHeaders = json_decode($existing->response_headers, true) ?: [];
+                $cachedBody = json_decode((string) $existing->response_body, true);
+                $cachedHeaders = json_decode((string) $existing->response_headers, true) ?: [];
 
                 return new JsonResponse($cachedBody, $existing->response_code, array_merge($cachedHeaders, [
                     'X-Cache-Lookup' => 'HIT-IDEMPOTENT',
@@ -87,6 +102,7 @@ class EnsureIdempotency
         // Register pending record
         $recordId = DB::table('idempotency_keys')->insertGetId([
             'key' => $idempotencyKey,
+            'actor_scope' => $actorScope,
             'user_id' => $request->user()?->id,
             'route' => $routePath,
             'request_hash' => $requestHash,

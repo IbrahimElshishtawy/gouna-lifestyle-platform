@@ -216,7 +216,36 @@ php artisan test tests/Feature/RouteInventorySecurityTest.php --env=testing
 php artisan test tests/Feature/AuthorizationSecurityTest.php --env=testing
 php artisan test tests/Feature/AuthenticationSecurityTest.php --env=testing
 php artisan test tests/Feature/BookingHardeningTest.php --env=testing
+php artisan test tests/Feature/AdversarialPaymentSecurityTest.php --env=testing
+php artisan test tests/Feature/AdversarialWebhookTest.php --env=testing
+php artisan test tests/Feature/AdversarialIdempotencyTest.php --env=testing
 ./vendor/bin/pint --test
 php artisan migrate:status --env=testing
 composer audit
 ```
+
+## Phase 6 — Payment & Financial Integrity Hardening (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-03
+- **Gate**: PASS (Zero P0/P1 blockers remaining)
+- **Key Deliverables & Resolved Findings**:
+  - `FINDING-001 (P0)`: Cryptographic Webhook HMAC Verification (`WebhookSignatureVerifier`, `VerifyWebhookSignature`).
+  - `FINDING-002 (P1)`: Public mock endpoints strictly guarded (`abort_unless(app()->environment('local', 'testing'), 403)`).
+  - `FINDING-003 (P1)`: Actor-scoped idempotency key partitioning (`actor_scope` composite unique constraint).
+  - `FINDING-004 (P2)`: Legacy web checkout concurrency lock (`checkout_lock_{hash}`).
+  - `FINDING-005 (P2)`: Database engine matrix & exclusion constraint defense-in-depth documentation.
+- **Documentation Created**:
+  - `docs/hardening/PHASE_6_PAYMENT_ARCHITECTURE.md`
+  - `docs/hardening/PHASE_6_PAYMENT_STATE_MACHINE.md`
+  - `docs/hardening/PHASE_6_FINANCIAL_TRUST_BOUNDARIES.md`
+  - `docs/hardening/PHASE_6_RECONCILIATION.md`
+  - `docs/hardening/PHASE_6_DATABASE_ENGINE_MATRIX.md`
+  - `docs/hardening/PHASE_6_SECURITY_MATRIX.md`
+  - `docs/hardening/PHASE_6_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Application Tests: 155 passed (668 assertions)
+  - Adversarial Tests: 24 passed (74 assertions across payment, webhook, and idempotency suites)
+  - PHPStan: 0 errors (185 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
+
