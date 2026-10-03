@@ -166,13 +166,15 @@ Route::prefix('checkout')->middleware('throttle:checkout')->name('checkout.')->g
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
     Route::get('/confirmation/{reference}', [CheckoutController::class, 'confirmation'])->middleware('throttle:booking_confirmation')->name('confirmation');
 
-    // Gateway Simulation & 3DS Mock Endpoints
-    Route::get('/mock/card/{reference}', [CheckoutController::class, 'cardMock'])->name('card-mock');
-    Route::post('/mock/card/{reference}/complete', [CheckoutController::class, 'cardMockComplete'])->name('card-mock.complete');
-    Route::post('/mock/card/{reference}/decline', [CheckoutController::class, 'cardMockDecline'])->name('card-mock.decline');
+    // Gateway Simulation & 3DS Mock Endpoints (Isolated strictly from Production)
+    if (! app()->isProduction()) {
+        Route::get('/mock/card/{reference}', [CheckoutController::class, 'cardMock'])->name('card-mock');
+        Route::post('/mock/card/{reference}/complete', [CheckoutController::class, 'cardMockComplete'])->name('card-mock.complete');
+        Route::post('/mock/card/{reference}/decline', [CheckoutController::class, 'cardMockDecline'])->name('card-mock.decline');
 
-    Route::get('/mock/paypal/{reference}', [CheckoutController::class, 'paypalMock'])->name('paypal-mock');
-    Route::post('/mock/paypal/{reference}/complete', [CheckoutController::class, 'paypalMockComplete'])->name('paypal-mock.complete');
+        Route::get('/mock/paypal/{reference}', [CheckoutController::class, 'paypalMock'])->name('paypal-mock');
+        Route::post('/mock/paypal/{reference}/complete', [CheckoutController::class, 'paypalMockComplete'])->name('paypal-mock.complete');
+    }
 });
 
 // Public Frontend Routes (Phase 6: Sections 7, 26, 29, 126, 127)

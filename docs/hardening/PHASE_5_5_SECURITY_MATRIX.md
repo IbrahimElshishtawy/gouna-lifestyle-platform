@@ -1,0 +1,35 @@
+# Phase 5.5 — Security Property Matrix
+
+> **Standard:** Mandated by `promit.md` Section 53 for GouNow Platform Pre-Production Hardening.
+> **Rule:** Every control must have direct code and test evidence. No control is marked PASS without evidence.
+
+---
+
+| Security Property | Attack Scenario | Expected Result | Actual Result | Evidence | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Authentication** | Non-existent user vs wrong password login attempts | Generic 422 with identical message to prevent user enumeration | Generic `Invalid email or password.` returned for both cases | `AdversarialAuthenticationTest::test_login_returns_identical_generic_error_preventing_user_enumeration` | **PASS** |
+| **Account Lifecycle** | Deactivated user attempts API access with active token | Instant 403 Forbidden via fresh DB check | 403 Forbidden returned | `AdversarialAuthenticationTest::test_deactivated_account_instantly_denied_access` | **PASS** |
+| **Password Reset** | Replaying single-use reset token | Rejected on second use | 422 Validation Error returned on replay | `AdversarialAuthenticationTest::test_password_reset_token_cannot_be_replayed` | **PASS** |
+| **Horizontal Escalation** | Customer A queries or cancels Customer B's reservation | Denied with 404 (No existence disclosure) | 404 Not Found returned for both show and cancel | `AdversarialAuthorizationTest::test_customer_cannot_view_or_cancel_other_customer_booking` | **PASS** |
+| **Vertical Escalation** | Customer accesses `/admin` dashboard | Denied with 403 / redirect to login | Access denied | `AdversarialAuthorizationTest::test_customer_cannot_access_any_admin_endpoint` | **PASS** |
+| **Role Hierarchy** | Staff user attempts to view/manage `/admin/users` | 403 Forbidden | 403 Forbidden returned | `AdversarialAuthorizationTest::test_staff_cannot_escalate_to_user_management` | **PASS** |
+| **Mass Assignment** | Submitting `is_admin: true` in customer profile mutation | Flag ignored and discarded | `is_admin` remains `false` in database | `AdversarialAuthorizationTest::test_mass_assignment_of_admin_flags_is_ignored_or_rejected` | **PASS** |
+| **State Authorization** | Customer attempts to cancel completed booking | 422 Invalid Transition | 422 returned; booking status unchanged | `AdversarialAuthorizationTest::test_customer_cannot_cancel_completed_booking` | **PASS** |
+| **IDOR Defense** | Direct reference lookup on `/checkout/confirmation/{ref}` without token | 404 Not Found returned to unauthenticated strangers | 404 returned; 200 only for owner or valid SHA-256 token | `AdversarialIdorTest::test_idor_matrix_checkout_confirmation_page` | **PASS** |
+| **IDOR Isolation** | Customer API access to foreign customer booking | 404 Not Found | 404 returned without financial details | `AdversarialIdorTest::test_idor_customer_api_isolated_by_authenticated_customer` | **PASS** |
+| **Concurrency Control** | Concurrent booking attempts on overlapping dates | Exactly one booking succeeds; second throws BookingUnavailableException | One pending reservation created; overlapping attempt denied | `AdversarialConcurrencyTest::test_concurrent_booking_attempts_prevent_double_booking` | **PASS** |
+| **Turnaround Booking** | Same-day turnaround (`check_out == check_in`) | Both bookings succeed (half-open range `[check_in, check_out)`) | Both reservations confirmed | `AdversarialConcurrencyTest::test_turnaround_booking_on_same_checkout_day_succeeds` | **PASS** |
+| **Authoritative Pricing** | Submitting `price: 1, total: 1, discount: 999999` to booking API | FormRequest prohibits fields with 422 | 422 Unprocessable Entity with validation details on prohibited keys | `AdversarialPricingTest::test_tampered_price_injection_is_rejected_or_recalculated` | **PASS** |
+| **Quote Integrity** | Client injecting `total_cents: 10` in quote calculation | Injected field ignored; server calculates true subtotal and fees | Server computes authoritative total (1,500,000 cents) | `AdversarialPricingTest::test_quote_endpoint_computes_server_authoritative_pricing` | **PASS** |
+| **Idempotency Replay** | Re-sending identical request with same key | Returns cached response without second mutation | Returns 201 with identical body and no duplicate booking | `AdversarialIdempotencyTest::test_same_key_different_payload_throws_conflict` | **PASS** |
+| **Idempotency Conflict** | Sending same key with different payload | 409 Conflict thrown | 409 IDEMPOTENCY_CONFLICT returned | `AdversarialIdempotencyTest::test_same_key_different_payload_throws_conflict` | **PASS** |
+| **Idempotency In-Flight** | Simultaneous request while first request is pending | 409 REQUEST_IN_FLIGHT with Retry-After | 409 returned | `AdversarialIdempotencyTest::test_inflight_request_blocks_duplicate` | **PASS** |
+| **Data Leakage (API)** | Querying properties via public API | Internal notes omitted from JSON response | JSON verified without `internal_notes` | `AdversarialDataLeakageTest::test_property_api_does_not_leak_internal_notes` | **PASS** |
+| **Data Leakage (User)** | Fetching customer profile | 2FA secrets and password hashes omitted | `two_factor_secret` and `password` absent from JSON | `AdversarialDataLeakageTest::test_user_profile_api_does_not_leak_secrets` | **PASS** |
+| **Log Hygiene** | Logging context containing passwords, cards, tokens | SensitiveDataRedactionProcessor replaces values with `[REDACTED]` | Verified `[REDACTED]` in log records | `AdversarialDataLeakageTest::test_sensitive_keys_are_redacted_in_logger_context` | **PASS** |
+| **Input Fuzzing** | Inverting dates, negative guest counts, XSS/SQL payloads | 422 Validation Error | 422 returned with standard envelope | `AdversarialInputValidationTest::test_negative_or_malformed_values_rejected_with_422` | **PASS** |
+| **Pagination Cap** | Requesting `per_page=1000000` | Capped at 100 items maximum | Capped at <= 100 items | `AdversarialInputValidationTest::test_pagination_exhaustion_is_capped_at_standard_maximum` | **PASS** |
+| **SQLi Resistance** | Submitting UNION SELECT payloads in search parameter | Safely parameterized via Eloquent | Handled cleanly; 0 injection | `AdversarialInputValidationTest::test_sql_injection_patterns_in_search_queries_are_handled_safely` | **PASS** |
+| **Webhook Delivery** | Valid webhook delivered to payment receiver | Booking transitioned to paid/confirmed atomically | Booking updated to confirmed/paid | `AdversarialWebhookTest::test_valid_webhook_marks_booking_confirmed` | **PASS** |
+| **Webhook Idempotency** | Webhook delivered twice with same transaction ID | Idempotent execution; no duplicate `PaymentTransaction` | Exactly 1 `PaymentTransaction` record in DB | `AdversarialWebhookTest::test_duplicate_webhook_delivery_is_idempotent` | **PASS** |
+| **Webhook Security** | Forged signature on webhook payload | Rejected with 401 Unauthorized HMAC verification | Placeholder implementation only checks header presence (FINDING-001) | `VerifyWebhookSignature.php` | **FAIL (P0 Blocker for Phase 6)** |

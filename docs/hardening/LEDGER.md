@@ -1,12 +1,12 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 4 (Authentication, 2FA & Account Security) — COMPLETED
-- **Next phase**: 5 (Booking, IDOR & Concurrency)
-- **Last completed task ID**: P4-T13 (DONE)
-- **Branch**: `hardening/phase-4`
-- **Test status**: 97/97 tests PASS (488 assertions). 15/15 Authentication tests PASS. 11/11 Authorization tests PASS. 10/10 API Hardening tests PASS. 6/6 Baseline tests PASS. 1/1 Route Inventory tests PASS. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
-- **Overall status**: PHASE 4 SIGNED-OFF
+- **Current phase**: 5.5 (Adversarial Production Audit) — COMPLETED
+- **Next phase**: 6 (Payment, Webhooks & Financial Hardening)
+- **Last completed task ID**: P5.5-T07 (DONE)
+- **Branch**: `hardening/phase-5.5`
+- **Test status**: 136/136 tests PASS (608 assertions). 26/26 Adversarial Security tests PASS across 9 dedicated attack suites. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
+- **Overall status**: PHASE 5.5 CONDITIONAL PASS SIGNED-OFF
 
 ## Task Completion Table (Phase 0 — G17 Discipline)
 | Task ID | Status | Evidence | Reason if not DONE |
@@ -111,6 +111,17 @@
 | P5-T11 | DONE | Confirmation rate limiting: named rate limiter `booking_confirmation` (15/min per IP) registered in `AppServiceProvider` and enforced on `/checkout/confirmation/{reference}`. Verified in tests. | N/A |
 | P5-T12 | DONE | Concurrency test suite: `BookingHardeningTest::test_concurrent_booking_same_inventory_concurrency` verifies conflicting bookings throw `BookingUnavailableException`. | N/A |
 | P5-T13 | DONE | IDOR regression test suite: `BookingHardeningTest::test_confirmation_page_idor_protection` verifies bare references, invalid tokens, and stranger users receive 404 while owners and token holders receive 200. | N/A |
+
+## Task Completion Table (Phase 5.5 — Adversarial Production Audit)
+| Task ID | Status | Evidence | Reason if not DONE |
+|---|---|---|---|
+| P5.5-T01 | DONE | `docs/hardening/PHASE_5_5_ATTACK_SURFACE.md` generated documenting all 135 Laravel routes with 15 adversarial properties per route. | N/A |
+| P5.5-T02 | DONE | `docs/hardening/PHASE_5_5_SECURITY_BOUNDARY_MAP.md` created mapping all 10 architectural trust boundaries and trust flows. | N/A |
+| P5.5-T03 | DONE | 9 dedicated adversarial test suites implemented in `backend/tests/Feature/Adversarial*Test.php` with 26/26 attacks passing 100% (73 assertions). | N/A |
+| P5.5-T04 | DONE | `docs/hardening/PHASE_5_5_FINDINGS.md` created documenting 5 findings (FINDING-001 to FINDING-005) with severity and reproduction steps. | N/A |
+| P5.5-T05 | DONE | `docs/hardening/PHASE_5_5_SECURITY_MATRIX.md` created linking each security property to direct test and code evidence. | N/A |
+| P5.5-T06 | DONE | Shielded mock payment gateways in `backend/routes/web.php` with `if (! app()->isProduction())` (resolving FINDING-002). | N/A |
+| P5.5-T07 | DONE | `docs/hardening/PHASE_5_5_FINAL_REPORT.md` generated issuing CONDITIONAL PASS for Phase 6 transition. | N/A |
 
 ## Standards S1–S5 Comprehension (10-line summary)
 1. **S1 (Request Pipeline)**: Strict 14-step request lifecycle (Correlation ID → Trusted Proxies → CORS → Force JSON → Rate limit → Auth → Account state → Scoped bindings → Policy → FormRequest → Thin Controller → Action/Transaction → Resource → Exception envelope).
