@@ -29,6 +29,29 @@ class ProcessCheckoutRequest extends FormRequest
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
             'payment_type' => ['required', 'in:full,deposit'],
             'promo_code' => ['nullable', 'string', 'max:50'],
+
+            // Strictly prohibited fields from customer/client (Mass Assignment & Price Tampering Defense)
+            'id' => ['prohibited'],
+            'reference' => ['prohibited'],
+            'status' => ['prohibited'],
+            'payment_status' => ['prohibited'],
+            'price' => ['prohibited'],
+            'price_cents' => ['prohibited'],
+            'total' => ['prohibited'],
+            'total_cents' => ['prohibited'],
+            'amount' => ['prohibited'],
+            'deposit' => ['prohibited'],
+            'deposit_cents' => ['prohibited'],
+            'subtotal_cents' => ['prohibited'],
+            'cleaning_fee_cents' => ['prohibited'],
+            'service_fee_cents' => ['prohibited'],
+            'tax_cents' => ['prohibited'],
+            'discount_cents' => ['prohibited'],
+            'amount_paid_cents' => ['prohibited'],
+            'amount_remaining_cents' => ['prohibited'],
+            'internal_notes' => ['prohibited'],
+            'assigned_to' => ['prohibited'],
+            'is_admin' => ['prohibited'],
         ];
     }
 }

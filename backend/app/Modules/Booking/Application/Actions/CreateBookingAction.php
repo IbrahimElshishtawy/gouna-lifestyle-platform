@@ -18,6 +18,7 @@ use App\Shared\Domain\Exceptions\PaymentMethodNotAllowedException;
 use App\Shared\Domain\Exceptions\PaymentRequirementMismatchException;
 use App\Shared\Domain\ValueObjects\BookingReference;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CreateBookingAction
 {
@@ -133,7 +134,7 @@ class CreateBookingAction
             }
 
             // Guest confirmation access token (P5-T08)
-            $plainAccessToken = \Illuminate\Support\Str::random(64);
+            $plainAccessToken = Str::random(64);
             $hashedAccessToken = hash('sha256', $plainAccessToken);
 
             // Cancellation policy snapshot (P5-T09)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Modules\Booking\Domain\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +59,11 @@ class Booking extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function getBookingStatusAttribute(): ?BookingStatus
+    {
+        return $this->status ? BookingStatus::tryFrom($this->status) : null;
     }
 
     public function bookable(): MorphTo
