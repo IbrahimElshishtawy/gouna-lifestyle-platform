@@ -102,7 +102,7 @@ class CheckoutController extends Controller
         $checkOut = Carbon::parse($validated['check_out']);
 
         try {
-            [$booking, $paymentResult] = DB::transaction(function () use ($validated, $property, $paymentMethod, $checkIn, $checkOut) {
+            [$booking, $paymentResult] = DB::transaction(function () use ($validated, $property, $paymentMethod, $checkIn, $checkOut, $request) {
                 // Find or create customer
                 $customer = $this->findOrCreateCustomerAction->execute($validated, auth()->id());
 
@@ -118,6 +118,7 @@ class CheckoutController extends Controller
                     promoCode: $validated['promo_code'] ?? null,
                     source: 'website_checkout',
                     internalNotes: $validated['special_requests'] ?? null,
+                    idempotencyKey: $request->header('Idempotency-Key') ?? $request->header('X-Idempotency-Key'),
                 );
 
                 $booking = $this->createBookingAction->execute($dto);
@@ -132,10 +133,17 @@ class CheckoutController extends Controller
                 return response()->json([
                     'success' => true,
                     'booking_reference' => $booking->reference,
-                    'redirect_url' => $paymentResult['redirect_url'] ?? route('checkout.confirmation', $booking->reference),
+                    'access_token' => $booking->plain_access_token,
+                    'redirect_url' => $paymentResult['redirect_url'] ?? route('checkout.confirmation', [
+                        'reference' => $booking->reference,
+                        'token' => $booking->plain_access_token,
+                    ]),
                     'payment_result' => $paymentResult,
                 ]);
             }
+
+            // Save recent booking id in session for authorized confirmation access
+            $request->session()->put('recent_booking_id', $booking->id);
 
             // If gateway provided a redirect URL (e.g. Card 3DS, PayPal), redirect user there
             if (! empty($paymentResult['redirect_url'])) {
@@ -156,15 +164,64 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Show the booking confirmation voucher page.
+     * Show the booking confirmation voucher page (P5-T08: IDOR & Enumeration Defense).
      */
-    public function confirmation(string $reference): View
+    public function confirmation(Request $request, string $reference): View
     {
         $booking = Booking::where('reference', $reference)
             ->with(['bookable', 'customer', 'nightlyPrices', 'transactions', 'paymentMethod'])
-            ->firstOrFail();
+            ->first();
 
-        return view('checkout.confirmation', compact('booking'));
+        if (! $booking) {
+            abort(404, 'Reservation not found or access denied.');
+        }
+
+        $user = auth()->user();
+        $isAuthorized = false;
+        $isGuestAccess = true;
+
+        if ($user) {
+            if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager') || $user->hasRole('finance')) {
+                $isAuthorized = true;
+                $isGuestAccess = false;
+            } elseif ($user->hasRole('staff') && $booking->assigned_to === $user->id) {
+                $isAuthorized = true;
+                $isGuestAccess = false;
+            } elseif ($booking->customer && ($booking->customer->user_id === $user->id || Str::lower((string) $booking->customer->email) === Str::lower((string) $user->email))) {
+                $isAuthorized = true;
+                $isGuestAccess = false;
+            }
+        }
+
+        // Session authorization: user just completed checkout in this session
+        if (! $isAuthorized && $request->hasSession() && $request->session()->get('recent_booking_id') === $booking->id) {
+            $isAuthorized = true;
+        }
+
+        // Signed URL authorization
+        if (! $isAuthorized && $request->hasValidSignature()) {
+            $isAuthorized = true;
+        }
+
+        // Token-based guest authorization (P5-T08)
+        $token = $request->query('token');
+        if (! $isAuthorized && $token && ! empty($booking->booking_access_token)) {
+            if (hash_equals($booking->booking_access_token, hash('sha256', (string) $token))) {
+                $isAuthorized = true;
+            }
+        }
+
+        // Guest email verification fallback
+        $email = $request->query('email');
+        if (! $isAuthorized && $email && $booking->customer && Str::lower((string) $email) === Str::lower((string) $booking->customer->email)) {
+            $isAuthorized = true;
+        }
+
+        if (! $isAuthorized) {
+            abort(404, 'Reservation not found or access denied.');
+        }
+
+        return view('checkout.confirmation', compact('booking', 'isGuestAccess'));
     }
 
     /**

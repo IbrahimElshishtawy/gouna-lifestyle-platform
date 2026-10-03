@@ -113,6 +113,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin_login', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });
+
+        RateLimiter::for('booking_confirmation', function (Request $request) {
+            return Limit::perMinute(15)->by($request->ip());
+        });
         // Model Policy Registrations (Standard S5)
         Gate::policy(Property::class, PropertyPolicy::class);
         Gate::policy(Booking::class, BookingPolicy::class);

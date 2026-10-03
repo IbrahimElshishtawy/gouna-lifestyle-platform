@@ -5,16 +5,26 @@ declare(strict_types=1);
 namespace App\Modules\Booking\Application\Actions;
 
 use App\Models\Booking;
+use App\Models\User;
+use App\Modules\Booking\Domain\Enums\BookingStatus;
+use App\Modules\Booking\Domain\Services\BookingStateMachine;
 
 class CancelBookingAction
 {
-    public function execute(Booking $booking, string $reason, ?int $refundAmountCents = 0): void
+    public function __construct(
+        private readonly BookingStateMachine $stateMachine
+    ) {}
+
+    public function execute(Booking $booking, string $reason, ?int $refundAmountCents = 0, ?User $actor = null): void
     {
-        $booking->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-            'cancellation_reason' => $reason,
-            'refund_amount_cents' => $refundAmountCents ?? 0,
-        ]);
+        $this->stateMachine->transition(
+            booking: $booking,
+            targetStatus: BookingStatus::CANCELLED,
+            actor: $actor,
+            context: [
+                'reason' => $reason,
+                'refund_amount_cents' => $refundAmountCents ?? 0,
+            ]
+        );
     }
 }

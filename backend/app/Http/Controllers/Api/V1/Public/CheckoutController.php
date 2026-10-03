@@ -115,6 +115,7 @@ class CheckoutController extends Controller
                     promoCode: $validated['promo_code'] ?? null,
                     source: 'api_v1_checkout',
                     internalNotes: $validated['special_requests'] ?? null,
+                    idempotencyKey: $request->header('Idempotency-Key') ?? $request->header('X-Idempotency-Key'),
                 );
 
                 $booking = $this->createBookingAction->execute($dto);
@@ -127,6 +128,7 @@ class CheckoutController extends Controller
                 'meta' => [
                     'payment_result' => $paymentResult,
                     'redirect_url' => $paymentResult['redirect_url'] ?? null,
+                    'access_token' => $booking->plain_access_token ?? null,
                 ],
             ]);
 

@@ -21,10 +21,14 @@ class Booking extends Model
         'deposit_cents', 'amount_paid_cents', 'amount_remaining_cents', 'currency',
         'payment_type', 'payment_method_id',
         'status', 'payment_status',
+        'expires_at', 'booking_access_token', 'idempotency_key',
+        'pricing_snapshot', 'cancellation_policy_snapshot',
         'discount_id', 'promo_code', 'balance_due_date',
         'internal_notes', 'source', 'assigned_to',
         'cancelled_at', 'cancellation_reason', 'refund_amount_cents',
     ];
+
+    public ?string $plain_access_token = null;
 
     protected function casts(): array
     {
@@ -33,6 +37,9 @@ class Booking extends Model
             'check_out' => 'date',
             'balance_due_date' => 'date',
             'cancelled_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'pricing_snapshot' => 'array',
+            'cancellation_policy_snapshot' => 'array',
             'nights' => 'integer',
             'guests' => 'integer',
             'subtotal_cents' => 'integer',

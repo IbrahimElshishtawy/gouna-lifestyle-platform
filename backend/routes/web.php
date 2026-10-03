@@ -164,7 +164,7 @@ Route::prefix('checkout')->middleware('throttle:checkout')->name('checkout.')->g
     Route::post('/calculate', [CheckoutController::class, 'calculate'])->name('calculate');
     Route::get('/{property:slug}', [CheckoutController::class, 'show'])->name('show');
     Route::post('/process', [CheckoutController::class, 'process'])->name('process');
-    Route::get('/confirmation/{reference}', [CheckoutController::class, 'confirmation'])->name('confirmation');
+    Route::get('/confirmation/{reference}', [CheckoutController::class, 'confirmation'])->middleware('throttle:booking_confirmation')->name('confirmation');
 
     // Gateway Simulation & 3DS Mock Endpoints
     Route::get('/mock/card/{reference}', [CheckoutController::class, 'cardMock'])->name('card-mock');

@@ -54,6 +54,12 @@ class CheckPropertyAvailabilityQuery
         $conflictingBooking = Booking::where('bookable_type', Property::class)
             ->where('bookable_id', $property->id)
             ->whereIn('status', self::BLOCKING_BOOKING_STATUSES)
+            ->where(function ($q) {
+                // Ignore pending bookings where hold has expired (P5-T05)
+                $q->whereNotIn('status', ['pending', 'awaiting_payment'])
+                    ->orWhereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
             ->whereDate('check_in', '<', $checkOutStr)
             ->whereDate('check_out', '>', $checkInStr)
             ->when($excludeBookingId, fn ($q) => $q->where('id', '!=', $excludeBookingId))

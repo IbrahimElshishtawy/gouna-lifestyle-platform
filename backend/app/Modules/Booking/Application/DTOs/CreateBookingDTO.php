@@ -22,5 +22,6 @@ final class CreateBookingDTO
         public readonly ?string $promoCode = null,
         public readonly ?string $source = 'website_checkout',
         public readonly ?string $internalNotes = null,
+        public readonly ?string $idempotencyKey = null,
     ) {}
 }

@@ -60,16 +60,28 @@ class CreateBookingAction
             throw new PaymentMethodNotAllowedException($paymentMethod->name);
         }
 
+        $idempotencyKey = $dto->idempotencyKey;
+
+        // Idempotency check: if customer already created booking with this key, return it immediately (P5-T06)
+        if ($idempotencyKey) {
+            $existing = Booking::where('idempotency_key', $idempotencyKey)
+                ->where('customer_id', $customer->id)
+                ->first();
+            if ($existing) {
+                return $existing;
+            }
+        }
+
         return DB::transaction(function () use (
             $property, $customer, $checkIn, $checkOut, $guests,
-            $paymentType, $paymentMethod, $promoCode, $source, $internalNotes
+            $paymentType, $paymentMethod, $promoCode, $source, $internalNotes, $idempotencyKey
         ) {
-            // Re-validate availability inside transaction with pessimistic property row lock
+            // Re-validate availability inside transaction with pessimistic property row lock (P5-T04)
             $this->lockAndValidateAction->execute(
                 $property, $checkIn, $checkOut, $guests
             );
 
-            // Calculate exact pricing and minimum stay rules server-side
+            // Calculate exact pricing and minimum stay rules server-side (P5-T02)
             $pricing = $this->pricingQuery->execute(
                 $property, $checkIn, $checkOut, $guests, $promoCode
             );
@@ -109,10 +121,28 @@ class CreateBookingAction
                 default => 'pending',
             };
 
+            // Hold expiry (15 minutes) for pending reservations (P5-T05)
+            $expiresAt = in_array($initialStatus, ['pending', 'awaiting_payment'], true)
+                ? now()->addMinutes(15)
+                : null;
+
+            // Secure random reference (P5-T08)
             $reference = BookingReference::generate()->toString();
             while (Booking::where('reference', $reference)->exists()) {
                 $reference = BookingReference::generate()->toString();
             }
+
+            // Guest confirmation access token (P5-T08)
+            $plainAccessToken = \Illuminate\Support\Str::random(64);
+            $hashedAccessToken = hash('sha256', $plainAccessToken);
+
+            // Cancellation policy snapshot (P5-T09)
+            $cancellationPolicySnapshot = [
+                'cancellation_policy' => $property->cancellation_policy ?? 'moderate',
+                'cancellation_policy_en' => $property->cancellation_policy_en ?? 'Free cancellation up to 14 days before check-in.',
+                'cancellation_policy_ar' => $property->cancellation_policy_ar ?? null,
+                'snapshot_at' => now()->toIso8601String(),
+            ];
 
             $booking = Booking::create([
                 'reference' => $reference,
@@ -137,12 +167,19 @@ class CreateBookingAction
                 'payment_method_id' => $paymentMethod->id,
                 'status' => $initialStatus,
                 'payment_status' => 'unpaid',
+                'expires_at' => $expiresAt,
+                'booking_access_token' => $hashedAccessToken,
+                'idempotency_key' => $idempotencyKey,
+                'pricing_snapshot' => $pricing->toArray(),
+                'cancellation_policy_snapshot' => $cancellationPolicySnapshot,
                 'discount_id' => $discountId,
                 'promo_code' => $pricing->promoCode,
                 'balance_due_date' => $balanceDueDate,
                 'internal_notes' => $internalNotes,
                 'source' => $source ?? 'website_checkout',
             ]);
+
+            $booking->plain_access_token = $plainAccessToken;
 
             // Store immutable nightly price snapshots (Section 18)
             foreach ($pricing->nightlyPrices as $nightData) {
@@ -170,6 +207,6 @@ class CreateBookingAction
             }
 
             return $booking;
-        });
+        }, 3);
     }
 }

@@ -12,4 +12,5 @@ Route::get('/me/abilities', [AuthController::class, 'abilities'])->name('me.abil
 Route::prefix('bookings')->as('bookings.')->group(function () {
     Route::get('/', [BookingController::class, 'index'])->name('index');
     Route::get('/{reference}', [BookingController::class, 'show'])->name('show');
+    Route::post('/{reference}/cancel', [BookingController::class, 'cancel'])->name('cancel');
 });

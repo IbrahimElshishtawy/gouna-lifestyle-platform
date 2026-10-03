@@ -35,12 +35,18 @@ class CreateBookingRequest extends FormRequest
             'promo_code' => ['nullable', 'string', 'max:50'],
             'payment_method' => ['required', 'string', 'in:card,paypal,cash,bank_transfer'],
 
-            // Strictly prohibited fields from customer/client (Mass Assignment Defense)
+            // Strictly prohibited fields from customer/client (Mass Assignment & Price Tampering Defense)
             'id' => ['prohibited'],
             'reference' => ['prohibited'],
             'status' => ['prohibited'],
             'payment_status' => ['prohibited'],
+            'price' => ['prohibited'],
+            'price_cents' => ['prohibited'],
+            'total' => ['prohibited'],
             'total_cents' => ['prohibited'],
+            'amount' => ['prohibited'],
+            'deposit' => ['prohibited'],
+            'deposit_cents' => ['prohibited'],
             'subtotal_cents' => ['prohibited'],
             'cleaning_fee_cents' => ['prohibited'],
             'service_fee_cents' => ['prohibited'],
