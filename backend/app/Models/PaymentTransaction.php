@@ -20,7 +20,10 @@ class PaymentTransaction extends Model
         'failure_reason', 'completed_at',
     ];
 
-    protected $hidden = ['gateway_response'];
+    protected $hidden = [
+        'gateway_response',
+        'manual_notes',
+    ];
 
     protected function casts(): array
     {

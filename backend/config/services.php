@@ -36,13 +36,13 @@ return [
     ],
 
     'payment' => [
-        'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', env('PAYMOB_HMAC_SECRET', 'whsec_placeholder')),
+        'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', env('PAYMOB_HMAC_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder')),
         'paymob' => [
-            'hmac_secret' => env('PAYMOB_HMAC_SECRET', 'whsec_placeholder'),
+            'hmac_secret' => env('PAYMOB_HMAC_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder'),
             'merchant_id' => env('PAYMOB_MERCHANT_ID', null),
         ],
         'stripe' => [
-            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET', 'whsec_placeholder'),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder'),
         ],
     ],
 

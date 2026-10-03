@@ -34,12 +34,14 @@ RUN apk add --no-cache \
     libxml2-dev \
     oniguruma-dev \
     sqlite-dev \
+    postgresql-dev \
     linux-headers \
     $PHPIZE_DEPS \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         pdo_sqlite \
+        pdo_pgsql \
         mbstring \
         exif \
         pcntl \

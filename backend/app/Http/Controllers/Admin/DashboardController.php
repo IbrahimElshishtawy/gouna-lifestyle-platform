@@ -11,8 +11,10 @@ use App\Models\EventTicket;
 use App\Models\Experience;
 use App\Models\Lead;
 use App\Models\Property;
+use App\Services\Payment\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -162,20 +164,58 @@ class DashboardController extends Controller
     /**
      * Process a refund for a booking with strict policy authorization.
      */
-    public function bookingsRefund(Request $request, Booking $booking): RedirectResponse
+    public function bookingsRefund(Request $request, Booking $booking, PaymentService $paymentService): RedirectResponse
     {
         Gate::authorize('refund', $booking);
 
-        $amount = (int) $request->input('amount_cents', $booking->amount_paid_cents);
-        $reason = (string) $request->input('reason', 'Customer requested cancellation/refund');
+        $maxRefundable = max(0, (int) $booking->amount_paid_cents - (int) ($booking->refund_amount_cents ?? 0));
+        if ($maxRefundable <= 0) {
+            return back()->withErrors(['error' => 'This booking has no remaining refundable balance.']);
+        }
 
-        $booking->update([
-            'status' => 'cancelled',
-            'payment_status' => 'refunded',
-            'refund_amount_cents' => $amount,
-            'cancellation_reason' => $reason,
-            'cancelled_at' => now(),
+        $validated = $request->validate([
+            'amount_cents' => ['nullable', 'integer', 'min:1', "max:{$maxRefundable}"],
+            'reason' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $amount = (int) ($validated['amount_cents'] ?? $maxRefundable);
+        $reason = (string) ($validated['reason'] ?? 'Customer requested cancellation/refund');
+
+        // Look for completed payment transaction
+        $completedTx = $booking->paymentTransactions()
+            ->where('status', 'completed')
+            ->whereRaw('(amount_cents - COALESCE(refund_amount_cents, 0)) >= ?', [$amount])
+            ->first();
+
+        if ($completedTx) {
+            $paymentService->initiateRefund($completedTx, $amount, $reason, (int) (auth()->id() ?? 1));
+        } else {
+            // Atomic fallback if no single matching transaction (e.g. offline/manual)
+            DB::transaction(function () use ($booking, $amount, $reason) {
+                /** @var Booking $locked */
+                $locked = Booking::where('id', $booking->id)->lockForUpdate()->firstOrFail();
+                $newRefundTotal = (int) ($locked->refund_amount_cents ?? 0) + $amount;
+                $newPaymentStatus = ($newRefundTotal >= (int) $locked->amount_paid_cents) ? 'refunded' : 'partially_refunded';
+
+                $locked->update([
+                    'refund_amount_cents' => $newRefundTotal,
+                    'payment_status' => $newPaymentStatus,
+                    'status' => 'cancelled',
+                    'cancellation_reason' => $reason,
+                    'cancelled_at' => $locked->cancelled_at ?? now(),
+                ]);
+
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'booking_refund_executed',
+                    'entity_type' => Booking::class,
+                    'entity_id' => $locked->id,
+                    'description' => "Manual refund of {$amount} cents applied to booking {$locked->reference}. Reason: {$reason}",
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+            });
+        }
 
         return back()->with('success', 'Refund processed successfully.');
     }

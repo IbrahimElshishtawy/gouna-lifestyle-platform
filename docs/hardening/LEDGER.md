@@ -249,3 +249,76 @@ composer audit
   - Pint: Passed
   - Composer Audit: 0 advisories
 
+## Phase 7 — Production Configuration & Secrets Hardening (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-04
+- **Gate**: PASS (Zero blockers; production configuration verified & fail-closed)
+- **Key Deliverables & Resolved Findings**:
+  - `BL-006 (Low)`: Created comprehensive `.env.example` with 50+ configuration variables, descriptions, and safe defaults.
+  - `SEC-001 (Config)`: Forced `SESSION_SECURE_COOKIE` to default to `true` whenever `APP_ENV === 'production'`.
+  - `SEC-002 (Database)`: Made `DB_SSLMODE` configurable for managed PostgreSQL connections (`prefer`, `require`, `verify-full`).
+  - `SEC-003 (Secrets)`: Made payment webhook secrets fail-closed (`null`) in production when missing instead of using `whsec_placeholder`.
+  - `SEC-004 (Network)`: Added configurable `TRUSTED_PROXIES` support in `bootstrap/app.php`.
+  - `SEC-005 (Data Leakage)`: Hardened model serialization with `$hidden` attributes on `Booking`, `PaymentTransaction`, and `Customer`.
+  - `SEC-006 (Audit Command)`: Created `php artisan config:audit-production` (`AuditProductionConfigCommand`) checking 13 production prerequisites.
+  - `SEC-007 (Testing)`: Added `ProductionConfigHardeningTest` covering audit command, data leakage prevention, CORS wildcard prohibition, and fail-closed webhook verifier.
+- **Documentation Created**:
+  - `docs/hardening/PHASE_7_PRODUCTION_CONFIG.md`
+  - `docs/hardening/PHASE_7_SECRETS_MATRIX.md`
+  - `docs/hardening/PHASE_7_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Application Tests: 163 passed (685 assertions)
+  - Configuration Tests: 8 passed (17 assertions)
+  - PHPStan: 0 errors (186 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
+
+## Phase 8 — Database Production Hardening & Migration Safety (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-04
+- **Gate**: PASS (Zero blockers; PostgreSQL 16 engine compatibility, exclusion constraints & backup/restore verified)
+- **Key Deliverables & Resolved Findings**:
+  - `MIG-001 (Schema Ordering)`: Fixed circular foreign key dependency between `discounts` and `bookings`. Moved `discount_usages` table creation after `bookings`, ensuring 100% clean migration execution on PostgreSQL and MySQL.
+  - `DB-001 (PostgreSQL Target)`: Validated all 41 migrations cleanly executing against live PostgreSQL 16 container (`gounow_postgres_test`).
+  - `DB-002 (Exclusion Constraints)`: Verified PostgreSQL `bookings_no_double_booking` GiST exclusion constraint active and enforcing double-booking prevention at the engine kernel level.
+  - `DB-003 (Financial Types)`: Audited all money-related columns across all tables. Confirmed zero floating point columns; all authoritative balances stored in integer minor units (`bigint`).
+  - `DB-004 (Disaster Recovery)`: Executed real physical backup (`pg_dump` binary format), dropped schema, executed `pg_restore`, verified 100% record and schema recovery (53 tables, 7 roles, 21 permissions), and tested application reconnect.
+  - `DB-005 (Dockerfile)`: Added `postgresql-dev` and `pdo_pgsql` to root `Dockerfile` for production container compatibility.
+  - `DB-006 (PostgreSQL Tests)`: Executed `BookingHardeningTest` (13 passed, 47 assertions) and adversarial suites (24 passed, 74 assertions) directly against PostgreSQL 16.
+- **Documentation Created**:
+  - `docs/hardening/PHASE_8_DATABASE_PRODUCTION.md`
+  - `docs/hardening/PHASE_8_MIGRATION_SAFETY.md`
+  - `docs/hardening/PHASE_8_BACKUP_RESTORE.md`
+  - `docs/hardening/PHASE_8_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - PostgreSQL 16 Migrations: 41 passed (41/41)
+  - PostgreSQL Feature Tests: 37 passed (121 assertions)
+  - Full Host Regression Suite: 163 passed (685 assertions)
+  - PHPStan: 0 errors (186 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
+
+## Phase 9 — Authentication, Authorization & API Security Final Audit (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-04
+- **Gate**: PASS (Zero blockers; security headers, IDOR/BOLA protections, rate limiting & enumeration defenses certified)
+- **Key Deliverables & Resolved Findings**:
+  - `SEC-008 (Headers)`: Created `ApplySecurityHeaders` middleware and registered in `bootstrap/app.php` across web and API pipelines (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS).
+  - `SEC-009 (Attack Surface)`: Disabled `'serve' => false` on local private disk in `config/filesystems.php`, eliminating unauthenticated `PUT /storage/{path}` and `GET /storage/{path}` routes.
+  - `SEC-010 (IDOR/BOLA)`: Tested and verified that cross-tenant access to customer booking records and cancellation is rejected with HTTP 403/404.
+  - `SEC-011 (Enumeration)`: Verified that `/api/v1/auth/login` uses timing equalization and identical error messages for nonexistent accounts and wrong passwords.
+  - `SEC-012 (Adversarial Testing)`: Created `AdversarialApiSecurityTest` with 8 passing security test cases (35 assertions).
+- **Documentation Created**:
+  - `docs/hardening/PHASE_9_API_SECURITY_MATRIX.md`
+  - `docs/hardening/PHASE_9_AUTHORIZATION_AUDIT.md`
+  - `docs/hardening/PHASE_9_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Adversarial API Suite: 8 passed (35 assertions)
+  - Full Host Regression Suite: 171 passed (720 assertions)
+  - PHPStan: 0 errors (187 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
+
+
+
+

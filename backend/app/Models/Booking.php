@@ -31,6 +31,11 @@ class Booking extends Model
 
     public ?string $plain_access_token = null;
 
+    protected $hidden = [
+        'booking_access_token',
+        'internal_notes',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -92,6 +97,11 @@ class Booking extends Model
     }
 
     public function transactions(): HasMany
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+
+    public function paymentTransactions(): HasMany
     {
         return $this->hasMany(PaymentTransaction::class);
     }

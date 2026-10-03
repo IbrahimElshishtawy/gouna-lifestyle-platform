@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\DomainException;
+use App\Http\Middleware\ApplySecurityHeaders;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\EnsureAccountActive;
@@ -41,15 +42,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = env('TRUSTED_PROXIES', '*');
+        $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : array_filter(explode(',', (string) $trustedProxies)));
 
         $middleware->web(append: [
             SetLocale::class,
+            ApplySecurityHeaders::class,
         ]);
 
         $middleware->api(prepend: [
             AssignRequestId::class,
             ForceJsonResponse::class,
+            ApplySecurityHeaders::class,
         ]);
 
         $middleware->api(append: [

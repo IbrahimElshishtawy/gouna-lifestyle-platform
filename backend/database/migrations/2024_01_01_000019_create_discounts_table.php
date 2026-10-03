@@ -29,20 +29,10 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-
-        Schema::create('discount_usages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('discount_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
-            $table->unsignedBigInteger('amount_discounted_cents');
-            $table->timestamps();
-        });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('discount_usages');
         Schema::dropIfExists('discounts');
     }
 };

@@ -129,8 +129,13 @@ class BookingPolicy
      */
     public function refund(User $user, Booking $booking): bool
     {
+        $remainingRefundable = (int) $booking->amount_paid_cents - (int) ($booking->refund_amount_cents ?? 0);
+        if ($remainingRefundable <= 0) {
+            return false;
+        }
+
         if ($user->is_admin || $user->hasRole('super_admin')) {
-            return $booking->amount_paid_cents > 0;
+            return true;
         }
 
         // Property Manager, Content Manager, Sales, Staff are STRICTLY FORBIDDEN from issuing refunds
@@ -140,7 +145,6 @@ class BookingPolicy
 
         // Only Finance role with refund capability
         return $user->hasRole('finance')
-            && $user->hasPermission('payments.refund')
-            && $booking->amount_paid_cents > 0;
+            && $user->hasPermission('payments.refund');
     }
 }

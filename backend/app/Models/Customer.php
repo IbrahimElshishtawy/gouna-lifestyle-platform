@@ -18,6 +18,10 @@ class Customer extends Model
         'notes', 'source', 'is_active',
     ];
 
+    protected $hidden = [
+        'notes',
+    ];
+
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];

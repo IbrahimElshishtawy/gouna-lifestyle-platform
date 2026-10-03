@@ -472,4 +472,84 @@ class AdversarialPaymentSecurityTest extends TestCase
 
         $lock->release();
     }
+
+    /**
+     * Test 12: Admin refund is rejected when booking has zero refundable balance.
+     */
+    public function test_admin_booking_refund_fails_when_no_refundable_balance(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $ref = 'BK-NO-REFUND-'.uniqid();
+        $booking = $this->createBooking($ref, 50000);
+        $booking->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'amount_paid_cents' => 50000,
+            'refund_amount_cents' => 50000, // Fully refunded already
+        ]);
+
+        $response = $this->actingAs($admin)->post("/admin/bookings/{$booking->id}/refund", [
+            'amount_cents' => 1000,
+            'reason' => 'Should fail',
+        ]);
+
+        $response->assertSessionHasErrors(['error' => 'This booking has no remaining refundable balance.']);
+    }
+
+    /**
+     * Test 13: Admin refund is rejected when amount exceeds remaining refundable balance.
+     */
+    public function test_admin_booking_refund_fails_when_amount_exceeds_refundable_balance(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $ref = 'BK-EXCEED-REFUND-'.uniqid();
+        $booking = $this->createBooking($ref, 50000);
+        $booking->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'amount_paid_cents' => 50000,
+            'refund_amount_cents' => 20000, // 30000 remaining
+        ]);
+
+        $response = $this->actingAs($admin)->post("/admin/bookings/{$booking->id}/refund", [
+            'amount_cents' => 40000, // Exceeds 30000
+            'reason' => 'Excessive refund attempt',
+        ]);
+
+        $response->assertSessionHasErrors(['amount_cents']);
+        $this->assertEquals(20000, $booking->fresh()->refund_amount_cents);
+    }
+
+    /**
+     * Test 14: Admin refund executes atomically and creates activity log.
+     */
+    public function test_admin_booking_refund_succeeds_and_creates_activity_log(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $ref = 'BK-SUCCESS-REFUND-'.uniqid();
+        $booking = $this->createBooking($ref, 50000);
+        $booking->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'amount_paid_cents' => 50000,
+            'refund_amount_cents' => 0,
+        ]);
+
+        $response = $this->actingAs($admin)->post("/admin/bookings/{$booking->id}/refund", [
+            'amount_cents' => 50000,
+            'reason' => 'Guest cancelled stay within grace window',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertEquals('refunded', $booking->fresh()->payment_status);
+        $this->assertEquals(50000, $booking->fresh()->refund_amount_cents);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'entity_type' => Booking::class,
+            'entity_id' => $booking->id,
+            'action' => 'booking_refund_executed',
+        ]);
+    }
 }
+
