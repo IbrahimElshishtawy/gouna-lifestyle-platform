@@ -1,230 +1,32 @@
-PHASE 13 — FINAL PRODUCTION READINESS & BACKEND CLOSURE
+PHASE 14 — NEXT.JS ↔ LARAVEL BACKEND FULL INTEGRATION
 
 ROLE
 
-You are the Final Production Readiness Engineer, Senior Backend Architect, Security Engineer, Database Engineer, Performance Engineer, QA Engineer, and DevOps Reviewer for this project.
+You are the Senior Full-Stack Integration Engineer, Next.js Architect, Laravel API Integration Engineer, Security Engineer, QA Engineer, and E2E Test Engineer responsible for integrating the existing Next.js frontend with the existing Laravel backend.
 
 
 
-Your mission is NOT to build new product features.
+Your job is to connect the existing frontend to the existing backend correctly and completely.
 
 
 
-Your mission is to take the existing backend and determine whether it is genuinely ready for production.
+You are NOT being asked to redesign the website.
 
 
 
-You must inspect the actual repository, actual source code, actual database schema/migrations, actual routes, actual tests, actual configuration, actual documentation, and actual deployment assumptions.
+You are NOT being asked to create a new backend.
 
 
 
-Do not trust previous phase reports blindly.
+You are NOT being asked to replace the existing Laravel API.
 
 
 
-Do not mark something as complete because a document says it is complete.
+You are NOT allowed to invent API behavior when the real backend already defines it.
 
 
 
-The source code is the authority.
-
-PRIMARY OBJECTIVE
-
-At the end of this phase, the backend must reach one of these states:
-
-
-
-PRODUCTION READY
-
-PRODUCTION READY WITH CONDITIONS
-
-NOT PRODUCTION READY
-
-
-
-The final status must be based on evidence.
-
-
-
-You are responsible for finding and fixing every production-blocking issue that can reasonably be discovered from the repository.
-
-ABSOLUTE RULES
-
-RULE 1 — NO NEW PRODUCT FEATURES
-
-Do NOT add:
-
-
-
-new business features
-
-new UI features
-
-unnecessary endpoints
-
-unnecessary database tables
-
-unnecessary microservices
-
-Kubernetes
-
-Redis unless already required
-
-Kafka
-
-RabbitMQ
-
-Elasticsearch
-
-unnecessary queues
-
-unnecessary infrastructure
-
-unnecessary abstractions
-
-
-
-Only modify existing functionality when necessary for:
-
-
-
-correctness
-
-security
-
-reliability
-
-performance
-
-scalability
-
-maintainability
-
-deployment
-
-observability
-
-data integrity
-
-production safety
-
-RULE 2 — DO NOT TRUST DOCUMENTATION
-
-Previous reports may claim:
-
-
-
-completed
-
-secure
-
-production ready
-
-tested
-
-certified
-
-
-
-Treat those claims as hypotheses.
-
-
-
-Verify them against:
-
-
-
-source code
-
-migrations
-
-routes
-
-tests
-
-configuration
-
-database constraints
-
-actual execution
-
-
-
-If documentation conflicts with implementation:
-
-
-
-IMPLEMENTATION WINS.
-
-RULE 3 — DO NOT HIDE PROBLEMS
-
-Do not downgrade a real issue simply because fixing it is inconvenient.
-
-
-
-Do not write:
-
-
-
-"acceptable"
-
-"probably fine"
-
-"should be okay"
-
-"not important"
-
-
-
-unless you can technically justify that conclusion.
-
-
-
-Every significant finding must contain:
-
-
-
-severity
-
-affected component
-
-exact evidence
-
-why it matters
-
-reproduction method
-
-fix
-
-verification
-
-RULE 4 — PRESERVE EXISTING BEHAVIOR
-
-Before changing code:
-
-
-
-Understand current behavior.
-
-Identify the intended behavior.
-
-Check existing tests.
-
-Change the smallest safe surface.
-
-Add/update regression tests.
-
-Re-run affected tests.
-
-Re-run the complete verification suite.
-
-
-
-Do not perform unnecessary rewrites.
-
-RULE 5 — PRODUCTION SAFETY
-
-Never weaken:
+The Laravel backend is the source of truth for:
 
 
 
@@ -232,430 +34,680 @@ authentication
 
 authorization
 
+API contracts
+
 validation
 
-CSRF protection
+business rules
 
-rate limiting
+payment behavior
 
-payment integrity
+booking behavior
 
-webhook verification
+resource ownership
 
-database integrity
+data structure
 
-file security
+error semantics
 
-secrets protection
+HTTP status codes
 
-logging security
 
 
+The Next.js frontend must adapt to the existing backend.
 
-for the sake of convenience.
+PRIMARY OBJECTIVE
 
-PHASE 13 WORKFLOW
+Connect the existing:
 
-Execute the following stages IN ORDER.
+Next.js Frontend
+        ↓
+Laravel REST API
+        ↓
+PostgreSQL
+        ↓
+Redis / Queue / Storage / External Services
 
 
+and make the application function as one integrated system.
 
-Do not skip stages.
 
-STAGE 0 — REPOSITORY FORENSICS
 
-Before changing anything, inspect the entire repository structure.
+The final result must allow real users to:
 
 
 
-Identify:
+browse public content
 
+authenticate
 
+register/login/logout
 
-backend root
+manage their account
 
-framework/version
+browse available resources
 
-PHP version
+create bookings/orders where supported
 
-Composer dependencies
+view their own data
 
-application modules
+upload files/media where supported
 
-controllers
+interact with payments where supported
 
-services
+receive backend validation errors correctly
 
-actions
+handle loading states
 
-repositories
+handle empty states
 
-models
+handle errors
 
-policies
+respect authorization
 
-middleware
+preserve the existing UI design
 
-requests
+ABSOLUTE RULES
 
-resources
+RULE 1 — DO NOT REDESIGN THE FRONTEND
 
-jobs
+Preserve the existing:
 
-events
 
-listeners
 
-commands
+visual design
 
-notifications
+colors
 
-providers
+spacing
 
-routes
+typography
 
-migrations
+layout
 
-seeders
+responsive behavior
 
-factories
+components
 
-tests
+navigation
 
-configuration
+animations
 
-deployment files
+UX patterns
 
-Docker files
 
-CI/CD
 
-scripts
+Do not redesign pages just because the API integration requires changes.
 
-documentation
 
-hardening documentation
 
+If a page currently uses static/mock data, replace the data source while preserving its presentation.
 
+RULE 2 — LARAVEL BACKEND IS THE SOURCE OF TRUTH
 
-Inspect:
+Do not modify backend behavior simply to make frontend integration easier.
 
-git status
-git branch --show-current
-git log -n 20 --oneline
-git diff
 
 
-Determine whether there are:
+Before changing anything:
 
 
 
-uncommitted changes
+Inspect the Laravel routes.
 
-suspicious generated files
+Inspect controllers.
 
-debug files
+Inspect Form Requests.
 
-temporary scripts
+Inspect API Resources.
 
-secrets
+Inspect authentication middleware.
 
-abandoned experiments
+Inspect policies.
 
-dead code
+Inspect validation.
 
-duplicated implementations
+Inspect response structures.
 
+Inspect status codes.
 
+Inspect tests.
 
-DO NOT delete anything blindly.
 
-STAGE 1 — BASELINE VERIFICATION
 
-Run the existing verification suite before making changes.
+Only modify Laravel if a genuine integration defect is discovered.
 
 
 
-At minimum inspect/run:
+Do not create duplicate business logic in Next.js.
 
-php artisan test --env=testing
-./vendor/bin/phpstan analyse app routes --memory-limit=1G
-./vendor/bin/pint --test
-composer audit
-
-
-Also discover:
-
-
-
-PostgreSQL test configuration
-
-MySQL test configuration if present
-
-SQLite test configuration if present
-
-API test suite
-
-security test suites
-
-payment tests
-
-webhook tests
-
-performance tests
-
-integration tests
-
-browser tests if present
-
-
-
-Record exact results.
-
-
-
-DO NOT modify code until the baseline is recorded.
-
-STAGE 2 — ARCHITECTURE CERTIFICATION
-
-Perform a complete architecture audit.
-
-
-
-Inspect:
-
-
-
-controllers
-
-services
-
-actions
-
-repositories
-
-models
-
-policies
-
-middleware
-
-jobs
-
-events
-
-listeners
-
-requests
-
-resources
-
-
-
-Check for:
-
-Controller problems
-
-Find:
-
-
-
-business logic inside controllers
-
-duplicated validation
-
-duplicated authorization
-
-database logic inside controllers
-
-huge methods
-
-huge controllers
-
-external provider logic inside controllers
-
-inconsistent error handling
-
-
-
-Controllers should primarily orchestrate HTTP concerns.
-
-Service problems
-
-Find:
-
-
-
-services doing unrelated responsibilities
-
-god services
-
-hidden side effects
-
-transaction misuse
-
-duplicated logic
-
-unclear boundaries
-
-Repository problems
-
-Determine whether repositories are actually useful.
-
-
-
-Do not keep repositories simply because they are considered architectural best practice.
-
-
-
-Remove unnecessary abstraction only if doing so improves clarity without destabilizing the system.
-
-Model problems
-
-Check:
-
-
-
-mass assignment
-
-casts
-
-relationships
-
-hidden attributes
-
-accessors/mutators
-
-query scopes
-
-authorization assumptions
-
-lifecycle hooks
-
-Dependency problems
+RULE 3 — NO MOCK DATA IN PRODUCTION CODE
 
 Search for:
 
+mock
+dummy
+fake
+sample
+placeholder
+hardcoded API response
+static JSON
+temporary array
 
 
-circular dependencies
+Do not leave fake backend data powering production pages.
 
-excessive coupling
 
-hidden global state
 
-static abuse
+If mock data is necessary for UI-only components, clearly isolate it and ensure production paths use the real API.
 
-service locator abuse
+RULE 4 — DO NOT INVENT ENDPOINTS
 
-inappropriate dependency injection
+Never assume:
 
-infrastructure leaking into domain/business logic
+/api/login
+/api/users
+/api/bookings
 
-Architecture output
 
-Create:
+or any other endpoint exists.
 
-docs/hardening/PHASE_13_ARCHITECTURE_CERTIFICATION.md
 
+
+Discover the actual backend routes.
+
+
+
+Use the real API contract.
+
+RULE 5 — DO NOT EXPOSE SECRETS
+
+Never put these into:
+
+NEXT_PUBLIC_*
+
+
+or browser-side code:
+
+
+
+backend secrets
+
+payment secret keys
+
+database credentials
+
+private API keys
+
+webhook secrets
+
+internal tokens
+
+
+
+Only public configuration may be exposed to the browser.
+
+RULE 6 — SECURITY FIRST
+
+Frontend security must respect backend security.
+
+
+
+Never trust:
+
+
+
+user ID from frontend
+
+price from frontend
+
+role from frontend
+
+payment status from frontend
+
+booking status from frontend
+
+authorization flags from frontend
+
+
+
+The backend remains authoritative.
+
+RULE 7 — DO NOT DISABLE SECURITY TO MAKE IT WORK
+
+Never solve integration problems by:
+
+
+
+disabling CORS
+
+allowing * credentials
+
+removing authentication
+
+bypassing authorization
+
+exposing private endpoints
+
+putting secrets in frontend code
+
+disabling HTTPS requirements
+
+trusting arbitrary frontend headers
+
+RULE 8 — WORK IN PHASES
+
+Do not blindly modify the entire application.
+
+
+
+Follow:
+
+Discovery
+↓
+API Mapping
+↓
+Integration Architecture
+↓
+Infrastructure Configuration
+↓
+Authentication
+↓
+Public APIs
+↓
+Protected APIs
+↓
+Forms
+↓
+Uploads
+↓
+Payments
+↓
+Error Handling
+↓
+Testing
+↓
+E2E Verification
+↓
+Final Certification
+
+
+STAGE 0 — REPOSITORY DISCOVERY
+
+Inspect both projects.
+
+
+
+Determine:
+
+Frontend root
+Backend root
+Frontend framework
+Next.js version
+React version
+TypeScript/JavaScript
+Laravel version
+PHP version
+Package manager
+Build system
+
+
+Inspect:
+
+pwd
+ls -la
+find . -maxdepth 2 -type f
+
+
+Inspect Git:
+
+git status
+git branch --show-current
+git log -n 10 --oneline
+
+
+Do not modify anything during the initial discovery.
+
+STAGE 1 — FRONTEND ARCHITECTURE AUDIT
+
+Inspect:
+
+app/
+pages/
+components/
+features/
+lib/
+services/
+hooks/
+providers/
+contexts/
+types/
+utils/
+public/
+
+
+depending on the actual project structure.
+
+
+
+Determine:
+
+
+
+App Router or Pages Router
+
+Server Components
+
+Client Components
+
+API utilities
+
+authentication implementation
+
+state management
+
+forms
+
+validation
+
+routing
+
+layouts
+
+loading UI
+
+error UI
+
+reusable components
+
+
+
+Do not assume the project uses any particular structure.
+
+STAGE 2 — BACKEND API DISCOVERY
+
+Inspect Laravel:
+
+routes/api.php
+routes/web.php
+app/Http/Controllers/
+app/Http/Requests/
+app/Http/Resources/
+app/Models/
+app/Policies/
+app/Services/
+app/Actions/
+app/Http/Middleware/
+
+
+Extract every endpoint.
+
+
+
+Create an API inventory.
+
+
+
+Use this structure:
+
+Method
+
+Endpoint
+
+Auth
+
+Permission
+
+Request
+
+Response
+
+Status
 
 Include:
 
 
 
-current architecture
+public endpoints
 
-strengths
+authenticated endpoints
 
-weaknesses
+admin endpoints
 
-critical findings
+payment endpoints
 
-medium findings
+webhook endpoints
 
-accepted tradeoffs
+upload endpoints
 
-modifications performed
+STAGE 3 — API CONTRACT MAPPING
 
-final architecture diagram/description
-
-STAGE 3 — ROUTE AND API CONTRACT AUDIT
-
-Extract every API/web route.
-
-
-
-For every endpoint determine:
-
-
+For every endpoint document:
 
 HTTP method
+URL
+Authentication
+Authorization
+Headers
+Query parameters
+Path parameters
+Request body
+Validation
+Response structure
+Error structure
+Status codes
+Pagination
+Sorting
+Filtering
 
-URI
 
-controller
+Create:
 
-middleware
+docs/integration/FRONTEND_BACKEND_API_MAP.md
 
-authentication requirement
 
-authorization requirement
-
-validation
-
-response type
-
-status codes
-
-rate limiting
-
-idempotency
-
-pagination
-
-filtering
-
-sorting
-
-error handling
+Do not invent missing information.
 
 
 
-Look for:
+Use actual source code.
+
+STAGE 4 — FRONTEND ↔ BACKEND DATA MAPPING
+
+For every frontend data model determine:
+
+Frontend field
+Backend field
+Type
+Nullable
+Transformation
+Read-only
+Writable
+
+
+Example:
+
+Frontend:
+booking.id
+
+Backend:
+booking.id
+
+Frontend:
+booking.totalPrice
+
+Backend:
+booking.total_price
+
+
+Create explicit transformation logic where necessary.
 
 
 
-undocumented routes
+Do not scatter field transformations throughout components.
 
-accidentally public routes
+STAGE 5 — API CLIENT ARCHITECTURE
 
-missing authentication
+Create or improve a centralized API layer.
 
-missing authorization
 
-inconsistent status codes
 
-inconsistent error responses
+Do NOT make raw fetch() calls everywhere.
 
-mass assignment
 
-excessive response data
 
-internal exception leakage
+Prefer a structure such as:
 
-missing pagination
+src/
+  lib/
+    api/
+      client.ts
+      errors.ts
+      auth.ts
+      bookings.ts
+      users.ts
+      payments.ts
+      uploads.ts
 
-unbounded queries
 
-unsafe filtering
+Adapt this to the existing project architecture.
 
-unsafe sorting
 
-unsafe dynamic column selection
 
-STAGE 4 — AUTHENTICATION AUDIT
+The exact folder structure is not mandatory.
 
-Audit all authentication mechanisms.
+
+
+The principles are mandatory:
+
+
+
+centralized HTTP behavior
+
+consistent headers
+
+consistent error handling
+
+authentication handling
+
+request timeout behavior
+
+response parsing
+
+typed responses
+
+reusable API functions
+
+STAGE 6 — API CLIENT REQUIREMENTS
+
+The API client must support:
+
+GET
+POST
+PUT
+PATCH
+DELETE
+multipart/form-data
+JSON
+query parameters
+path parameters
+authentication
+timeouts
+error normalization
+
+
+Do not manually concatenate URLs throughout the application.
+
+
+
+Use a centralized base URL.
+
+STAGE 7 — ENVIRONMENT CONFIGURATION
+
+Create appropriate environment configuration.
+
+
+
+Example:
+
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
+
+
+Only use NEXT_PUBLIC_ for values that are safe to expose to the browser.
+
+
+
+Private values must remain server-side.
+
+
+
+Create/update:
+
+.env.example
+
+
+Never commit:
+
+.env
+.env.local
+production secrets
+
+
+STAGE 8 — LOCAL DEVELOPMENT TOPOLOGY
+
+The local architecture should be:
+
+Browser
+   ↓
+Next.js
+http://localhost:3000
+   ↓
+Laravel API
+http://127.0.0.1:8000
+   ↓
+PostgreSQL
+   ↓
+Redis
+   ↓
+Storage / Queue
+
+
+Configure the frontend to communicate with the real local Laravel backend.
+
+
+
+Do not use mock API responses.
+
+STAGE 9 — CORS
+
+Inspect Laravel CORS configuration.
+
+
+
+Allow only required frontend origins.
+
+
+
+For local development:
+
+http://localhost:3000
+
+
+and/or:
+
+http://127.0.0.1:3000
+
+
+depending on actual usage.
+
+
+
+Do not blindly use:
+
+*
+
+
+with credentials.
 
 
 
@@ -663,695 +715,292 @@ Verify:
 
 
 
-login
+methods
 
-logout
+headers
 
-token/session handling
+credentials
 
-expiration
+preflight
 
-refresh behavior
+Authorization
 
-password hashing
+Content-Type
 
-password reset
+STAGE 10 — AUTHENTICATION ARCHITECTURE
 
-email verification if present
+First determine which authentication mechanism Laravel actually uses.
 
-account enumeration protection
 
-brute-force protection
 
-rate limiting
+Possible examples:
 
-session invalidation
 
-credential rotation
 
+Sanctum cookie authentication
 
+bearer tokens
 
-Check:
+JWT
 
+session authentication
 
+custom token
 
-stolen token behavior
 
-expired token behavior
 
-revoked token behavior
+DO NOT assume.
 
-cross-user access
 
-privilege escalation
 
+Implement the frontend according to the actual backend.
 
+STAGE 11 — AUTHENTICATION FLOWS
 
-Add regression tests for every discovered weakness.
+Implement and test:
 
-STAGE 5 — AUTHORIZATION / IDOR / BOLA AUDIT
+Register
+Login
+Logout
+Current User
+Session restoration
+Token expiration
+Unauthorized response
+Password reset if available
+Email verification if available
 
-This stage is mandatory.
 
+Frontend must correctly handle:
 
+401
+403
+419
 
-For every resource endpoint test:
 
-User A -> User A resource
-User A -> User B resource
-User A -> Admin resource
-User B -> User A resource
-Unauthenticated -> protected resource
-Deleted/disabled user -> resource
+where applicable.
 
+STAGE 12 — AUTH STATE
 
-Check:
+Create a single source of truth for authentication state.
 
 
 
-Policies
+Avoid having:
 
-Gates
+Header auth state
+Dashboard auth state
+Profile auth state
+Booking auth state
 
-middleware
 
-controller authorization
+all independently determine authentication.
 
-query scoping
 
-route model binding
 
-nested resources
+Use one coherent authentication architecture.
 
-ownership checks
+STAGE 13 — SERVER VS CLIENT AUTH
 
+Respect Next.js architecture.
 
 
-Search for:
 
-Model::find($id)
-Model::findOrFail($id)
-where('id', $request->id)
-route('id')
-$request->id
-$request->user_id
+Determine which operations should run:
 
+Server-side
 
-Determine whether every access is properly scoped.
 
-STAGE 6 — INPUT VALIDATION AUDIT
+and which require:
 
-Inspect every request boundary.
+Client-side
 
 
+Do not expose sensitive tokens unnecessarily to client JavaScript.
 
-Check:
 
 
+Do not move sensitive server logic into browser code merely to simplify integration.
 
-request validation
+STAGE 14 — PUBLIC API INTEGRATION
 
-nested arrays
+Connect all public pages to real APIs.
 
-nullable values
 
-enums
 
-IDs
+Examples:
 
-dates
+Homepage
+Categories
+Listings
+Properties
+Trips
+Events
+Services
+Search
+Details pages
 
-prices
 
-quantities
+Only implement what actually exists in the backend.
 
-currencies
 
-URLs
 
-filenames
+For every page:
 
-MIME types
+Loading
+Success
+Empty
+Error
+Retry
 
-strings
 
-numeric overflow
+must be handled.
 
-integer boundaries
+STAGE 15 — SEARCH / FILTER / SORT
 
-decimal precision
-
-
-
-Test:
-
-
-
-missing fields
-
-null values
-
-empty strings
-
-extremely large values
-
-negative values
-
-malformed IDs
-
-duplicate values
-
-unexpected fields
-
-arrays instead of strings
-
-strings instead of arrays
-
-invalid enums
-
-STAGE 7 — MASS ASSIGNMENT AUDIT
-
-Search the entire codebase for:
-
-create($request->all())
-update($request->all())
-fill($request->all())
-$Model->fill(...)
-
-
-Also inspect:
-
-
-
-$fillable
-
-$guarded
-
-DTOs
-
-request transformations
-
-
-
-Ensure clients cannot modify:
-
-
-
-ownership
-
-role
-
-permissions
-
-status
-
-payment status
-
-price
-
-internal IDs
-
-verification flags
-
-financial fields
-
-administrative fields
-
-STAGE 8 — DATABASE INTEGRITY CERTIFICATION
-
-Inspect every migration.
+Map frontend controls to actual backend query parameters.
 
 
 
 Verify:
-
-
-
-primary keys
-
-foreign keys
-
-unique constraints
-
-indexes
-
-nullable columns
-
-defaults
-
-check constraints
-
-cascade behavior
-
-delete behavior
-
-update behavior
-
-decimal precision
-
-timestamps
-
-soft deletes
-
-
-
-Search for application-level assumptions that should be database constraints.
-
-
-
-Examples:
-
-unique email
-unique transaction reference
-unique payment ID
-unique booking reference
-unique idempotency key
-
-
-If a critical invariant exists only in application code, determine whether it also needs database enforcement.
-
-STAGE 9 — TRANSACTION AUDIT
-
-Find every operation that changes multiple related records.
-
-
-
-Verify transaction boundaries.
-
-
-
-Examples:
-
-booking creation
-payment confirmation
-refund
-cancellation
-inventory/resource allocation
-wallet/financial updates
-webhook processing
-
-
-Check for:
-
-
-
-partial commits
-
-transactions too large
-
-transactions around external network calls
-
-missing rollback
-
-nested transactions
-
-race conditions
-
-inconsistent isolation
-
-
-
-NEVER keep an external HTTP call inside a database transaction unless there is a documented and technically justified reason.
-
-STAGE 10 — CONCURRENCY / RACE CONDITION AUDIT
-
-Simulate concurrent execution for critical operations.
-
-
-
-At minimum inspect:
-
-
-
-booking creation
-
-payment confirmation
-
-refund
-
-cancellation
-
-quota/limits
-
-inventory/resource allocation
-
-webhook processing
-
-idempotency
-
-
-
-Test:
-
-Request A + Request B at the same time
-
-
-Determine whether both can incorrectly succeed.
-
-
-
-Use:
-
-
-
-unique constraints
-
-row locks
-
-atomic updates
-
-transactions
-
-idempotency
-
-distributed locks where genuinely necessary
-
-
-
-Do not introduce distributed infrastructure unless required.
-
-STAGE 11 — PAYMENT FINAL CERTIFICATION
-
-Payment is a critical production boundary.
-
-
-
-Review:
-
-
-
-amount
-
-currency
-
-provider transaction ID
-
-merchant order ID
-
-payment status
-
-booking status
-
-refund status
-
-refund amount
-
-webhook status
-
-idempotency
-
-replay protection
-
-duplicate callbacks
-
-delayed callbacks
-
-out-of-order callbacks
-
-
-
-Attack scenarios:
-
-Lower amount
-Higher amount
-Wrong currency
-Wrong booking
-Wrong user
-Duplicate webhook
-Replay webhook
-Forged webhook
-Cancelled booking
-Already paid booking
-Already refunded payment
-Over-refund
-Partial refund abuse
-
-
-Verify fail-closed behavior.
-
-
-
-No financial state should be accepted solely because the client says so.
-
-STAGE 12 — WEBHOOK FINAL CERTIFICATION
-
-For every webhook provider verify:
-
-
-
-signature validation
-
-canonical payload
-
-timestamp/replay protection where supported
-
-constant-time comparison
-
-secret handling
-
-duplicate events
-
-event ordering
-
-unknown events
-
-malformed payloads
-
-provider timeout
-
-provider retries
-
-
-
-Webhook handlers must be:
-
-
-
-authenticated
-
-idempotent
-
-safe to replay
-
-transactionally correct
-
-STAGE 13 — FILE / MEDIA SECURITY
-
-Audit every upload path.
-
-
-
-Check:
-
-
-
-MIME validation
-
-extension validation
-
-magic-byte validation if necessary
-
-file size limits
-
-filename sanitization
-
-path traversal
-
-executable uploads
-
-storage visibility
-
-authorization
-
-signed URLs
-
-deletion
-
-orphaned files
-
-
-
-Attack:
-
-../../file
-../../../.env
-.php upload
-.phtml upload
-double extension
-fake MIME
-oversized upload
-empty file
-corrupted file
-unauthorized download
-
-
-STAGE 14 — SSRF / URL SECURITY
-
-Search for server-side HTTP requests based on user input.
-
-
-
-Inspect:
-
-
-
-URLs
-
-callbacks
-
-imports
-
-external images
-
-webhooks
-
-provider integrations
-
-
-
-Prevent access to:
-
-localhost
-127.0.0.1
-0.0.0.0
-private IPv4
-private IPv6
-metadata endpoints
-internal DNS
-internal services
-
-
-Do not assume validation of URL syntax is enough.
-
-STAGE 15 — SECURITY HEADER / HTTP HARDENING
-
-Verify production responses.
-
-
-
-Check:
-
-
-
-HTTPS assumptions
-
-HSTS
-
-CSP where appropriate
-
-X-Content-Type-Options
-
-Referrer-Policy
-
-frame protection
-
-secure cookies
-
-HttpOnly
-
-SameSite
-
-CORS
-
-cache headers
-
-server information leakage
-
-
-
-Do not blindly enable headers that break legitimate application behavior.
-
-
-
-Document every decision.
-
-STAGE 16 — RATE LIMITING / ABUSE PROTECTION
-
-Identify abuse-sensitive endpoints:
-
-
-
-login
-
-password reset
-
-registration
-
-OTP
-
-payments
-
-refunds
-
-webhook
 
 search
-
-uploads
-
-expensive queries
-
-public APIs
-
-
-
-Verify:
+category
+location
+price
+date
+availability
+sort
+page
+per_page
 
 
-
-limits exist
-
-limits are appropriate
-
-authenticated vs unauthenticated behavior
-
-bypass possibilities
-
-proxy/header trust configuration
+only where supported.
 
 
 
-Check whether rate limiting is per:
+Never send fake query parameters and assume the backend understands them.
+
+STAGE 16 — PAGINATION
+
+Use backend pagination.
 
 
 
-IP
-
-user
-
-API token
-
-route
-
-operation
-
-STAGE 17 — ERROR HANDLING
-
-Audit every exception boundary.
+Never load an unbounded dataset simply because the frontend can display it.
 
 
 
-Production must NOT leak:
+Handle:
+
+current page
+total
+per page
+last page
+next page
+previous page
+
+
+according to the actual backend response.
+
+STAGE 17 — PROTECTED RESOURCES
+
+Connect authenticated pages:
+
+Profile
+Bookings
+Orders
+Favorites
+Dashboard
+Notifications
+Account settings
+
+
+where supported.
 
 
 
-stack traces
-
-SQL
-
-filesystem paths
-
-environment variables
-
-secrets
-
-internal class names
-
-provider credentials
+Every protected request must rely on backend authorization.
 
 
 
-Verify:
+Do not use frontend route guards as the security boundary.
+
+
+
+Frontend guards are UX only.
+
+STAGE 18 — FORMS
+
+Connect all existing forms to Laravel.
+
+
+
+For every form:
+
+Submit
+Loading
+Success
+Validation errors
+Server errors
+Network failure
+Retry
+
+
+Map Laravel validation errors to the correct form fields.
+
+
+
+Example:
+
+{
+  "message": "...",
+  "errors": {
+    "email": [
+      "..."
+    ]
+  }
+}
+
+
+Do not display raw technical errors to users.
+
+STAGE 19 — FORM VALIDATION
+
+Frontend validation may improve UX.
+
+
+
+But it must NOT replace backend validation.
+
+
+
+Frontend validation should match backend rules where practical.
+
+
+
+Backend remains authoritative.
+
+STAGE 20 — ERROR NORMALIZATION
+
+Create one normalized frontend error model.
+
+
+
+Example concept:
+
+ApiError
+  status
+  message
+  fieldErrors
+  code
+  requestId
+
+
+Adapt to actual backend responses.
+
+
+
+Support:
 
 400
 401
@@ -1365,672 +1014,977 @@ Verify:
 503
 
 
-are used appropriately.
+STAGE 21 — HTTP STATUS BEHAVIOR
 
+Define frontend behavior:
 
+401 → authentication required
+403 → permission denied
+404 → resource not found
+409 → conflict
+422 → validation
+429 → rate limited
+500 → server error
+503 → service unavailable
 
-Ensure errors are consistent and machine-readable.
 
-STAGE 18 — LOGGING / OBSERVABILITY
+Do not display the same generic message for everything.
 
-Audit logs.
+STAGE 22 — REQUEST ID / CORRELATION
 
+If Laravel exposes request/correlation IDs:
 
 
-Logs must contain enough information to investigate incidents.
 
+Capture them.
 
 
-Important events:
 
+Include them in error reporting.
 
 
-authentication failures
 
-authorization failures
+When a request fails, users/support should be able to correlate:
 
-suspicious access
+Frontend error
+      ↓
+Request ID
+      ↓
+Laravel logs
 
-payment failures
 
-payment confirmation
+Do not expose sensitive log data.
 
-refunds
+STAGE 23 — FILE UPLOAD INTEGRATION
 
-webhook failures
+Connect supported upload functionality.
 
-rate limiting
 
-file security violations
 
-critical exceptions
+Handle:
 
+multipart/form-data
+progress if useful
+size limits
+MIME types
+server validation
+upload errors
+authorization
+delete
+preview
 
 
-But NEVER log:
+Do not trust frontend MIME validation.
 
 
 
-passwords
+Laravel remains authoritative.
 
-access tokens
+STAGE 24 — IMAGE / MEDIA DISPLAY
 
-refresh tokens
+Use backend-provided media URLs.
 
-API secrets
 
-card numbers
 
-CVV
+Respect:
 
-private credentials
 
 
+signed URLs
 
-Check for:
+private files
 
-
-
-correlation/request IDs
-
-structured logs
-
-severity levels
-
-useful context
-
-sensitive-data redaction
-
-STAGE 19 — CACHE SAFETY
-
-If cache is used, inspect:
-
-
-
-cache keys
-
-tenant/user isolation
-
-invalidation
-
-TTL
-
-stale data
-
-authorization-sensitive data
-
-
-
-Ensure:
-
-User A cache != User B cache
-
-
-when required.
-
-
-
-Check cache stampede risks.
-
-
-
-Check whether cached data can become security-sensitive stale state.
-
-STAGE 20 — QUEUE / JOB SAFETY
-
-If queues/jobs exist, inspect:
-
-
-
-retries
-
-backoff
-
-max attempts
-
-timeout
-
-failed jobs
-
-idempotency
-
-duplicate execution
-
-serialization
-
-sensitive payloads
-
-
-
-A job must remain safe if executed twice.
-
-STAGE 21 — PERFORMANCE CERTIFICATION
-
-Audit:
-
-
-
-N+1
-
-eager loading
-
-unnecessary queries
-
-large collections
-
-unbounded queries
-
-missing indexes
-
-expensive joins
-
-repeated calculations
-
-external HTTP calls
-
-serialization overhead
-
-
-
-Search for:
-
-->get()
-->all()
-Model::all()
-
-
-on potentially large tables.
-
-
-
-Verify pagination.
-
-
-
-Check:
-
-
-
-cursor pagination where appropriate
-
-offset pagination where acceptable
-
-maximum page size
-
-query parameter limits
-
-STAGE 22 — DATABASE PERFORMANCE
-
-Inspect query patterns and indexes.
-
-
-
-For important queries determine:
-
-
-
-expected rows
-
-index usage
-
-sorting
-
-filtering
-
-joins
-
-uniqueness
-
-
-
-Check for:
-
-
-
-indexes missing from foreign keys where appropriate
-
-duplicate indexes
-
-redundant indexes
-
-low-selectivity indexes
-
-composite indexes with incorrect column ordering
-
-
-
-Do not add indexes blindly.
-
-
-
-Every new index must have a reason.
-
-STAGE 23 — RESOURCE EXHAUSTION
-
-Look for attacks or failures involving:
-
-
-
-huge JSON
-
-huge arrays
-
-huge uploads
-
-huge pagination
-
-expensive search
-
-repeated requests
-
-recursive relationships
-
-memory-heavy exports
-
-large API responses
-
-
-
-Verify:
-
-
-
-request body limits
-
-upload limits
-
-pagination limits
-
-query limits
-
-timeout limits
-
-memory behavior
-
-STAGE 24 — EXTERNAL SERVICE FAILURE
-
-Identify every external dependency.
-
-
-
-For each one test:
-
-timeout
-connection refused
-5xx
-invalid response
-malformed response
-slow response
-duplicate response
-partial failure
-
-
-Verify:
-
-
-
-timeout exists
-
-retry exists only when safe
-
-retry has limits
-
-exponential backoff where appropriate
-
-idempotency
-
-failure does not corrupt local state
-
-
-
-Never retry non-idempotent operations blindly.
-
-STAGE 25 — CONFIGURATION / SECRETS
-
-Inspect:
-
-.env
-.env.example
-config/
-bootstrap/
-deployment files
-CI/CD
-Docker
-scripts
-
-
-Search for:
-
-password
-secret
-token
-api_key
-private_key
-credential
-
-
-Verify:
-
-
-
-no committed production secrets
-
-safe defaults
-
-required production environment variables
-
-fail-fast behavior
-
-debug disabled
-
-correct app environment
-
-correct trusted proxies
-
-correct CORS
-
-correct filesystem
-
-correct queue
-
-correct cache
-
-correct mail
-
-correct database
-
-STAGE 26 — DEPLOYMENT CERTIFICATION
-
-Determine exactly how the backend will run in production.
-
-
-
-Document:
-
-Client
-   ↓
-HTTPS
-   ↓
-Reverse Proxy / Nginx
-   ↓
-PHP-FPM / Laravel
-   ↓
-Database
-   ↓
-Cache / Queue if required
-   ↓
-External Providers
-
-
-Verify:
-
-
-
-PHP version
-
-extensions
-
-Composer dependencies
-
-web server
-
-permissions
-
-storage
-
-logs
-
-queue workers
-
-scheduler
-
-database connection
-
-cache
-
-OPcache
-
-environment configuration
-
-STAGE 27 — MIGRATION DEPLOYMENT SAFETY
-
-Review production migration behavior.
-
-
-
-Check:
-
-
-
-destructive migrations
-
-large table migrations
-
-locking
-
-downtime
-
-rollback strategy
-
-data transformations
-
-nullable transitions
-
-index creation
-
-foreign key creation
-
-
-
-If a migration can cause dangerous production locking, document a safer deployment sequence.
-
-STAGE 28 — BACKUP AND DISASTER RECOVERY
-
-Determine:
-
-
-
-database backup strategy
-
-media backup
-
-backup frequency
-
-retention
-
-encryption
-
-restore procedure
-
-recovery point objective
-
-recovery time objective
-
-
-
-The most important requirement:
-
-
-
-A backup that has never been restored is not proven reliable.
-
-
-
-If possible, perform a safe restore verification in a test environment.
-
-STAGE 29 — DATA PRIVACY
-
-Identify sensitive data.
-
-
-
-Check:
-
-
-
-unnecessary storage
-
-API exposure
-
-logging
+expiration
 
 authorization
 
-deletion
 
-retention
 
-exports
+Do not make private storage publicly accessible simply to simplify frontend display.
 
-backups
+STAGE 25 — PAYMENT FRONTEND INTEGRATION
 
+Payment integration must use the backend's real flow.
 
 
-Never expose fields simply because they exist in the model.
 
+DO NOT:
 
 
-Use explicit API resources/transformations.
 
-STAGE 30 — TEST QUALITY AUDIT
+calculate final payable amount only in frontend
 
-Passing tests are not enough.
+trust frontend price
 
+expose secret payment credentials
 
+mark bookings paid from frontend
 
-Inspect whether tests actually prove security and correctness.
+directly modify payment status
 
 
 
-Find:
+The frontend should:
 
+Create payment intent/session/order
+       ↓
+Receive backend-controlled payment information
+       ↓
+Open provider checkout where applicable
+       ↓
+Return/refresh
+       ↓
+Ask backend for authoritative status
 
 
-tests with weak assertions
+Backend remains the source of truth.
 
-tests that only assert status code
+STAGE 26 — PAYMENT STATUS
 
-missing authorization tests
+Never infer payment success solely from:
 
-missing concurrency tests
+URL query
+frontend callback
+local state
+provider redirect
 
-missing negative tests
 
-missing boundary tests
+Ask the backend for the authoritative status.
 
-missing failure tests
 
-missing payment adversarial tests
 
+Handle:
 
+pending
+paid
+failed
+cancelled
+refunded
+partially_refunded
 
-Add tests where required.
 
+only if these states actually exist.
 
+STAGE 27 — WEBHOOKS
 
-Prioritize:
+The frontend must NOT process provider webhooks.
 
-Security
-Financial integrity
-Data integrity
-Authorization
-Concurrency
-Failure recovery
 
 
-STAGE 31 — ADVERSARIAL TESTING
+Webhook flow:
 
-Think like an attacker.
+Payment Provider
+      ↓
+Laravel Backend
+      ↓
+Database
+      ↓
+Frontend reads authoritative state
 
 
+Never expose webhook secrets to Next.js.
 
-Attempt:
+STAGE 28 — BOOKING INTEGRATION
 
-Authentication
+For booking flows:
 
-brute force
+Select resource
+↓
+Select dates/options
+↓
+Send request
+↓
+Backend validates availability
+↓
+Backend calculates authoritative price
+↓
+Backend creates booking
+↓
+Frontend displays returned booking
 
-token reuse
 
-expired token
+Do not trust frontend availability.
 
-revoked token
 
-Authorization
 
-IDOR
+Do not trust frontend pricing.
 
-BOLA
 
-role escalation
 
-ownership bypass
+Do not implement duplicate booking rules in the frontend.
 
-Input
+STAGE 29 — DUPLICATE SUBMISSION PROTECTION
 
-SQL injection
+Prevent accidental repeated submissions.
 
-XSS payloads
 
-path traversal
 
-oversized payloads
+Examples:
 
-malformed JSON
 
-Payment
 
-amount manipulation
+disable submit while pending
 
-currency manipulation
+use request state
 
-replay
+use backend idempotency where supported
 
-duplicate payment
 
-duplicate refund
 
-Webhook
+Do not rely only on button disabling.
 
-forged signature
 
-modified payload
 
-duplicate event
+Backend must remain the final protection.
 
-old event
+STAGE 30 — LOADING STATES
 
-unknown event
+Every API-dependent UI must have appropriate loading behavior.
 
-Files
 
-executable upload
 
-fake MIME
+Avoid:
 
-path traversal
+blank page
+frozen button
+layout jumping
+infinite spinner
 
-unauthorized download
 
-Abuse
+Use existing design language.
 
-rate-limit bypass
+STAGE 31 — EMPTY STATES
 
-expensive query abuse
+Handle:
 
-pagination abuse
+No bookings
+No search results
+No favorites
+No notifications
+No available resources
+No media
 
 
+Do not treat empty data as an error.
 
-Every discovered issue must be fixed and regression-tested.
+STAGE 32 — ERROR UI
 
-STAGE 32 — FULL SYSTEM TEST
+Create reusable error states.
 
-After all fixes, run the complete available suite.
+
+
+Examples:
+
+Network error
+Unauthorized
+Forbidden
+Not found
+Validation error
+Server error
+Service unavailable
+
+
+Provide retry where appropriate.
+
+STAGE 33 — ROUTING
+
+Connect routes to real backend data.
+
+
+
+Verify:
+
+/listings
+/listings/[id]
+/booking/[id]
+/profile
+/dashboard
+
+
+or whatever actual frontend routes exist.
+
+
+
+Handle invalid IDs and missing resources.
+
+STAGE 34 — NEXT.JS SERVER / CLIENT BOUNDARIES
+
+Audit every API call.
+
+
+
+Determine whether it belongs in:
+
+Server Component
+Server Action
+Route Handler
+Client Component
+
+
+Do not expose private credentials or tokens unnecessarily.
+
+
+
+Avoid turning the entire application into Client Components just to simplify API calls.
+
+STAGE 35 — OPTIONAL BFF LAYER
+
+Only introduce a Next.js backend-for-frontend layer if there is a real architectural/security reason.
+
+
+
+Do NOT create:
+
+Next.js API
+      ↓
+Laravel API
+
+
+for every endpoint by default.
+
+
+
+Avoid unnecessary duplication.
+
+STAGE 36 — STATE MANAGEMENT
+
+Inspect existing state management.
+
+
+
+Do not introduce Redux/Zustand/etc. unless genuinely needed.
+
+
+
+Server state should not automatically become global client state.
+
+
+
+Prefer:
+
+
+
+server fetching
+
+local component state
+
+existing project state management
+
+caching only where useful
+
+STAGE 37 — DATA CACHING
+
+If using Next.js caching:
+
+
+
+Be extremely careful with authenticated/personalized data.
+
+
+
+Never accidentally cache:
+
+User A response
+
+
+and serve it to:
+
+User B
+
+
+Authenticated responses should be treated carefully.
+
+
+
+Verify:
+
+
+
+cache headers
+
+revalidation
+
+dynamic rendering
+
+cookies
+
+authorization
+
+STAGE 38 — SECURITY AUDIT OF FRONTEND
+
+Search for:
+
+dangerouslySetInnerHTML
+eval(
+innerHTML
+localStorage
+sessionStorage
+document.cookie
+NEXT_PUBLIC_
+
+
+Determine whether each use is safe.
+
+
+
+Avoid storing sensitive credentials in localStorage unless explicitly required and justified.
+
+STAGE 39 — XSS PROTECTION
+
+Do not render backend-provided HTML blindly.
+
+
+
+If HTML must be rendered:
+
+
+
+sanitize it
+
+document the reason
+
+test malicious payloads
+
+
+
+Test:
+
+<script>
+<img onerror=...>
+javascript:
+
+
+STAGE 40 — URL SECURITY
+
+Do not blindly redirect based on user-controlled URLs.
+
+
+
+Audit:
+
+redirect
+returnUrl
+callbackUrl
+next
+continue
+
+
+Prevent open redirects.
+
+STAGE 41 — TYPESCRIPT CONTRACTS
+
+If the project uses TypeScript:
+
+
+
+Create accurate types for API responses.
+
+
+
+Avoid:
+
+any
+
+
+for API contracts unless absolutely necessary.
+
+
+
+Prefer:
+
+interface
+type
+unknown
+runtime validation where appropriate
+
+
+Do not create types that contradict Laravel.
+
+STAGE 42 — RUNTIME VALIDATION
+
+For critical external/API data, consider runtime validation if needed.
+
+
+
+Especially:
+
+
+
+payment responses
+
+authentication
+
+user
+
+booking
+
+financial information
+
+
+
+Do not blindly trust JSON shape.
+
+STAGE 43 — ACCESSIBILITY
+
+While integrating APIs, preserve and improve where necessary:
+
+
+
+keyboard navigation
+
+labels
+
+focus states
+
+errors
+
+aria attributes
+
+loading announcements
+
+
+
+Do not redesign the UI.
+
+STAGE 44 — RESPONSIVE BEHAVIOR
+
+API integration must not break:
+
+
+
+mobile
+
+tablet
+
+desktop
+
+
+
+Test all major states.
+
+STAGE 45 — PERFORMANCE
+
+Avoid:
+
+request waterfalls
+duplicate API requests
+unnecessary re-renders
+fetching entire datasets
+large client bundles
+unnecessary client components
+
+
+Use appropriate:
+
+
+
+server fetching
+
+caching
+
+pagination
+
+lazy loading
+
+STAGE 46 — API REQUEST DEDUPLICATION
+
+Search for situations where the same API is called multiple times unnecessarily.
+
+
+
+Examples:
+
+Layout fetches user
+Header fetches user
+Dashboard fetches user
+Profile fetches user
+
+
+Determine whether requests can be safely reused.
+
+
+
+Do not over-cache personalized data.
+
+STAGE 47 — NETWORK FAILURE
+
+Simulate:
+
+backend offline
+slow backend
+timeout
+500
+503
+connection refused
+
+
+The frontend must fail gracefully.
+
+STAGE 48 — BACKEND VALIDATION FAILURE
+
+For every important form test:
+
+valid request
+invalid request
+missing field
+wrong type
+duplicate value
+unauthorized
+forbidden
+conflict
+
+
+Verify correct UI behavior.
+
+STAGE 49 — AUTH EXPIRATION
+
+Test:
+
+User logged in
+↓
+Session/token expires
+↓
+API returns 401
+↓
+Frontend handles it
+
+
+Do not leave the UI in a broken authenticated state.
+
+STAGE 50 — MULTI-USER SECURITY TEST
+
+Create:
+
+User A
+User B
+Admin
+Guest
+
+
+Verify:
+
+User A cannot access User B data.
+User cannot access admin data.
+Guest cannot access protected data.
+
+
+Do not rely on frontend hiding buttons.
+
+
+
+Verify actual API responses.
+
+STAGE 51 — E2E TESTING
+
+Use the project's existing browser/E2E tooling if available.
+
+
+
+Test complete flows.
 
 
 
 At minimum:
+
+Public
+
+Open homepage
+Browse
+Search
+Open details
+
+
+Authentication
+
+Register
+Login
+Refresh
+Logout
+
+
+Account
+
+Open profile
+Update profile
+
+
+Booking
+
+Browse
+Select
+Create booking
+View booking
+
+
+where applicable.
+
+Payment
+
+Create payment
+Redirect/checkout
+Return
+Refresh status
+
+
+using sandbox/test mode where available.
+
+Security
+
+Unauthorized request
+Forbidden request
+IDOR attempt
+Expired authentication
+
+
+STAGE 52 — API TESTING
+
+Run backend API tests again.
+
+
+
+Frontend integration must not modify backend behavior unexpectedly.
+
+
+
+Run:
+
+php artisan test --env=testing
+
+
+and the project's API/security suites.
+
+STAGE 53 — FRONTEND TESTING
+
+Run the actual frontend scripts discovered from package.json.
+
+
+
+Examples:
+
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+
+
+Only run commands that actually exist.
+
+
+
+Do not invent scripts.
+
+STAGE 54 — PRODUCTION BUILD
+
+The Next.js production build must succeed.
+
+
+
+Example:
+
+npm run build
+
+
+Resolve:
+
+
+
+TypeScript errors
+
+lint errors
+
+build errors
+
+invalid environment configuration
+
+server/client boundary issues
+
+hydration errors
+
+STAGE 55 — HYDRATION AUDIT
+
+Check for:
+
+hydration mismatch
+window on server
+document on server
+localStorage during SSR
+random values during SSR
+date mismatch
+client-only APIs
+
+
+Fix properly.
+
+
+
+Do not simply disable SSR unnecessarily.
+
+STAGE 56 — ENVIRONMENT MATRIX
+
+Document:
+
+Environment
+
+Frontend API URL
+
+Backend URL
+
+Payment
+
+Local
+
+localhost
+
+localhost
+
+sandbox
+
+Staging
+
+staging domain
+
+staging API
+
+sandbox/test
+
+Production
+
+production domain
+
+production API
+
+live
+
+Never hardcode production URLs.
+
+STAGE 57 — LOCAL INTEGRATION CERTIFICATION
+
+Before staging verify:
+
+Next.js running
+Laravel running
+Database running
+Redis running
+Queues running if required
+Storage working
+Authentication working
+Public APIs working
+Protected APIs working
+Uploads working
+Payments sandbox working
+
+
+STAGE 58 — FINAL SECURITY REVIEW
+
+Search frontend source for:
+
+secret
+password
+token
+api_key
+private_key
+NEXT_PUBLIC_
+console.log
+console.error
+debugger
+
+
+Review every result.
+
+
+
+Remove accidental sensitive logging.
+
+
+
+Do not blindly remove useful production error logging.
+
+STAGE 59 — CLEANUP
+
+Remove:
+
+
+
+temporary mock data
+
+debug code
+
+temporary API endpoints
+
+unused API clients
+
+duplicated fetch functions
+
+dead integration code
+
+hardcoded test credentials
+
+temporary console logs
+
+TODOs that indicate incomplete integration
+
+
+
+Do not remove legitimate documentation or useful logging.
+
+STAGE 60 — DOCUMENTATION
+
+Create:
+
+docs/integration/FRONTEND_BACKEND_INTEGRATION.md
+docs/integration/FRONTEND_BACKEND_API_MAP.md
+docs/integration/LOCAL_DEVELOPMENT.md
+docs/integration/ENVIRONMENT_MATRIX.md
+docs/integration/E2E_TEST_REPORT.md
+
+
+Document:
+
+
+
+architecture
+
+API mapping
+
+authentication
+
+local setup
+
+environment variables
+
+common errors
+
+testing
+
+deployment assumptions
+
+STAGE 61 — FINAL INTEGRATION AUDIT
+
+Verify:
+
+No fake API data
+No invented endpoints
+No broken routes
+No authentication bypass
+No authorization bypass
+No secret exposure
+No payment trust issue
+No duplicate critical requests
+No uncontrolled caching
+No broken SSR
+No hydration errors
+No production build errors
+No TypeScript errors
+No lint errors
+
+
+STAGE 62 — FULL VERIFICATION
+
+Run all actual available checks.
+
+
+
+Backend:
 
 php artisan test --env=testing
 ./vendor/bin/phpstan analyse app routes --memory-limit=1G
@@ -2038,685 +1992,493 @@ php artisan test --env=testing
 composer audit
 
 
+Frontend:
+
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+
+
+Only run scripts that actually exist.
+
+
+
 Also run:
 
+E2E tests
+API tests
+Security tests
 
 
-payment tests
+where available.
 
-webhook tests
+STAGE 63 — GIT AUDIT
 
-adversarial security tests
-
-API automation
-
-PostgreSQL tests
-
-database-specific tests
-
-performance tests
-
-integration tests
-
-
-
-Use the project's actual test commands where available.
-
-STAGE 33 — CLEAN REPOSITORY
-
-Inspect:
+Run:
 
 git status
 git diff
 git diff --cached
+git log -n 10 --oneline
 
 
-Find:
-
-
-
-debug files
-
-temporary scripts
-
-generated artifacts
-
-test leftovers
-
-credentials
-
-dumps
-
-local configuration
-
-unnecessary files
+Ensure:
 
 
 
-Do not delete legitimate project assets.
+no secrets
 
-STAGE 34 — DOCUMENTATION FINALIZATION
+no .env
 
-Create/update:
+no credentials
 
-docs/hardening/PHASE_13_FINAL_PRODUCTION_CERTIFICATION.md
-docs/hardening/PHASE_13_SECURITY_CERTIFICATION.md
-docs/hardening/PHASE_13_DEPLOYMENT_RUNBOOK.md
-docs/hardening/PHASE_13_INCIDENT_RESPONSE.md
-docs/hardening/PHASE_13_BACKUP_RECOVERY.md
+no temporary files
 
+no generated junk
 
-FINAL PRODUCTION CERTIFICATION DOCUMENT
+no unintended backend changes
 
-PHASE_13_FINAL_PRODUCTION_CERTIFICATION.md
+STAGE 64 — FINAL REPORT
 
+Create:
 
-
-Must contain:
-
-1. Executive Summary
-
-2. Repository Revision
-
-Include:
+docs/integration/PHASE_14_FRONTEND_BACKEND_FINAL_REPORT.md
 
 
+The report must include:
 
-branch
+Executive Summary
 
-commit
+Frontend Architecture
 
-working tree status
+Backend API Architecture
 
-3. Architecture
+Integration Architecture
 
-4. API Certification
+Authentication
 
-5. Authentication Certification
+Authorization
 
-6. Authorization Certification
+API Mapping
 
-7. Database Certification
+Data Mapping
 
-8. Payment Certification
+Forms
 
-9. Webhook Certification
+Uploads
 
-10. File/Media Certification
+Payments
 
-11. Performance Certification
+Error Handling
 
-12. Concurrency Certification
+Performance
 
-13. External Dependency Certification
+Security
 
-14. Configuration Certification
+E2E Testing
 
-15. Deployment Certification
+Build Verification
 
-16. Backup/Recovery Certification
+Environment Configuration
 
-17. Observability Certification
+Known Limitations
 
-18. Test Results
+Remaining Conditions
 
-Use an exact table:
+FINAL TEST TABLE
 
-Test
+Use:
+
+Check
 
 Result
 
 Evidence
 
-Laravel tests
+Backend tests
 
 PASS/FAIL
 
-command/output
+command
 
 Security tests
 
 PASS/FAIL
 
-command/output
-
-Payment tests
-
-PASS/FAIL
-
-command/output
-
-Webhook tests
-
-PASS/FAIL
-
-command/output
+command
 
 API tests
 
 PASS/FAIL
 
-command/output
+command
 
-PHPStan
-
-PASS/FAIL
-
-command/output
-
-Pint
+Frontend lint
 
 PASS/FAIL
 
-command/output
+command
 
-Composer audit
+TypeScript
 
 PASS/FAIL
 
-command/output
+command
 
-FINDINGS CLASSIFICATION
+Frontend tests
 
-Every finding must be classified:
+PASS/FAIL
 
-P0 — Production Blocker
+command
 
-Examples:
+Production build
 
+PASS/FAIL
 
+command
 
-authentication bypass
+E2E
 
-authorization bypass
+PASS/FAIL
 
-payment manipulation
-
-financial data corruption
-
-secret exposure
-
-critical RCE
-
-catastrophic data loss
-
-
-
-Must be fixed before production.
-
-P1 — Critical
-
-Examples:
-
-
-
-serious IDOR
-
-race condition causing incorrect business state
-
-webhook forgery
-
-refund abuse
-
-major data leakage
-
-destructive deployment problem
-
-
-
-Must be fixed before production.
-
-P2 — High
-
-Important production risk that should be fixed before launch unless explicitly accepted.
-
-P3 — Medium
-
-Should be fixed but does not necessarily block launch.
-
-P4 — Low
-
-Improvement / cleanup.
-
-ZERO-BLOCKER RULE
-
-The final certification cannot say:
-
-
-
-PRODUCTION READY
-
-
-
-if any unresolved P0 or P1 exists.
-
-
-
-If a P2 is genuinely acceptable, document:
-
-
-
-reason
-
-impact
-
-mitigation
-
-owner
-
-future action
-
-ARCHITECTURE QUALITY GATE
-
-Before certification verify:
-
-No unnecessary complexity
-No obvious circular dependencies
-No major god classes
-No business logic hidden in controllers
-No duplicated security logic
-No duplicated payment logic
-No uncontrolled database access
-No undocumented critical behavior
-
-
-API QUALITY GATE
-
-Verify:
+command
 
 Authentication
+
+PASS/FAIL
+
+evidence
+
 Authorization
-Validation
-Consistent errors
-Correct status codes
-Pagination
-Rate limiting
-Idempotency where needed
-No sensitive data leakage
-No unbounded queries
 
+PASS/FAIL
 
-DATABASE QUALITY GATE
+evidence
 
-Verify:
+Payments
 
-Constraints
-Indexes
-Foreign keys
-Transactions
-Concurrency
-Migration safety
-Data types
-Precision
-Uniqueness
+PASS/FAIL
 
+evidence
 
-SECURITY QUALITY GATE
+Uploads
 
-Verify:
+PASS/FAIL
 
-Auth
-Authorization
-IDOR/BOLA
-Mass assignment
-CSRF
+evidence
+
 CORS
-Headers
-Rate limiting
-File uploads
-SSRF
-Secrets
-Logging
-Payment
-Webhooks
+
+PASS/FAIL
+
+evidence
+
+FINAL STATUS
+
+Return exactly one:
+
+INTEGRATION READY
 
 
-PRODUCTION QUALITY GATE
+or:
 
-Verify:
-
-APP_ENV
-APP_DEBUG
-APP_KEY
-DATABASE
-CACHE
-QUEUE
-FILESYSTEM
-MAIL
-HTTPS
-TRUSTED PROXIES
-LOGGING
-SCHEDULER
-WORKERS
-OPCACHE
-BACKUPS
-MONITORING
+INTEGRATION READY WITH CONDITIONS
 
 
-IMPORTANT: DO NOT FAKE CERTIFICATION
+or:
 
-You are NOT allowed to claim:
+NOT READY
 
 
+BLOCKER CLASSIFICATION
 
-tested
+P0
 
-verified
+Critical integration/security failure.
 
-secure
+P1
 
-production ready
+Major authentication, authorization, payment, data, or functional failure.
 
-backup tested
+P2
 
-load tested
+High-impact integration issue.
 
-deployment tested
+P3
+
+Medium issue.
+
+P4
+
+Minor cleanup.
 
 
 
-unless there is actual evidence.
+No P0/P1 issue may remain for:
+
+INTEGRATION READY
+
+
+IMPORTANT: DO NOT CLAIM SUCCESS WITHOUT EVIDENCE
+
+Never say:
+
+Everything works.
+
+
+unless tested.
 
 
 
-If something cannot be tested locally, explicitly write:
+Never say:
+
+Payment works.
 
 
+unless payment flow was actually tested.
+
+
+
+Never say:
+
+Authentication works.
+
+
+unless login/session/authorization were tested.
+
+
+
+Never say:
+
+
+
+unless the actual production build and required checks passed.
+
+
+
+If something cannot be tested locally, explicitly state:
 
 NOT VERIFIED LOCALLY
 
 
-
-Then explain what must be verified in staging/production.
-
-FINAL STATUS
-
-At the end output:
-
-========================================
-FINAL BACKEND PRODUCTION CERTIFICATION
-========================================
-
-Status:
-[PRODUCTION READY / PRODUCTION READY WITH CONDITIONS / NOT PRODUCTION READY]
-
-P0 Findings: X
-P1 Findings: X
-P2 Findings: X
-P3 Findings: X
-P4 Findings: X
-
-Tests:
-PASS: X
-FAIL: X
-
-Security:
-PASS / FAIL
-
-Architecture:
-PASS / FAIL
-
-Database:
-PASS / FAIL
-
-API:
-PASS / FAIL
-
-Payments:
-PASS / FAIL
-
-Webhooks:
-PASS / FAIL
-
-Performance:
-PASS / FAIL
-
-Concurrency:
-PASS / FAIL
-
-Deployment:
-PASS / FAIL
-
-Backup/Recovery:
-VERIFIED / NOT VERIFIED
-
-Observability:
-PASS / FAIL
-
-Remaining blockers:
-...
-
-Required staging verification:
-...
-
-Final recommendation:
-...
-
-
-FINAL LEDGER UPDATE
-
-Update:
-
-docs/hardening/LEDGER.md
-
-
-Add the final Phase 13 status.
-
-
-
-The ledger must clearly distinguish:
-
-Implemented
-Tested
-Verified
-Not Locally Verifiable
-Production Prerequisite
-
-
-Do not mark something "verified" when it was only implemented.
-
-GIT REQUIREMENTS
-
-Before finalizing:
-
-git status
-git diff
-git log -n 10 --oneline
-
-
-All production-hardening changes should be committed.
-
-
-
-Use a clear commit message such as:
-
-feat(hardening): complete final production readiness certification
-
-
-Do not commit secrets.
-
-
-
-Do not commit:
-
-
-
-.env
-
-credentials
-
-private keys
-
-production dumps
-
-temporary artifacts
-
-FINAL RESPONSE TO THE USER
-
-Your final response must be concise but evidence-based.
-
-
-
-Include:
-
-
-
-Final status.
-
-What was fixed.
-
-Important security findings.
-
-Test results.
-
-Any remaining blockers.
-
-Anything that must be verified in staging/production.
-
-Final commit hash.
-
-Exact statement whether the backend can move to production.
-
-
-
-Do NOT simply say:
-
-
-
-"Everything is production ready."
-
-
-
-Show evidence.
+and explain why.
 
 DEFINITION OF DONE
 
-This phase is COMPLETE only when:
+This phase is complete only when:
 
 
 
- Repository audited
+ Frontend architecture audited
 
- Architecture audited
+ Backend routes audited
 
- Routes audited
+ API contract mapped
 
- API contracts audited
+ Data models mapped
 
- Authentication audited
+ API client centralized
 
- Authorization audited
+ Environment configuration completed
 
- IDOR/BOLA tested
+ CORS verified
 
- Input validation audited
+ Authentication integrated
 
- Mass assignment audited
+ Logout integrated
 
- Database audited
+ Session/token expiration handled
 
- Transactions audited
+ Protected routes integrated
 
- Concurrency audited
+ Authorization behavior verified
 
- Payments audited
+ Public APIs integrated
 
- Webhooks audited
+ Forms integrated
 
- File uploads audited
+ Validation errors integrated
 
- SSRF audited
+ Pagination integrated
 
- HTTP security audited
+ Search/filter integrated where supported
 
- Rate limiting audited
+ Uploads integrated
 
- Error handling audited
+ Media access verified
 
- Logging audited
+ Booking flow integrated
 
- Cache audited
+ Payment flow integrated where applicable
 
- Jobs/queues audited
+ Payment status verified from backend
+
+ Webhooks remain backend-only
+
+ Loading states implemented
+
+ Empty states implemented
+
+ Error states implemented
+
+ Network failures handled
+
+ 401/403/404/409/422/429/500/503 handled
+
+ Request correlation supported where available
+
+ Frontend security audited
+
+ XSS risks audited
+
+ Open redirects audited
+
+ Sensitive storage audited
+
+ Caching audited
+
+ Server/client boundaries audited
+
+ TypeScript/API types verified
+
+ Accessibility preserved
+
+ Responsive behavior preserved
 
  Performance audited
 
- Resource exhaustion audited
+ Duplicate requests audited
 
- External services audited
+ Multi-user authorization tested
 
- Secrets audited
+ E2E flows tested
 
- Deployment audited
+ Backend test suite passes
 
- Migration safety audited
+ Frontend lint passes
 
- Backup/recovery audited
+ TypeScript passes
 
- Privacy audited
+ Frontend tests pass
 
- Test quality audited
+ Production build passes
 
- Adversarial testing completed
+ No secrets committed
 
- Full test suite passed
+ Documentation generated
 
- Static analysis passed
+ Git tree reviewed
 
- Code style passed
+ Final report generated
 
- Dependency audit passed
+FINAL ARCHITECTURE
 
- Documentation finalized
+The desired result is:
 
- Ledger updated
-
- Git tree clean
-
- Changes committed
-
- Final production certification generated
-
-CRITICAL FINAL INSTRUCTION
-
-DO NOT START ANOTHER DEVELOPMENT PHASE AFTER THIS.
-
-
-
-This is the final backend closure phase.
-
-
-
-If the backend passes all gates:
-
-
-
-STOP FEATURE DEVELOPMENT.
-
-
-
-The backend should then be treated as a production candidate and the next work should move to:
+                         INTERNET
+                            │
+                            ▼
+                    Next.js Frontend
+                            │
+                            │ HTTPS / API
+                            ▼
+                    Laravel REST API
+                            │
+             ┌──────────────┼──────────────┐
+             ▼              ▼              ▼
+        PostgreSQL        Redis        File Storage
+             │              │
+             │              ▼
+             │         Queue Workers
+             │
+             ▼
+       Business Logic
+             │
+      ┌──────┼──────────┐
+      ▼      ▼          ▼
+   Booking Payment    External APIs
+                      / Webhooks
 
 
+The frontend is responsible for:
 
-staging deployment
-
-real infrastructure configuration
-
-frontend integration
-
-real payment provider credentials
-
-domain/HTTPS
-
-production monitoring
-
-controlled launch
+Presentation
+UX
+Navigation
+Forms
+Client-side validation
+Loading states
+Error display
+API consumption
 
 
+The backend is responsible for:
 
-Only reopen backend development if staging or production verification discovers a real defect.
+Authentication
+Authorization
+Business rules
+Validation
+Pricing
+Booking integrity
+Payment integrity
+Database integrity
+Webhooks
+Security
+
+
+Never move backend responsibilities into the frontend.
+
+FINAL INSTRUCTION
+
+This is an integration phase, not a redesign phase.
 
 
 
-END OF PHASE 13.
+Preserve the existing frontend design.
+
+
+
+Preserve the hardened backend.
+
+
+
+Connect them correctly.
+
+
+
+Do not weaken backend security.
+
+
+
+Do not invent APIs.
+
+
+
+Do not create unnecessary infrastructure.
+
+
+
+Do not create unnecessary abstractions.
+
+
+
+Do not leave mock data powering production functionality.
+
+
+
+Do not claim completion without evidence.
+
+
+
+At the end, produce the complete integration report and clearly state whether the system is ready to move from:
+
+LOCAL
+
+
+to:
+
+STAGING
+
+
+END OF PHASE 14.

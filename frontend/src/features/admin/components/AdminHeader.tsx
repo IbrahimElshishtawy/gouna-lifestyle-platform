@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { logout } from "@/lib/api/auth";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -13,11 +14,8 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const handleSignOut = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("gounow_admin_auth");
-      localStorage.removeItem("gounow_admin_email");
-    }
+  const handleSignOut = async () => {
+    await logout();
     router.push("/admin/login");
   };
 
