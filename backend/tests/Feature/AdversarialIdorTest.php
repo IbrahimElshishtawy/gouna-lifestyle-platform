@@ -135,4 +135,52 @@ class AdversarialIdorTest extends TestCase
         $response->assertStatus(404);
         $response->assertJsonMissing(['total_cents' => 1500000]);
     }
+
+    /**
+     * IDOR Matrix 4: Public Checkout API booking lookup isolated and requires token/ownership.
+     */
+    public function test_idor_public_checkout_api_isolated_and_requires_authorization(): void
+    {
+        $customerA = $this->createCustomer();
+        $customerB = $this->createCustomer();
+
+        $bookingB = Booking::create([
+            'reference' => 'BK-PUB-'.uniqid(),
+            'customer_id' => $customerB->id,
+            'bookable_type' => Property::class,
+            'bookable_id' => $this->createProperty()->id,
+            'check_in' => '2026-12-10',
+            'check_out' => '2026-12-15',
+            'nights' => 5,
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'total_cents' => 1800000,
+            'currency' => 'EGP',
+            'booking_access_token' => hash('sha256', 'valid-api-token-123'),
+        ]);
+
+        // 1. Unauthenticated bare reference -> 404
+        $resBare = $this->getJson("/api/v1/checkout/bookings/{$bookingB->reference}");
+        $resBare->assertStatus(404);
+
+        // 2. Unauthenticated forged token -> 404
+        $resForged = $this->getJson("/api/v1/checkout/bookings/{$bookingB->reference}?token=wrong-token");
+        $resForged->assertStatus(404);
+
+        // 3. Authenticated customer A (different user) without token -> 404
+        $resOtherUser = $this->actingAs($customerA->user, 'sanctum')
+            ->getJson("/api/v1/checkout/bookings/{$bookingB->reference}");
+        $resOtherUser->assertStatus(404);
+
+        // 4. Authenticated owner customer B -> 200
+        $resOwner = $this->actingAs($customerB->user, 'sanctum')
+            ->getJson("/api/v1/checkout/bookings/{$bookingB->reference}");
+        $resOwner->assertStatus(200)
+            ->assertJsonPath('data.attributes.reference', $bookingB->reference);
+
+        // 5. Guest with valid token in query -> 200
+        $resGuest = $this->getJson("/api/v1/checkout/bookings/{$bookingB->reference}?token=valid-api-token-123");
+        $resGuest->assertStatus(200)
+            ->assertJsonPath('data.attributes.reference', $bookingB->reference);
+    }
 }

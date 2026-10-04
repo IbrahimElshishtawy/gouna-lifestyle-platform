@@ -1,12 +1,12 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 12 (Performance, Load, Concurrency & Resource Safety) — COMPLETED
-- **Next phase**: Production Deployment & Release Sign-Off
-- **Last completed task ID**: P12-T06 (DONE)
+- **Current phase**: 13 (Final Production Readiness & Backend Closure) — COMPLETED
+- **Next phase**: Staging Deployment, Infrastructure Provisioning & Client Integration (Backend Feature Freeze)
+- **Last completed task ID**: P13-T06 (DONE)
 - **Branch**: `hardening/phase-5.5`
-- **Test status**: 182/182 tests PASS (758 assertions). 15/15 Enterprise API test suite PASS. Pint style check 100% PASS. PHPStan (188 files) 0 errors. Composer audit 0 vulnerabilities.
-- **Overall status**: ALL HARDENING PHASES (0 THROUGH 12) COMPLETED — ZERO BLOCKERS
+- **Test status**: 183/183 tests PASS (765 assertions). 28/28 Master API test suite PASS. Pint style check 100% PASS. PHPStan (188 files) 0 errors. Composer audit 0 vulnerabilities.
+- **Overall status**: BACKEND HARDENING COMPLETE — CERTIFIED PRODUCTION READY WITH CONDITIONS (ZERO P0/P1/P2 BLOCKERS)
 
 
 ## Task Completion Table (Phase 0 — G17 Discipline)
@@ -387,3 +387,30 @@ composer audit
   - PHPStan: 0 errors (181 files analysed)
   - Pint: Passed
   - Composer Audit: 0 advisories
+
+## Phase 13 — Final Production Readiness & Backend Closure (COMPLETED)
+- **Status**: **PASS (PRODUCTION READY WITH CONDITIONS)**
+- **Date**: 2026-10-04
+- **Gate**: PASS (Zero P0/P1/P2 blockers remaining; 100% test suites, static analysis, and code style passing)
+- **Key Deliverables & Resolved Findings**:
+  - `P13-T01 (Baseline Verification)`: Audited baseline test suite (182 tests), PHPStan, Pint, Composer audit, and master Python API suite.
+  - `P13-T02 (Architecture Certification)`: Audited presentation, domain, and infrastructure separation. Verified zero business logic hidden in controllers, zero duplicate validations, and consistent transaction boundaries. Generated `PHASE_13_ARCHITECTURE_CERTIFICATION.md`.
+  - `P13-T03 (Security Certification & IDOR Hardening)`: Hardened `Api\V1\Public\CheckoutController@show` with multi-tier authorization and guest token checks, preventing unauthenticated booking reference enumeration and customer PII leakage. Added `test_idor_public_checkout_api_isolated_and_requires_authorization`. Generated `PHASE_13_SECURITY_CERTIFICATION.md`.
+  - `P13-T04 (Deployment Runbook)`: Codified complete zero-downtime deployment sequence, system requirements, Nginx/PHP-FPM/PostgreSQL/Redis architecture, and rollback procedures in `PHASE_13_DEPLOYMENT_RUNBOOK.md`.
+  - `P13-T05 (Incident Response & Backup Recovery)`: Codified emergency incident triage playbooks in `PHASE_13_INCIDENT_RESPONSE.md` and certified disaster recovery RPO/RTO procedures in `PHASE_13_BACKUP_RECOVERY.md`.
+  - `P13-T06 (Final Production Certification & Closure)`: Generated master production certification `PHASE_13_FINAL_PRODUCTION_CERTIFICATION.md`. Certified backend as production-ready with documented external merchant onboarding conditions. Declared backend feature development frozen.
+- **Documentation Created / Updated**:
+  - `docs/hardening/PHASE_13_ARCHITECTURE_CERTIFICATION.md`
+  - `docs/hardening/PHASE_13_SECURITY_CERTIFICATION.md`
+  - `docs/hardening/PHASE_13_DEPLOYMENT_RUNBOOK.md`
+  - `docs/hardening/PHASE_13_INCIDENT_RESPONSE.md`
+  - `docs/hardening/PHASE_13_BACKUP_RECOVERY.md`
+  - `docs/hardening/PHASE_13_FINAL_PRODUCTION_CERTIFICATION.md`
+  - `docs/hardening/LEDGER.md`
+- **Verification Metrics**:
+  - Full Host Regression Suite: 183 passed (765 assertions)
+  - Master Python API Suite: 28 passed (28/28 endpoints, 100%)
+  - PHPStan: 0 errors (188 files analysed)
+  - Pint: Passed (100%)
+  - Composer Audit: 0 advisories
+

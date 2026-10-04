@@ -19,7 +19,9 @@ use App\Modules\Pricing\Application\Queries\CalculateBookingQuoteQuery;
 use App\Shared\Domain\Exceptions\BookingUnavailableException as DomainAvailabilityException;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
@@ -140,13 +142,48 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Retrieve booking by public reference code.
+     * Retrieve booking by reference code with multi-tier authorization and IDOR defense.
      */
-    public function show(string $reference): BookingResource
+    public function show(Request $request, string $reference): BookingResource
     {
         $booking = Booking::where('reference', $reference)
             ->with(['bookable', 'customer'])
-            ->firstOrFail();
+            ->first();
+
+        if (! $booking) {
+            abort(404, 'Reservation not found or access denied.');
+        }
+
+        $user = $request->user('sanctum') ?? auth()->user();
+        $isAuthorized = false;
+
+        if ($user) {
+            if ($user->is_admin || $user->hasRole('super_admin') || $user->hasRole('property_manager') || $user->hasRole('finance')) {
+                $isAuthorized = true;
+            } elseif ($user->hasRole('staff') && $booking->assigned_to === $user->id) {
+                $isAuthorized = true;
+            } elseif ($booking->customer && ($booking->customer->user_id === $user->id || Str::lower((string) $booking->customer->email) === Str::lower((string) $user->email))) {
+                $isAuthorized = true;
+            }
+        }
+
+        // Token-based guest authorization
+        $token = $request->query('token') ?? $request->header('X-Booking-Token');
+        if (! $isAuthorized && $token && ! empty($booking->booking_access_token)) {
+            if (hash_equals($booking->booking_access_token, hash('sha256', (string) $token))) {
+                $isAuthorized = true;
+            }
+        }
+
+        // Guest email verification fallback
+        $email = $request->query('email') ?? $request->header('X-Customer-Email');
+        if (! $isAuthorized && $email && $booking->customer && Str::lower((string) $email) === Str::lower((string) $booking->customer->email)) {
+            $isAuthorized = true;
+        }
+
+        if (! $isAuthorized) {
+            abort(404, 'Reservation not found or access denied.');
+        }
 
         return new BookingResource($booking);
     }
