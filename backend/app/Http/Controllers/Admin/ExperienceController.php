@@ -25,7 +25,7 @@ class ExperienceController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Experience::with(['category', 'location', 'featuredImage'])->latest();
+        $query = Experience::with(['category', 'location', 'featuredImage', 'media'])->latest();
 
         if ($request->filled('search')) {
             $s = $request->input('search');

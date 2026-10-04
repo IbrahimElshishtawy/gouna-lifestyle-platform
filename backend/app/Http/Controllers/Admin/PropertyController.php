@@ -29,7 +29,7 @@ class PropertyController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Property::with(['category', 'location', 'featuredImage'])
+        $query = Property::with(['category', 'location', 'featuredImage', 'images'])
             ->latest();
 
         if ($request->filled('search')) {

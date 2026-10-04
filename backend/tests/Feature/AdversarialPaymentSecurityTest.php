@@ -552,4 +552,3 @@ class AdversarialPaymentSecurityTest extends TestCase
         ]);
     }
 }
-

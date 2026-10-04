@@ -319,6 +319,48 @@ composer audit
   - Pint: Passed
   - Composer Audit: 0 advisories
 
+## Phase 10 — Payment Gateway Real-World Integration Certification (COMPLETED)
+- **Status**: **PASS** (With Documented External Sandbox Provisioning Prerequisite)
+- **Date**: 2026-10-04
+- **Gate**: PASS (All internal payment mechanics, cryptographic verification, trust boundaries, state machine & refund protections certified; 174 automated tests passing)
+- **Key Deliverables & Resolved Findings**:
+  - `PAY-001 (Gateway Configuration)`: Audited environment keys and credentials separation; confirmed fail-safe behavior in production against empty or placeholder secrets.
+  - `PAY-002 (Authoritative Trust Model)`: Verified client cannot tamper with price, currency, payment status, transaction ID, or refund ceiling. Server-side quote generation is mandatory.
+  - `PAY-003 (Payment State Machine)`: Audited state transitions across `unpaid`, `pending`, `paid`, `failed`, `refunded`, and `partially_refunded`. Verified rejection of invalid transitions (409 Conflict).
+  - `PAY-004 (Webhook Security)`: Verified cryptographic HMAC signature validation (Paymob SHA-512 canonical ordering + generic SHA-256 HMAC), timestamp tolerance, idempotent replay protection, and payload sanitization (`[REDACTED]`).
+  - `PAY-005 (Refund Hardening)`: Hardened `DashboardController::bookingsRefund` and `BookingPolicy::refund` with remaining balance validation, strict authorization, and delegation to `PaymentService::initiateRefund`. Added `Booking::paymentTransactions` relationship alias.
+  - `PAY-006 (Adversarial Testing)`: Expanded `AdversarialPaymentSecurityTest` with 3 new automated test cases (total 14 tests, 41 assertions).
+  - `PAY-007 (Limitation Disclosure)`: Documented honest status regarding external live merchant sandbox credentials pending onboarding per Section 10.6.
+- **Documentation Created**:
+  - `docs/hardening/PHASE_10_PAYMENT_CERTIFICATION.md`
+  - `docs/hardening/PHASE_10_WEBHOOK_CERTIFICATION.md`
+  - `docs/hardening/PHASE_10_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Full Host Regression Suite: 174 passed (730 assertions)
+  - Adversarial Payment Suite: 14 passed (41 assertions)
+  - Adversarial Webhook Suite: 8 passed (26 assertions)
+  - PHPStan: 0 errors (180 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
 
-
-
+## Phase 11 — Files, Media, Uploads & Storage Security (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-04
+- **Gate**: PASS (All upload/download/destruction paths possess explicit security boundaries; zero executable/polyglot vector vulnerabilities)
+- **Key Deliverables & Resolved Findings**:
+  - `STR-001 (MIME & Extension Security)`: Hardened `MediaService` with static MIME whitelist (JPEG, PNG, WebP, GIF, AVIF, MP4, MOV, WebM) and a strict 23-extension blacklist rejecting executable/script files.
+  - `STR-002 (Polyglot Defense)`: Added binary header inspection checking initial 2048 bytes for embedded PHP tags (`<?php`, `<?=`), `<script`, and `__halt_compiler`.
+  - `STR-003 (Size & Resource Safeguards)`: Enforced 10 MB image and 50 MB video limits before disk operations.
+  - `STR-004 (Filename Normalization & Isolation)`: Saved all files with UUID v4 filenames in scoped directories (`uploads/{folder}/`). Sanitized client-provided names before storing in database metadata.
+  - `STR-005 (Orphan Cleanup Tooling)`: Created `CleanupOrphanMediaCommand` (`php artisan media:cleanup-orphans`) supporting dry-run and configurable age cutoff.
+  - `STR-006 (Authorization & IDOR Defense)`: Confirmed media management permissions (`media.manage`) and scoped route bindings prevent cross-entity media destruction.
+  - `STR-007 (Automated Security Testing)`: Created `StorageSecurityHardeningTest` with 8 passing test cases (28 assertions).
+- **Documentation Created**:
+  - `docs/hardening/PHASE_11_STORAGE_SECURITY.md`
+  - `docs/hardening/PHASE_11_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Full Host Regression Suite: 182 passed (758 assertions)
+  - Storage Security Suite: 8 passed (28 assertions)
+  - PHPStan: 0 errors (181 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories

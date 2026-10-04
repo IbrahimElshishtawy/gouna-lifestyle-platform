@@ -25,7 +25,7 @@ class EventController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Event::with(['location', 'ticketTypes', 'featuredImage'])->latest('event_date');
+        $query = Event::with(['location', 'ticketTypes', 'featuredImage', 'media'])->latest('event_date');
 
         if ($request->filled('search')) {
             $s = $request->input('search');
