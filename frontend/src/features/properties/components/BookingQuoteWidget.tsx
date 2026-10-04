@@ -176,15 +176,6 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
                 </div>
               )}
 
-              {quote.service_fee_cents > 0 && (
-                <div className="flex justify-between text-brand-brown-muted">
-                  <span>Service Fee</span>
-                  <span>
-                    {quote.currency}{" "}
-                    {(quote.service_fee_cents / 100).toLocaleString()}
-                  </span>
-                </div>
-              )}
 
               {quote.tax_cents > 0 && (
                 <div className="flex justify-between text-brand-brown-muted">

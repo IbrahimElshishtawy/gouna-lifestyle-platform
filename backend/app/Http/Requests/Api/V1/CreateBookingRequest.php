@@ -33,7 +33,7 @@ class CreateBookingRequest extends FormRequest
             'phone' => ['required', 'string', 'max:30'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
             'promo_code' => ['nullable', 'string', 'max:50'],
-            'payment_method' => ['required', 'string', 'in:card,paypal,cash,bank_transfer'],
+            'payment_method' => ['required', 'string', 'in:card,paypal,cash,bank_transfer,instapay'],
 
             // Strictly prohibited fields from customer/client (Mass Assignment & Price Tampering Defense)
             'id' => ['prohibited'],

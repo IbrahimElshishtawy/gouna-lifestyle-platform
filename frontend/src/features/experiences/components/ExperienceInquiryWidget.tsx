@@ -17,6 +17,7 @@ export default function ExperienceInquiryWidget({
     return today.toISOString().split("T")[0];
   });
   const [guests, setGuests] = useState(2);
+  const [preferredTime, setPreferredTime] = useState("Sunset (04:30 PM - 07:00 PM)");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -32,20 +33,22 @@ export default function ExperienceInquiryWidget({
       await inquireExperience(experience.slug, {
         requested_date: requestedDate,
         guests,
+        pax: guests,
+        preferred_time: preferredTime,
         name,
         email,
         phone,
-        message,
+        message: `[Activity Booking Details]\nDate: ${requestedDate}\nPax: ${guests} Persons\nTime: ${preferredTime}${message ? `\nNotes: ${message}` : ""}`,
       });
 
-      // Construct WhatsApp fallback URL matching legacy
+      // Construct WhatsApp fallback URL matching concierge desk
       const waText = encodeURIComponent(
-        `Hello GouNow VIP Concierge,\n\nI am inquiring about the experience: ${experience.title}\nDate: ${requestedDate}\nGuests: ${guests}\nName: ${name} (${phone || email})\n\nNotes: ${message || "Please confirm availability."}`
+        `Hello GouNow VIP Concierge,\n\nI am inquiring about the activity: ${experience.title}\nDate: ${requestedDate}\nPax: ${guests} Persons\nTime: ${preferredTime}\nClient: ${name} (${phone || email})\n\nNotes: ${message || "Please confirm availability."}`
       );
       window.open(`https://wa.me/201000000000?text=${waText}`, "_blank");
 
       setSuccessMessage(
-        `Thank you ${name || "Guest"}! Your inquiry has been forwarded to our VIP Concierge desk.`
+        `Thank you ${name || "Guest"}! Your activity booking inquiry for ${requestedDate} at ${preferredTime} (${guests} pax) has been forwarded to our VIP Concierge desk.`
       );
     } catch {
       setSuccessMessage("Thank you! Connecting you with our concierge team.");
@@ -88,34 +91,58 @@ export default function ExperienceInquiryWidget({
           onSubmit={handleSubmit}
           className="space-y-3 pt-3 border-t border-brand-border text-xs"
         >
-          <div>
-            <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-              Preferred Date
-            </label>
-            <input
-              type="date"
-              name="requested_date"
-              value={requestedDate}
-              onChange={(e) => setRequestedDate(e.target.value)}
-              required
-              className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                name="requested_date"
+                value={requestedDate}
+                onChange={(e) => setRequestedDate(e.target.value)}
+                required
+                className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                Pax (Persons)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  name="guests"
+                  min={1}
+                  max={experience.max_guests || 20}
+                  value={guests}
+                  onChange={(e) => setGuests(Number(e.target.value))}
+                  required
+                  className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
+                />
+                <span className="absolute right-3 top-2.5 text-[11px] text-brand-brown-muted pointer-events-none">
+                  pax
+                </span>
+              </div>
+            </div>
           </div>
 
           <div>
             <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-              Guests / Party Size
+              Time / Preferred Slot
             </label>
-            <input
-              type="number"
-              name="guests"
-              min={1}
-              max={experience.max_guests || 20}
-              value={guests}
-              onChange={(e) => setGuests(Number(e.target.value))}
-              required
+            <select
+              value={preferredTime}
+              onChange={(e) => setPreferredTime(e.target.value)}
               className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-            />
+            >
+              <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 AM - 12:00 PM)</option>
+              <option value="Mid-Day (12:30 PM - 03:30 PM)">Mid-Day (12:30 PM - 03:30 PM)</option>
+              <option value="Sunset (04:30 PM - 07:00 PM)">Sunset (04:30 PM - 07:00 PM)</option>
+              <option value="Evening (07:30 PM - 10:30 PM)">Evening (07:30 PM - 10:30 PM)</option>
+              <option value="Flexible / Full Day">Flexible / Full Day</option>
+            </select>
           </div>
 
           <div>

@@ -8,30 +8,16 @@ import {
 export const PAYMENT_METHODS: PaymentMethod[] = [
   {
     id: 1,
-    name: "Credit / Debit Card (Online)",
+    name: "Credit / Debit Cards",
     type: "card",
-    description: "Pay securely online with Visa, Mastercard, or local card schemes.",
+    description: "Instant secure online payment via Visa or Mastercard with 3D Secure verification.",
     is_enabled: true,
   },
   {
     id: 2,
-    name: "PayPal",
-    type: "paypal",
-    description: "Pay with your PayPal account or linked cards.",
-    is_enabled: true,
-  },
-  {
-    id: 3,
-    name: "Bank Wire / Instapay Transfer",
-    type: "bank_transfer",
-    description: "Direct transfer to our Egyptian National Bank account or Instapay.",
-    is_enabled: true,
-  },
-  {
-    id: 4,
-    name: "Cash on Arrival / Office Payment",
-    type: "cash",
-    description: "Pay cash upon arrival or at our Abu Tig Marina office.",
+    name: "Instapay (Instant Egypt Payment)",
+    type: "instapay",
+    description: "Instant bank-to-bank transfer via Instapay (IPA / Mobile) with instant verification.",
     is_enabled: true,
   },
 ];
@@ -73,11 +59,9 @@ export async function processCheckout(
 ): Promise<CheckoutProcessResponse> {
   const methodMap: Record<number, string> = {
     1: "card",
-    2: "paypal",
-    3: "bank_transfer",
-    4: "cash",
+    2: "instapay",
   };
-  const paymentMethodCode = methodMap[formData.payment_method_id] || "cash";
+  const paymentMethodCode = methodMap[formData.payment_method_id] || "card";
 
   const idempotencyKey = `chk-${formData.property_id}-${formData.email}-${Date.now()}`;
 

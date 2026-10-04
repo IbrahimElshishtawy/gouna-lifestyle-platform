@@ -45,8 +45,8 @@ export default function CheckoutClient({
   const basePricePerNight = Math.round(property.price_cents / 100);
   const baseStayAmount = basePricePerNight * nights;
   const cleaningFee = 1500;
-  const serviceFee = 2000;
-  const subtotal = baseStayAmount + cleaningFee + serviceFee;
+  const serviceFee = 0; // Service fee eliminated per specification
+  const subtotal = baseStayAmount + cleaningFee;
   const discountAmount = appliedPromo ? Math.round(subtotal * 0.1) : 0;
   const taxable = subtotal - discountAmount;
   const taxAmount = Math.round(taxable * 0.14);
@@ -418,6 +418,25 @@ export default function CheckoutClient({
                     </label>
                   );
                 })}
+
+                {paymentMethodId === 2 && (
+                  <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs space-y-2 text-emerald-900 mt-2">
+                    <div className="flex items-center gap-2 font-bold text-emerald-800">
+                      <span>⚡</span>
+                      <span>Instapay Transfer Details</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-800/90 leading-relaxed">
+                      Transfer your reservation deposit/payment instantly via your Egyptian bank application or Instapay:
+                    </p>
+                    <div className="flex items-center justify-between p-2.5 bg-white border border-emerald-300 rounded-lg font-mono font-bold text-xs text-brand-brown">
+                      <span>IPA: gounow@instapay</span>
+                      <span className="text-[10px] text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded font-sans font-semibold">Instant Verification</span>
+                    </div>
+                    <p className="text-[10px] text-emerald-700">
+                      Please enter your name or booking reference in the transfer remarks. Concierge will confirm receipt immediately.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -536,10 +555,7 @@ export default function CheckoutClient({
                 <span className="font-semibold">{formatEgp(cleaningFee)} EGP</span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span>Concierge & Guest Service Fee</span>
-                <span className="font-semibold">{formatEgp(serviceFee)} EGP</span>
-              </div>
+
 
               {appliedPromo && (
                 <div className="flex items-center justify-between text-emerald-700 font-semibold">

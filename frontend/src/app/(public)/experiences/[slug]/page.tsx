@@ -8,6 +8,7 @@ import {
 } from "@/features/experiences/services/experiences.api";
 import ExperienceInquiryWidget from "@/features/experiences/components/ExperienceInquiryWidget";
 import ExperienceCard from "@/features/experiences/components/ExperienceCard";
+import ReviewsSection from "@/features/reviews/components/ReviewsSection";
 import type { Metadata } from "next";
 
 interface Props {
@@ -162,6 +163,9 @@ export default async function ExperienceDetailPage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Guest Reviews Section */}
+          <ReviewsSection title={`Guest Reviews for ${experience.title}`} />
         </div>
 
         {/* Right: Sticky Inquiry Form */}

@@ -28,6 +28,8 @@ export interface Experience {
 export interface ExperienceInquiryRequest {
   requested_date: string;
   guests: number;
+  pax?: number;
+  preferred_time?: string;
   name: string;
   email: string;
   phone: string;

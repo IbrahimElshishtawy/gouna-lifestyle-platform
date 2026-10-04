@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { getProperties } from "@/features/properties/services/properties.api";
+import UserActionsHistory from "@/features/admin/components/UserActionsHistory";
 
 export default async function AdminDashboardPage() {
   const properties = await getProperties();
@@ -302,6 +303,9 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* History for All User Actions & Audit Trail */}
+      <UserActionsHistory />
     </div>
   );
 }

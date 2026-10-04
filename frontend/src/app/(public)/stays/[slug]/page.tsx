@@ -8,6 +8,7 @@ import {
 } from "@/features/properties/services/properties.api";
 import BookingQuoteWidget from "@/features/properties/components/BookingQuoteWidget";
 import PropertyCard from "@/features/properties/components/PropertyCard";
+import ReviewsSection from "@/features/reviews/components/ReviewsSection";
 import type { Metadata } from "next";
 
 interface Props {
@@ -244,6 +245,9 @@ export default async function PropertyDetailPage({ params }: Props) {
               )}
             </div>
           </div>
+
+          {/* Guest Reviews Section */}
+          <ReviewsSection title={`Guest Reviews for ${property.title}`} />
         </div>
 
         {/* Right Column: Sticky Booking / Inquiry Widget */}
