@@ -1,12 +1,13 @@
 # GouNow Hardening Ledger
 
 ## Current State
-- **Current phase**: 5.5 (Adversarial Production Audit) — COMPLETED
-- **Next phase**: 6 (Payment, Webhooks & Financial Hardening)
-- **Last completed task ID**: P5.5-T07 (DONE)
+- **Current phase**: 12 (Performance, Load, Concurrency & Resource Safety) — COMPLETED
+- **Next phase**: Production Deployment & Release Sign-Off
+- **Last completed task ID**: P12-T06 (DONE)
 - **Branch**: `hardening/phase-5.5`
-- **Test status**: 136/136 tests PASS (608 assertions). 26/26 Adversarial Security tests PASS across 9 dedicated attack suites. Pint style check 100% PASS. Composer audit 0 vulnerabilities.
-- **Overall status**: PHASE 5.5 CONDITIONAL PASS SIGNED-OFF
+- **Test status**: 182/182 tests PASS (758 assertions). 15/15 Enterprise API test suite PASS. Pint style check 100% PASS. PHPStan (188 files) 0 errors. Composer audit 0 vulnerabilities.
+- **Overall status**: ALL HARDENING PHASES (0 THROUGH 12) COMPLETED — ZERO BLOCKERS
+
 
 ## Task Completion Table (Phase 0 — G17 Discipline)
 | Task ID | Status | Evidence | Reason if not DONE |
@@ -361,6 +362,28 @@ composer audit
 - **Verification Metrics**:
   - Full Host Regression Suite: 182 passed (758 assertions)
   - Storage Security Suite: 8 passed (28 assertions)
+  - PHPStan: 0 errors (181 files analysed)
+  - Pint: Passed
+  - Composer Audit: 0 advisories
+
+## Phase 12 — Performance, Load, Concurrency & Resource Safety (COMPLETED)
+- **Status**: **PASS**
+- **Date**: 2026-10-04
+- **Gate**: PASS (Measured performance acceptable, p50 < 25ms, N+1 queries eliminated, pagination bounded, and concurrency preserves financial/business invariants)
+- **Key Deliverables & Resolved Findings**:
+  - `PERF-001 (N+1 Elimination)`: Resolved BL-002, BL-003, BL-004 by adding eager-loading for media/images across `PropertyController@index`, `EventController@index`, and `ExperienceController@index`.
+  - `PERF-002 (Index Verification)`: Confirmed performance index coverage for catalog search filters, foreign keys, unique slugs, and PostgreSQL kernel GiST exclusion constraint (`bookings_no_double_booking`).
+  - `PERF-003 (Pagination Safeguards)`: Enforced 12–15 item limits on all collection routes; bounded large queries.
+  - `PERF-004 (Benchmark Execution)`: Executed 10 scenario benchmarks (20 iterations each): Homepage (p50: 8.3ms), Stays (p50: 13.9ms), Quote (p50: 6.5ms), Admin Dashboard (p50: 9.9ms).
+  - `PERF-005 (Concurrency Certification)`: Verified double-booking rejection, idempotency key contention locks, webhook replay idempotency, and checkout double-submission locks.
+  - `PERF-006 (Load Testing Plan)`: Codified realistic luxury hospitality sizing profile (150–250 VUs) with k6 execution script and monitoring thresholds.
+- **Documentation Created**:
+  - `docs/hardening/PHASE_12_PERFORMANCE_REPORT.md`
+  - `docs/hardening/PHASE_12_LOAD_TEST_PLAN.md`
+  - `docs/hardening/PHASE_12_FINAL_REPORT.md`
+- **Verification Metrics**:
+  - Full Host Regression Suite: 182 passed (758 assertions)
+  - Performance Benchmark: 10 scenarios passed (p50 < 25ms)
   - PHPStan: 0 errors (181 files analysed)
   - Pint: Passed
   - Composer Audit: 0 advisories

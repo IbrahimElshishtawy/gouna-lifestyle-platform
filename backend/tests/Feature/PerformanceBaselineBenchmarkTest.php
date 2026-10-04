@@ -32,7 +32,18 @@ class PerformanceBaselineBenchmarkTest extends TestCase
         );
 
         $this->property = Property::where('is_published', true)->first()
-            ?? Property::first();
+            ?? Property::first()
+            ?? Property::create([
+                'reference_number' => 'PROP-PERF-'.uniqid(),
+                'slug' => 'perf-villa-'.uniqid(),
+                'title_en' => 'Performance Benchmark Villa',
+                'title_ar' => 'فيلا قياس الأداء',
+                'listing_type' => 'rent',
+                'base_price_cents' => 350000,
+                'currency' => 'EGP',
+                'is_published' => true,
+                'status' => 'published',
+            ]);
     }
 
     #[Test]
