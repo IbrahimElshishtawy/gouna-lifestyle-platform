@@ -15,6 +15,7 @@ import FaqSection from "@/features/home/components/FaqSection";
 import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
 import { getPublicMediaDesignConfig } from "@/features/home/services/media-design.public";
+import PropertyCardsShowcase from "@/features/home/components/PropertyCardsShowcase";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { setRequestLocale } from "next-intl/server";
 
@@ -90,6 +91,11 @@ export default async function HomePage({
             <FeaturedVacationRentals properties={displayProperties} />
           </ScrollReveal>
         )}
+
+        {/* 3.1 Modern Property Cards Showcase (21st Style with Category Tabs & Spatial Tour) */}
+        <ScrollReveal animation="fade-up" duration={800}>
+          <PropertyCardsShowcase properties={displayProperties} />
+        </ScrollReveal>
 
         {/* 4. Curated Experiences Split Showcase (Tawila Island Yacht & Adventures) */}
         {sections?.experiences !== false && (
