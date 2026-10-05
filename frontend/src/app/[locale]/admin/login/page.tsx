@@ -11,8 +11,8 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { locale, setLocale } = useLanguage();
   
-  const [email, setEmail] = useState("admin@gounow.com");
-  const [password, setPassword] = useState("GouNow@2026!Secure");
+  const [email, setEmail] = useState("superadmin@gounow.com");
+  const [password, setPassword] = useState("SuperAdmin@2026!");
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -525,7 +525,7 @@ export default function AdminLoginPage() {
                 {/* Account 1: Super Admin */}
                 <div
                   className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center justify-between ${
-                    activeAutofill === "admin"
+                    activeAutofill === "superadmin"
                       ? "border-brand-terracotta bg-brand-terracotta/5 shadow-xs"
                       : "border-brand-border/90 bg-brand-sand-light/40 hover:bg-brand-sand-light/80"
                   }`}
@@ -544,14 +544,14 @@ export default function AdminLoginPage() {
                         </span>
                       </div>
                       <span className="text-[11px] text-brand-brown-muted block font-light">
-                        admin@gounow.com
+                        superadmin@gounow.com
                       </span>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() =>
-                      handleAutofill("admin@gounow.com", "GouNow@2026!Secure", "admin")
+                      handleAutofill("superadmin@gounow.com", "SuperAdmin@2026!", "superadmin")
                     }
                     className="px-3 py-1.5 rounded-lg border border-brand-border bg-white text-[11px] font-semibold text-brand-brown hover:border-brand-terracotta hover:text-brand-terracotta hover:bg-brand-terracotta/5 transition-all shadow-2xs cursor-pointer shrink-0"
                   >
@@ -559,36 +559,36 @@ export default function AdminLoginPage() {
                   </button>
                 </div>
 
-                {/* Account 2: Property Manager */}
+                {/* Account 2: Platform Admin */}
                 <div
                   className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center justify-between ${
-                    activeAutofill === "stays"
+                    activeAutofill === "admin"
                       ? "border-brand-terracotta bg-brand-terracotta/5 shadow-xs"
                       : "border-brand-border/90 bg-brand-sand-light/40 hover:bg-brand-sand-light/80"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-brand-terracotta text-white flex items-center justify-center text-xs font-bold shrink-0">
-                      PM
+                      AD
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs text-brand-brown">
-                          Property Manager
+                          Administrator
                         </span>
                         <span className="text-[10px] font-semibold bg-stone-100 text-stone-600 border border-stone-200 px-1.5 py-0.2 rounded">
-                          Villas &amp; Concierge
+                          Operational Admin
                         </span>
                       </div>
                       <span className="text-[11px] text-brand-brown-muted block font-light">
-                        stays@gounow.com
+                        admin@gounow.com
                       </span>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() =>
-                      handleAutofill("stays@gounow.com", "GouNow@2026!Secure", "stays")
+                      handleAutofill("admin@gounow.com", "Admin@2026!", "admin")
                     }
                     className="px-3 py-1.5 rounded-lg border border-brand-border bg-white text-[11px] font-semibold text-brand-brown hover:border-brand-terracotta hover:text-brand-terracotta hover:bg-brand-terracotta/5 transition-all shadow-2xs cursor-pointer shrink-0"
                   >
