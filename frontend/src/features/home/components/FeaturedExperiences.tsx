@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Experience } from "@/features/experiences/types/experience.types";
 import { useLanguage } from "@/context/LanguageContext";
 

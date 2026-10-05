@@ -2,10 +2,12 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { getPropertyBySlug } from "@/features/properties/services/properties.api";
 import CheckoutClient from "@/features/checkout/components/CheckoutClient";
+import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{
+    locale: string;
     slug: string;
   }>;
   searchParams: Promise<{
@@ -17,18 +19,23 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const property = await getPropertyBySlug(slug);
-  if (!property) return { title: "Booking Checkout" };
+  const isAr = locale === "ar";
+  if (!property) return { title: isAr ? "إتمام الحجز" : "Booking Checkout" };
 
   return {
-    title: `Checkout - ${property.title} | GouNow El Gouna`,
-    description: `Complete your luxury booking reservation for ${property.title} in El Gouna.`,
+    title: `${isAr ? "إتمام حجز" : "Checkout -"} ${property.title} | ${isAr ? "جوناو الجونة" : "GouNow El Gouna"}`,
+    description: isAr
+      ? `أكمل حجز إقامتك الفاخرة في ${property.title} بالجونة مع تأكيد كونسيرج فوري.`
+      : `Complete your luxury booking reservation for ${property.title} in El Gouna.`,
   };
 }
 
 export default async function CheckoutPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+
   const query = await searchParams;
   const property = await getPropertyBySlug(slug);
 
@@ -62,3 +69,4 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
     </div>
   );
 }
+

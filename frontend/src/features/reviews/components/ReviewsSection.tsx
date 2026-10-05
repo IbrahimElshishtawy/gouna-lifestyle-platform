@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export interface ReviewItem {
   id: string | number;
@@ -22,18 +23,19 @@ interface ReviewsSectionProps {
 }
 
 export default function ReviewsSection({
-  title = "Guest Reviews & Ratings",
+  title,
   averageRating = 4.96,
   totalReviews = 28,
   initialReviews,
 }: ReviewsSectionProps) {
+  const { t, locale } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formRating, setFormRating] = useState(5);
   const [formAuthor, setFormAuthor] = useState("");
   const [formComment, setFormComment] = useState("");
 
-  const defaultReviews: ReviewItem[] = [
+  const defaultReviewsEn: ReviewItem[] = [
     {
       id: 1,
       author: "Lord Henry Cavendish",
@@ -68,6 +70,42 @@ export default function ReviewsSection({
     },
   ];
 
+  const defaultReviewsAr: ReviewItem[] = [
+    {
+      id: 1,
+      author: "لورد هنري كافنديش",
+      location: "لندن، المملكة المتحدة",
+      rating: 5,
+      date: "سبتمبر 2026",
+      verifiedStay: true,
+      comment:
+        "إقامة تفوق الوصف بكافة المقاييس. الغروب على مياه البحيرة ساحر للغاية، والمرسى الخاص سهل علينا رحلات اليخوت اليومية. خدمة النظافة والمضيف الخاص قدمت خصوصية تامة ورفاهية متناهية.",
+      conciergeResponse:
+        "شكراً لك لورد كافنديش. تشرفنا باستضافتك في الجونة، ونتطلع للترحيب بك مجدداً هذا الشتاء.",
+    },
+    {
+      id: 2,
+      author: "د. ماريان فيبر",
+      location: "ميونخ، ألمانيا",
+      rating: 5,
+      date: "أغسطس 2026",
+      verifiedStay: true,
+      comment:
+        "تصميم معماري متكامل ونظافة استثنائية. حمام السباحة الإنفينيتي المطل على المارينا وترتيبات الكونسيرج الخاصة جعلت ذكرى زواجنا لا تُنسى. كل شيء مطابق تماماً للصور.",
+    },
+    {
+      id: 3,
+      author: "كريم وياسمين منصور",
+      location: "القاهرة، مصر",
+      rating: 5,
+      date: "يوليو 2026",
+      verifiedStay: true,
+      comment:
+        "أفضل تجربة استئجار فيلا خاصة قضيناها في الجونة. مساحة واسعة، هدوء تام، إنترنت فائق السرعة وقرب مباشر من مارينا أبو تيج. خمس نجوم في كل التفاصيل.",
+    },
+  ];
+
+  const defaultReviews = locale === "ar" ? defaultReviewsAr : defaultReviewsEn;
   const reviews = initialReviews && initialReviews.length > 0 ? initialReviews : defaultReviews;
 
   const handleReviewSubmit = (e: React.FormEvent) => {
@@ -82,13 +120,15 @@ export default function ReviewsSection({
   };
 
   const categories = [
-    { name: "Cleanliness", score: "5.0", percent: 100 },
-    { name: "Accuracy", score: "4.9", percent: 98 },
-    { name: "Communication", score: "5.0", percent: 100 },
-    { name: "Location", score: "5.0", percent: 100 },
-    { name: "Check-in", score: "4.9", percent: 98 },
-    { name: "Value for Money", score: "4.8", percent: 96 },
+    { name: t.reviews.cleanliness, score: "5.0", percent: 100 },
+    { name: t.reviews.accuracy, score: "4.9", percent: 98 },
+    { name: t.reviews.communication, score: "5.0", percent: 100 },
+    { name: t.reviews.location, score: "5.0", percent: 100 },
+    { name: t.reviews.checkIn, score: "4.9", percent: 98 },
+    { name: t.reviews.valueForMoney, score: "4.8", percent: 96 },
   ];
+
+  const sectionTitle = title || t.reviews.title;
 
   return (
     <div className="bg-white p-6 sm:p-10 rounded-3xl border border-brand-border shadow-xs space-y-8">
@@ -101,11 +141,11 @@ export default function ReviewsSection({
               {averageRating.toFixed(2)}
             </span>
             <span className="text-xs text-brand-brown-muted font-medium">
-              &bull; {totalReviews} Verified Reviews
+              &bull; {totalReviews} {t.reviews.verifiedReviews}
             </span>
           </div>
           <h2 className="font-serif text-lg font-bold text-brand-brown">
-            {title}
+            {sectionTitle}
           </h2>
         </div>
 
@@ -114,7 +154,7 @@ export default function ReviewsSection({
           onClick={() => setShowModal(true)}
           className="self-start sm:self-auto px-4 py-2.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
         >
-          Write a Review
+          {t.reviews.writeReview}
         </button>
       </div>
 
@@ -152,7 +192,7 @@ export default function ReviewsSection({
                     </span>
                     {rev.verifiedStay && (
                       <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.5 rounded">
-                        ✓ Verified Guest
+                        ✓ {t.reviews.verifiedGuest}
                       </span>
                     )}
                   </div>
@@ -169,7 +209,7 @@ export default function ReviewsSection({
                       <span key={i}>★</span>
                     ))}
                   </div>
-                  <span className="text-[10px] text-brand-brown-muted ml-1">
+                  <span className="text-[10px] text-brand-brown-muted ms-1">
                     {rev.date}
                   </span>
                 </div>
@@ -183,7 +223,7 @@ export default function ReviewsSection({
             {rev.conciergeResponse && (
               <div className="pt-2.5 border-t border-brand-border/40 text-[11px] text-brand-brown-muted">
                 <span className="font-bold text-brand-terracotta">
-                  Concierge Response:{" "}
+                  {t.reviews.conciergeResponse}:{" "}
                 </span>
                 <span>{rev.conciergeResponse}</span>
               </div>
@@ -198,12 +238,12 @@ export default function ReviewsSection({
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-brand-border shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-brand-border pb-3">
               <h3 className="font-serif font-bold text-lg text-brand-brown">
-                Share Your Experience
+                {t.reviews.shareExperience}
               </h3>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-brand-brown-muted hover:text-brand-brown text-base font-bold"
+                className="text-brand-brown-muted hover:text-brand-brown text-base font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -213,17 +253,17 @@ export default function ReviewsSection({
               <div className="p-6 bg-emerald-50 rounded-2xl text-center space-y-2">
                 <span className="text-3xl">✓</span>
                 <p className="text-xs font-bold text-emerald-900">
-                  Review Submitted for Verification
+                  {t.reviews.reviewSubmitted}
                 </p>
                 <p className="text-[11px] text-emerald-700">
-                  Thank you! Your verified review will be published shortly.
+                  {t.reviews.reviewSubmittedSub}
                 </p>
               </div>
             ) : (
               <form onSubmit={handleReviewSubmit} className="space-y-3 text-xs">
                 <div>
                   <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                    Rating
+                    {t.reviews.rating}
                   </label>
                   <div className="flex gap-2 text-xl text-amber-500 cursor-pointer">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -241,28 +281,28 @@ export default function ReviewsSection({
 
                 <div>
                   <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                    Your Full Name
+                    {t.reviews.yourFullName}
                   </label>
                   <input
                     type="text"
                     required
                     value={formAuthor}
                     onChange={(e) => setFormAuthor(e.target.value)}
-                    placeholder="e.g. Dr. Marianne Weber"
+                    placeholder={t.reviews.namePlaceholder}
                     className="w-full text-xs p-2.5 rounded-xl border border-brand-border bg-brand-sand-light/50 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                    Review Details
+                    {t.reviews.reviewDetails}
                   </label>
                   <textarea
                     rows={4}
                     required
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
-                    placeholder="How was your stay? Mention amenities, cleanliness, location..."
+                    placeholder={t.reviews.reviewPlaceholder}
                     className="w-full text-xs p-2.5 rounded-xl border border-brand-border bg-brand-sand-light/50 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
@@ -271,15 +311,15 @@ export default function ReviewsSection({
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 border border-brand-border rounded-xl text-xs font-bold text-brand-brown-muted"
+                    className="px-4 py-2 border border-brand-border rounded-xl text-xs font-bold text-brand-brown-muted cursor-pointer"
                   >
-                    Cancel
+                    {t.reviews.cancel}
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold transition shadow-xs"
+                    className="px-5 py-2 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
                   >
-                    Submit Review
+                    {t.reviews.submitReview}
                   </button>
                 </div>
               </form>

@@ -9,3 +9,7 @@ export const dictionary = {
 } as const;
 
 export type Dictionary = typeof dictionary.en;
+
+export function getDictionary(locale: string): Dictionary {
+  return (dictionary[locale as Locale] || dictionary.en) as Dictionary;
+}

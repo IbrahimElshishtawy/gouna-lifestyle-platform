@@ -5,7 +5,7 @@ import { submitConciergeInquiry } from "../services/home.api";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function ConciergeInquiry() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +36,11 @@ export default function ConciergeInquiry() {
       window.open(`https://wa.me/201000000000?text=${whatsappText}`, "_blank");
     } catch {
       setStatus("error");
-      setFeedback("Unable to submit online. Please message our 24/7 WhatsApp concierge directly.");
+      setFeedback(
+        locale === "ar"
+          ? "تعذر الإرسال عبر الموقع حالياً. يرجى مراسلة كونسيرج واتساب مباشرة."
+          : "Unable to submit online. Please message our 24/7 WhatsApp concierge directly."
+      );
     }
   };
 

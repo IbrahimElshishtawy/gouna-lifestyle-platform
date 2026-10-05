@@ -1,33 +1,49 @@
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
 import ExperienceCard from "@/features/experiences/components/ExperienceCard";
+import { setRequestLocale } from "next-intl/server";
+import { getDictionary } from "@/locales/dictionary";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Curated Experiences & Red Sea Adventures | GouNow El Gouna",
-  description:
-    "From private sunset catamarans across untouched Red Sea islands to starlit Bedouin desert safaris, explore handpicked activities in El Gouna.",
-};
-
 interface Props {
+  params: Promise<{
+    locale: string;
+  }>;
   searchParams: Promise<{
     category?: string;
   }>;
 }
 
-const CATEGORIES = [
-  { slug: "", label: "All Adventures" },
-  { slug: "boat-trips", label: "Private Boat Trips & Yachts" },
-  { slug: "safari", label: "Desert Safaris & Stargazing" },
-  { slug: "watersports-kitesurfing", label: "Watersports & Kitesurfing" },
-  { slug: "boat-trips-test", label: "Boat Trips" },
-  { slug: "lifestyle-wellness", label: "Lifestyle & Wellness" },
-];
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === "ar";
+  return {
+    title: isAr
+      ? "تجارب ومغامرات البحر الأحمر بالجونة | GouNow"
+      : "Curated Experiences & Red Sea Adventures | GouNow El Gouna",
+    description: isAr
+      ? "من رحلات اليخوت الخاصة في جزر البحر الأحمر إلى رحلات السفاري الصحراوية وليالي النجوم، اكتشف تجارب الجونة الاستثنائية."
+      : "From private sunset catamarans across untouched Red Sea islands to starlit Bedouin desert safaris, explore handpicked activities in El Gouna.",
+  };
+}
 
-export default async function ExperiencesPage({ searchParams }: Props) {
+export default async function ExperiencesPage({ params, searchParams }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = getDictionary(locale);
+  const isAr = locale === "ar";
+
   const { category = "" } = await searchParams;
   const allExperiences = await getExperiences();
+
+  const CATEGORIES = [
+    { slug: "", label: t.experiencesPage.allAdventures },
+    { slug: "boat-trips", label: t.experiencesPage.boatTrips },
+    { slug: "safari", label: t.experiencesPage.safari },
+    { slug: "watersports-kitesurfing", label: t.experiencesPage.watersports },
+    { slug: "lifestyle-wellness", label: t.experiencesPage.wellness },
+  ];
 
   const filteredExperiences = category
     ? allExperiences.filter(
@@ -44,13 +60,13 @@ export default async function ExperiencesPage({ searchParams }: Props) {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="max-w-2xl space-y-3">
             <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand-terracotta">
-              Red Sea Adventures
+              {t.experiencesPage.eyebrow}
             </span>
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
-              Curated Experiences
+              {t.experiencesPage.title}
             </h1>
             <p className="text-xs sm:text-sm text-brand-brown-muted leading-relaxed font-light">
-              From private sunset catamarans across untouched Red Sea islands to starlit Bedouin desert safaris, explore handpicked activities hosted by certified local guides.
+              {t.experiencesPage.subtitle}
             </p>
           </div>
 
@@ -81,7 +97,9 @@ export default async function ExperiencesPage({ searchParams }: Props) {
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
         <div className="flex items-center justify-between mb-8">
           <span className="text-xs text-brand-brown-muted font-medium">
-            Showing <strong className="text-brand-brown">{filteredExperiences.length}</strong> curated experiences in El Gouna
+            {isAr ? "عرض" : "Showing"}{" "}
+            <strong className="text-brand-brown">{filteredExperiences.length}</strong>{" "}
+            {t.experiencesPage.showingCount}
           </span>
         </div>
 
@@ -94,13 +112,13 @@ export default async function ExperiencesPage({ searchParams }: Props) {
         ) : (
           <div className="text-center py-16 bg-white rounded-3xl border border-brand-border p-8">
             <p className="text-brand-brown-muted text-sm mb-4">
-              No experiences found in this category at this time.
+              {t.experiencesPage.noExperiencesFound}
             </p>
             <Link
               href="/experiences"
               className="inline-block px-5 py-2.5 bg-brand-terracotta text-white text-xs font-bold uppercase rounded-xl"
             >
-              View All Experiences
+              {t.experiencesPage.viewAll}
             </Link>
           </div>
         )}
@@ -108,3 +126,4 @@ export default async function ExperiencesPage({ searchParams }: Props) {
     </div>
   );
 }
+

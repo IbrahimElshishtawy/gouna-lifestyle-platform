@@ -9,6 +9,7 @@ import { useRouter, usePathname } from "@/i18n/routing";
 interface LanguageContextType {
   locale: Locale;
   dir: "ltr" | "rtl";
+  isRtl: boolean;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
   t: typeof dictionary.en;
@@ -30,7 +31,8 @@ export function LanguageProvider({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const dir: "ltr" | "rtl" = currentLocale === "ar" ? "rtl" : "ltr";
+  const isRtl = currentLocale === "ar";
+  const dir: "ltr" | "rtl" = isRtl ? "rtl" : "ltr";
   const t = (dictionary[currentLocale] || dictionary.en) as typeof dictionary.en;
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export function LanguageProvider({
       value={{
         locale: currentLocale,
         dir,
+        isRtl,
         setLocale,
         toggleLocale,
         t,
@@ -85,6 +88,7 @@ export function useLanguage() {
     return {
       locale: "en" as Locale,
       dir: "ltr" as "ltr" | "rtl",
+      isRtl: false,
       setLocale: () => {},
       toggleLocale: () => {},
       t: dictionary.en,
@@ -93,3 +97,4 @@ export function useLanguage() {
   }
   return context;
 }
+

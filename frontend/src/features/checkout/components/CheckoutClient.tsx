@@ -2,9 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { PAYMENT_METHODS, processCheckout } from "../services/checkout.api";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CheckoutClientProps {
   property: Property;
@@ -21,11 +22,13 @@ export default function CheckoutClient({
   initialGuests,
   initialPromo,
 }: CheckoutClientProps) {
+  const { t, locale, isRtl } = useLanguage();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [country, setCountry] = useState("Egypt");
+  const [country, setCountry] = useState(locale === "ar" ? "مصر" : "Egypt");
   const [specialRequests, setSpecialRequests] = useState("");
 
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("full");
@@ -45,7 +48,6 @@ export default function CheckoutClient({
   const basePricePerNight = Math.round(property.price_cents / 100);
   const baseStayAmount = basePricePerNight * nights;
   const cleaningFee = 1500;
-  const serviceFee = 0; // Service fee eliminated per specification
   const subtotal = baseStayAmount + cleaningFee;
   const discountAmount = appliedPromo ? Math.round(subtotal * 0.1) : 0;
   const taxable = subtotal - discountAmount;
@@ -58,12 +60,14 @@ export default function CheckoutClient({
 
   const payableAmount = paymentType === "deposit" ? depositAmount : totalAmount;
 
-  const formatEgp = (num: number) => new Intl.NumberFormat().format(num);
+  const currencyLabel = locale === "ar" ? "ج.م" : "EGP";
+  const formatNum = (num: number) => new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(num);
+  const formatCurrency = (num: number) => `${formatNum(num)} ${currencyLabel}`;
 
   const formatDateDisplay = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString("en-US", {
+      return d.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
         month: "short",
         day: "2-digit",
         year: "numeric",
@@ -104,9 +108,9 @@ export default function CheckoutClient({
       const ref = res.booking_reference || `GON-2026-${Math.floor(100000 + Math.random() * 900000)}`;
       setBookingConfirmedRef(ref);
 
-      // WhatsApp concierge notification fallback matching legacy behavior
+      const msgHeader = locale === "ar" ? "مرحباً مكتب حجز جوناو كونسيرج،" : "Hello GouNow VIP Reservations,";
       const text = encodeURIComponent(
-        `Hello GouNow VIP Reservations,\n\nI have submitted a booking reservation for ${property.title}.\nBooking Reference: ${ref}\nCheck-in: ${initialCheckIn}\nCheck-out: ${initialCheckOut} (${nights} Nights)\nGuests: ${initialGuests}\nGuest Name: ${firstName} ${lastName} (${phone || email})\nTotal: ${formatEgp(totalAmount)} EGP (Due Today: ${formatEgp(payableAmount)} EGP - ${paymentType.toUpperCase()})\n\nPlease confirm availability and payment verification.`
+        `${msgHeader}\n\nProperty: ${property.title}\nRef: ${ref}\nCheck-in: ${initialCheckIn}\nCheck-out: ${initialCheckOut} (${nights} Nights)\nGuests: ${initialGuests}\nGuest: ${firstName} ${lastName} (${phone || email})\nTotal: ${formatCurrency(totalAmount)} (Due Today: ${formatCurrency(payableAmount)} - ${paymentType.toUpperCase()})`
       );
       window.open(`https://wa.me/201000000000?text=${text}`, "_blank");
     } catch {
@@ -123,40 +127,38 @@ export default function CheckoutClient({
           ✓
         </div>
         <span className="text-xs font-bold uppercase tracking-widest text-brand-terracotta">
-          Reservation Request Confirmed
+          {t.checkout.reservationConfirmed}
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-brand-brown">
-          Thank you, {firstName || "Guest"}!
+          {t.checkout.thankYou}, {firstName || (locale === "ar" ? "ضيفنا العزيز" : "Guest")}!
         </h1>
         <p className="text-sm text-brand-brown-muted max-w-md mx-auto leading-relaxed">
-          Your booking reference is{" "}
-          <strong className="font-mono text-brand-brown">{bookingConfirmedRef}</strong>.
-          Our VIP Concierge desk in Abu Tig Marina is reviewing your reservation details and will reach out shortly.
+          {t.checkout.referenceNotice.replace("{ref}", bookingConfirmedRef)}
         </p>
 
-        <div className="bg-white p-6 rounded-2xl border border-brand-border text-left max-w-md mx-auto text-xs space-y-2">
+        <div className="bg-white p-6 rounded-2xl border border-brand-border text-start max-w-md mx-auto text-xs space-y-2">
           <div className="flex justify-between">
-            <span className="text-brand-brown-muted">Property:</span>
+            <span className="text-brand-brown-muted">{t.checkout.propertyLabel}</span>
             <span className="font-bold text-brand-brown">{property.title}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-brand-brown-muted">Dates:</span>
+            <span className="text-brand-brown-muted">{t.checkout.datesLabel}</span>
             <span className="font-medium text-brand-brown">
-              {formatDateDisplay(initialCheckIn)} — {formatDateDisplay(initialCheckOut)} ({nights} Nights)
+              {formatDateDisplay(initialCheckIn)} — {formatDateDisplay(initialCheckOut)} ({nights} {locale === "ar" ? "ليالي" : "Nights"})
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-brand-brown-muted">Payable Due Today:</span>
-            <span className="font-bold text-brand-terracotta">{formatEgp(payableAmount)} EGP</span>
+            <span className="text-brand-brown-muted">{t.checkout.payableDueToday}</span>
+            <span className="font-bold text-brand-terracotta">{formatCurrency(payableAmount)}</span>
           </div>
         </div>
 
-        <div className="pt-4 flex justify-center gap-4">
+        <div className="pt-4 flex justify-center gap-4 flex-wrap">
           <Link
             href="/"
             className="px-6 py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition"
           >
-            Return to Homepage
+            {t.checkout.returnHome}
           </Link>
           <a
             href="https://wa.me/201000000000"
@@ -164,7 +166,7 @@ export default function CheckoutClient({
             rel="noopener noreferrer"
             className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2"
           >
-            <span>💬</span> Concierge WhatsApp
+            <span>💬</span> {t.checkout.conciergeWhatsApp}
           </a>
         </div>
       </div>
@@ -178,18 +180,18 @@ export default function CheckoutClient({
       {/* Checkout Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-brand-brown-muted mb-6">
         <Link href="/" className="hover:text-brand-brown">
-          Home
+          {t.common.home}
         </Link>
-        <span>/</span>
+        <span className="rtl:rotate-180">/</span>
         <Link href="/stays" className="hover:text-brand-brown">
-          Stays
+          {t.nav.stays}
         </Link>
-        <span>/</span>
+        <span className="rtl:rotate-180">/</span>
         <Link href={`/stays/${property.slug}`} className="hover:text-brand-brown">
           {property.title}
         </Link>
-        <span>/</span>
-        <span className="text-brand-brown font-medium">Checkout</span>
+        <span className="rtl:rotate-180">/</span>
+        <span className="text-brand-brown font-medium">{t.checkout.checkoutBreadcrumb}</span>
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -198,61 +200,61 @@ export default function CheckoutClient({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 1. Guest Information */}
             <div className="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
-              <div className="flex items-center space-x-2 border-b border-brand-border pb-3">
+              <div className="flex items-center gap-2 border-b border-brand-border pb-3">
                 <span className="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">
                   1
                 </span>
                 <h2 className="font-bold text-brand-brown text-sm uppercase tracking-wider">
-                  Guest Information
+                  {t.checkout.guestInfo}
                 </h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    First Name *
+                    {t.checkout.firstName}
                   </label>
                   <input
                     type="text"
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Elena"
+                    placeholder={locale === "ar" ? "أحمد" : "Elena"}
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    Last Name *
+                    {t.checkout.lastName}
                   </label>
                   <input
                     type="text"
                     required
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Rostova"
+                    placeholder={locale === "ar" ? "محمود" : "Rostova"}
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    Email Address *
+                    {t.checkout.email}
                   </label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="elena@example.com"
+                    placeholder="guest@example.com"
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    Mobile / WhatsApp Phone *
+                    {t.checkout.phone}
                   </label>
                   <input
                     type="tel"
@@ -260,32 +262,33 @@ export default function CheckoutClient({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+20 100 000 0000"
-                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
+                    dir="ltr"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta text-start"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    Country of Residence
+                    {t.checkout.country}
                   </label>
                   <input
                     type="text"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Egypt, Germany, UAE..."
+                    placeholder={locale === "ar" ? "مصر، الإمارات، السعودية، ألمانيا..." : "Egypt, Germany, UAE..."}
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    Special Requests or Arrival Notes
+                    {t.checkout.specialRequests}
                   </label>
                   <textarea
                     rows={2}
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
-                    placeholder="Early check-in preferred, baby cot required, lagoon view preference..."
+                    placeholder={t.checkout.specialRequestsPlaceholder}
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                   />
                 </div>
@@ -294,12 +297,12 @@ export default function CheckoutClient({
 
             {/* 2. Payment Schedule Option */}
             <div className="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
-              <div className="flex items-center space-x-2 border-b border-brand-border pb-3">
+              <div className="flex items-center gap-2 border-b border-brand-border pb-3">
                 <span className="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">
                   2
                 </span>
                 <h2 className="font-bold text-brand-brown text-sm uppercase tracking-wider">
-                  Payment Schedule
+                  {t.checkout.paymentPreference}
                 </h2>
               </div>
 
@@ -321,17 +324,19 @@ export default function CheckoutClient({
                     onChange={() => setPaymentType("deposit")}
                     className="mt-1 text-brand-terracotta focus:ring-brand-terracotta"
                   />
-                  <div className="ml-3 flex-1">
+                  <div className="ms-3 flex-1">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-brand-brown">
-                        Pay Deposit Now
+                        {t.checkout.payDeposit}
                       </span>
                       <span className="text-xs font-bold text-brand-terracotta">
-                        {formatEgp(depositAmount)} EGP
+                        {formatCurrency(depositAmount)}
                       </span>
                     </div>
                     <p className="text-[11px] text-brand-brown-muted mt-1">
-                      Pay 30.00% today. Remaining balance of {formatEgp(remainingDepositBalance)} EGP due 14 days before arrival.
+                      {locale === "ar"
+                        ? `سداد 30% دفعة أولى اليوم. المتبقي ${formatCurrency(remainingDepositBalance)} يُستحق قبل 14 يوماً من موعد الوصول.`
+                        : `Pay 30% today. Remaining balance of ${formatCurrency(remainingDepositBalance)} due prior to arrival.`}
                     </p>
                   </div>
                 </label>
@@ -353,17 +358,17 @@ export default function CheckoutClient({
                     onChange={() => setPaymentType("full")}
                     className="mt-1 text-brand-terracotta focus:ring-brand-terracotta"
                   />
-                  <div className="ml-3 flex-1">
+                  <div className="ms-3 flex-1">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-brand-brown">
-                        Pay In Full
+                        {t.checkout.payFull}
                       </span>
                       <span className="text-xs font-bold text-brand-terracotta">
-                        {formatEgp(totalAmount)} EGP
+                        {formatCurrency(totalAmount)}
                       </span>
                     </div>
                     <p className="text-[11px] text-brand-brown-muted mt-1">
-                      Complete 100% of payment today for hassle-free instant express check-in upon arrival.
+                      {t.checkout.payFullSub}
                     </p>
                   </div>
                 </label>
@@ -372,18 +377,30 @@ export default function CheckoutClient({
 
             {/* 3. Payment Method */}
             <div className="bg-white p-6 rounded-2xl border border-brand-border shadow-xs space-y-4">
-              <div className="flex items-center space-x-2 border-b border-brand-border pb-3">
+              <div className="flex items-center gap-2 border-b border-brand-border pb-3">
                 <span className="w-6 h-6 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs">
                   3
                 </span>
                 <h2 className="font-bold text-brand-brown text-sm uppercase tracking-wider">
-                  Payment Method
+                  {t.checkout.paymentMethod}
                 </h2>
               </div>
 
               <div className="space-y-3">
                 {PAYMENT_METHODS.map((pm) => {
                   const isSelected = paymentMethodId === pm.id;
+                  const localizedName =
+                    pm.id === 1 ? t.checkout.creditCard :
+                    pm.id === 2 ? (locale === "ar" ? "تحويل إنستاباي الفوري (Instapay)" : "Instapay Bank Transfer") :
+                    pm.id === 3 ? t.checkout.bankTransfer :
+                    t.checkout.cash;
+
+                  const localizedDesc =
+                    pm.id === 1 ? t.checkout.creditCardSub :
+                    pm.id === 2 ? (locale === "ar" ? "التحويل المباشر عبر البنوك المصرية وشبكة المدفوعات اللحظية" : "Instant direct transfer via Egyptian Banks & IPN network") :
+                    pm.id === 3 ? t.checkout.bankTransferSub :
+                    t.checkout.cashSub;
+
                   return (
                     <label
                       key={pm.id}
@@ -394,7 +411,7 @@ export default function CheckoutClient({
                           : "border-brand-border bg-white hover:bg-brand-sand-light/20"
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center gap-3">
                         <input
                           type="radio"
                           name="payment_method_id"
@@ -405,10 +422,10 @@ export default function CheckoutClient({
                         />
                         <div>
                           <span className="block text-xs font-bold text-brand-brown">
-                            {pm.name}
+                            {localizedName}
                           </span>
                           <span className="block text-[11px] text-brand-brown-muted">
-                            {pm.description}
+                            {localizedDesc}
                           </span>
                         </div>
                       </div>
@@ -423,17 +440,21 @@ export default function CheckoutClient({
                   <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs space-y-2 text-emerald-900 mt-2">
                     <div className="flex items-center gap-2 font-bold text-emerald-800">
                       <span>⚡</span>
-                      <span>Instapay Transfer Details</span>
+                      <span>{locale === "ar" ? "تفاصيل التحويل عبر إنستاباي" : "Instapay Transfer Details"}</span>
                     </div>
                     <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                      Transfer your reservation deposit/payment instantly via your Egyptian bank application or Instapay:
+                      {locale === "ar"
+                        ? "يمكنك تحويل قيمة الحجز مباشرة عبر تطبيق البنك أو إنستاباي:"
+                        : "Transfer your reservation deposit/payment instantly via your Egyptian bank application or Instapay:"}
                     </p>
-                    <div className="flex items-center justify-between p-2.5 bg-white border border-emerald-300 rounded-lg font-mono font-bold text-xs text-brand-brown">
+                    <div className="flex items-center justify-between p-2.5 bg-white border border-emerald-300 rounded-lg font-mono font-bold text-xs text-brand-brown" dir="ltr">
                       <span>IPA: gounow@instapay</span>
                       <span className="text-[10px] text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded font-sans font-semibold">Instant Verification</span>
                     </div>
                     <p className="text-[10px] text-emerald-700">
-                      Please enter your name or booking reference in the transfer remarks. Concierge will confirm receipt immediately.
+                      {locale === "ar"
+                        ? "يرجى كتابة اسم الضيف أو رقم الحجز في خانة الملاحظات لتأكيد التحويل فورياً."
+                        : "Please enter your name or booking reference in the transfer remarks. Concierge will confirm receipt immediately."}
                     </p>
                   </div>
                 )}
@@ -443,13 +464,13 @@ export default function CheckoutClient({
             {/* 4. Cancellation & House Rules */}
             <div className="bg-white p-6 rounded-2xl border border-brand-border shadow-xs text-xs text-brand-brown space-y-2">
               <h3 className="font-bold text-sm text-brand-brown mb-1">
-                Moderate Cancellation Policy
+                {locale === "ar" ? "سياسة الإلغاء المرنة" : "Moderate Cancellation Policy"}
               </h3>
               <p className="text-brand-brown-muted leading-relaxed">
-                Full refund up to 7 days before check-in. 50% refund thereafter.
+                {t.checkout.cancellationPolicy}
               </p>
               <p className="text-[11px] text-brand-brown-muted pt-2 border-t border-brand-border">
-                By selecting &apos;Complete Reservation&apos;, you agree to the GouNow Villa Rental Terms, House Rules, and Privacy Policy.
+                {t.checkout.termsAgreement}
               </p>
             </div>
 
@@ -457,10 +478,10 @@ export default function CheckoutClient({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-4 px-6 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-4 px-6 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>{isSubmitting ? "Processing..." : "Complete Reservation & Pay"}</span>
-              <span>({formatEgp(payableAmount)} EGP)</span>
+              <span>{isSubmitting ? t.checkout.processing : t.checkout.completeReservation}</span>
+              <span>({formatCurrency(payableAmount)})</span>
             </button>
           </form>
         </div>
@@ -469,7 +490,7 @@ export default function CheckoutClient({
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
           <div className="bg-white rounded-2xl border border-brand-border shadow-xs overflow-hidden">
             {/* Property Header */}
-            <div className="p-6 border-b border-brand-border flex items-center space-x-4">
+            <div className="p-6 border-b border-brand-border flex items-center gap-4">
               <div className="w-20 h-20 rounded-xl overflow-hidden bg-brand-sand shrink-0 border border-brand-border relative">
                 <Image
                   src={thumbImg}
@@ -480,30 +501,30 @@ export default function CheckoutClient({
               </div>
               <div>
                 <span className="text-[10px] font-bold text-brand-terracotta uppercase tracking-wider bg-brand-terracotta/10 px-2 py-0.5 rounded">
-                  {property.category?.name || "Luxury Villa"}
+                  {property.category?.name || (locale === "ar" ? "فيلا فاخرة" : "Luxury Villa")}
                 </span>
                 <h3 className="font-bold text-brand-brown text-sm mt-1 leading-snug">
                   {property.title}
                 </h3>
                 <p className="text-[11px] text-brand-brown-muted mt-0.5">
-                  📍 {property.location?.name || "El Gouna"}
+                  📍 {property.location?.name || (locale === "ar" ? "الجونة" : "El Gouna")}
                 </p>
               </div>
             </div>
 
             {/* Dates & Guests Box */}
             <div className="p-6 border-b border-brand-border bg-brand-sand-light/30 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="border-r border-brand-border/80">
+              <div className="border-e border-brand-border/80">
                 <span className="block text-[10px] font-bold text-brand-brown-muted uppercase">
-                  Check-in
+                  {t.bookingQuote.checkIn}
                 </span>
                 <span className="font-bold text-brand-brown">
                   {formatDateDisplay(initialCheckIn)}
                 </span>
               </div>
-              <div className="border-r border-brand-border/80">
+              <div className="border-e border-brand-border/80">
                 <span className="block text-[10px] font-bold text-brand-brown-muted uppercase">
-                  Check-out
+                  {t.bookingQuote.checkOut}
                 </span>
                 <span className="font-bold text-brand-brown">
                   {formatDateDisplay(initialCheckOut)}
@@ -511,10 +532,10 @@ export default function CheckoutClient({
               </div>
               <div>
                 <span className="block text-[10px] font-bold text-brand-brown-muted uppercase">
-                  Duration
+                  {locale === "ar" ? "المدة والضيوف" : "Duration"}
                 </span>
                 <span className="font-bold text-brand-brown">
-                  {nights} Nights • {initialGuests} Guests
+                  {nights} {locale === "ar" ? "ليالي" : "Nights"} • {initialGuests} {t.propertyCard.guests}
                 </span>
               </div>
             </div>
@@ -522,8 +543,8 @@ export default function CheckoutClient({
             {/* Price Breakdown Snapshot */}
             <div className="p-6 space-y-3 text-xs text-brand-brown">
               <div className="flex items-center justify-between">
-                <span>Base Stay ({nights} Nights)</span>
-                <span className="font-semibold">{formatEgp(baseStayAmount)} EGP</span>
+                <span>{t.checkout.nightsStay.replace("{nights}", String(nights))}</span>
+                <span className="font-semibold">{formatCurrency(baseStayAmount)}</span>
               </div>
 
               {/* Nightly Accordion */}
@@ -533,16 +554,16 @@ export default function CheckoutClient({
                   onClick={() => setOpenNights(!openNights)}
                   className="w-full flex items-center justify-between text-[11px] text-brand-terracotta font-semibold hover:underline"
                 >
-                  <span>Nightly Rate Details</span>
-                  <span>{openNights ? "▲ Hide" : "▼ View"}</span>
+                  <span>{locale === "ar" ? "تفاصيل سعر الليلة" : "Nightly Rate Details"}</span>
+                  <span>{openNights ? "▲" : "▼"}</span>
                 </button>
                 {openNights && (
-                  <div className="mt-2 space-y-1.5 pl-2 text-[11px] text-brand-brown-muted">
+                  <div className="mt-2 space-y-1.5 ps-2 text-[11px] text-brand-brown-muted">
                     {Array.from({ length: nights }).map((_, idx) => (
                       <div key={idx} className="flex items-center justify-between">
-                        <span>Night {idx + 1} (Standard Rate)</span>
+                        <span>{locale === "ar" ? `الليلة ${idx + 1}` : `Night ${idx + 1}`}</span>
                         <span className="font-medium text-brand-brown">
-                          {formatEgp(basePricePerNight)} EGP
+                          {formatCurrency(basePricePerNight)}
                         </span>
                       </div>
                     ))}
@@ -551,42 +572,40 @@ export default function CheckoutClient({
               </div>
 
               <div className="flex items-center justify-between">
-                <span>Departure Cleaning Fee</span>
-                <span className="font-semibold">{formatEgp(cleaningFee)} EGP</span>
+                <span>{t.checkout.cleaningFee}</span>
+                <span className="font-semibold">{formatCurrency(cleaningFee)}</span>
               </div>
-
-
 
               {appliedPromo && (
                 <div className="flex items-center justify-between text-emerald-700 font-semibold">
-                  <span>Promo Discount ({appliedPromo})</span>
-                  <span>-{formatEgp(discountAmount)} EGP</span>
+                  <span>{t.checkout.promoDiscount} ({appliedPromo})</span>
+                  <span>-{formatCurrency(discountAmount)}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between text-brand-brown-muted">
-                <span>Applicable Taxes (14%)</span>
-                <span>{formatEgp(taxAmount)} EGP</span>
+                <span>{t.checkout.taxes}</span>
+                <span>{formatCurrency(taxAmount)}</span>
               </div>
 
               <div className="border-t border-brand-border pt-3 flex items-center justify-between text-sm font-bold">
-                <span>Total Stay Amount</span>
+                <span>{t.checkout.totalStay}</span>
                 <span className="text-brand-terracotta text-base">
-                  {formatEgp(totalAmount)} EGP
+                  {formatCurrency(totalAmount)}
                 </span>
               </div>
 
               {/* Due Today Highlight */}
               <div className="bg-brand-sand-light p-3.5 rounded-xl border border-brand-border mt-3">
                 <div className="flex items-center justify-between font-bold text-xs">
-                  <span>Amount Due Today</span>
+                  <span>{t.checkout.dueToday.replace("{type}", paymentType === "deposit" ? (locale === "ar" ? "عربون" : "Deposit") : (locale === "ar" ? "سداد كامل" : "Full"))}</span>
                   <span className="text-brand-terracotta text-sm">
-                    {formatEgp(payableAmount)} EGP
+                    {formatCurrency(payableAmount)}
                   </span>
                 </div>
                 {paymentType === "deposit" && (
                   <p className="text-[10px] text-brand-brown-muted mt-1">
-                    Remaining {formatEgp(remainingDepositBalance)} EGP payable prior to arrival.
+                    {t.checkout.remainingBalance} {formatCurrency(remainingDepositBalance)}
                   </p>
                 )}
               </div>
@@ -599,19 +618,19 @@ export default function CheckoutClient({
                   type="text"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
-                  placeholder="Promo / Voucher Code"
+                  placeholder={t.checkout.promoPlaceholder}
                   className="flex-1 text-xs rounded-xl border-brand-border py-2 px-3 uppercase font-mono bg-white focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
                 />
                 <button
                   type="submit"
                   className="py-2 px-4 bg-brand-brown text-white text-xs font-semibold rounded-xl hover:bg-brand-brown-dark transition-colors cursor-pointer"
                 >
-                  Apply
+                  {t.checkout.apply}
                 </button>
               </form>
               {appliedPromo && (
                 <p className="text-[10px] text-emerald-700 font-medium mt-1.5">
-                  ✓ Voucher &quot;{appliedPromo}&quot; applied: 10% discount!
+                  ✓ {locale === "ar" ? `تم تطبيق القسيمة "${appliedPromo}" خصم 10%!` : `Voucher "${appliedPromo}" applied: 10% discount!`}
                 </p>
               )}
             </div>
@@ -621,3 +640,4 @@ export default function CheckoutClient({
     </div>
   );
 }
+

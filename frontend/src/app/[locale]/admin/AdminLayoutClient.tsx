@@ -14,7 +14,7 @@ export default function AdminLayoutClient({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // If on login page, render clean layout without sidebar/header
-  if (pathname === "/admin/login") {
+  if (pathname.endsWith("/admin/login")) {
     return <>{children}</>;
   }
 
@@ -27,7 +27,7 @@ export default function AdminLayoutClient({
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+      <div className="flex-1 flex flex-col min-w-0 lg:ps-72">
         <AdminHeader onMenuToggle={() => setSidebarOpen(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto gounow-scrollbar">

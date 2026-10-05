@@ -2,8 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 import { login, challenge2fa } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";

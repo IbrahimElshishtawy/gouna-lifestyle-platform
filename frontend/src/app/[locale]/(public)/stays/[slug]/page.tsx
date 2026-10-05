@@ -1,5 +1,5 @@
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
@@ -9,32 +9,41 @@ import {
 import BookingQuoteWidget from "@/features/properties/components/BookingQuoteWidget";
 import PropertyCard from "@/features/properties/components/PropertyCard";
 import ReviewsSection from "@/features/reviews/components/ReviewsSection";
+import { setRequestLocale } from "next-intl/server";
+import { getDictionary } from "@/locales/dictionary";
 import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{
+    locale: string;
     slug: string;
   }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const property = await getPropertyBySlug(slug);
-  if (!property) return { title: "Property Not Found" };
+  const isAr = locale === "ar";
+  if (!property) return { title: isAr ? "العقار غير موجود" : "Property Not Found" };
 
   return {
-    title: `${property.title} | GouNow El Gouna`,
+    title: `${property.title} | ${isAr ? "جوناو الجونة" : "GouNow El Gouna"}`,
     description: property.description,
     openGraph: {
       title: property.title,
       description: property.description,
+      locale: isAr ? "ar_EG" : "en_US",
       images: property.images?.[0]?.url ? [property.images[0].url] : [],
     },
   };
 }
 
 export default async function PropertyDetailPage({ params }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = getDictionary(locale);
+  const isAr = locale === "ar";
+
   const property = await getPropertyBySlug(slug);
 
   if (!property) {
@@ -48,8 +57,9 @@ export default async function PropertyDetailPage({ params }: Props) {
 
   const images = property.images || [];
   const heroImage = images[0]?.url || "/assets/images/bg-sand-texture.jpg";
+  const whatsappMsgHeader = isAr ? "مرحباً جوناو،" : "Hello GouNow,";
   const whatsappInquiryUrl = `https://wa.me/201000000000?text=${encodeURIComponent(
-    `Hello GouNow,\n\nI am inquiring about: ${property.title}\nReference: ${property.reference_code}\n\nCould you please provide more details?`
+    `${whatsappMsgHeader}\n\n${isAr ? "أستفسر عن عقار:" : "I am inquiring about:"} ${property.title}\n${isAr ? "المرجع:" : "Reference:"} ${property.reference_code}\n\n${isAr ? "هل يمكن تزويدي بالمزيد من التفاصيل والتواريخ المتاحة؟" : "Could you please provide more details?"}`
   )}`;
 
   return (
@@ -59,18 +69,18 @@ export default async function PropertyDetailPage({ params }: Props) {
         <div>
           <nav className="flex items-center gap-2 text-xs text-brand-brown-muted mb-2">
             <Link href="/" className="hover:text-brand-brown">
-              Home
+              {t.common.home}
             </Link>
-            <span>/</span>
+            <span className="rtl:rotate-180">/</span>
             <Link
               href={`/stays?listing_type=${property.listing_type}`}
               className="hover:text-brand-brown"
             >
-              {property.listing_type === "rent" ? "Stays" : "Real Estate"}
+              {property.listing_type === "rent" ? t.nav.stays : (isAr ? "عقارات للبيع" : "Real Estate")}
             </Link>
-            <span>/</span>
+            <span className="rtl:rotate-180">/</span>
             <span className="text-brand-brown font-medium">
-              {property.location?.name || "El Gouna"}
+              {property.location?.name || (isAr ? "الجونة" : "El Gouna")}
             </span>
           </nav>
 
@@ -79,9 +89,9 @@ export default async function PropertyDetailPage({ params }: Props) {
           </h1>
 
           <div className="flex items-center gap-3 text-xs text-brand-brown-muted mt-2">
-            <span>📍 {property.location?.name}, El Gouna, Egypt</span>
+            <span>📍 {property.location?.name}, {isAr ? "الجونة، مصر" : "El Gouna, Egypt"}</span>
             <span>&bull;</span>
-            <span className="font-mono text-brand-terracotta font-semibold">
+            <span className="font-mono text-brand-terracotta font-semibold" dir="ltr">
               Ref: {property.reference_code}
             </span>
           </div>
@@ -99,7 +109,7 @@ export default async function PropertyDetailPage({ params }: Props) {
             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition flex items-center gap-1.5 shadow-xs"
           >
             <span>💬</span>
-            <span>WhatsApp Concierge</span>
+            <span>{isAr ? "كونسيرج واتساب" : "WhatsApp Concierge"}</span>
           </a>
         </div>
       </div>
@@ -115,9 +125,9 @@ export default async function PropertyDetailPage({ params }: Props) {
             priority
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-4 start-4">
             <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] rounded-full uppercase tracking-wider">
-              {property.category?.name || "Signature Residence"}
+              {property.category?.name || (isAr ? "إقامة مميزة" : "Signature Residence")}
             </span>
           </div>
         </div>
@@ -140,44 +150,44 @@ export default async function PropertyDetailPage({ params }: Props) {
 
       {/* Quick Facts Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 p-5 bg-white rounded-2xl border border-brand-border mb-12 text-xs">
-        <div className="border-r border-brand-border/60 pr-3">
+        <div className="border-e border-brand-border/60 pe-3">
           <span className="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">
-            Bedrooms
+            {t.staysPage.bedrooms}
           </span>
           <span className="text-sm font-bold text-brand-brown">
-            {property.bedrooms} Beds
+            {property.bedrooms} {isAr ? "غرف نوم" : "Beds"}
           </span>
         </div>
-        <div className="border-r border-brand-border/60 pr-3">
+        <div className="border-e border-brand-border/60 pe-3">
           <span className="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">
-            Bathrooms
+            {isAr ? "الحمامات" : "Bathrooms"}
           </span>
           <span className="text-sm font-bold text-brand-brown">
-            {property.bathrooms} Baths
+            {property.bathrooms} {isAr ? "حمامات" : "Baths"}
           </span>
         </div>
-        <div className="border-r border-brand-border/60 pr-3">
+        <div className="border-e border-brand-border/60 pe-3">
           <span className="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">
-            Capacity
+            {isAr ? "السعة" : "Capacity"}
           </span>
           <span className="text-sm font-bold text-brand-brown">
-            Up to {property.max_guests} Guests
+            {isAr ? `حتى ${property.max_guests} ضيوف` : `Up to ${property.max_guests} Guests`}
           </span>
         </div>
-        <div className="border-r border-brand-border/60 pr-3">
+        <div className="border-e border-brand-border/60 pe-3">
           <span className="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">
-            Area
+            {isAr ? "المساحة" : "Area"}
           </span>
           <span className="text-sm font-bold text-brand-brown">
-            {property.area_sqm ? `${property.area_sqm} m²` : "Exclusive"}
+            {property.area_sqm ? `${property.area_sqm} ${isAr ? "م²" : "m²"}` : (isAr ? "مساحة رحبة" : "Exclusive")}
           </span>
         </div>
         <div>
           <span className="block text-brand-brown-muted text-[10px] uppercase font-bold tracking-wider">
-            Times
+            {isAr ? "مواعيد الإقامة" : "Times"}
           </span>
           <span className="text-xs font-semibold text-brand-brown">
-            In {property.check_in_time} / Out {property.check_out_time}
+            {isAr ? `وصول ${property.check_in_time} / مغادرة ${property.check_out_time}` : `In ${property.check_in_time} / Out ${property.check_out_time}`}
           </span>
         </div>
       </div>
@@ -189,7 +199,7 @@ export default async function PropertyDetailPage({ params }: Props) {
           {/* Description */}
           <div className="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-4">
             <h2 className="font-serif text-xl font-bold text-brand-brown">
-              About This Sanctuary
+              {isAr ? "عن هذا الملاذ الاستثنائي" : "About This Sanctuary"}
             </h2>
             <div className="text-xs sm:text-sm text-brand-brown/90 leading-relaxed space-y-4 font-light">
               <p className="font-medium text-brand-brown leading-relaxed">
@@ -202,7 +212,7 @@ export default async function PropertyDetailPage({ params }: Props) {
           {property.amenities && property.amenities.length > 0 && (
             <div className="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-6">
               <h2 className="font-serif text-xl font-bold text-brand-brown">
-                Curated Amenities
+                {isAr ? "وسائل الراحة والمرافق" : "Curated Amenities"}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
                 {property.amenities.map((amenity) => (
@@ -221,12 +231,12 @@ export default async function PropertyDetailPage({ params }: Props) {
           {/* House Policies */}
           <div className="bg-white p-8 rounded-3xl border border-brand-border shadow-xs space-y-6">
             <h2 className="font-serif text-xl font-bold text-brand-brown">
-              Stay Policies &amp; Information
+              {isAr ? "سياسات وتعليمات الإقامة" : "Stay Policies & Information"}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
               <div className="space-y-2">
                 <span className="font-bold text-brand-brown block">
-                  Cancellation Policy:
+                  {isAr ? "سياسة الإلغاء:" : "Cancellation Policy:"}
                 </span>
                 <p className="text-brand-brown-muted leading-relaxed">
                   {property.cancellation_policy}
@@ -236,7 +246,7 @@ export default async function PropertyDetailPage({ params }: Props) {
               {property.payment_rules && (
                 <div className="space-y-2">
                   <span className="font-bold text-brand-brown block">
-                    Payment Rules:
+                    {isAr ? "شروط الدفع:" : "Payment Rules:"}
                   </span>
                   <p className="text-brand-brown-muted leading-relaxed">
                     {property.payment_rules}
@@ -247,7 +257,7 @@ export default async function PropertyDetailPage({ params }: Props) {
           </div>
 
           {/* Guest Reviews Section */}
-          <ReviewsSection title={`Guest Reviews for ${property.title}`} />
+          <ReviewsSection title={isAr ? `تقييمات الضيوف لـ ${property.title}` : `Guest Reviews for ${property.title}`} />
         </div>
 
         {/* Right Column: Sticky Booking / Inquiry Widget */}
@@ -260,7 +270,7 @@ export default async function PropertyDetailPage({ params }: Props) {
       {similarProperties.length > 0 && (
         <div className="mt-20 pt-16 border-t border-brand-border">
           <h2 className="font-serif text-2xl font-bold text-brand-brown mb-8">
-            Similar Escapes in {property.location?.name || "El Gouna"}
+            {isAr ? `إقامات مماثلة في ${property.location?.name || "الجونة"}` : `Similar Escapes in ${property.location?.name || "El Gouna"}`}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {similarProperties.map((p) => (
@@ -272,3 +282,4 @@ export default async function PropertyDetailPage({ params }: Props) {
     </div>
   );
 }
+
