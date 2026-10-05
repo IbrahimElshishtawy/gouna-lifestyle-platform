@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\V1\Admin\ConciergeApiController;
 use App\Http\Controllers\Api\V1\Admin\CustomerApiController;
 use App\Http\Controllers\Api\V1\Admin\DashboardApiController;
 use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
+use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
+use App\Http\Controllers\Api\V1\Admin\PropertyApiController;
 use App\Http\Controllers\Api\V1\Admin\SettingsApiController;
 use App\Http\Controllers\Api\V1\Admin\StaffApiController;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +27,21 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::post('/{id}/refund', [BookingApiController::class, 'refund'])->name('refund');
     });
 
-    // 3. Staff & Administrative Users
+    // 3. Properties & Units Management (Pause / Resume Display & CRUD)
+    Route::prefix('properties')->as('properties.')->group(function () {
+        Route::get('/', [PropertyApiController::class, 'index'])->name('index');
+        Route::get('/{id}', [PropertyApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [PropertyApiController::class, 'update'])->name('update');
+        Route::match(['put', 'patch'], '/{id}/toggle-status', [PropertyApiController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // 4. Media Design & Homepage CMS Control
+    Route::prefix('media-design')->as('media-design.')->group(function () {
+        Route::get('/', [MediaDesignApiController::class, 'index'])->name('index');
+        Route::put('/', [MediaDesignApiController::class, 'update'])->name('update');
+    });
+
+    // 5. Staff & Administrative Users
     Route::prefix('users')->as('users.')->group(function () {
         Route::get('/', [StaffApiController::class, 'index'])->name('index');
         Route::post('/', [StaffApiController::class, 'store'])->name('store');
@@ -33,26 +49,26 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::delete('/{id}', [StaffApiController::class, 'destroy'])->name('destroy');
     });
 
-    // 4. VIP Concierge & Leads
+    // 6. VIP Concierge & Leads
     Route::prefix('concierge')->as('concierge.')->group(function () {
         Route::get('/', [ConciergeApiController::class, 'index'])->name('index');
         Route::put('/{id}', [ConciergeApiController::class, 'update'])->name('update');
         Route::post('/{id}/assign', [ConciergeApiController::class, 'assign'])->name('assign');
     });
 
-    // 5. Finances & Payment Transactions
+    // 7. Finances & Payment Transactions
     Route::prefix('finances')->as('finances.')->group(function () {
         Route::get('/', [FinanceApiController::class, 'index'])->name('index');
         Route::get('/summary', [FinanceApiController::class, 'summary'])->name('summary');
     });
 
-    // 6. Customers / CRM
+    // 8. Customers / CRM
     Route::prefix('customers')->as('customers.')->group(function () {
         Route::get('/', [CustomerApiController::class, 'index'])->name('index');
         Route::get('/{id}', [CustomerApiController::class, 'show'])->name('show');
     });
 
-    // 7. Settings & Audit Logs
+    // 9. Settings & Audit Logs
     Route::prefix('settings')->as('settings.')->group(function () {
         Route::get('/', [SettingsApiController::class, 'index'])->name('index');
         Route::put('/', [SettingsApiController::class, 'update'])->name('update');

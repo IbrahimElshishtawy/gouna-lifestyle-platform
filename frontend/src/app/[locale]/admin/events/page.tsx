@@ -132,9 +132,9 @@ export default async function AdminEventsPage({ params }: Props) {
                   {isAr ? event.titleAr : event.title}
                 </h3>
                 <div className="space-y-1 text-xs text-brand-brown-muted font-light">
-                  <p>📍 {isAr ? event.venueAr : event.venue}</p>
-                  <p>🗓️ {isAr ? event.dateAr : event.date}</p>
-                  <p>🎟️ {isAr ? event.capacityAr : event.capacity}</p>
+                  <p>{isAr ? event.venueAr : event.venue}</p>
+                  <p>{isAr ? event.dateAr : event.date}</p>
+                  <p>{isAr ? event.capacityAr : event.capacity}</p>
                 </div>
               </div>
             </div>

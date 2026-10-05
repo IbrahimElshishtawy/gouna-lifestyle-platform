@@ -133,7 +133,6 @@ export default function AdminBookingsPage() {
             rel="noopener noreferrer"
             className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
           >
-            <span>💬</span>
             <span>{isAr ? "مكتب الكونسيرج المباشر" : "Concierge Desk"}</span>
           </a>
         </div>

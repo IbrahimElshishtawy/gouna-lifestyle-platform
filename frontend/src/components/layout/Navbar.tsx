@@ -55,7 +55,6 @@ export default function Navbar() {
             rel="noopener noreferrer"
             className="hover:text-white transition flex items-center gap-1 font-medium"
           >
-            <span>💬</span>
             <span className="hidden sm:inline">{t.common.whatsAppConcierge}</span>
             <span className="sm:hidden">WhatsApp</span>
           </a>
@@ -387,7 +386,6 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center gap-2"
               >
-                <span>💬</span>
                 <span>{t.common.whatsAppConcierge}</span>
               </a>
 

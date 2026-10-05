@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export type ClientTag = "First Time" | "New Client" | "VIP" | "VVIP";
 
@@ -29,6 +30,9 @@ export interface ClientProfile {
 }
 
 export default function AdminCustomersPage() {
+  const { locale } = useLanguage();
+  const isAr = locale === "ar";
+
   const [selectedTag, setSelectedTag] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"clients" | "leads">("clients");
@@ -78,124 +82,155 @@ export default function AdminCustomersPage() {
       id: 2,
       name: "Tarek Khalil",
       email: "tarek.khalil@investments.eg",
-      phone: "+201011223344",
+      phone: "+20 100 892 4110",
       nationality: "Egyptian",
       tag: "VIP",
       totalBookings: 4,
-      lifetimeSpendEgp: 215000,
-      memberSince: "Mar 2025",
+      lifetimeSpendEgp: 195000,
+      memberSince: "Jan 2025",
       lastActive: "Yesterday",
-      notes: "Investor evaluating Gouna real estate. Looking for beachfront acquisition while renting luxury units during negotiation periods.",
+      notes: "Regular investor in El Gouna. Frequently books high-end chalets and private yacht excursions for business partners.",
       history: [
         {
           id: "4",
-          reference: "GON-2026-552910",
-          property: "West Golf Sunset Lagoon Villa",
-          dates: "Aug 02 - Aug 06, 2026 (4 nights)",
-          amountEgp: 58000,
+          reference: "GON-2026-310928",
+          property: "Marina Luxury Residence 4B",
+          dates: "Jul 10 - Jul 15, 2026 (5 nights)",
+          amountEgp: 85000,
           status: "Completed",
         },
         {
           id: "5",
-          reference: "GON-2025-441029",
-          property: "Mangroovy Beachfront Luxury Chalet",
-          dates: "May 10 - May 14, 2025 (4 nights)",
-          amountEgp: 62000,
+          reference: "GON-2025-559201",
+          property: "Ancient Sands Golf Villa",
+          dates: "Oct 12 - Oct 17, 2025 (5 nights)",
+          amountEgp: 110000,
           status: "Completed",
         },
       ],
     },
     {
       id: 3,
-      name: "Dr. Marianne Weber",
-      email: "m.weber@munich-health.de",
-      phone: "+49 170 555 4321",
-      nationality: "German",
-      tag: "New Client",
-      totalBookings: 1,
-      lifetimeSpendEgp: 38000,
-      memberSince: "Sep 2026",
-      lastActive: "2 days ago",
-      notes: "First completed booking in Mangroovy. Inquired about kitesurfing instruction packages for winter season.",
+      name: "Elena Rostova",
+      email: "elena.rostova@geneva-wealth.ch",
+      phone: "+41 22 710 4490",
+      nationality: "Swiss",
+      tag: "VVIP",
+      totalBookings: 5,
+      lifetimeSpendEgp: 360000,
+      memberSince: "Mar 2025",
+      lastActive: "3 days ago",
+      notes: "Kitesurfing enthusiast. Demands Mangroovy beachfront villas with gear storage and direct water access. Prefers organic catering.",
       history: [
         {
           id: "6",
-          reference: "GON-2026-302194",
-          property: "Mangroovy Beachfront Luxury Chalet",
-          dates: "Sep 01 - Sep 05, 2026 (4 nights)",
-          amountEgp: 38000,
+          reference: "GON-2026-881023",
+          property: "Mangroovy Beachfront Estate",
+          dates: "Aug 01 - Aug 10, 2026 (9 nights)",
+          amountEgp: 210000,
+          status: "Completed",
+        },
+        {
+          id: "7",
+          reference: "GON-2025-440192",
+          property: "Fanadir Lagoon Palace",
+          dates: "Apr 20 - Apr 27, 2025 (7 nights)",
+          amountEgp: 150000,
           status: "Completed",
         },
       ],
     },
     {
       id: 4,
-      name: "Elena Rostova",
-      email: "elena.rostova@design-studio.at",
-      phone: "+201000000000",
-      nationality: "Austrian",
-      tag: "First Time",
+      name: "Marc Dubost",
+      email: "marc.dubost@luxury-travel.fr",
+      phone: "+33 6 40 91 88 23",
+      nationality: "French",
+      tag: "New Client",
       totalBookings: 1,
-      lifetimeSpendEgp: 18810,
-      memberSince: "Oct 2026",
-      lastActive: "1 hour ago",
-      notes: "Submitted first reservation request through web quote widget. Needs payment verification assistance.",
+      lifetimeSpendEgp: 78000,
+      memberSince: "Aug 2026",
+      lastActive: "1 week ago",
+      notes: "First time booking a lagoon villa. Inquired about private chef arrangements and luxury airport transfer from HRG.",
       history: [
         {
-          id: "7",
-          reference: "GON-2026-936084",
-          property: "Mangroovy Beachfront Luxury Chalet",
-          dates: "Oct 14 - Oct 17, 2026 (3 nights)",
-          amountEgp: 18810,
+          id: "8",
+          reference: "GON-2026-102948",
+          property: "Waterside Chalet Abu Tig",
+          dates: "Oct 25 - Oct 30, 2026 (5 nights)",
+          amountEgp: 78000,
+          status: "Upcoming",
+        },
+      ],
+    },
+    {
+      id: 5,
+      name: "Sophie Van Der Bilt",
+      email: "sophie.vdb@amsterdam-capital.nl",
+      phone: "+31 20 891 0029",
+      nationality: "Dutch",
+      tag: "First Time",
+      totalBookings: 1,
+      lifetimeSpendEgp: 54000,
+      memberSince: "Sep 2026",
+      lastActive: "5 hours ago",
+      notes: "Recently signed up and confirmed first reservation. Inquired about yacht day trips to Tawila Island.",
+      history: [
+        {
+          id: "9",
+          reference: "GON-2026-771920",
+          property: "South Marina Lagoon Loft",
+          dates: "Nov 02 - Nov 07, 2026 (5 nights)",
+          amountEgp: 54000,
           status: "Upcoming",
         },
       ],
     },
   ]);
 
-  const leads = [
+  const [leads] = useState([
     {
-      id: 1,
-      name: "Tarek Khalil",
-      phone: "+201011223344",
-      email: "tarek.khalil@investments.eg",
-      interest: "Real Estate Purchase (Fanadir Bay Waterfront Villa)",
-      source: "Property Sale Lead Form",
-      date: "Today, 10:14 AM",
-      notes: "Interested in cash buyout or 2-year payment plan. Requires layout blueprint.",
-      status: "Hot Lead",
-      statusColor: "bg-red-100 text-red-800",
-    },
-    {
-      id: 2,
-      name: "Dr. Marianne Weber",
-      phone: "+49 170 555 4321",
-      email: "m.weber@munich-health.de",
-      interest: "Vacation Rental (Mangroovy Beachfront Chalet)",
-      source: "Website Booking Quote Widget",
-      date: "Yesterday, 04:30 PM",
-      notes: "Requested 10 days in November with daily housekeeping and yacht charter.",
-      status: "Negotiating",
+      id: "LD-2026-01",
+      name: "Countess Beatrice Von Habsburg",
+      email: "b.habsburg@salzburg-estates.at",
+      phone: "+43 662 840 991",
+      interest: isAr ? "استئجار فيلا بحيرة خاصة لمدة شهر" : "1-Month Private Lagoon Villa Lease",
+      notes: isAr ? "تطلب فيلا خاصة ذات رصيف بحري لليخوت ومسبح مدفأ وحراسة خاصة." : "Requires private mooring, heated pool, and round-the-clock security.",
+      source: "WhatsApp Concierge",
+      date: isAr ? "اليوم، 14:15" : "Today, 14:15",
+      status: isAr ? "قيد المتابعة الفورية" : "In Progress",
       statusColor: "bg-amber-100 text-amber-800",
     },
     {
-      id: 3,
-      name: "Omar Al-Fassi",
-      phone: "+971 50 123 9876",
-      email: "omar.alfassi@dubaiholding.ae",
-      interest: "Private Yacht Charter to Tawila Island",
-      source: "WhatsApp VIP Concierge",
-      date: "Sep 28, 2026",
-      notes: "Birthday party for 10 guests. Requested sunset cruise with private sushi chef.",
-      status: "Confirmed",
+      id: "LD-2026-02",
+      name: "Karim Mansour",
+      email: "k.mansour@cairo-holding.com",
+      phone: "+20 122 400 8192",
+      interest: isAr ? "شراء قصر على الواجهة المائية بالفنادير" : "Acquisition of Fanadir Waterfront Estate",
+      notes: isAr ? "ميزانية استثمارية تتجاوز 45 مليون ج.م. طلب معاينة خاصة الأسبوع القادم." : "Investor with budget > 45M EGP. Requested private walkthrough next week.",
+      source: "Real Estate Portal",
+      date: isAr ? "أمس" : "Yesterday",
+      status: isAr ? "مؤهل للاستثمار" : "Qualified",
       statusColor: "bg-emerald-100 text-emerald-800",
     },
-  ];
+    {
+      id: "LD-2026-03",
+      name: "Alexander Becker",
+      email: "a.becker@berlin-tech.de",
+      phone: "+49 30 9102 384",
+      interest: isAr ? "حجز يخت خاص لجزيرة طوّيلة" : "Private Tawila Island Yacht Charter",
+      notes: isAr ? "مجموعة من 10 ضيوف بمناسبة خاصة مع عشاء فاخر على متن اليخت." : "Party of 10 celebrating special anniversary with private onboard chef.",
+      source: "Website Direct",
+      date: isAr ? "منذ يومين" : "2 days ago",
+      status: isAr ? "تم التواصل وتأكيد العرض" : "Proposal Sent",
+      statusColor: "bg-blue-100 text-blue-800",
+    },
+  ]);
 
   const getTagBadge = (tag: ClientTag) => {
     switch (tag) {
       case "VVIP":
-        return "bg-purple-100 text-purple-900 border border-purple-300 font-extrabold";
+        return "bg-rose-100 text-rose-900 border border-rose-300 font-bold";
       case "VIP":
         return "bg-amber-100 text-amber-900 border border-amber-300 font-bold";
       case "New Client":
@@ -204,6 +239,18 @@ export default function AdminCustomersPage() {
         return "bg-sky-100 text-sky-900 border border-sky-300 font-medium";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getTagLabel = (tag: string) => {
+    if (!isAr) return tag;
+    switch (tag) {
+      case "All": return "الكل";
+      case "VVIP": return "كبار الشخصيات (VVIP)";
+      case "VIP": return "عميل مميز (VIP)";
+      case "New Client": return "عميل جديد";
+      case "First Time": return "حجز أول مرة";
+      default: return tag;
     }
   };
 
@@ -233,14 +280,16 @@ export default function AdminCustomersPage() {
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[11px] font-bold uppercase tracking-wider text-brand-terracotta">
-              VIP Client Relationship Management
+              {isAr ? "إدارة علاقات كبار العملاء والنزلاء" : "VIP Client Relationship Management"}
             </span>
           </div>
           <h1 className="text-2xl font-serif font-bold text-brand-brown">
-            Customers &amp; Client History
+            {isAr ? "سجل العملاء والمستثمرين" : "Customers & Client History"}
           </h1>
-          <p className="text-xs text-brand-brown-muted mt-1">
-            Track repeat guest history, lifetime value, VIP statuses (First Time, New Client, VIP, VVIP) and concierge inquiries.
+          <p className="text-xs text-brand-brown-muted mt-1 font-light">
+            {isAr
+              ? "متابعة سجل إقامات النزلاء المتكررة، القيمة المالية الإجمالية، تصنيفات الـ VIP، والطلبات الخاصة."
+              : "Track repeat guest history, lifetime value, VIP statuses (First Time, New Client, VIP, VVIP) and concierge inquiries."}
           </p>
         </div>
 
@@ -249,10 +298,9 @@ export default function AdminCustomersPage() {
             href="https://wa.me/201000000000"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center shadow-xs cursor-pointer"
           >
-            <span>💬</span>
-            <span>Open WhatsApp CRM</span>
+            <span>{isAr ? "فتح واتساب كونسيرج CRM" : "Open WhatsApp CRM"}</span>
           </a>
         </div>
       </div>
@@ -262,24 +310,28 @@ export default function AdminCustomersPage() {
         <button
           type="button"
           onClick={() => setActiveTab("clients")}
-          className={`pb-3 px-1 border-b-2 transition ${
+          className={`pb-3 px-1 border-b-2 transition cursor-pointer ${
             activeTab === "clients"
               ? "border-brand-terracotta text-brand-terracotta"
               : "border-transparent text-brand-brown-muted hover:text-brand-brown"
           }`}
         >
-          Client Directory &amp; History ({clients.length})
+          {isAr
+            ? `دليل العملاء وسجل الإقامات (${clients.length})`
+            : `Client Directory & History (${clients.length})`}
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("leads")}
-          className={`pb-3 px-1 border-b-2 transition ${
+          className={`pb-3 px-1 border-b-2 transition cursor-pointer ${
             activeTab === "leads"
               ? "border-brand-terracotta text-brand-terracotta"
               : "border-transparent text-brand-brown-muted hover:text-brand-brown"
           }`}
         >
-          Live Inquiries &amp; Leads ({leads.length})
+          {isAr
+            ? `طلبات الاهتمام المباشرة (${leads.length})`
+            : `Live Inquiries & Leads (${leads.length})`}
         </button>
       </div>
 
@@ -290,7 +342,7 @@ export default function AdminCustomersPage() {
             {/* Tag Pills */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[11px] font-bold text-brand-brown-muted uppercase mr-1">
-                Filter by Tag:
+                {isAr ? "تصفية بالتصنيف:" : "Filter by Tag:"}
               </span>
               {(["All", "VVIP", "VIP", "New Client", "First Time"] as const).map((tag) => (
                 <button
@@ -303,7 +355,7 @@ export default function AdminCustomersPage() {
                       : "bg-brand-sand-light text-brand-brown hover:bg-brand-sand/60"
                   }`}
                 >
-                  {tag}
+                  {getTagLabel(tag)}
                 </button>
               ))}
             </div>
@@ -314,7 +366,7 @@ export default function AdminCustomersPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search client by name, email, phone..."
+                placeholder={isAr ? "بحث بالاسم أو البريد أو الهاتف..." : "Search client by name, email, phone..."}
                 className="w-full text-xs p-2.5 rounded-xl border border-brand-border bg-brand-sand-light/40 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
               />
             </div>
@@ -323,15 +375,15 @@ export default function AdminCustomersPage() {
           {/* Clients Table */}
           <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
             <div className="overflow-x-auto gounow-scrollbar">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-start text-xs">
                 <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
                   <tr>
-                    <th className="py-3 px-4">Client Name &amp; Origin</th>
-                    <th className="py-3 px-4">Client Tag</th>
-                    <th className="py-3 px-4">Stays Count</th>
-                    <th className="py-3 px-4">Lifetime Spend</th>
-                    <th className="py-3 px-4">Last Activity</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "العميل وبيانات الاتصال" : "Client Name & Origin"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "التصنيف" : "Client Tag"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "عدد الإقامات" : "Stays Count"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "إجمالي الإنفاق" : "Lifetime Spend"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "آخر نشاط" : "Last Activity"}</th>
+                    <th className="py-3 px-4 text-end">{isAr ? "الإجراءات" : "Actions"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-border/60">
@@ -354,12 +406,12 @@ export default function AdminCustomersPage() {
                             client.tag
                           )}`}
                         >
-                          ★ {client.tag}
+                          {client.tag}
                         </span>
                       </td>
 
                       <td className="py-3.5 px-4 font-semibold text-brand-brown">
-                        {client.totalBookings} stay{client.totalBookings > 1 ? "s" : ""}
+                        {client.totalBookings} {isAr ? "إقامات" : `stay${client.totalBookings > 1 ? "s" : ""}`}
                       </td>
 
                       <td className="py-3.5 px-4 font-mono font-bold text-brand-terracotta">
@@ -370,16 +422,16 @@ export default function AdminCustomersPage() {
                         {client.lastActive}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3.5 px-4 text-end">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedClient(client);
                           }}
-                          className="px-3 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg font-bold text-[11px] transition"
+                          className="px-3 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg font-bold text-[11px] transition cursor-pointer"
                         >
-                          View History
+                          {isAr ? "عرض السجل" : "View History"}
                         </button>
                       </td>
                     </tr>
@@ -393,14 +445,14 @@ export default function AdminCustomersPage() {
         /* Leads Table */
         <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
           <div className="overflow-x-auto gounow-scrollbar">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-start text-xs">
               <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
                 <tr>
-                  <th className="py-3 px-4">Client Name</th>
-                  <th className="py-3 px-4">Contact</th>
-                  <th className="py-3 px-4">Interest &amp; Requirements</th>
-                  <th className="py-3 px-4">Channel &amp; Date</th>
-                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "اسم العميل" : "Client Name"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "بيانات التواصل" : "Contact"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "نوع الطلب والمواصفات" : "Interest & Requirements"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "قناة الاتصال والتاريخ" : "Channel & Date"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "الحالة" : "Status"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border/60">
@@ -444,7 +496,7 @@ export default function AdminCustomersPage() {
                     {selectedClient.name}
                   </h2>
                   <span className={`px-2.5 py-0.5 rounded-lg text-[10px] ${getTagBadge(selectedClient.tag)}`}>
-                    ★ {selectedClient.tag}
+                    {selectedClient.tag}
                   </span>
                 </div>
                 <p className="text-xs text-brand-brown-muted mt-0.5">
@@ -455,7 +507,7 @@ export default function AdminCustomersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedClient(null)}
-                className="text-brand-brown-muted hover:text-brand-brown text-lg font-bold"
+                className="text-brand-brown-muted hover:text-brand-brown text-lg font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -464,8 +516,12 @@ export default function AdminCustomersPage() {
             {/* Tag Quick Switcher */}
             <div className="p-4 bg-brand-sand-light/50 rounded-2xl border border-brand-border flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-brand-brown block">Update Client VIP Tier:</span>
-                <span className="text-[10px] text-brand-brown-muted">Changes the classification across concierge workflows</span>
+                <span className="text-xs font-bold text-brand-brown block">
+                  {isAr ? "تعديل تصنيف VIP للعميل:" : "Update Client VIP Tier:"}
+                </span>
+                <span className="text-[10px] text-brand-brown-muted">
+                  {isAr ? "يغيّر مستوى الأولوية في إجراءات الكونسيرج" : "Changes the classification across concierge workflows"}
+                </span>
               </div>
               <div className="flex gap-1.5">
                 {(["First Time", "New Client", "VIP", "VVIP"] as ClientTag[]).map((tagOption) => (
@@ -473,7 +529,7 @@ export default function AdminCustomersPage() {
                     key={tagOption}
                     type="button"
                     onClick={() => handleUpdateTag(selectedClient.id, tagOption)}
-                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition ${
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition cursor-pointer ${
                       selectedClient.tag === tagOption
                         ? "bg-brand-brown text-white shadow-xs"
                         : "bg-white text-brand-brown border border-brand-border hover:bg-brand-sand-light"
@@ -488,17 +544,23 @@ export default function AdminCustomersPage() {
             {/* Lifetime Metrics */}
             <div className="grid grid-cols-3 gap-4 text-center">
               <div className="p-3 bg-brand-sand-light/30 rounded-xl border border-brand-border">
-                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">Total Stays</span>
+                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">
+                  {isAr ? "إجمالي الإقامات" : "Total Stays"}
+                </span>
                 <span className="text-lg font-bold text-brand-brown">{selectedClient.totalBookings}</span>
               </div>
               <div className="p-3 bg-brand-sand-light/30 rounded-xl border border-brand-border">
-                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">Lifetime Spend</span>
+                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">
+                  {isAr ? "إجمالي الإنفاق" : "Lifetime Spend"}
+                </span>
                 <span className="text-lg font-mono font-bold text-brand-terracotta">
                   {selectedClient.lifetimeSpendEgp.toLocaleString()} EGP
                 </span>
               </div>
               <div className="p-3 bg-brand-sand-light/30 rounded-xl border border-brand-border">
-                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">Member Since</span>
+                <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">
+                  {isAr ? "تاريخ الانضمام" : "Member Since"}
+                </span>
                 <span className="text-lg font-bold text-brand-brown">{selectedClient.memberSince}</span>
               </div>
             </div>
@@ -506,7 +568,7 @@ export default function AdminCustomersPage() {
             {/* Concierge Notes */}
             <div className="space-y-1.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-brand-brown-muted">
-                Concierge Notes &amp; Preferences
+                {isAr ? "ملاحظات وتفضيلات النزيل الخاصة" : "Concierge Notes & Preferences"}
               </h3>
               <p className="text-xs text-brand-brown leading-relaxed p-3.5 bg-brand-sand-light/30 rounded-xl border border-brand-border">
                 {selectedClient.notes}
@@ -516,7 +578,7 @@ export default function AdminCustomersPage() {
             {/* Complete Stays & Bookings History */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-brand-brown-muted">
-                Complete Stays &amp; Bookings History
+                {isAr ? "سجل الإقامات والحجوزات السابقة" : "Complete Stays & Bookings History"}
               </h3>
               <div className="space-y-2.5">
                 {selectedClient.history.map((stay) => (
@@ -527,11 +589,11 @@ export default function AdminCustomersPage() {
                     <div>
                       <div className="font-bold text-brand-brown">{stay.property}</div>
                       <div className="text-[11px] text-brand-brown-muted">
-                        Ref: <span className="font-mono">{stay.reference}</span> &bull; {stay.dates}
+                        {isAr ? "المرجع:" : "Ref:"} <span className="font-mono">{stay.reference}</span> &bull; {stay.dates}
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-end">
                       <div className="font-mono font-bold text-brand-brown">
                         {stay.amountEgp.toLocaleString()} EGP
                       </div>
@@ -542,7 +604,7 @@ export default function AdminCustomersPage() {
                             : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {stay.status}
+                        {stay.status === "Completed" ? (isAr ? "مكتمل" : "Completed") : (isAr ? "قادم" : "Upcoming")}
                       </span>
                     </div>
                   </div>
@@ -558,18 +620,17 @@ export default function AdminCustomersPage() {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center shadow-xs cursor-pointer"
               >
-                <span>💬</span>
-                <span>Direct WhatsApp Contact</span>
+                <span>{isAr ? "محادثة واتساب مباشرة" : "Direct WhatsApp Contact"}</span>
               </a>
 
               <button
                 type="button"
                 onClick={() => setSelectedClient(null)}
-                className="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown font-bold text-xs rounded-xl"
+                className="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown font-bold text-xs rounded-xl cursor-pointer"
               >
-                Close
+                {isAr ? "إغلاق" : "Close"}
               </button>
             </div>
           </div>

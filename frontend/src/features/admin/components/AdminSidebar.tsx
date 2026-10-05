@@ -107,20 +107,28 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                 : "text-brand-brown hover:bg-brand-sand/50"
             }`}
           >
-            <span className="me-3">📊</span>
             <span>{t.admin.dashboard}</span>
           </Link>
 
-          {/* 2. Bookings */}
+          {/* 2. Media Design (Homepage CMS) */}
+          <Link
+            href="/admin/media-design"
+            className={`flex items-center px-3 py-2.5 rounded-xl transition-all ${
+              isActive("/admin/media-design")
+                ? "bg-brand-terracotta text-white shadow-xs font-semibold"
+                : "text-brand-brown hover:bg-brand-sand/50"
+            }`}
+          >
+            <span>{isAr ? "ميديا ديزاين (الواجهة الرئيسية)" : "Media Design (Homepage)"}</span>
+          </Link>
+
+          {/* 3. Bookings */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("bookings")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">📅</span>
-                <span>{t.admin.bookings}</span>
-              </div>
+              <span>{t.admin.bookings}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.bookings ? "rotate-90 rtl:rotate-90" : ""
@@ -130,7 +138,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.bookings && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/bookings"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -153,16 +161,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 3. Properties */}
+          {/* 4. Properties */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("properties")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">🏡</span>
-                <span>{t.admin.properties}</span>
-              </div>
+              <span>{t.admin.properties}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.properties ? "rotate-90 rtl:rotate-90" : ""
@@ -172,12 +177,12 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.properties && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/properties"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "جميع العقارات" : "All Properties"}
+                  {isAr ? "جميع العقارات والوحدات" : "All Properties & Units"}
                 </Link>
                 <Link
                   href="/admin/properties?type=rent"
@@ -189,28 +194,25 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/properties?type=sale"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "للبيع" : "For Sale"}
+                  {isAr ? "للبيع والتملك" : "For Sale"}
                 </Link>
                 <Link
                   href="/admin/properties/create"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-terracotta font-semibold"
                 >
-                  {isAr ? "+ إضافة عقار" : "+ Add Property"}
+                  {isAr ? "+ إضافة وحدة جديدة" : "+ Add Unit / Property"}
                 </Link>
               </div>
             )}
           </div>
 
-          {/* 4. Pricing Engine */}
+          {/* 5. Pricing Engine */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("pricing")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">🏷️</span>
-                <span>{isAr ? "محرك الأسعار" : "Pricing Engine"}</span>
-              </div>
+              <span>{isAr ? "محرك الأسعار" : "Pricing Engine"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.pricing ? "rotate-90 rtl:rotate-90" : ""
@@ -220,7 +222,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.pricing && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/pricing"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -237,16 +239,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 5. Experiences & Yacht Charters */}
+          {/* 6. Experiences & Yacht Charters */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("experiences")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">⛵</span>
-                <span>{t.admin.experiencesNav}</span>
-              </div>
+              <span>{t.admin.experiencesNav}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.experiences ? "rotate-90 rtl:rotate-90" : ""
@@ -256,7 +255,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.experiences && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/experiences"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -267,16 +266,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 6. Events & Nightlife */}
+          {/* 7. Events & Nightlife */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("events")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">🎉</span>
-                <span>{isAr ? "الفعاليات والحفلات" : "Events & Nightlife"}</span>
-              </div>
+              <span>{isAr ? "الفعاليات والحفلات" : "Events & Nightlife"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.events ? "rotate-90 rtl:rotate-90" : ""
@@ -286,7 +282,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.events && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/events"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -299,22 +295,18 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
 
           {/* Section: Super Admin & High-Tier Command */}
           <div className="px-3 pb-1 pt-4 border-t border-brand-border/60 mt-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-terracotta flex items-center gap-1.5">
-              <span>👑</span>
-              <span>{isAr ? "صلاحيات السوبر أدمن" : "SUPER ADMIN SUITE"}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-terracotta">
+              {isAr ? "صلاحيات السوبر أدمن" : "SUPER ADMIN SUITE"}
             </span>
           </div>
 
-          {/* 7. Super Admin: Users & Staff Management */}
+          {/* 8. Super Admin: Users & Staff Management */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("users")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">👥</span>
-                <span className="font-semibold">{isAr ? "المشرفون والصلاحيات" : "Staff & Roles"}</span>
-              </div>
+              <span className="font-semibold">{isAr ? "المشرفون والصلاحيات" : "Staff & Roles"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.users ? "rotate-90 rtl:rotate-90" : ""
@@ -324,7 +316,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.users && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/users"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -335,16 +327,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 8. VIP Concierge Inquiries */}
+          {/* 9. VIP Concierge Inquiries */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("concierge")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">🛎️</span>
-                <span>{isAr ? "طلبات الكونسيرج" : "VIP Concierge"}</span>
-              </div>
+              <span>{isAr ? "طلبات الكونسيرج" : "VIP Concierge"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.concierge ? "rotate-90 rtl:rotate-90" : ""
@@ -354,7 +343,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.concierge && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/concierge"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -365,16 +354,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 9. Finances & Payouts */}
+          {/* 10. Finances & Payouts */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("finances")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">💳</span>
-                <span>{isAr ? "المالية والمدفوعات" : "Finances & Payouts"}</span>
-              </div>
+              <span>{isAr ? "المالية والمدفوعات" : "Finances & Payouts"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.finances ? "rotate-90 rtl:rotate-90" : ""
@@ -384,7 +370,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.finances && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/finances"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -395,16 +381,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 10. Platform Settings & Audit Logs */}
+          {/* 11. Platform Settings & Audit Logs */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("settings")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <div className="flex items-center">
-                <span className="me-3">⚙️</span>
-                <span>{isAr ? "إعدادات المنصة" : "Platform Settings"}</span>
-              </div>
+              <span>{isAr ? "إعدادات المنصة" : "Platform Settings"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.settings ? "rotate-90 rtl:rotate-90" : ""
@@ -414,7 +397,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               </span>
             </button>
             {openSections.settings && (
-              <div className="ps-8 border-s-2 border-brand-sand mt-1 space-y-1">
+              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
                 <Link
                   href="/admin/settings"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
@@ -425,13 +408,12 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 11. Customers & Investors */}
+          {/* 12. Customers & Investors */}
           <div className="pt-1">
             <Link
               href="/admin/customers"
               className="flex items-center px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start"
             >
-              <span className="me-3">💼</span>
               <span>{isAr ? "العملاء والمستثمرون" : "Clients & Investors"}</span>
             </Link>
           </div>

@@ -1,31 +1,58 @@
-import React from "react";
-import Link from "next/link";
-import { getProperties } from "@/features/properties/services/properties.api";
+"use client";
 
-export default async function AdminPricingPage() {
-  const properties = await getProperties();
-  const rentalProperties = properties.filter((p) => p.listing_type === "rent");
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { getAdminProperties } from "@/features/admin/services/admin.api";
+import type { AdminPropertyItem } from "@/features/admin/types";
+import { useLanguage } from "@/context/LanguageContext";
+import LoadingState from "@/components/ui/LoadingState";
+
+export default function AdminPricingPage() {
+  const { locale } = useLanguage();
+  const isAr = locale === "ar";
+
+  const [properties, setProperties] = useState<AdminPropertyItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getAdminProperties({ type: "rent" })
+      .then((res) => {
+        if (!mounted) return;
+        setProperties(res.data);
+      })
+      .catch(() => {
+        setProperties([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const seasonalRules = [
     {
-      name: "El Gouna Film Festival / Peak Autumn",
-      dates: "Oct 15 - Nov 05, 2026",
+      name: isAr ? "مهرجان الجونة السينمائي / ذروة الخريف" : "El Gouna Film Festival / Peak Autumn",
+      dates: isAr ? "15 أكتوبر - 05 نوفمبر 2026" : "Oct 15 - Nov 05, 2026",
       multiplier: "+35%",
-      status: "Active",
+      status: isAr ? "نشط حالياً" : "Active",
       color: "bg-emerald-100 text-emerald-800",
     },
     {
-      name: "Christmas & New Year Gala",
-      dates: "Dec 20 - Jan 06, 2027",
+      name: isAr ? "احتفالات رأس السنة وعيد الميلاد" : "Christmas & New Year Gala",
+      dates: isAr ? "20 ديسمبر - 06 يناير 2027" : "Dec 20 - Jan 06, 2027",
       multiplier: "+50%",
-      status: "Scheduled",
+      status: isAr ? "مجدول" : "Scheduled",
       color: "bg-blue-100 text-blue-800",
     },
     {
-      name: "Spring Kitesurf Wind Season",
-      dates: "Apr 01 - May 31, 2027",
+      name: isAr ? "موسم رياح الكايت سيرف الربيعي" : "Spring Kitesurf Wind Season",
+      dates: isAr ? "01 أبريل - 31 مايو 2027" : "Apr 01 - May 31, 2027",
       multiplier: "+20%",
-      status: "Scheduled",
+      status: isAr ? "مجدول" : "Scheduled",
       color: "bg-amber-100 text-amber-800",
     },
   ];
@@ -33,21 +60,21 @@ export default async function AdminPricingPage() {
   const promoCodes = [
     {
       code: "VIP10",
-      discount: "10% Off Total",
-      usage: "38 used",
-      status: "Active",
+      discount: isAr ? "خصم 10% على الإجمالي" : "10% Off Total",
+      usage: isAr ? "38 استخدام" : "38 used",
+      status: isAr ? "نشط" : "Active",
     },
     {
       code: "SUMMER2026",
-      discount: "15% Off Stays > 5 Nights",
-      usage: "64 used",
-      status: "Active",
+      discount: isAr ? "خصم 15% للإقامات أكثر من 5 ليالٍ" : "15% Off Stays > 5 Nights",
+      usage: isAr ? "64 استخدام" : "64 used",
+      status: isAr ? "نشط" : "Active",
     },
     {
       code: "TAWILA_BOAT",
-      discount: "2,000 EGP Off Yacht Charter",
-      usage: "12 used",
-      status: "Active",
+      discount: isAr ? "خصم 2,000 ج.م على رحلات اليخوت" : "2,000 EGP Off Yacht Charter",
+      usage: isAr ? "12 استخدام" : "12 used",
+      status: isAr ? "نشط" : "Active",
     },
   ];
 
@@ -56,10 +83,12 @@ export default async function AdminPricingPage() {
       {/* Top Header */}
       <div>
         <h1 className="text-2xl font-serif font-bold text-brand-brown">
-          Pricing Engine &amp; Revenue Management
+          {isAr ? "محرك الأسعار وإدارة العوائد" : "Pricing Engine & Revenue Management"}
         </h1>
-        <p className="text-xs text-brand-brown-muted mt-1">
-          Dynamic nightly pricing, seasonal rules, promotional vouchers, and tax policies
+        <p className="text-xs text-brand-brown-muted mt-1 font-light">
+          {isAr
+            ? "تسعير ديناميكي لليالي، مضاعفات مواسم الذروة، قسائم الخصم الترويجية، وسياسات الرسوم."
+            : "Dynamic nightly pricing, seasonal rules, promotional vouchers, and tax policies."}
         </p>
       </div>
 
@@ -67,58 +96,71 @@ export default async function AdminPricingPage() {
       <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
         <div className="p-6 border-b border-brand-border flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-brand-brown">
-              Base Nightly Rates
-            </h3>
+            <h2 className="text-base font-bold text-brand-brown">
+              {isAr ? "الأسعار الأساسية لليلة الواحدة" : "Base Nightly Rates"}
+            </h2>
             <p className="text-xs text-brand-brown-muted">
-              Standard weekday base prices per property
+              {isAr ? "الأسعار الأساسية لأيام الأسبوع لكل عقار" : "Standard weekday base prices per property"}
             </p>
           </div>
-          <span className="text-xs text-brand-brown-muted">
-            {rentalProperties.length} Vacation Stays
+          <span className="text-xs text-brand-brown-muted font-medium">
+            {properties.length} {isAr ? "وحدة إيجار" : "Vacation Stays"}
           </span>
         </div>
 
-        <div className="overflow-x-auto gounow-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
-              <tr>
-                <th className="py-3 px-4">Property</th>
-                <th className="py-3 px-4">Location</th>
-                <th className="py-3 px-4">Base Rate (Night)</th>
-                <th className="py-3 px-4">Cleaning Fee</th>
-                <th className="py-3 px-4">Service Fee</th>
-                <th className="py-3 px-4">Weekend Surcharge</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand-border/60">
-              {rentalProperties.map((p) => (
-                <tr key={p.id} className="hover:bg-brand-sand-light/30 transition">
-                  <td className="py-3.5 px-4 font-bold text-brand-brown">
-                    <Link href={`/stays/${p.slug}`} target="_blank" className="hover:text-brand-terracotta">
-                      {p.title}
-                    </Link>
-                  </td>
-                  <td className="py-3.5 px-4 text-brand-brown-muted">
-                    📍 {p.location?.name || "El Gouna"}
-                  </td>
-                  <td className="py-3.5 px-4 font-bold text-brand-brown">
-                    {p.price_formatted} EGP
-                  </td>
-                  <td className="py-3.5 px-4 text-brand-brown-muted">1,500 EGP</td>
-                  <td className="py-3.5 px-4 text-brand-brown-muted">2,000 EGP</td>
-                  <td className="py-3.5 px-4 text-emerald-700 font-semibold">+10% (Thu-Fri)</td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button className="px-2.5 py-1 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded text-[11px] font-bold">
-                      Edit Rule
-                    </button>
-                  </td>
+        {loading ? (
+          <div className="p-8">
+            <LoadingState message={isAr ? "جارٍ تحميل قواعد الأسعار..." : "Loading pricing rules..."} />
+          </div>
+        ) : (
+          <div className="overflow-x-auto gounow-scrollbar">
+            <table className="w-full text-start text-xs">
+              <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
+                <tr>
+                  <th className="py-3 px-4 text-start">{isAr ? "العقار / الوحدة" : "Property"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "المنطقة" : "Location"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "سعر الليلة الأساسي" : "Base Rate (Night)"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "رسوم النظافة" : "Cleaning Fee"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "رسوم الخدمة" : "Service Fee"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "زيادة عطلة نهاية الأسبوع" : "Weekend Surcharge"}</th>
+                  <th className="py-3 px-4 text-end">{isAr ? "الإجراءات" : "Actions"}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-brand-border/60">
+                {properties.map((p) => {
+                  const title = isAr && p.title_ar ? p.title_ar : p.title_en;
+                  const locName = isAr && p.location?.name_ar ? p.location.name_ar : p.location?.name_en || "الجونة";
+
+                  return (
+                    <tr key={p.id} className="hover:bg-brand-sand-light/30 transition">
+                      <td className="py-3.5 px-4 font-bold text-brand-brown">
+                        <Link href={`/stays/${p.slug}`} target="_blank" className="hover:text-brand-terracotta">
+                          {title}
+                        </Link>
+                      </td>
+                      <td className="py-3.5 px-4 text-brand-brown-muted font-medium">
+                        {locName}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-brand-brown">
+                        {p.formatted_price}
+                      </td>
+                      <td className="py-3.5 px-4 text-brand-brown-muted">1,500 EGP</td>
+                      <td className="py-3.5 px-4 text-brand-brown-muted">2,000 EGP</td>
+                      <td className="py-3.5 px-4 text-emerald-700 font-semibold">
+                        {isAr ? "+10% (الخميس والجمعة)" : "+10% (Thu-Fri)"}
+                      </td>
+                      <td className="py-3.5 px-4 text-end">
+                        <button className="px-2.5 py-1 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg text-[11px] font-bold cursor-pointer">
+                          {isAr ? "تعديل القاعدة" : "Edit Rule"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* 2-Column: Seasonal Rules & Promo Codes */}
@@ -127,15 +169,15 @@ export default async function AdminPricingPage() {
         <div id="seasons" className="bg-white p-6 rounded-3xl border border-brand-border shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-brand-border">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-brand-brown">
-                Seasonal Rate Multipliers
-              </h3>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-brand-brown">
+                {isAr ? "مضاعفات الأسعار الموسمية" : "Seasonal Rate Multipliers"}
+              </h2>
               <p className="text-[11px] text-brand-brown-muted">
-                Automatic price surges applied across peak dates
+                {isAr ? "زيادات آلية تُطبّق خلال تواريخ الإشغال المرتفع" : "Automatic price surges applied across peak dates"}
               </p>
             </div>
-            <button className="px-3 py-1.5 bg-brand-terracotta text-white rounded-xl text-xs font-bold shadow-xs">
-              + New Season
+            <button className="px-3 py-1.5 bg-brand-terracotta text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer">
+              {isAr ? "+ موسم جديد" : "+ New Season"}
             </button>
           </div>
 
@@ -149,7 +191,7 @@ export default async function AdminPricingPage() {
                   <h4 className="font-bold text-xs text-brand-brown">{rule.name}</h4>
                   <p className="text-[11px] text-brand-brown-muted mt-0.5">{rule.dates}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <span className="font-serif font-bold text-sm text-brand-terracotta block">
                     {rule.multiplier}
                   </span>
@@ -166,15 +208,15 @@ export default async function AdminPricingPage() {
         <div id="discounts" className="bg-white p-6 rounded-3xl border border-brand-border shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-brand-border">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-brand-brown">
-                Promotional Voucher Codes
-              </h3>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-brand-brown">
+                {isAr ? "أكواد الخصم والقسائم الترويجية" : "Promotional Voucher Codes"}
+              </h2>
               <p className="text-[11px] text-brand-brown-muted">
-                Active coupons checked at checkout
+                {isAr ? "الكوبونات النشطة التي يتم التحقق منها عند الدفع" : "Active coupons checked at checkout"}
               </p>
             </div>
-            <button className="px-3 py-1.5 bg-brand-terracotta text-white rounded-xl text-xs font-bold shadow-xs">
-              + New Voucher
+            <button className="px-3 py-1.5 bg-brand-terracotta text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer">
+              {isAr ? "+ كوبون جديد" : "+ New Voucher"}
             </button>
           </div>
 
@@ -190,7 +232,7 @@ export default async function AdminPricingPage() {
                   </span>
                   <p className="text-[11px] text-brand-brown mt-1 font-medium">{promo.discount}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <span className="text-[11px] text-brand-brown-muted block">{promo.usage}</span>
                   <span className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800 uppercase mt-0.5">
                     {promo.status}

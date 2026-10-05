@@ -76,7 +76,6 @@ export default function AdminConciergePage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
           >
-            <span>💬</span>
             <span>{isAr ? "فتح مكتب واتساب المباشر" : "Open WhatsApp Dispatch"}</span>
           </a>
         </div>
@@ -173,7 +172,6 @@ export default function AdminConciergePage() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-2xs"
                   >
-                    <span>💬</span>
                     <span>{isAr ? "واتساب النزيل" : "Direct WhatsApp"}</span>
                   </a>
                 )}

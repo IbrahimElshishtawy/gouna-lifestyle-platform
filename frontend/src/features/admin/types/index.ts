@@ -97,12 +97,10 @@ export interface AdminBookingItem {
   created_at: string;
 }
 
-// 3. Properties (Admin View)
 export interface AdminPropertyItem {
   id: number;
   reference_number: string;
   slug: string;
-  title: string;
   title_en: string;
   title_ar: string | null;
   listing_type: "rent" | "sale";
@@ -110,21 +108,92 @@ export interface AdminPropertyItem {
   bathrooms: number;
   max_guests: number;
   area_sqm: number | null;
-  pricing: {
-    base_price_cents: number;
-    cleaning_fee_cents: number;
-    service_fee_cents: number;
-    tax_percentage: number;
-    currency: string;
-    formatted_base_price: string;
-  };
+  compound?: string | null;
+  is_published: boolean;
   is_available: boolean;
   is_featured: boolean;
-  cancellation_policy: string;
-  created_at: string;
+  status: "published" | "draft" | "active" | "paused";
+  base_price_cents: number;
+  sale_price_cents: number;
+  currency: string;
+  formatted_price: string;
+  location: {
+    id: number;
+    name_en: string;
+    name_ar: string;
+  };
+  category: {
+    id: number;
+    name_en: string;
+    name_ar: string;
+  };
+  primary_image: string;
+  created_at: string | null;
 }
 
-// 4. Staff / Administrative Users
+export interface AdminPropertySummary {
+  total: number;
+  published: number;
+  paused: number;
+  rent: number;
+  sale: number;
+}
+
+// 4. Media Design & Homepage CMS Control
+export interface MediaDesignConfig {
+  hero: {
+    badge_en: string;
+    badge_ar: string;
+    title_line1_en: string;
+    title_line1_ar: string;
+    title_line2_en: string;
+    title_line2_ar: string;
+    subtitle_en: string;
+    subtitle_ar: string;
+    cta1_text_en: string;
+    cta1_text_ar: string;
+    cta1_link: string;
+    cta2_text_en: string;
+    cta2_text_ar: string;
+    cta2_link: string;
+    background_image: string;
+    video_url?: string;
+  };
+  sections: {
+    hero: boolean;
+    pillars: boolean;
+    vacation_rentals: boolean;
+    experiences: boolean;
+    diving: boolean;
+    sales: boolean;
+    testimonials: boolean;
+    events: boolean;
+    concierge: boolean;
+    faq: boolean;
+  };
+  featured_property_ids: number[];
+  announcement: {
+    enabled: boolean;
+    text_en: string;
+    text_ar: string;
+    link: string;
+  };
+}
+
+export interface MediaDesignResponse {
+  config: MediaDesignConfig;
+  available_properties: Array<{
+    id: number;
+    reference_number: string;
+    title_en: string;
+    title_ar: string | null;
+    listing_type: "rent" | "sale";
+    is_published: boolean;
+    is_featured: boolean;
+  }>;
+}
+
+// 5. Staff / Administrative Users
 export interface AdminStaffItem {
   id: number;
   name: string;

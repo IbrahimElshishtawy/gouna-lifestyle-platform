@@ -196,3 +196,65 @@ export async function getAdminAuditLogs(params?: {
   const qs = query.toString();
   return apiClient<PaginatedResponse<ActivityLogItem>>(`/admin/audit-logs${qs ? `?${qs}` : ""}`);
 }
+
+/**
+ * 8. Properties & Units Management (Pause / Resume Display & Status)
+ */
+export async function getAdminProperties(params?: {
+  type?: string;
+  status?: string;
+  search?: string;
+  page?: number;
+}): Promise<PaginatedResponse<import("../types").AdminPropertyItem> & { summary: import("../types").AdminPropertySummary }> {
+  const query = new URLSearchParams();
+  if (params?.type) query.set("type", params.type);
+  if (params?.status) query.set("status", params.status);
+  if (params?.search) query.set("search", params.search);
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  return apiClient<PaginatedResponse<import("../types").AdminPropertyItem> & { summary: import("../types").AdminPropertySummary }>(
+    `/admin/properties${qs ? `?${qs}` : ""}`
+  );
+}
+
+export async function togglePropertyStatus(
+  id: number,
+  is_published?: boolean
+): Promise<{ success: boolean; message: string; data: { id: number; reference_number: string; is_published: boolean; status: string } }> {
+  return apiClient<{ success: boolean; message: string; data: { id: number; reference_number: string; is_published: boolean; status: string } }>(
+    `/admin/properties/${id}/toggle-status`,
+    {
+      method: "PUT",
+      body: JSON.stringify(typeof is_published === "boolean" ? { is_published } : {}),
+    }
+  );
+}
+
+export async function updateAdminProperty(
+  id: number,
+  payload: Record<string, unknown>
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/properties/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * 9. Media Design & Homepage CMS Control
+ */
+export async function getMediaDesignConfig(): Promise<import("../types").MediaDesignResponse> {
+  const res = await apiClient<SingleResponse<import("../types").MediaDesignResponse>>("/admin/media-design");
+  return res.data;
+}
+
+export async function updateMediaDesignConfig(
+  payload: Partial<import("../types").MediaDesignConfig>
+): Promise<{ success: boolean; message: string; data: import("../types").MediaDesignConfig }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").MediaDesignConfig }>("/admin/media-design", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+

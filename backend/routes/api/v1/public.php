@@ -39,6 +39,13 @@ Route::post('/leads', [LeadController::class, 'store'])
     ->middleware('throttle:inquiries')
     ->name('leads.store');
 
+// Homepage Media Design Config
+Route::get('/settings/media-design', function () {
+    return response()->json([
+        'data' => \App\Http\Controllers\Api\V1\Admin\MediaDesignApiController::getPublicConfig(),
+    ]);
+})->name('settings.media-design');
+
 // Authentication (ADR-003, P4-T02, P4-T03, P4-T05, P4-T09)
 Route::prefix('auth')->as('auth.')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])

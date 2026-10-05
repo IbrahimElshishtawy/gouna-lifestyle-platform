@@ -116,6 +116,46 @@ s, b = request_api("/admin/audit-logs", token=token)
 logs = b.get("data", []) if b else []
 record_test("Admin Audit: Security Activity Timeline Retrieved", s == 200 and isinstance(logs, list), f"Status={s}")
 
+# 13. Admin Properties List & Counters
+s, b = request_api("/admin/properties", token=token)
+props_list = b.get("data", []) if b else []
+props_summary = b.get("summary", {}) if b else {}
+record_test("Admin Properties: Complete Inventory & Counters Retrieved", s == 200 and len(props_list) > 0 and "total" in props_summary, f"Status={s}, Count={len(props_list)}")
+
+# 14. Admin Property Display Status Toggle (Pause & Activate)
+if len(props_list) > 0:
+    prop_id = props_list[0]["id"]
+    s_toggle, b_toggle = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={}, token=token)
+    new_status = b_toggle.get("data", {}).get("status") if b_toggle else None
+    new_published = b_toggle.get("data", {}).get("is_published") if b_toggle else None
+    record_test("Admin Properties: Toggle Display Status (Pause)", s_toggle == 200 and new_published is False and new_status == "draft", f"Status={s_toggle}, NewStatus={new_status}, Published={new_published}")
+    
+    # Toggle back to original active state
+    s_toggle2, b_toggle2 = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={}, token=token)
+    restored_status = b_toggle2.get("data", {}).get("status") if b_toggle2 else None
+    restored_published = b_toggle2.get("data", {}).get("is_published") if b_toggle2 else None
+    record_test("Admin Properties: Toggle Display Status (Restore Active)", s_toggle2 == 200 and restored_published is True and restored_status == "published", f"Status={s_toggle2}, RestoredStatus={restored_status}")
+
+# 15. Admin Media Design Homepage CMS
+s, b = request_api("/admin/media-design", token=token)
+media_data = b.get("data", {}) if b else {}
+media_cfg = media_data.get("config", {})
+avail_props = media_data.get("available_properties", [])
+record_test("Admin Media Design: Homepage CMS Config & Units Retrieved", s == 200 and "hero" in media_cfg and len(avail_props) > 0, f"Status={s}, AvailableProps={len(avail_props)}")
+
+# 16. Admin Media Design Config Update
+if media_cfg:
+    # Update announcement text
+    updated_cfg = dict(media_cfg)
+    updated_cfg["announcement"]["text_ar"] = "موسم مهرجان الجونة 2026 - باقات حصرية للإقامات الخاصة"
+    s_update, b_update = request_api("/admin/media-design", method="PUT", data=updated_cfg, token=token)
+    record_test("Admin Media Design: Update Homepage Configuration", s_update == 200 and b_update.get("success") is True, f"Status={s_update}")
+
+# 17. Public Media Design Settings Endpoint
+s_pub, b_pub = request_api("/settings/media-design")
+pub_data = b_pub.get("data", {}) if b_pub else {}
+record_test("Public Settings: Media Design Configuration Served", s_pub == 200 and "hero" in pub_data and "sections" in pub_data, f"Status={s_pub}")
+
 print("=" * 65)
 print(f"TEST SUMMARY: {passed_count} PASSED, {failed_count} FAILED")
 print("=" * 65)

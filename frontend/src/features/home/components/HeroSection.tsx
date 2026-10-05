@@ -5,9 +5,16 @@ import Image from "next/image";
 import { useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
-export default function HeroSection() {
+import type { MediaDesignConfig } from "@/features/admin/types";
+
+interface HeroSectionProps {
+  heroConfig?: MediaDesignConfig["hero"];
+}
+
+export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
+  const isAr = locale === "ar";
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
   const [checkIn, setCheckIn] = useState("2026-10-24");
@@ -58,7 +65,7 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-[720px] lg:min-h-[840px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-36 sm:pt-40 lg:pt-44 pb-20 lg:pb-28">
-      {/* Background Hero Image with Feathered Dissolve */}
+      {/* Background Hero Image/Video with Feathered Dissolve */}
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -66,14 +73,25 @@ export default function HeroSection() {
           maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)"
         }}
       >
-        <Image
-          src="/assets/images/hero-villa-dusk.jpg"
-          alt="Live the Unrivaled El Gouna Lifestyle"
-          fill
-          priority
-          sizes="100vw"
-          className="w-full h-full object-cover object-center animate-ken-burns"
-        />
+        {heroConfig?.video_url ? (
+          <video
+            src={heroConfig.video_url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover object-center animate-ken-burns"
+          />
+        ) : (
+          <Image
+            src={heroConfig?.background_image || "/assets/images/hero-villa-dusk.jpg"}
+            alt="Live the Unrivaled El Gouna Lifestyle"
+            fill
+            priority
+            sizes="100vw"
+            className="w-full h-full object-cover object-center animate-ken-burns"
+          />
+        )}
         {/* Top Vignette for Transparent Header Contrast */}
         <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-10" />
 
@@ -91,35 +109,59 @@ export default function HeroSection() {
         {/* Curated Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-4 sm:mb-6 shadow-md animate-fade-in-down animate-float">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
-          <span>{t.hero.badge}</span>
+          <span>
+            {heroConfig
+              ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
+              : t.hero.badge}
+          </span>
         </div>
 
         {/* Hero Title with Dramatic Contrast & Smooth Slide Up */}
         <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.15] sm:leading-[1.1] mb-4 sm:mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
-          {t.hero.titleLine1} <br className="hidden sm:inline" />
-          <span className="italic font-normal">{t.hero.titleLine2}</span>
+          {heroConfig ? (
+            <>
+              {isAr ? heroConfig.title_line1_ar : heroConfig.title_line1_en}{" "}
+              <br className="hidden sm:inline" />
+              <span className="italic font-normal">
+                {isAr ? heroConfig.title_line2_ar : heroConfig.title_line2_en}
+              </span>
+            </>
+          ) : (
+            <>
+              {t.hero.titleLine1} <br className="hidden sm:inline" />
+              <span className="italic font-normal">{t.hero.titleLine2}</span>
+            </>
+          )}
         </h1>
 
         {/* Hero Subtitle */}
         <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-8 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
-          {t.hero.subtitle}
+          {heroConfig
+            ? (isAr ? heroConfig.subtitle_ar : heroConfig.subtitle_en)
+            : t.hero.subtitle}
         </p>
 
         {/* Dual Cinematic Action CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 mb-6 sm:mb-10 w-full sm:w-auto max-w-md sm:max-w-none animate-fade-in-up [animation-delay:350ms]">
           <a
-            href="#stays"
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-2"
+            href={heroConfig?.cta1_link || "#stays"}
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
           >
-            <span>{locale === "ar" ? "استكشف الفلل والإقامات" : "Explore Curated Stays"}</span>
-            <span className="rtl:rotate-180">→</span>
+            <span>
+              {heroConfig
+                ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
+                : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
+            </span>
           </a>
           <a
-            href="#experiences"
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-2"
+            href={heroConfig?.cta2_link || "#experiences"}
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
           >
-            <span>{locale === "ar" ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving"}</span>
-            <span className="rtl:rotate-180">→</span>
+            <span>
+              {heroConfig
+                ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
+                : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
+            </span>
           </a>
         </div>
 
@@ -133,15 +175,12 @@ export default function HeroSection() {
               <button
                 type="button"
                 onClick={() => setActiveTab("rent")}
-                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg sm:rounded-full text-[11px] sm:text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-4 sm:px-7 py-1.5 sm:py-2.5 rounded-lg sm:rounded-full text-[11px] sm:text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
                   activeTab === "rent"
                     ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
                     : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
                 }`}
               >
-                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
                 <span>{t.hero.tabRent}</span>
               </button>
 
@@ -149,15 +188,12 @@ export default function HeroSection() {
               <button
                 type="button"
                 onClick={() => setActiveTab("sale")}
-                className={`px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-4 sm:px-7 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
                   activeTab === "sale"
                     ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
                     : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
                 }`}
               >
-                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
                 <span>{t.hero.tabSale}</span>
               </button>
 
@@ -165,15 +201,12 @@ export default function HeroSection() {
               <button
                 type="button"
                 onClick={() => setActiveTab("experiences")}
-                className={`px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-4 sm:px-7 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
                   activeTab === "experiences"
                     ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
                     : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
                 }`}
               >
-                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
                 <span>{t.hero.tabExp}</span>
               </button>
             </div>
@@ -188,11 +221,7 @@ export default function HeroSection() {
                 <>
                   {/* Field 1: Location */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.locationLabel}
                       </span>
@@ -219,10 +248,7 @@ export default function HeroSection() {
 
                   {/* Field 2: Check-In */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.checkInLabel}
                       </span>
@@ -237,10 +263,7 @@ export default function HeroSection() {
 
                   {/* Field 3: Check-Out */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.checkOutLabel}
                       </span>
@@ -255,10 +278,7 @@ export default function HeroSection() {
 
                   {/* Field 4: Guests */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.guestsLabel}
                       </span>
@@ -287,11 +307,7 @@ export default function HeroSection() {
                 <>
                   {/* Field 1: Location */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.locationLabel}
                       </span>
@@ -316,10 +332,7 @@ export default function HeroSection() {
 
                   {/* Field 2: Property Type */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.propertyTypeLabel}
                       </span>
@@ -343,10 +356,7 @@ export default function HeroSection() {
 
                   {/* Field 3: Budget Range */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.budgetLabel}
                       </span>
@@ -370,10 +380,7 @@ export default function HeroSection() {
 
                   {/* Field 4: Bedrooms */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.common.beds}
                       </span>
@@ -402,10 +409,7 @@ export default function HeroSection() {
                 <>
                   {/* Field 1: Experience Type */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.expTypeLabel}
                       </span>
@@ -430,10 +434,7 @@ export default function HeroSection() {
 
                   {/* Field 2: Preferred Date */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.dateLabel}
                       </span>
@@ -448,10 +449,7 @@ export default function HeroSection() {
 
                   {/* Field 3: Schedule / Timing */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.timingLabel}
                       </span>
@@ -475,10 +473,7 @@ export default function HeroSection() {
 
                   {/* Field 4: Guests */}
                   <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="flex items-center gap-1.5 text-brand-terracotta mb-1">
-                      <svg className="w-3.5 h-3.5 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
+                    <div className="mb-1">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.guestsLabel}
                       </span>
