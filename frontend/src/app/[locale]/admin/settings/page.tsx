@@ -1,44 +1,61 @@
-import React from "react";
+"use client";
 
-interface Props {
-  params: Promise<{
-    locale: string;
-  }>;
-}
+import React, { useEffect, useState } from "react";
+import { getAdminSettings, updateAdminSettings, getAdminAuditLogs } from "@/features/admin/services/admin.api";
+import type { ActivityLogItem, PlatformSettingsMap } from "@/features/admin/types";
+import { useLanguage } from "@/context/LanguageContext";
+import LoadingState from "@/components/ui/LoadingState";
+import PermissionGuard from "@/components/ui/PermissionGuard";
 
-export default async function AdminSettingsPage({ params }: Props) {
-  const { locale } = await params;
+export default function AdminSettingsPage() {
+  const { locale } = useLanguage();
   const isAr = locale === "ar";
 
-  const auditLogs = [
-    {
-      id: "LOG-5510",
-      actor: "superadmin@gounow.com",
-      action: "Created Admin Account (admin@gounow.com)",
-      actionAr: "إنشاء حساب مسؤول تشغيلي جديد",
-      ip: "127.0.0.1 (Local Executive Node)",
-      timestamp: "Today, 15:10",
-      timestampAr: "اليوم، 15:10",
-    },
-    {
-      id: "LOG-5508",
-      actor: "superadmin@gounow.com",
-      action: "Executed Database Seeder (CreateAdminAccountsSeeder)",
-      actionAr: "تنفيذ بذر قاعدة البيانات لحسابات الإدارة",
-      ip: "CLI / Artisan Command",
-      timestamp: "Today, 14:58",
-      timestampAr: "اليوم، 14:58",
-    },
-    {
-      id: "LOG-5499",
-      actor: "admin@gounow.com",
-      action: "Confirmed Villa Reservation (GON-2026-641770)",
-      actionAr: "تأكيد حجز فيلا خليج الفنادير",
-      ip: "192.168.1.10 (El Gouna Marina Hub)",
-      timestamp: "Yesterday, 18:22",
-      timestampAr: "أمس، 18:22",
-    },
-  ];
+  const [settings, setSettings] = useState<PlatformSettingsMap>({});
+  const [logs, setLogs] = useState<ActivityLogItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [settingsRes, logsRes] = await Promise.all([
+        getAdminSettings().catch(() => ({})),
+        getAdminAuditLogs().catch(() => ({ data: [] })),
+      ]);
+      setSettings(settingsRes);
+      setLogs(logsRes.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setFeedback(null);
+
+    try {
+      await updateAdminSettings(settings);
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم حفظ إعدادات المنصة بنجاح وتوثيقها في سجل الأمان." : "Settings updated and audited successfully.",
+      });
+      await fetchData();
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر حفظ الإعدادات." : "Failed to update settings."),
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -62,101 +79,123 @@ export default async function AdminSettingsPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Settings Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Global Policies (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white p-6 sm:p-7 rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs space-y-5">
-            <h2 className="font-serif text-lg font-bold text-brand-brown pb-3 border-b border-brand-border/60">
-              {isAr ? "السياسات المالية وقواعد الحجز" : "Core Business Rules"}
-            </h2>
-
-            <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-brand-brown block">
-                    {isAr ? "نسبة عمولة المنصة الافتراضية" : "Standard Platform Commission"}
-                  </span>
-                  <span className="text-brand-brown-muted font-light">
-                    {isAr ? "تُخصم تلقائياً من حجوزات الفلل واليخوت" : "Deducted automatically from gross bookings"}
-                  </span>
-                </div>
-                <span className="font-mono font-bold text-base text-brand-terracotta bg-brand-sand-light px-3 py-1 rounded-xl border border-brand-border">
-                  15%
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-brand-border/60">
-                <div>
-                  <span className="font-bold text-brand-brown block">
-                    {isAr ? "مهلة تأكيد الحجز المبدئي" : "Instant Hold Window"}
-                  </span>
-                  <span className="text-brand-brown-muted font-light">
-                    {isAr ? "الوقت المتاح للنزيل لإتمام الدفع قبل إلغاء الحجز" : "Reservation hold timeout before release"}
-                  </span>
-                </div>
-                <span className="font-mono font-bold text-sm text-brand-brown bg-brand-sand-light px-3 py-1 rounded-xl border border-brand-border">
-                  24 {isAr ? "ساعة" : "Hours"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-brand-border/60">
-                <div>
-                  <span className="font-bold text-brand-brown block">
-                    {isAr ? "سياسة الإلغاء القياسية للفلل" : "Cancellation Policy"}
-                  </span>
-                  <span className="text-brand-brown-muted font-light">
-                    {isAr ? "استرداد كامل حتى 14 يوماً قبل تاريخ الوصول" : "100% refund up to 14 days before check-in"}
-                  </span>
-                </div>
-                <span className="font-bold text-xs text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-                  {isAr ? "مرنة VIP" : "Flexible"}
-                </span>
-              </div>
-            </div>
-          </div>
+      {/* Feedback Alert */}
+      {feedback && (
+        <div
+          className={`p-4 rounded-2xl text-xs font-medium border flex items-center justify-between ${
+            feedback.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+        >
+          <span>{feedback.message}</span>
+          <button
+            onClick={() => setFeedback(null)}
+            className="text-sm font-bold opacity-60 hover:opacity-100 cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
+      )}
 
-        {/* Right Column: Node & Security Status (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#12100E] text-white p-6 sm:p-7 rounded-2xl sm:rounded-3xl border border-white/10 shadow-lg space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-brand-terracotta font-bold">
-                {isAr ? "حالة الأمان والحماية" : "SECURITY ENGINE"}
-              </span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+      {/* Settings Form Card */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs p-6 sm:p-8">
+        <h2 className="font-serif text-lg font-bold text-brand-brown mb-4 pb-2 border-b border-brand-border/60">
+          {isAr ? "القواعد التشغيلية والمالية العامة" : "General Governance Rules"}
+        </h2>
+
+        {loading ? (
+          <LoadingState message={isAr ? "جارٍ تحميل الإعدادات..." : "Loading system settings..."} rows={3} />
+        ) : (
+          <form onSubmit={handleSaveSettings} className="space-y-6 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block font-bold text-brand-brown mb-1.5">
+                  {isAr ? "نسبة ضريبة القيمة المضافة (VAT %)" : "VAT Tax Percentage (%)"}
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={settings["vat_percentage"] !== undefined ? String(settings["vat_percentage"]) : "14"}
+                  onChange={(e) => setSettings({ ...settings, vat_percentage: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none"
+                />
+                <span className="text-[11px] text-brand-brown-muted mt-1 block">
+                  {isAr ? "تطبق تلقائياً في حسابات محرك التسعير والحجز." : "Automatically applied in server-side quote calculations."}
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-bold text-brand-brown mb-1.5">
+                  {isAr ? "عمولة المنصة على الإقامات (%)" : "Platform Commission Rate (%)"}
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={settings["platform_commission_rate"] !== undefined ? String(settings["platform_commission_rate"]) : "15"}
+                  onChange={(e) => setSettings({ ...settings, platform_commission_rate: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none"
+                />
+                <span className="text-[11px] text-brand-brown-muted mt-1 block">
+                  {isAr ? "تستقطع من دفعات الملاك عند التسوية البنكية." : "Deducted from owner payouts during financial settlements."}
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-bold text-brand-brown mb-1.5">
+                  {isAr ? "مهلة الإلغاء المجاني (بالأيام)" : "Free Cancellation Window (Days)"}
+                </label>
+                <input
+                  type="number"
+                  value={settings["cancellation_free_days"] !== undefined ? String(settings["cancellation_free_days"]) : "14"}
+                  onChange={(e) => setSettings({ ...settings, cancellation_free_days: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-brand-brown mb-1.5">
+                  {isAr ? "العملة الافتراضية للمعاملات" : "Primary Base Currency"}
+                </label>
+                <input
+                  type="text"
+                  value={settings["base_currency"] !== undefined ? String(settings["base_currency"]) : "EGP"}
+                  onChange={(e) => setSettings({ ...settings, base_currency: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none font-mono"
+                />
+              </div>
             </div>
 
-            <h3 className="font-serif text-xl font-bold text-white">
-              {isAr ? "خادم الجونة الآمن" : "El Gouna Node Hardened"}
-            </h3>
-
-            <div className="space-y-2 text-xs text-stone-300 font-light">
-              <div className="flex items-center justify-between py-1 border-b border-white/10">
-                <span>Sanctum Token Auth:</span>
-                <span className="font-mono text-emerald-400 font-bold">Active ●</span>
+            <PermissionGuard permission="manage_settings">
+              <div className="flex items-center justify-end pt-4 border-t border-brand-border/60">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-6 py-2.5 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? (isAr ? "جارٍ الحفظ..." : "Saving...") : (isAr ? "حفظ التغييرات" : "Save Changes")}
+                </button>
               </div>
-              <div className="flex items-center justify-between py-1 border-b border-white/10">
-                <span>Hardware Encryption:</span>
-                <span className="font-mono text-white">AES-256</span>
-              </div>
-              <div className="flex items-center justify-between py-1 border-b border-white/10">
-                <span>Database Connection:</span>
-                <span className="font-mono text-emerald-400 font-bold">SQLite Protected</span>
-              </div>
-            </div>
-          </div>
-        </div>
+            </PermissionGuard>
+          </form>
+        )}
       </div>
 
-      {/* Audit Logs Table Card */}
+      {/* Audit Logs Card */}
       <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs overflow-hidden">
         <div className="p-5 sm:p-6 border-b border-brand-border flex items-center justify-between">
-          <h2 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
-            {isAr ? "سجل تدقيق العمليات الأمنية (Audit Trail)" : "Administrative Audit Trail"}
-          </h2>
-          <span className="text-xs text-brand-brown-muted font-light">
-            {isAr ? "تسجيل دقيق لكافة أوامر السوبر أدمن" : "Immutable Action Log"}
+          <div>
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
+              {isAr ? "سجل التدقيق الأمني والعمليات (Audit Trail)" : "Security Activity Audit Trail"}
+            </h2>
+            <p className="text-xs text-brand-brown-muted font-light mt-0.5">
+              {isAr
+                ? "سجل غير قابل للتعديل يوثق كافة العمليات الإدارية الحساسة"
+                : "Immutable activity trail tracking sensitive administrative actions"}
+            </p>
+          </div>
+          <span className="text-xs font-mono font-bold text-brand-terracotta">
+            LIVE LOGS
           </span>
         </div>
 
@@ -164,30 +203,34 @@ export default async function AdminSettingsPage({ params }: Props) {
           <table className="w-full text-start text-xs">
             <thead className="bg-brand-sand-light/60 text-brand-brown-muted font-bold text-[10px] uppercase tracking-wider border-b border-brand-border">
               <tr>
-                <th className="py-3.5 px-4 text-start">{isAr ? "المعرف" : "Log ID"}</th>
+                <th className="py-3.5 px-4 text-start">{isAr ? "رقم السجل" : "Log ID"}</th>
                 <th className="py-3.5 px-4 text-start">{isAr ? "المسؤول" : "Actor"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "العملية المنفذة" : "Action"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "المصدر / IP" : "Source"}</th>
+                <th className="py-3.5 px-4 text-start">{isAr ? "الإجراء" : "Action"}</th>
+                <th className="py-3.5 px-4 text-start">{isAr ? "التفاصيل" : "Description"}</th>
+                <th className="py-3.5 px-4 text-start">{isAr ? "عنوان IP" : "IP / Node"}</th>
                 <th className="py-3.5 px-4 text-end">{isAr ? "التوقيت" : "Timestamp"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-border/60">
-              {auditLogs.map((log) => (
+              {logs.map((log) => (
                 <tr key={log.id} className="hover:bg-brand-sand/30 transition-colors">
-                  <td className="py-4 px-4 font-mono font-bold text-brand-terracotta">
-                    {log.id}
+                  <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">
+                    LOG-#{log.id}
                   </td>
-                  <td className="py-4 px-4 font-mono text-brand-brown">
-                    {log.actor}
+                  <td className="py-3.5 px-4 font-semibold text-brand-brown">
+                    {log.user_name || "System"}
                   </td>
-                  <td className="py-4 px-4 font-medium text-brand-brown">
-                    {isAr ? log.actionAr : log.action}
+                  <td className="py-3.5 px-4 font-mono text-[11px] text-brand-terracotta">
+                    {log.action}
                   </td>
-                  <td className="py-4 px-4 text-stone-600 font-mono text-[11px]" dir="ltr">
-                    {log.ip}
+                  <td className="py-3.5 px-4 text-brand-brown font-light">
+                    {log.description}
                   </td>
-                  <td className="py-4 px-4 text-end text-brand-brown-muted font-light">
-                    {isAr ? log.timestampAr : log.timestamp}
+                  <td className="py-3.5 px-4 font-mono text-[11px] text-brand-brown-muted" dir="ltr">
+                    {log.ip_address || "Internal"}
+                  </td>
+                  <td className="py-3.5 px-4 text-end font-mono text-[11px] text-brand-brown-muted" dir="ltr">
+                    {new Date(log.created_at).toLocaleString()}
                   </td>
                 </tr>
               ))}

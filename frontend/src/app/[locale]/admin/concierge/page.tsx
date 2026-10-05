@@ -1,162 +1,209 @@
-import React from "react";
+"use client";
 
-interface Props {
-  params: Promise<{
-    locale: string;
-  }>;
-}
+import React, { useEffect, useState } from "react";
+import { getAdminConciergeLeads, updateConciergeStatus } from "@/features/admin/services/admin.api";
+import type { AdminLeadItem } from "@/features/admin/types";
+import { useLanguage } from "@/context/LanguageContext";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
+import PermissionGuard from "@/components/ui/PermissionGuard";
 
-export default async function AdminConciergePage({ params }: Props) {
-  const { locale } = await params;
+export default function AdminConciergePage() {
+  const { locale } = useLanguage();
   const isAr = locale === "ar";
 
-  const inquiries = [
-    {
-      id: "CON-9821",
-      customer: "Lord Alexander Wright",
-      phone: "+44 7700 900077",
-      email: "alexander.w@mayfair-invest.co.uk",
-      service: "Waterfront Villa & Yacht Charter",
-      serviceAr: "فيلا على اللاجون مع يخت خاص",
-      dates: "Dec 20 - Jan 03, 2027",
-      guests: "8 Guests",
-      guestsAr: "8 ضيوف كبار",
-      status: "New",
-      statusAr: "طلب جديد VIP",
-      statusColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-      notes: "Requires private mooring for 75ft yacht, daily private chef, and airport Mercedes Maybach transfer.",
-      notesAr: "طلب رسو خاص ليخت 75 قدم، شيف إيطالي خاص يومياً، وسيارة مرسيدس مايباخ من مطار الغردقة.",
-      time: "25 mins ago",
-      timeAr: "منذ 25 دقيقة",
-    },
-    {
-      id: "CON-9819",
-      customer: "Eng. Tarek El-Kattan",
-      phone: "+20 100 554 9988",
-      email: "t.kattan@orascom-partners.eg",
-      service: "Ancient Sands Signature Villa Buy Inquiry",
-      serviceAr: "معاينة شراء فيلا أنشنت ساندز الخاصة",
-      dates: "Immediate Inspection",
-      guests: "Family",
-      guestsAr: "عائلة",
-      status: "In Progress",
-      statusAr: "قيد المتابعة",
-      statusColor: "bg-blue-100 text-blue-800 border-blue-300",
-      notes: "High-net-worth real estate investor requesting architectural floor plans and payment schedule.",
-      notesAr: "مستثمر عقاري يرغب في استلام المخططات الهندسية وجدول سداد التقسيط على 5 سنوات.",
-      time: "2 hours ago",
-      timeAr: "منذ ساعتين",
-    },
-    {
-      id: "CON-9814",
-      customer: "Elena Rostova",
-      phone: "+971 50 123 4567",
-      email: "elena.r@dubai-creatives.ae",
-      service: "Superyacht Day Expedition to Tawila Island",
-      serviceAr: "رحلة يخت فاخر ليوم كامل إلى جزيرة طويلة",
-      dates: "Oct 28, 2026",
-      guests: "12 Guests",
-      guestsAr: "12 ضيف",
-      status: "Contacted",
-      statusAr: "تم التواصل واتساب",
-      statusColor: "bg-amber-100 text-amber-800 border-amber-300",
-      notes: "Birthday celebration on sandbar with catering, scuba instructor, and drone videographer.",
-      notesAr: "حفل عيد ميلاد على لسان جزيرة طويلة مع تجهيزات ضيافة، مدرب غوص ومصور درون محترف.",
-      time: "Yesterday",
-      timeAr: "أمس",
-    },
-  ];
+  const [leads, setLeads] = useState<AdminLeadItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const fetchLeads = async () => {
+    setLoading(true);
+    try {
+      const res = await getAdminConciergeLeads();
+      setLeads(res.data);
+    } catch {
+      setLeads([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const handleStatusChange = async (id: number, newStatus: string) => {
+    try {
+      await updateConciergeStatus(id, newStatus);
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم تحديث حالة طلب الكونسيرج بنجاح." : "Concierge status updated successfully.",
+      });
+      await fetchLeads();
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر تحديث الحالة." : "Failed to update status."),
+      });
+    }
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-600 font-bold">
-              {isAr ? "مكتب الكونسيرج الفاخر 24/7" : "VIP CONCIERGE DESK // LIVE DISPATCH"}
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-brand-terracotta font-bold">
+              {isAr ? "مكتب كونسيرج الجونة الحي" : "LIVE 24/7 CONCIERGE DESK"}
             </span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-brand-brown">
-            {isAr ? "طلبات الكونسيرج واستفسارات النزلاء" : "VIP Concierge Inquiries & Client Leads"}
+            {isAr ? "استفسارات وطلبات كبار الزوار (VIP)" : "VIP Concierge Inquiries & Work Queue"}
           </h1>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-1 font-light">
             {isAr
-              ? "متابعة طلبات الفلل المخصصة، وتأجير اليخوت، وخدمات الشيف الخاص، والتواصل الفوري عبر واتساب."
-              : "Review bespoke villa requests, yacht charters, VIP transfers, and instant WhatsApp client dispatch."}
+              ? "متابعة طلبات اليخوت الخاصة، وحجوزات الفلل الفاخرة، وطلبات النقل الجوي واستفسارات الواتساب."
+              : "Bespoke high-net-worth requests, private charters, and high-priority WhatsApp leads."}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1.5 rounded-xl bg-white border border-brand-border text-xs font-semibold text-brand-brown">
-            {isAr ? "14 استفسار نشط" : "14 Active Inquiries"}
-          </span>
+        <div className="flex items-center gap-2.5">
+          <a
+            href="https://wa.me/201000000000"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+          >
+            <span>💬</span>
+            <span>{isAr ? "فتح مكتب واتساب المباشر" : "Open WhatsApp Dispatch"}</span>
+          </a>
         </div>
       </div>
 
-      {/* Inquiries Cards */}
-      <div className="space-y-4">
-        {inquiries.map((inquiry) => (
-          <div
-            key={inquiry.id}
-            className="p-5 sm:p-6 bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs hover:border-brand-terracotta/40 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5"
+      {/* Feedback Alert */}
+      {feedback && (
+        <div
+          className={`p-4 rounded-2xl text-xs font-medium border flex items-center justify-between ${
+            feedback.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+        >
+          <span>{feedback.message}</span>
+          <button
+            onClick={() => setFeedback(null)}
+            className="text-sm font-bold opacity-60 hover:opacity-100 cursor-pointer"
           >
-            <div className="space-y-2 flex-1">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="font-mono text-xs font-bold text-brand-terracotta bg-brand-sand-light px-2.5 py-0.5 rounded-lg border border-brand-border">
-                  {inquiry.id}
-                </span>
-                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${inquiry.statusColor}`}>
-                  {isAr ? inquiry.statusAr : inquiry.status}
-                </span>
-                <span className="text-xs text-brand-brown-muted font-light">
-                  • {isAr ? inquiry.timeAr : inquiry.time}
-                </span>
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Leads Roster */}
+      {loading ? (
+        <LoadingState message={isAr ? "جارٍ تحميل طلبات الكونسيرج..." : "Loading concierge queue..."} rows={4} />
+      ) : leads.length === 0 ? (
+        <EmptyState
+          icon="🛎️"
+          title={isAr ? "لا توجد طلبات كونسيرج حالياً" : "No Concierge Requests"}
+          description={
+            isAr
+              ? "جميع طلبات واستفسارات كبار النزلاء تم الرد عليها والتعامل معها بنجاح."
+              : "All VIP concierge inquiries and leads have been processed."
+          }
+        />
+      ) : (
+        <div className="space-y-4">
+          {leads.map((item) => (
+            <div
+              key={item.id}
+              className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-white border border-brand-border shadow-xs hover:border-brand-terracotta/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
+            >
+              <div className="space-y-2 flex-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="font-mono text-xs font-bold text-brand-terracotta">
+                    LEAD #{item.id}
+                  </span>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      item.status === "new"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : item.status === "in_progress"
+                        ? "bg-blue-100 text-blue-800 border border-blue-300"
+                        : "bg-stone-100 text-stone-800 border border-stone-300"
+                    }`}
+                  >
+                    {item.status.toUpperCase()}
+                  </span>
+                  <span className="text-[11px] text-brand-brown-muted font-light">
+                    • {new Date(item.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-serif text-base sm:text-lg font-bold text-brand-brown">
+                    {item.name}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-brand-brown-muted mt-0.5">
+                    {item.email && <span>📧 {item.email}</span>}
+                    {item.phone && <span className="font-mono" dir="ltr">📞 {item.phone}</span>}
+                    {item.type && <span className="capitalize">🏷️ {item.type.replace("_", " ")}</span>}
+                  </div>
+                </div>
+
+                <p className="text-xs text-brand-brown font-light bg-brand-sand-light/50 p-3 rounded-xl border border-brand-border/60 leading-relaxed">
+                  {item.message}
+                </p>
+
+                {item.admin_notes && (
+                  <p className="text-[11px] text-brand-brown-muted italic">
+                    {isAr ? "ملاحظات الإدارة: " : "Admin Notes: "} {item.admin_notes}
+                  </p>
+                )}
               </div>
 
-              <h3 className="font-serif text-lg font-bold text-brand-brown">
-                {inquiry.customer}
-              </h3>
+              {/* Status Action Workflow */}
+              <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-brand-border/60">
+                {item.phone && (
+                  <a
+                    href={`https://wa.me/${item.phone.replace(/[^0-9]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-2xs"
+                  >
+                    <span>💬</span>
+                    <span>{isAr ? "واتساب النزيل" : "Direct WhatsApp"}</span>
+                  </a>
+                )}
 
-              <div className="flex flex-wrap items-center gap-4 text-xs text-brand-brown-muted">
-                <span className="font-medium text-brand-brown">
-                  🛎️ {isAr ? inquiry.serviceAr : inquiry.service}
-                </span>
-                <span>•</span>
-                <span>🗓️ {inquiry.dates}</span>
-                <span>•</span>
-                <span>👥 {isAr ? inquiry.guestsAr : inquiry.guests}</span>
+                <PermissionGuard permission="manage_leads">
+                  <div className="flex items-center gap-1.5">
+                    {item.status === "new" && (
+                      <button
+                        onClick={() => handleStatusChange(item.id, "in_progress")}
+                        className="px-3 py-1.5 rounded-lg bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-semibold transition cursor-pointer"
+                      >
+                        {isAr ? "قيد المتابعة" : "Start Handling"}
+                      </button>
+                    )}
+
+                    {item.status !== "converted" && (
+                      <button
+                        onClick={() => handleStatusChange(item.id, "converted")}
+                        className="px-3 py-1.5 rounded-lg bg-white border border-brand-border text-brand-brown hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 text-xs font-semibold transition cursor-pointer"
+                      >
+                        {isAr ? "إتمام الحجز" : "Mark Converted"}
+                      </button>
+                    )}
+                  </div>
+                </PermissionGuard>
               </div>
-
-              <p className="text-xs text-stone-600 bg-brand-sand-light/50 p-3 rounded-xl border border-brand-border/60 leading-relaxed font-light">
-                {isAr ? inquiry.notesAr : inquiry.notes}
-              </p>
             </div>
-
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-brand-border/60 shrink-0">
-              <div className="text-start sm:text-end text-xs text-brand-brown-muted" dir="ltr">
-                <span className="block font-mono font-medium text-brand-brown">{inquiry.phone}</span>
-                <span className="block text-[11px] truncate max-w-[180px]">{inquiry.email}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <a
-                  href={`https://wa.me/${inquiry.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                    `Hello ${inquiry.customer}, this is GouNow VIP Concierge regarding your request for ${inquiry.service}.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
-                >
-                  <span>💬</span>
-                  <span>{isAr ? "مراسلة واتساب" : "WhatsApp Dispatch"}</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,212 +1,190 @@
-import React from "react";
+"use client";
 
-interface Props {
-  params: Promise<{
-    locale: string;
-  }>;
-}
+import React, { useEffect, useState } from "react";
+import { getAdminFinances, getAdminFinanceSummary } from "@/features/admin/services/admin.api";
+import type { AdminTransactionItem, FinanceSummary } from "@/features/admin/types";
+import { useLanguage } from "@/context/LanguageContext";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
 
-export default async function AdminFinancesPage({ params }: Props) {
-  const { locale } = await params;
+export default function AdminFinancesPage() {
+  const { locale } = useLanguage();
   const isAr = locale === "ar";
 
-  const transactions = [
-    {
-      id: "TXN-88102",
-      bookingRef: "GON-2026-641770",
-      customer: "First Booker",
-      amount: "30,210 EGP",
-      commission: "4,531 EGP",
-      payout: "25,679 EGP",
-      gateway: "Paymob (Online Card)",
-      gatewayAr: "باي موب (بطاقة بنكية)",
-      status: "Settled",
-      statusAr: "تمت التسوية",
-      statusColor: "bg-emerald-100 text-emerald-800",
-      date: "Nov 18, 2026",
-    },
-    {
-      id: "TXN-88094",
-      bookingRef: "GON-2026-118492",
-      customer: "Sarah Jenkins",
-      amount: "74,400 EGP",
-      commission: "11,160 EGP",
-      payout: "63,240 EGP",
-      gateway: "Stripe International",
-      gatewayAr: "سترايب (دولي)",
-      status: "Settled",
-      statusAr: "تمت التسوية",
-      statusColor: "bg-emerald-100 text-emerald-800",
-      date: "Oct 04, 2026",
-    },
-    {
-      id: "TXN-88081",
-      bookingRef: "GON-2026-552910",
-      customer: "Karim Mansour",
-      amount: "58,000 EGP",
-      commission: "8,700 EGP",
-      payout: "49,300 EGP",
-      gateway: "Commercial Bank Wire",
-      gatewayAr: "تحويل بنكي مباشر (CIB)",
-      status: "Settled",
-      statusAr: "تمت التسوية",
-      statusColor: "bg-emerald-100 text-emerald-800",
-      date: "Oct 02, 2026",
-    },
-    {
-      id: "TXN-88075",
-      bookingRef: "GON-2026-936084",
-      customer: "Guest User",
-      amount: "5,643 EGP (Deposit)",
-      commission: "846 EGP",
-      payout: "4,797 EGP",
-      gateway: "Paymob (Apple Pay)",
-      gatewayAr: "باي موب (أبل باي)",
-      status: "Pending Capture",
-      statusAr: "قيد التأكيد البنكي",
-      statusColor: "bg-amber-100 text-amber-800",
-      date: "Today, 14:10",
-    },
-  ];
+  const [transactions, setTransactions] = useState<AdminTransactionItem[]>([]);
+  const [summary, setSummary] = useState<FinanceSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    Promise.all([
+      getAdminFinances().catch(() => ({ data: [] })),
+      getAdminFinanceSummary().catch(() => null),
+    ]).then(([txRes, sumRes]) => {
+      if (!mounted) return;
+      setTransactions(txRes.data);
+      setSummary(sumRes);
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-600 font-bold">
-              {isAr ? "التقارير المالية والمدفوعات" : "FINANCIAL DISPATCH & SETTLEMENTS"}
-            </span>
-          </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-brand-brown">
-            {isAr ? "التقارير المالية وحسابات المنصة" : "Financial Analytics & Payout Ledgers"}
+            {isAr ? "المالية والتسويات والمدفوعات" : "Financial Command & Payment Transactions"}
           </h1>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-1 font-light">
             {isAr
-              ? "متابعة العائدات المحصلة، ونسب عمولة المنصة، ومستحقات الملاك، وتسويات بوابات الدفع."
-              : "Review gross collected revenues, 15% platform commissions, host payouts, and gateway reconciliation."}
+              ? "متابعة عمليات الدفع الإلكتروني، وحركات الاسترداد، وتوزيع العمولات وحسابات البنوك."
+              : "Track gateway transactions, automated refunds, commissions, and merchant settlements."}
           </p>
         </div>
       </div>
 
-      {/* KPI Financial Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* Financial Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <div className="p-5 rounded-2xl bg-white border border-brand-border shadow-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
-            {isAr ? "إجمالي الإيرادات المحصلة" : "Gross Revenue"}
+            {isAr ? "إجمالي التحصيلات (Gross)" : "Gross Revenue"}
           </span>
           <span className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown">
-            221,103 <span className="text-xs font-sans font-normal text-brand-brown-muted">EGP</span>
+            {summary?.formattedTotalRevenue || "0.00 EGP"}
           </span>
-          <div className="mt-2 text-xs text-emerald-600 font-medium flex items-center gap-1">
-            <span>●</span>
-            <span>{isAr ? "جميع التسويات مطابقة بنكياً" : "100% Reconciled"}</span>
-          </div>
+          <span className="text-[11px] text-emerald-600 block mt-1 font-medium">
+            ● {summary?.transactionCount ?? 0} {isAr ? "معاملة بنكية ناجحة" : "Successful Transactions"}
+          </span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-brand-border shadow-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
-            {isAr ? "عمولة المنصة (15% Net)" : "Platform Net Commission"}
+            {isAr ? "إجمالي المبالغ المستردة" : "Total Refunds"}
           </span>
-          <span className="text-2xl sm:text-3xl font-serif font-bold text-brand-terracotta">
-            33,165 <span className="text-xs font-sans font-normal text-brand-brown-muted">EGP</span>
+          <span className="text-2xl sm:text-3xl font-serif font-bold text-rose-600">
+            {summary?.formattedTotalRefunds || "0.00 EGP"}
           </span>
-          <div className="mt-2 text-xs text-brand-brown-muted font-light">
-            {isAr ? "رسوم الخدمة وإدارة الحجوزات" : "Service fees & concierge cut"}
-          </div>
+          <span className="text-[11px] text-brand-brown-muted block mt-1 font-light">
+            {isAr ? "تسويات وإلغاءات معتمدة" : "Processed Refund Deductions"}
+          </span>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-brand-border shadow-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
-            {isAr ? "مستحقات الملاك وأصحاب الفلل" : "Host Payouts Due"}
+            {isAr ? "صافي السيولة النقدية" : "Net Settlement"}
           </span>
-          <span className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown">
-            187,938 <span className="text-xs font-sans font-normal text-brand-brown-muted">EGP</span>
+          <span className="text-2xl sm:text-3xl font-serif font-bold text-emerald-700">
+            {summary?.formattedNetRevenue || "0.00 EGP"}
           </span>
-          <div className="mt-2 text-xs text-brand-brown-muted font-light">
-            {isAr ? "تُحول شهرياً لحسابات الملاك" : "Transferred bi-weekly via CIB"}
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-brand-border shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
-            {isAr ? "حالة بوابات الدفع الإلكتروني" : "Payment Gateways"}
+          <span className="text-[11px] text-emerald-700 block mt-1 font-medium">
+            {isAr ? "جاهز للصرف والتسوية" : "Available for Payouts"}
           </span>
-          <div className="space-y-1 mt-2 text-xs font-medium">
-            <div className="flex items-center justify-between text-emerald-700">
-              <span>Paymob (EGP):</span>
-              <span className="font-bold">Active ●</span>
-            </div>
-            <div className="flex items-center justify-between text-emerald-700">
-              <span>Stripe (EUR/USD):</span>
-              <span className="font-bold">Active ●</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Transaction Ledger Table */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs overflow-hidden">
-        <div className="p-5 sm:p-6 border-b border-brand-border flex items-center justify-between">
-          <h2 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
-            {isAr ? "سجل المعاملات والمدفوعات الأخيرة" : "Recent Settlement Ledger"}
-          </h2>
-          <span className="text-xs text-brand-brown-muted font-mono" dir="ltr">
-            Ledger-2026-Q4
-          </span>
-        </div>
+      {/* Transactions Table */}
+      {loading ? (
+        <LoadingState message={isAr ? "جارٍ تحميل السجل المالي..." : "Loading transaction ledger..."} rows={5} />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          icon="💳"
+          title={isAr ? "لا توجد معاملات مسجلة" : "No Transactions Found"}
+          description={
+            isAr
+              ? "لم يتم تسجيل أي معاملات بنكية أو حركات دفع في النظام حتى الآن."
+              : "No payment transactions have been logged in the platform ledger yet."
+          }
+        />
+      ) : (
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs overflow-hidden">
+          <div className="p-5 sm:p-6 border-b border-brand-border flex items-center justify-between">
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
+              {isAr ? "سجل المعاملات والتحصيلات" : "Payment Ledger"}
+            </h2>
+            <span className="text-xs text-brand-brown-muted font-light">
+              {isAr ? "تسوية آلية فورية" : "Audited Realtime Ledger"}
+            </span>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-start text-xs">
-            <thead className="bg-brand-sand-light/60 text-brand-brown-muted font-bold text-[10px] uppercase tracking-wider border-b border-brand-border">
-              <tr>
-                <th className="py-3.5 px-4 text-start">{isAr ? "رقم المعاملة" : "Transaction ID"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "رقم الحجز" : "Booking Ref"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "العميل" : "Client"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "القيمة الإجمالية" : "Amount"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "عمولة المنصة" : "Fee (15%)"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "بوابة الدفع" : "Gateway"}</th>
-                <th className="py-3.5 px-4 text-start">{isAr ? "الحالة" : "Status"}</th>
-                <th className="py-3.5 px-4 text-end">{isAr ? "التاريخ" : "Date"}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand-border/60">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-brand-sand/30 transition-colors">
-                  <td className="py-4 px-4 font-mono font-bold text-brand-terracotta">
-                    {tx.id}
-                  </td>
-                  <td className="py-4 px-4 font-mono text-brand-brown">
-                    {tx.bookingRef}
-                  </td>
-                  <td className="py-4 px-4 font-medium text-brand-brown">
-                    {tx.customer}
-                  </td>
-                  <td className="py-4 px-4 font-serif font-bold text-brand-brown">
-                    {tx.amount}
-                  </td>
-                  <td className="py-4 px-4 text-emerald-700 font-semibold">
-                    {tx.commission}
-                  </td>
-                  <td className="py-4 px-4 text-stone-600 font-medium">
-                    {isAr ? tx.gatewayAr : tx.gateway}
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${tx.statusColor}`}>
-                      {isAr ? tx.statusAr : tx.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-end text-brand-brown-muted font-light">
-                    {tx.date}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-start text-xs">
+              <thead className="bg-brand-sand-light/60 text-brand-brown-muted font-bold text-[10px] uppercase tracking-wider border-b border-brand-border">
+                <tr>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "رقم الحركة" : "Transaction ID"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "مرجع الحجز" : "Booking Ref"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "العميل" : "Client"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "بوابة الدفع" : "Gateway"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "النوع" : "Type"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "المبلغ" : "Amount"}</th>
+                  <th className="py-3.5 px-4 text-start">{isAr ? "التاريخ" : "Timestamp"}</th>
+                  <th className="py-3.5 px-4 text-end">{isAr ? "الحالة" : "Status"}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-brand-border/60">
+                {transactions.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-brand-sand/30 transition-colors">
+                    <td className="py-4 px-4 font-mono font-bold text-brand-brown">
+                      TXN-#{tx.id}
+                    </td>
+
+                    <td className="py-4 px-4 font-mono text-[11px] text-brand-terracotta font-semibold">
+                      {tx.booking_reference || "N/A"}
+                    </td>
+
+                    <td className="py-4 px-4 font-medium text-brand-brown">
+                      {tx.customer_name || "Direct Client"}
+                    </td>
+
+                    <td className="py-4 px-4 text-brand-brown-muted capitalize">
+                      {tx.gateway} ({tx.payment_method})
+                    </td>
+
+                    <td className="py-4 px-4">
+                      <span
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                          tx.type === "refund"
+                            ? "bg-rose-100 text-rose-800"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}
+                      >
+                        {tx.type}
+                      </span>
+                    </td>
+
+                    <td className="py-4 px-4 font-serif font-bold text-brand-brown">
+                      {tx.formatted_amount}
+                    </td>
+
+                    <td className="py-4 px-4 font-mono text-[11px] text-brand-brown-muted" dir="ltr">
+                      {new Date(tx.created_at).toLocaleDateString()}
+                    </td>
+
+                    <td className="py-4 px-4 text-end">
+                      <span
+                        className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                          tx.status === "successful"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                            : tx.status === "refunded"
+                            ? "bg-rose-100 text-rose-800 border-rose-300"
+                            : "bg-amber-100 text-amber-800 border-amber-300"
+                        }`}
+                      >
+                        {tx.status.toUpperCase()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

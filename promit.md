@@ -1,1438 +1,1142 @@
-You are a Senior Creative Director, Senior UI/UX Designer, Motion Designer, and Senior Next.js Architect.
+أيوه، فهمت المطلوب بالضبط. أنت مش عايز Prompt واحد يقول للـ AI "كمّل الموقع"، لأن ده غالبًا هيخليه يعمل **Frontend شكله حلو لكن منفصل عن الـ Backend** أو يكرر نفس الـ UI ويكسر حاجات موجودة.
 
-I have an existing production-oriented Next.js website for a premium Gouna platform.
+الملفين بيحددوا أساس المنظومة: **11 Module + RBAC + Backend APIs + Audit Logs + Finance + Booking lifecycle + Concierge + CRM**، والهدف الأساسي إننا نحولهم لخطة تنفيذ تدريجية قبل ما الـ AI يبدأ يكتب كود.  
 
-The platform is not a simple travel website.
+أنا أقترح تستخدم **Prompt مستقل لكل مرحلة**، وتنفذهم بالترتيب. والأهم: كل Prompt يمنع الـ AI من اختراع Backend أو بيانات وهمية أو تغيير Architecture بدون إذنك.
 
-It combines:
+---
 
-Luxury villa sales
+# المرحلة 0 — Audit وفهم المشروع قبل لمس أي كود
 
-Villa rentals
+**دي أهم مرحلة. لا تخلي الـ AI يعدل أي ملف في البداية.**
 
-Accommodation / unit booking
+```text
+You are a Senior Full-Stack Architect, Security Engineer, UX Engineer, and Next.js Engineer.
 
-Gouna trips
+I have an existing Next.js web application for a luxury Gouna platform.
 
-Diving experiences
+The platform includes:
 
-Events
-
-Parties
-
-Activities
-
-Gouna services
-
-Online booking
-
-Online payments
-
-Premium experiences
-
-The current website already has a design and working code.
-
-Your task is NOT to simply "improve the UI".
-
-Your task is to transform the existing website into a:
-
-PREMIUM CINEMATIC DIGITAL EXPERIENCE
-
-The website should feel like a luxury destination brand combined with a cinematic real-estate and travel platform.
-
-When a user opens the website, they should feel:
-
-"I am entering Gouna."
-
-Not:
-
-"I am opening another booking website."
-
-The experience should feel premium, immersive, elegant, cinematic, modern, and expensive.
-
-However:
-
-DO NOT sacrifice performance.
-
-DO NOT create a heavy website.
-
-DO NOT destroy the existing architecture.
-
-DO NOT introduce unnecessary dependencies.
-
-The final result must be production-ready.
-
-1. FIRST: AUDIT THE EXISTING PROJECT
-
-Before changing the design, deeply inspect the existing project.
-
-Understand:
-
-Next.js version
-
-App Router structure
-
-TypeScript architecture
-
-Tailwind setup
-
-component architecture
-
-server components
-
-client components
-
-data fetching
-
-API architecture
-
-database integration
-
-authentication
-
-payment integration
-
-booking logic
-
-routing
-
-dynamic routes
-
-image handling
-
-existing animations
-
-existing state management
-
-existing reusable components
-
-Do not start rewriting random files.
-
-Understand the architecture first.
-
-Then create a clear implementation strategy.
-
-2. THE DESIGN DIRECTION
-
-The visual direction should be:
-
-LUXURY
-+
-CINEMATIC
-+
-MINIMAL
-+
-EDITORIAL
-+
-REAL ESTATE
-+
-TRAVEL
-+
-GOUNA LIFESTYLE
-
-Think of the website as a combination of:
-
-Luxury resort website
-+
-High-end real estate platform
-+
-Premium travel experience
-+
-Cinematic portfolio
-+
-Modern booking platform
-
-The website should feel closer to a premium international hospitality brand than a normal Egyptian booking website.
-
-3. VISUAL IDENTITY
-
-Use a sophisticated visual system.
-
-Avoid:
-
-generic cards
-
-excessive rounded containers
-
-cheap gradients
-
-random glassmorphism
-
-excessive shadows
-
-generic dashboard UI
-
-template-like layouts
-
-excessive borders
-
-repetitive sections
-
-basic hero sections
-
-default Tailwind styling
-
-"AI generated website" appearance
-
-The design should have:
-
-strong typography
-
-large cinematic imagery
-
-sophisticated whitespace
-
-editorial layouts
-
-layered compositions
-
-asymmetric sections
-
-large visual storytelling
-
-premium micro-interactions
-
-carefully controlled motion
-
-The design must feel intentional.
-
-4. HERO EXPERIENCE
-
-The hero must be one of the strongest parts of the website.
-
-Do NOT create a simple:
-
-Image
-+
-Heading
-+
-Button
-
-Instead create a cinematic opening experience.
-
-The hero should feel like the beginning of a movie.
-
-Example structure:
-
-Full viewport cinematic visual
-
-↓
-
-Elegant navigation
-
-↓
-
-Minimal typography
-
-↓
-
-Strong headline
-
-↓
-
-Short supporting statement
-
-↓
-
-Primary CTA
-
-↓
-
-Secondary CTA
-
-↓
-
-Subtle scroll indicator
-
-Possible visual treatment:
-
-full-screen Gouna imagery
-
-cinematic video when available
-
-subtle image movement
-
-slow parallax
-
-layered typography
-
-atmospheric overlay
-
-controlled transitions
-
-smooth entrance animation
-
-Example feeling:
-
-"Discover Gouna Beyond the Ordinary."
-
-or a stronger brand-specific message based on the existing content.
-
-Do NOT copy this text literally if the existing brand has better messaging.
-
-5. CINEMATIC SCROLL EXPERIENCE
-
-Scrolling should feel like moving through a visual story.
-
-Do NOT animate everything.
-
-Animation must have hierarchy.
-
-Use:
-
-reveal animations
-
-clip-path reveals
-
-image masking
-
-scale transitions
-
-subtle parallax
-
-text splitting
-
-staggered entrances
-
-horizontal storytelling sections
-
-pinned visual sections where appropriate
-
-smooth section transitions
-
-image transformations
-
-subtle opacity transitions
-
-Animations should be:
-
-smooth
-slow
-intentional
-premium
-
-Never:
-
-bouncy
-cartoonish
-excessive
-random
-over-animated
-
-6. FRAMER MOTION
-
-If Framer Motion already exists, use it intelligently.
-
-Do not replace the existing animation architecture unnecessarily.
-
-Create reusable motion primitives.
-
-For example:
-
-FadeIn
-RevealText
-ImageReveal
-ScaleReveal
-StaggerContainer
-ParallaxImage
-SectionReveal
-
-Do not write custom animation logic repeatedly in every component.
-
-Centralize reusable motion behavior.
-
-7. LENIS / SMOOTH SCROLL
-
-If Lenis is already installed:
-
-Keep it.
-
-Improve the implementation if necessary.
-
-The scrolling experience should feel:
-
-smooth
-controlled
-premium
-
-But avoid excessive smoothing that makes the website feel slow.
-
-Make sure:
-
-mobile performance remains good
-
-touch scrolling works naturally
-
-accessibility is not broken
-
-reduced motion is respected
-
-8. NAVIGATION
-
-The navbar should feel premium and minimal.
-
-Do not make a huge traditional navbar.
-
-Possible structure:
-
-Logo
-
-Destinations / Explore
-Stay
-Villas
-Experiences
-Diving
-Events
-Services
-
-Then:
-
-Language
-Login
-Book Now
-
-The exact navigation must follow the existing business structure.
-
-The navbar should transition intelligently when scrolling.
-
-For example:
-
-At hero:
-transparent / overlay navigation
-
-After scrolling:
-subtle solid/blurred navigation
-
-Use animation carefully.
-
-9. EXPERIENCE CATEGORIES
-
-Do not show everything as ordinary cards.
-
-Create cinematic category sections.
-
-For example:
-
-STAY
-
-Large immersive image.
-
-Small typography.
-
-"Your private escape in Gouna."
-
-Then:
-
-VILLAS
-
-A large architectural visual.
-
-Then:
-
-EXPERIENCES
-
-Diving
-Trips
-Water activities
-Desert experiences
-
-Then:
-
-EVENTS
-
-Parties
-Private events
-Nightlife
-
-Then:
-
-SERVICES
-
-Premium Gouna services.
-
-Each category should feel like a chapter in a story.
-
-10. PROPERTY / VILLA EXPERIENCE
-
-The villa section is extremely important.
-
-Do NOT create a generic ecommerce grid.
-
-The villa discovery experience should feel like luxury real estate.
-
-Use:
-
-large photography
-
-architectural compositions
-
-large typography
-
-location
-
-bedrooms
-
-bathrooms
-
-capacity
-
-price
-
-availability
-
-amenities
-
-Cards should feel premium.
-
-When hovering:
-
-image movement
-
-subtle zoom
-
-information reveal
-
-elegant CTA
-
-smooth transition
-
-But keep the interaction subtle.
-
-11. PROPERTY DETAIL PAGE
-
-The property detail page should feel like a premium real estate presentation.
-
-Structure could include:
-
-Cinematic gallery
-
-↓
-
-Property identity
-
-↓
-
-Location
-
-↓
-
-Price
-
-↓
-
-Availability
-
-↓
-
-Features
-
-↓
-
-Amenities
-
-↓
-
-Interior / exterior gallery
-
-↓
-
-Map
-
-↓
-
-Booking / purchase CTA
-
-↓
-
-Related properties
-
-Do not make it look like an ecommerce product page.
-
-It should feel like a luxury property presentation.
-
-12. BOOKING EXPERIENCE
-
-The booking system must remain highly usable.
-
-Do not sacrifice UX for aesthetics.
-
-Booking should clearly show:
-
-selected unit
-
-date
-
-guests
-
-price
-
-taxes/fees if applicable
-
-availability
-
-services
-
-payment
-
-confirmation
-
-Use elegant progressive steps if appropriate.
-
-The booking flow must feel premium but extremely clear.
-
-13. PAYMENT EXPERIENCE
-
-Payment is business-critical.
-
-Do not visually hide important payment information.
-
-Create a trustworthy checkout experience.
-
-Clearly display:
-
-booking details
-
-total price
-
-payment method
-
-secure payment indication
-
-terms
-
-confirmation
-
-Do not change existing payment logic unless necessary.
-
-Only improve the presentation.
-
-14. EXPERIENCES
-
-Trips, diving, activities, and events should not be displayed like ordinary products.
-
-Create editorial experience layouts.
-
-Example:
-
-Large image
-
-Small category label
-
-Large title
-
-Short story
-
-Location
-
-Duration
-
-Price
-
-CTA
-
-The user should feel:
-
-"I want to experience this."
-
-not:
-
-"I am looking at a database record."
-
-15. DIVING EXPERIENCE
-
-Diving deserves its own visual language.
-
-Use:
-
-underwater imagery
-
-darker atmospheric sections
-
-smooth transitions
-
-immersive photography
-
-depth-inspired visual movement
-
-But maintain the overall brand identity.
-
-Do not create a completely different website.
-
-16. EVENTS & PARTIES
-
-Events should feel energetic without becoming visually cheap.
-
-Use:
-
-strong imagery
-
-editorial typography
-
-date/time
-
-location
-
-event category
-
-ticket/booking CTA
-
-Create cinematic event discovery.
-
-17. SERVICES
-
-Services should be presented as premium concierge-style offerings.
-
-Examples:
-
-Airport transfer
-Private transportation
-Cleaning
-Chef
-Boat
-Concierge
-Restaurant reservations
-Activities
-Other Gouna services
-
-Do not use a grid of generic icon cards.
-
-Use visual storytelling.
-
-18. IMAGE SYSTEM
-
-Images are extremely important.
-
-Use Next.js Image correctly.
-
-Optimize:
-
-width
-
-height
-
-sizes
-
-priority
-
-loading
-
-responsive images
-
-modern formats
-
-Do not load huge original images unnecessarily.
-
-Hero images should be optimized carefully.
-
-Use blur placeholders where useful.
-
-Do not create performance problems just to achieve cinematic visuals.
-
-19. MOTION PERFORMANCE
+- Luxury villa/chalet rentals
+- Real estate sales
+- Yacht bookings
+- Experiences and diving
+- Events and ticketing
+- VIP concierge services
+- Customer CRM
+- Investors
+- Finance and payouts
+- Staff management
+- RBAC permissions
+- Audit logs
+- Platform settings
+- Admin dashboard
 
 IMPORTANT:
 
-The website must remain fast.
+Do NOT start coding.
+Do NOT redesign the application yet.
+Do NOT create fake APIs.
+Do NOT create mock backend data.
+Do NOT replace existing components.
+Do NOT change the existing architecture.
+
+Your first task is to perform a complete technical audit of the existing project.
+
+Analyze:
+
+1. Next.js version
+2. App Router structure
+3. TypeScript configuration
+4. Tailwind configuration
+5. Existing UI architecture
+6. Existing components
+7. Existing layouts
+8. Existing pages
+9. Existing API clients
+10. Existing backend integration
+11. Authentication
+12. Authorization
+13. Session handling
+14. Environment variables
+15. API endpoints already implemented
+16. Database-related code
+17. State management
+18. Forms
+19. Validation
+20. Error handling
+21. Loading states
+22. Empty states
+23. Responsive behavior
+24. Accessibility
+25. Security weaknesses
+26. Secrets exposure risks
+27. XSS risks
+28. CSRF risks where applicable
+29. IDOR/BOLA risks
+30. Broken authorization risks
+31. Rate limiting requirements
+32. Input validation
+33. File upload risks
+34. Payment-related risks
+35. Admin privilege escalation risks
+36. Audit logging gaps
+37. Dependency risks
+38. Production configuration problems
+
+Then compare the existing project against the supplied Gouna platform specification.
+
+Create a report with:
+
+A. Existing Architecture
+B. Existing Frontend Modules
+C. Existing Backend Integration
+D. Existing Authentication
+E. Existing Authorization
+F. Missing APIs
+G. Missing UI
+H. Security Risks
+I. Architecture Problems
+J. Duplicate Components
+K. Components that should be reused
+L. Components that should be redesigned
+M. Components that should NOT be touched
+N. Required Backend contracts
+O. Recommended implementation order
+
+For every finding classify it as:
+
+CRITICAL
+HIGH
+MEDIUM
+LOW
+
+IMPORTANT:
+
+Do not modify files during this stage.
+
+At the end provide:
+
+1. Current architecture map
+2. Frontend → Backend dependency map
+3. Module dependency map
+4. Permission dependency map
+5. Security risk map
+6. Recommended implementation roadmap
+
+Wait for approval before making code changes.
+```
+
+---
+
+# المرحلة 1 — تثبيت الـ Architecture
+
+بعد ما يخلص الـ Audit، استخدم:
+
+```text
+You are now acting as the Lead Software Architect.
 
-Do not animate:
+Based on the previous audit, redesign the internal architecture of the existing Next.js project WITHOUT changing the visual design yet.
 
-every text element
+The objective is to create a clean, scalable, maintainable architecture.
 
-every card
+The platform contains:
 
-every icon
+1. Dashboard
+2. Bookings
+3. Properties
+4. Pricing Engine
+5. Yachts & Experiences
+6. Events & Ticketing
+7. Staff / Roles / Permissions
+8. VIP Concierge
+9. Finance
+10. Platform Settings / Security
+11. Customers / Investors / CRM
 
-every section
+ARCHITECTURE RULES:
 
-every image
+- Do not duplicate business logic.
+- Do not put business logic inside UI components.
+- Do not call APIs directly from random components.
+- Create a centralized API/data-access layer.
+- Create centralized authentication handling.
+- Create centralized authorization handling.
+- Create centralized validation.
+- Create centralized error handling.
+- Create reusable table patterns.
+- Create reusable modal patterns.
+- Create reusable form patterns.
+- Create reusable loading states.
+- Create reusable empty states.
+- Create reusable confirmation dialogs.
+- Create reusable permission guards.
+- Keep domain logic separated by module.
+- Keep shared components separate from domain components.
+
+Recommended conceptual structure:
+
+app/
+components/
+features/
+lib/
+services/
+hooks/
+types/
+schemas/
+config/
+providers/
+middleware/
 
-Use animation only where it improves storytelling.
+Do not blindly follow this structure if the existing project already has a better architecture.
 
-Prefer:
+Preserve good existing architecture.
 
-transform
-opacity
-clip-path
+For every architectural change explain:
 
-Avoid expensive continuous animations.
+- Why it is needed
+- What problem it solves
+- What files are affected
+- What dependencies it creates
+- Whether it affects backend integration
 
-Avoid unnecessary:
+Do not introduce unnecessary libraries.
 
-box-shadow animations
-filter animations
-layout animations
+Do not rewrite the entire project.
 
-Avoid excessive DOM complexity.
+Perform incremental refactoring only.
 
-20. MOBILE EXPERIENCE
+At the end provide the final architecture tree and dependency rules.
+```
 
-Mobile is NOT a reduced desktop version.
+---
 
-Design mobile intentionally.
+# المرحلة 2 — Backend Contract أولًا
 
-The cinematic feeling must remain on:
+دي المرحلة اللي هتمنع أكبر مشكلة عندك: **Frontend يتصمم على API وهمية وبعدها يطلع مش متوافق مع الـ Backend.**
 
-iPhone
+الـ specification نفسه محدد APIs مثل dashboard وbookings وproperties وstaff وconcierge. 
 
-Android
+```text
+You are now acting as a Senior Backend Integration Architect.
 
-tablets
+Before modifying frontend UI, inspect the existing backend integration and establish a strict Frontend ↔ Backend contract.
 
-But animations must be lighter where necessary.
+IMPORTANT:
 
-Do not use huge desktop-only animations on mobile.
+The frontend must never invent backend behavior.
 
-Ensure:
+Do not create fake API responses.
 
-touch interactions
+Do not silently assume database fields.
 
-readable typography
+Do not assume an endpoint exists.
 
-proper image ratios
+Do not change backend behavior from the frontend.
 
-usable booking controls
+For every module define:
 
-usable navigation
+1. Endpoint
+2. HTTP method
+3. Authentication requirement
+4. Required permission
+5. Request body
+6. Query parameters
+7. Response structure
+8. Pagination
+9. Filtering
+10. Sorting
+11. Validation errors
+12. Authorization errors
+13. Not-found behavior
+14. Server errors
+15. Loading behavior
+16. Empty-state behavior
 
-payment usability
+Modules:
 
-21. RESPONSIVE DESIGN
+Dashboard
+Bookings
+Properties
+Pricing
+Yachts
+Experiences
+Events
+Staff
+Permissions
+Concierge
+Finance
+Settings
+Audit Logs
+Customers
+Investors
 
-Test:
+Create a typed API contract for every endpoint.
 
-360px
-390px
-414px
-768px
-1024px
-1280px
-1440px
-1920px
+If an endpoint does not exist in the backend:
 
-Make sure the layout remains premium at all sizes.
+DO NOT fake it.
 
-Do not simply shrink desktop components.
+Mark it as:
 
-22. TYPOGRAPHY
+BACKEND REQUIRED
 
-Typography should be one of the main design elements.
-
-Use a sophisticated typographic hierarchy.
-
-Large cinematic headlines.
-
-Small uppercase labels where appropriate.
-
-Editorial body text.
-
-Strong contrast between:
-
-Display
-Heading
-Subheading
-Body
-Metadata
-
-Do not use too many font families.
-
-If Arabic is supported, make sure the typography works beautifully in both:
-
-Arabic RTL
-
-English LTR
-
-23. COLOR SYSTEM
-
-Use a restrained luxury palette based on the existing brand identity.
-
-Possible direction:
-
-deep charcoal
-warm white
-sand
-stone
-sea-inspired accent
-
-But FIRST inspect the existing brand colors.
-
-Do not randomly change the brand.
-
-The palette should feel inspired by:
-
-Gouna
-Sea
-Sand
-Architecture
-Sunset
-Luxury
-
-Avoid excessive gradients.
-
-24. MICRO INTERACTIONS
-
-Add high-quality micro interactions:
-
-button hover
-
-magnetic interaction where appropriate
-
-image hover
-
-navigation transitions
-
-cursor interaction where appropriate
-
-menu transitions
-
-card transitions
-
-gallery transitions
-
-booking controls
-
-But keep them subtle.
-
-The website should feel expensive, not like a motion demo.
-
-25. CURSOR
-
-If a custom cursor is implemented:
-
-Make it extremely subtle.
-
-Do not create a huge distracting cursor.
-
-It should respond intelligently to:
-
-images
-
-buttons
-
-links
-
-draggable galleries
-
-Disable or simplify it on touch devices.
-
-26. PAGE TRANSITIONS
-
-Create elegant page transitions if they fit the existing architecture.
-
-Transitions should be short and smooth.
-
-Do not make the user wait for animations before accessing content.
-
-Performance and usability always come first.
-
-27. LOADING EXPERIENCE
-
-Create a premium loading experience.
-
-Do not create a 5-second cinematic intro.
-
-Use a lightweight transition.
+For every frontend action identify its backend operation.
 
 Example:
 
-Logo
+Approve Booking
+→ PUT /api/v1/admin/bookings/{id}/status
+→ permission: bookings.approve
+→ body: { status: "confirmed" }
 
-↓
+Property Update
+→ PUT /api/v1/admin/properties/{id}
+→ permission: properties.update
 
-subtle progress
+Staff Creation
+→ POST /api/v1/admin/staff
+→ permission: staff.create
 
-↓
+Concierge Update
+→ PUT /api/v1/admin/concierge/{id}
+→ permission: concierge.update
 
-hero reveal
+Create a single source of truth for API contracts.
 
-The user should never feel blocked.
+Do not duplicate endpoint definitions throughout the application.
 
-28. EMPTY / ERROR STATES
+At the end produce:
 
-Even error states must feel part of the design system.
+API Contract Matrix
+Permission Matrix
+Request/Response Type Matrix
+Error Matrix
+Frontend Action → Backend Endpoint Matrix
+```
 
-Create elegant:
+---
 
-404
-500
-No Results
-No Availability
-Booking Error
-Payment Error
+# المرحلة 3 — Authentication + RBAC Security
 
-states.
+هنا بنقفل النظام من ناحية الصلاحيات.
 
-Keep them useful and actionable.
+المواصفات أصلًا بتطلب RBAC، granular permissions، 2FA، وإمكانية إنهاء الجلسات. 
 
-29. ACCESSIBILITY
+```text
+You are now acting as a Senior Application Security Engineer.
 
-Maintain:
+Implement and audit the authentication and authorization architecture.
 
-semantic HTML
+The platform contains these roles:
 
-keyboard navigation
+SUPER_ADMIN
+OPERATIONS_ADMIN
+REAL_ESTATE_DIRECTOR
+VIP_CONCIERGE_AGENT
+and any additional roles already supported by the backend.
 
-focus states
+IMPORTANT SECURITY PRINCIPLE:
 
-accessible buttons
+Frontend permissions are UX protection only.
 
-accessible forms
+The backend MUST remain the final authority.
 
-ARIA labels
+Never rely on:
 
-proper contrast
+- hidden buttons
+- disabled buttons
+- route hiding
+- frontend role checks alone
 
-reduced motion support
+for actual security.
 
-Respect:
+Implement:
 
-prefers-reduced-motion
+1. Authentication state
+2. Session validation
+3. Token/session expiration handling
+4. Protected routes
+5. Role-based access
+6. Permission-based access
+7. Server-side authorization where applicable
+8. Permission guards
+9. Route guards
+10. API authorization handling
+11. 401 handling
+12. 403 handling
+13. Session expiration handling
+14. Forced logout handling
+15. Multi-session handling if supported
+16. 2FA state handling
+17. Secure logout
 
-When reduced motion is enabled:
+Create granular permissions such as:
 
-disable parallax
+bookings.view
+bookings.create
+bookings.update
+bookings.cancel
+bookings.refund
+bookings.approve
 
-reduce transitions
+properties.view
+properties.create
+properties.update
+properties.delete
+properties.publish
 
-disable unnecessary motion
+pricing.view
+pricing.create
+pricing.update
+pricing.delete
 
-keep the website fully functional
+finance.view
+finance.refund
+finance.payout
+finance.export
 
-30. ARCHITECTURE
+staff.view
+staff.create
+staff.update
+staff.delete
+staff.force_logout
 
-This is CRITICAL.
+settings.view
+settings.update
 
-Do not turn the project into a giant collection of client components.
+audit.view
 
-Preserve Server Components wherever possible.
+concierge.view
+concierge.assign
+concierge.update
+concierge.convert
 
-Use Client Components only when needed for:
+customers.view
+customers.update
+customers.export
 
-interaction
+investors.view
+investors.create
+investors.update
 
-animation
+IMPORTANT:
 
-state
+Never expose permissions that the authenticated user does not have.
 
-browser APIs
+Never trust role/permission values coming from client-side storage.
 
-Keep:
+Never store sensitive authorization information in insecure client-controlled locations.
 
-data fetching
-SEO
-static content
-server logic
+Do not expose secrets.
 
-on the server whenever possible.
+Do not expose internal API keys.
 
-31. COMPONENT ARCHITECTURE
+Do not expose payment secret keys.
 
-Create reusable components.
+Do not expose database credentials.
 
-For example:
+At the end perform an authorization audit and report possible:
 
-components/
-layout/
-navigation/
-hero/
-sections/
-property/
-experience/
-booking/
-payment/
-gallery/
-motion/
-ui/
+- IDOR
+- BOLA
+- privilege escalation
+- broken access control
+- unauthorized API access
+- session fixation
+- insecure token handling
+```
 
-Do not create hundreds of tiny meaningless components.
+---
 
-Components should have clear responsibility.
+# المرحلة 4 — Security Hardening
 
-32. DESIGN SYSTEM
+هنا نحقق طلبك بتاع إن الموقع مايبقاش سهل يتلعب فيه.
 
-Create reusable primitives for:
+**مهم:** مفيش موقع نقدر نضمن إنه "مستحيل الاختراق"، لكن نقدر نخليه مبني بأسلوب دفاعي قوي ونقلل المخاطر بشكل كبير.
 
-Buttons
-Container
-Section
-Typography
-Cards
-Images
-Badges
-Price
-Metadata
-Motion
+```text
+You are now acting as a defensive Web Application Security Engineer.
 
-This prevents inconsistent styling.
+Harden the existing application against common web application vulnerabilities.
 
-33. DATA / UI SEPARATION
+This is defensive security work only.
 
-Do not hardcode business data inside presentation components.
+Do not create offensive exploitation tools.
 
-Separate:
+Do not add attack payloads.
 
-Data
+Do not create malware.
 
-from:
+Do not create credential harvesting.
 
-Presentation
+Do not create unauthorized access mechanisms.
 
-For example:
+Audit and harden the application against:
 
-PropertyCard
+1. Broken Access Control
+2. IDOR / BOLA
+3. XSS
+4. CSRF where applicable
+5. SQL Injection through backend integration
+6. Command Injection risks
+7. SSRF risks
+8. File Upload vulnerabilities
+9. Path Traversal
+10. Open Redirects
+11. Authentication weaknesses
+12. Session vulnerabilities
+13. Privilege escalation
+14. Rate-limit abuse
+15. Brute-force attempts
+16. Sensitive information disclosure
+17. API enumeration
+18. Excessive data exposure
+19. Mass assignment
+20. Unsafe redirects
+21. Insecure CORS
+22. Security header weaknesses
+23. Dependency vulnerabilities
+24. Debug information exposure
+25. Production error leakage
 
-should receive property data.
+Frontend requirements:
 
-It should not contain fake business logic.
+- Never expose secrets.
+- Never trust client input.
+- Validate forms.
+- Sanitize where required.
+- Handle API errors safely.
+- Never display raw server exceptions to users.
+- Do not expose stack traces.
+- Do not expose database errors.
+- Do not expose internal service information.
 
-34. API & BUSINESS LOGIC
+Backend requirements:
 
-DO NOT rewrite working:
+- Validate all input.
+- Authorize every protected operation.
+- Apply rate limiting.
+- Apply proper request size limits.
+- Validate file types and file sizes.
+- Use secure storage for uploaded files.
+- Use secure HTTP headers.
+- Use secure cookie/session configuration where applicable.
+- Log security-sensitive events.
+- Avoid logging passwords, tokens, payment secrets, or sensitive personal data.
 
-APIs
+For every security improvement explain:
 
-booking logic
+Threat
+→ Risk
+→ Mitigation
+→ Implementation
+→ Verification
 
-payment logic
+Do not claim the system is "100% secure".
 
-authentication
+At the end generate a Security Hardening Checklist.
+```
 
-database logic
+---
 
-unless there is a clear architectural problem.
+# المرحلة 5 — UI/UX بدون تكرار التصميم
 
-The visual redesign must not break the business.
+دي مهمة جدًا لأنك قلت إنك **مش عايز التصميم يبقى متشابه**.
 
-35. TypeScript
+المقصود هنا مش إن كل Module يبقى له Design غريب؛ يبقى عندنا **Design System واحد** لكن كل Module له interaction pattern مناسب لطبيعته.
 
-Maintain strict TypeScript quality.
+```text
+You are now acting as a Senior Product Designer and UX Architect.
 
-Avoid:
+Redesign the admin dashboard UI while preserving the existing business requirements and backend contracts.
 
-any
-unnecessary type assertions
-duplicated interfaces
+IMPORTANT:
 
-Use proper types for:
+Do NOT create repetitive pages.
 
-Property
-Villa
-Booking
-Experience
-Event
-Service
-Payment
-User
+Do NOT make every module look identical.
 
-Reuse existing types when possible.
+Do NOT use the same card layout everywhere.
 
-36. SEO
+Do NOT turn every screen into a generic CRUD table.
 
-Because this is a travel + real estate + booking platform, SEO is extremely important.
-
-Ensure pages have:
-
-proper metadata
-
-title
-
-description
-
-Open Graph
-
-structured data where appropriate
-
-canonical URLs
-
-semantic headings
-
-Property pages should be SEO-friendly.
-
-Experience pages should be SEO-friendly.
-
-Event pages should be SEO-friendly.
-
-37. CINEMATIC DESIGN RULE
-
-Follow this principle:
-
-DO NOT make every section cinematic.
-
-If everything is visually loud, nothing feels special.
+The application should have ONE coherent Design System but DIFFERENT UX patterns based on the job being performed.
 
 Use:
 
-quiet sections
-+
-strong visual moments
-+
-dramatic transitions
-+
-clean information sections
+- Shared typography
+- Shared spacing system
+- Shared navigation
+- Shared buttons
+- Shared form controls
+- Shared status system
+- Shared modal behavior
+- Shared tables
+- Shared visual language
 
-Create rhythm.
+But each module should have its own information architecture.
 
-Think of the website like a movie:
+Examples:
 
-Opening scene
+Dashboard
+→ command center
+→ KPIs
+→ live activity
+→ critical alerts
+→ charts
+
+Bookings
+→ operational workspace
+→ filters
+→ reservation table
+→ calendar
+→ timeline
+→ booking drawer/modal
+
+Properties
+→ inventory management
+→ gallery
+→ map
+→ availability calendar
+→ property details
+
+Pricing
+→ rule builder
+→ season timeline
+→ pricing simulator
+
+Yachts
+→ fleet management
+→ availability slots
+→ schedule
+
+Events
+→ event management
+→ ticket tiers
+→ capacity
+→ QR operations
+
+Concierge
+→ CRM/work queue
+→ priorities
+→ assignment
+→ timeline
+→ communication
+
+Finance
+→ financial command center
+→ transactions
+→ payouts
+→ reconciliation
+
+Staff
+→ security administration
+→ users
+→ roles
+→ permissions
+→ sessions
+
+Audit
+→ security timeline
+→ filters
+→ event details
+
+CRM
+→ customer 360
+→ history
+→ preferences
+→ communication
+
+Every page must prioritize:
+
+1. Clarity
+2. Speed
+3. Information hierarchy
+4. Practical workflow
+5. Error prevention
+6. Responsive behavior
+7. Accessibility
+
+Avoid unnecessary animations.
+
+Animations should communicate state changes, not decorate the interface.
+
+Do not sacrifice usability for visual effects.
+```
+
+---
+
+# المرحلة 6 — تحويل كل Module إلى Workflow عملي
+
+بدل ما نخلي AI يعمل CRUD وخلاص.
+
+```text
+You are now acting as a Senior Product Engineer.
+
+Convert every dashboard module from simple CRUD screens into complete operational workflows.
+
+For every action define:
+
+User Intent
+→ UI Action
+→ Validation
+→ Permission Check
+→ API Request
+→ Backend Processing
+→ Success State
+→ Error State
+→ Audit Event
+→ UI Refresh
+
+Implement this for:
+
+Bookings
+Properties
+Pricing
+Yachts
+Events
+Staff
+Concierge
+Finance
+Customers
+Investors
+Settings
+
+Example:
+
+Booking Confirmation:
+
+User clicks Confirm
 ↓
-Story
+Check bookings.update/approve permission
 ↓
-Visual climax
+Validate booking state
 ↓
-Information
+Confirm availability
 ↓
-Experience
+Send API request
 ↓
-Call to action
+Backend processes transaction
 ↓
-Ending
+Booking becomes Confirmed
+↓
+Audit event recorded
+↓
+Notification generated
+↓
+UI updates
+↓
+Success message
 
-38. PERFORMANCE BUDGET
+If any step is not supported by the backend:
 
-The website must remain production-ready.
+DO NOT simulate it.
 
-Do not add libraries just because they look impressive.
+Mark the missing backend capability.
 
-Before adding a dependency ask:
+Every destructive operation must require:
 
-"Can this be implemented using existing tools?"
+- explicit confirmation
+- clear description
+- affected resource
+- permission verification
+- proper API response handling
 
-Prefer existing:
+For financial actions:
 
-Next.js
-React
-Tailwind
-Framer Motion
-Lenis
+Require additional confirmation where appropriate.
 
-if already installed.
+For irreversible actions:
 
-Avoid unnecessary:
+Use stronger confirmation UX.
 
-3D engines
-WebGL
-heavy animation libraries
-large UI libraries
+For high-risk actions:
 
-unless there is a real business/design reason.
+Require appropriate elevated permission.
 
-39. DO NOT CREATE AN AI-GENERATED LOOK
+Never use optimistic UI for irreversible financial/security actions unless the backend contract explicitly supports it.
+```
 
-This is extremely important.
+---
 
-Avoid visual patterns that make websites look AI-generated:
+# المرحلة 7 — Error Handling + Loading + Empty States
 
-excessive rounded cards
+دي هتمنع الموقع من شكل "بيطلع Error وخلاص".
 
-random gradients
+```text
+You are now acting as a Senior Frontend Reliability Engineer.
 
-repetitive sections
+Implement a unified application state system.
 
-identical cards everywhere
+Every asynchronous operation must support:
 
-giant centered headings everywhere
+1. Loading
+2. Success
+3. Empty
+4. Validation Error
+5. Unauthorized
+6. Forbidden
+7. Not Found
+8. Conflict
+9. Rate Limited
+10. Server Error
+11. Network Error
+12. Timeout
 
-excessive glassmorphism
+Create a consistent error-handling architecture.
 
-random floating blobs
+Rules:
 
-generic dark mode
+Never show raw API errors.
 
-excessive neon
+Never show stack traces.
 
-too many shadows
+Never expose database errors.
 
-unnecessary icons
+Never expose internal server paths.
 
-The result should look designed by a professional creative studio.
+Never expose secrets.
 
-40. FINAL QUALITY BAR
+Never silently swallow errors.
 
-The final website should look like a serious premium company could launch it publicly.
+Every error should provide:
 
-Imagine the client saying:
+- Human-readable message
+- Appropriate action
+- Retry where appropriate
+- Support/reference ID where appropriate
 
-"This looks like a $50,000+ digital experience."
+Examples:
 
-Not:
+401
+→ Session expired
+→ Sign in again
 
-"This looks like a nice template."
+403
+→ You do not have permission to perform this action
 
-The website must communicate:
+404
+→ Resource no longer exists
 
-Luxury
-Trust
-Exclusivity
-Gouna
-Travel
-Real Estate
-Experience
-Quality
+409
+→ Resource changed or booking conflict occurred
 
-41. IMPLEMENTATION PROCESS
+422
+→ Validation errors
 
-Follow this order:
+429
+→ Too many requests
 
+500
+→ Something went wrong
+→ Try again later
+
+Implement reusable:
+
+ErrorBoundary
+ApiErrorHandler
+Toast system
+Form error system
+Loading skeletons
+Empty states
+Retry actions
+Confirmation states
+
+Make the UI resilient to slow APIs and temporary network failures.
+```
+
+---
+
+# المرحلة 8 — Backend ↔ Frontend Integration Verification
+
+دي مرحلة **ممنوع فيها الشكل فقط**؛ بنختبر إن كل زر فعلًا مربوط بالـ Backend.
+
+```text
+You are now acting as a Full-Stack Integration QA Engineer.
+
+Audit every interactive feature in the admin dashboard.
+
+For every button, form, filter, modal, table action, and workflow answer:
+
+1. What does it do?
+2. Which permission is required?
+3. Which API endpoint does it call?
+4. What request does it send?
+5. What response does it expect?
+6. What happens on success?
+7. What happens on failure?
+8. Is the operation audited?
+9. Is the operation idempotent where required?
+10. Is the UI synchronized with the backend state?
+
+Create a matrix:
+
+UI Element
+→ Module
+→ Action
+→ Permission
+→ Endpoint
+→ HTTP Method
+→ Request
+→ Response
+→ Error States
+→ Audit Event
+
+Search the entire project for:
+
+- TODO
+- FIXME
+- mock data
+- fake API
+- hardcoded IDs
+- hardcoded users
+- hardcoded permissions
+- fake success responses
+- console.log
+- temporary bypasses
+- disabled security checks
+- placeholder endpoints
+
+Remove production-only fake behavior.
+
+Do not remove intentional demo/example data without verifying its purpose.
+
+If backend functionality is missing:
+
+mark it as BACKEND REQUIRED.
+
+Do not implement fake behavior to make the UI appear functional.
+```
+
+---
+
+# المرحلة 9 — Security + Production Readiness Audit
+
+```text
+You are now acting as a Senior Production Security Auditor.
+
+Perform a final pre-production audit of the entire application.
+
+Check:
+
+AUTHENTICATION
+- session handling
+- expiration
+- logout
+- forced logout
+- 2FA
+- password handling
+
+AUTHORIZATION
+- RBAC
+- granular permissions
+- server-side enforcement
+- route protection
+- API protection
+- privilege escalation
+
+DATA SECURITY
+- secrets
+- environment variables
+- PII
+- payment information
+- logs
+- API responses
+
+APPLICATION SECURITY
+- XSS
+- CSRF where applicable
+- IDOR/BOLA
+- injection risks
+- SSRF
+- file uploads
+- path traversal
+- open redirects
+- CORS
+- security headers
+
+API SECURITY
+- validation
+- rate limiting
+- pagination
+- maximum request size
+- error handling
+- authorization
+- sensitive field exposure
+
+BUSINESS LOGIC
+- double booking
+- race conditions
+- duplicate payments
+- duplicate refunds
+- unauthorized discounts
+- unauthorized financial changes
+- unauthorized property publishing
+- unauthorized staff creation
+
+AUDITABILITY
+- sensitive actions logged
+- actor
+- role
+- action
+- resource
+- resource ID
+- timestamp
+- result
+- appropriate request metadata
+
+PRODUCTION
+- debug disabled
+- production error pages
+- secure configuration
+- dependency audit
+- build verification
+- environment validation
+
+Do not claim "100% secure".
+
+Instead produce:
+
+Security Score
+Critical Findings
+High Findings
+Medium Findings
+Low Findings
+Fixed Findings
+Remaining Backend Findings
+Remaining Infrastructure Findings
+Production Blockers
+Recommended Next Steps
+```
+
+---
+
+# المرحلة 10 — Final UX + Architecture Quality Review
+
+آخر Prompt قبل الـ Production:
+
+```text
+You are now acting as:
+
+- Senior UX Designer
+- Senior Frontend Engineer
+- Senior Backend Integration Engineer
+- Software Architect
+- Security Engineer
+- QA Engineer
+
+Perform a final complete review.
+
+The goal is NOT to add more features.
+
+The goal is to ensure the existing system is:
+
+- Practical
+- Understandable
+- Fast
+- Secure
+- Maintainable
+- Scalable
+- Consistent
+- Backend-connected
+- Production-ready
+
+Review every module:
+
+Dashboard
+Bookings
+Properties
+Pricing
+Yachts
+Events
+Staff
+Concierge
+Finance
+Settings
+Audit Logs
+Customers
+Investors
+
+For every module evaluate:
+
+1. UX quality
+2. Information architecture
+3. Backend integration
+4. Permission enforcement
+5. Error handling
+6. Loading states
+7. Empty states
+8. Validation
+9. Accessibility
+10. Responsiveness
+11. Security
+12. Performance
+13. Maintainability
+14. Reusability
+15. Visual consistency
+16. Workflow efficiency
+
+IMPORTANT:
+
+Do not redesign the whole application unnecessarily.
+
+Do not introduce visual changes just for the sake of change.
+
+Only change something if it improves:
+
+- usability
+- clarity
+- performance
+- consistency
+- security
+- maintainability
+
+At the end produce a Production Readiness Report:
+
+READY
+NOT READY
+BLOCKED BY BACKEND
+BLOCKED BY INFRASTRUCTURE
+BLOCKED BY SECURITY
+OPTIONAL IMPROVEMENTS
+```
+
+---
+
+# الترتيب اللي أنصحك تمشي به
+
+```text
+PHASE 0
+Audit Existing Project
+        ↓
 PHASE 1
-Audit existing codebase.
-
+Architecture
+        ↓
 PHASE 2
-Audit existing visual design.
-
+Backend Contracts
+        ↓
 PHASE 3
-Create a new visual direction.
-
+Authentication + RBAC
+        ↓
 PHASE 4
-Create reusable design primitives.
-
+Security Hardening
+        ↓
 PHASE 5
-Redesign global layout/navigation.
-
+UI/UX + Design System
+        ↓
 PHASE 6
-Redesign homepage.
-
+Operational Workflows
+        ↓
 PHASE 7
-Redesign property/villa discovery.
-
+Error / Loading / Empty States
+        ↓
 PHASE 8
-Redesign property details.
-
+Frontend ↔ Backend Verification
+        ↓
 PHASE 9
-Redesign experiences.
-
+Security Audit
+        ↓
 PHASE 10
-Redesign events.
-
-PHASE 11
-Redesign services.
-
-PHASE 12
-Redesign booking.
-
-PHASE 13
-Redesign payment UI without changing payment logic.
-
-PHASE 14
-Implement cinematic motion.
-
-PHASE 15
-Optimize mobile.
-
-PHASE 16
-Optimize performance.
-
-PHASE 17
-Accessibility audit.
-
-PHASE 18
-SEO audit.
-
-PHASE 19
-TypeScript/build/lint audit.
-
-PHASE 20
-Final visual consistency audit.
-
-42. IMPORTANT IMPLEMENTATION RULE
-
-Do NOT rewrite the entire project blindly.
-
-Reuse existing functionality.
-
-Reuse existing APIs.
-
-Reuse existing data models.
-
-Reuse existing authentication.
-
-Reuse existing booking logic.
-
-Reuse existing payment logic.
-
-Reuse existing business logic.
-
-Improve the presentation layer and architecture only where necessary.
-
-If an existing component is good:
-
-KEEP IT.
-
-If it is visually weak:
-
-REDESIGN IT.
-
-If it is architecturally bad:
-
-REFACTOR IT CAREFULLY.
-
-43. FINAL TEST
-
-Before declaring the work complete:
-
-Run:
-
-npm run build
-
-and:
-
-npm run lint
-
-if available.
-
-Fix all errors.
-
-Check for:
-
-hydration errors
-
-console errors
-
-broken images
-
-layout shifts
-
-animation glitches
-
-mobile overflow
-
-RTL issues
-
-broken routes
-
-broken buttons
-
-broken forms
-
-broken booking
-
-broken payment UI
-
-unnecessary client components
-
-FINAL OUTPUT
-
-Do not just describe what you would do.
-
-Actually implement the redesign in the existing project.
-
-The final result must be:
-
-Cinematic
-Premium
-Luxury
-Modern
-Immersive
-Fast
-Responsive
-Accessible
-SEO-friendly
-Maintainable
-Production-ready
-
-Most importantly:
-
-The website should feel like a cinematic digital journey through Gouna, while still functioning as a serious booking, real-estate, experiences, events, services, and payment platform.
-
-Do not sacrifice architecture or performance for visual effects.
-
-Premium visual quality + excellent UX + clean architecture + production performance is the goal.
+Production Readiness
+```

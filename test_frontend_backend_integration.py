@@ -223,7 +223,7 @@ record_test(
 # 11. Authentication: Valid Login
 login_payload = {
     "email": "admin@gounow.com",
-    "password": "GouNow@2026!Secure",
+    "password": "Admin@2026!",
     "token": True
 }
 status, headers, body = make_request("/auth/login", method="POST", data=login_payload)

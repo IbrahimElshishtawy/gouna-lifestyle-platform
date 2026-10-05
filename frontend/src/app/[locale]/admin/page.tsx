@@ -1,76 +1,50 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getProperties } from "@/features/properties/services/properties.api";
+import { getDashboardMetrics } from "@/features/admin/services/admin.api";
+import type { DashboardData } from "@/features/admin/types";
+import { useLanguage } from "@/context/LanguageContext";
+import { TableSkeleton } from "@/components/ui/LoadingState";
 import UserActionsHistory from "@/features/admin/components/UserActionsHistory";
 
-interface Props {
-  params: Promise<{
-    locale: string;
-  }>;
-}
-
-export default async function AdminDashboardPage({ params }: Props) {
-  const { locale } = await params;
+export default function AdminDashboardPage() {
+  const { locale } = useLanguage();
   const isAr = locale === "ar";
 
-  const properties = await getProperties();
-  const staysCount = properties.filter((p) => p.listing_type === "rent").length;
-  const salesCount = properties.filter((p) => p.listing_type === "sale").length;
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [propertiesCount, setPropertiesCount] = useState<{ rent: number; sale: number }>({ rent: 0, sale: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const mockBookings = [
-    {
-      ref: "GON-2026-641770",
-      customer: "First Booker",
-      customerAr: "حاجز تجريبي 1",
-      phone: "+201000000001",
-      property: "Fanadir Bay Waterfront Villa",
-      propertyAr: "فيلا واجهة خليج الفنادير المائية",
-      duration: isAr ? "5 ليالٍ • ضيفان" : "5 nights • 2 guests",
-      dates: isAr ? "18 نوفمبر - 23 نوفمبر 2026" : "Nov 18 - Nov 23, 2026",
-      total: "30,210",
-      status: isAr ? "مؤكد" : "Confirmed",
-      statusColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    },
-    {
-      ref: "GON-2026-936084",
-      customer: "Guest User",
-      customerAr: "نزيل معتمد",
-      phone: "+201022334455",
-      property: "Mangroovy Beachfront Luxury Chalet",
-      propertyAr: "شاليه مانجروفي الفاخر على الشاطئ",
-      duration: isAr ? "3 ليالٍ • 3 ضيوف" : "3 nights • 3 guests",
-      dates: isAr ? "14 أكتوبر - 17 أكتوبر 2026" : "Oct 14 - Oct 17, 2026",
-      total: "18,810",
-      status: isAr ? "قيد الانتظار" : "Pending",
-      statusColor: "bg-amber-100 text-amber-800 border-amber-300",
-    },
-    {
-      ref: "GON-2026-118492",
-      customer: "Sarah Jenkins",
-      customerAr: "سارة جينكينز",
-      phone: "+44 7911 123456",
-      property: "Abu Tig Marina Penthouse",
-      propertyAr: "بنتهاوس مارينا أبو تيج البانورامي",
-      duration: isAr ? "7 ليالٍ • 4 ضيوف" : "7 nights • 4 guests",
-      dates: isAr ? "22 ديسمبر - 29 ديسمبر 2026" : "Dec 22 - Dec 29, 2026",
-      total: "74,400",
-      status: isAr ? "مؤكد" : "Confirmed",
-      statusColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    },
-    {
-      ref: "GON-2026-552910",
-      customer: "Karim Mansour",
-      customerAr: "كريم منصور",
-      phone: "+201112223334",
-      property: "West Golf Sunset Lagoon Villa",
-      propertyAr: "فيلا لاجون ويست جولف للغروب",
-      duration: isAr ? "4 ليالٍ • 6 ضيوف" : "4 nights • 6 guests",
-      dates: isAr ? "02 نوفمبر - 06 نوفمبر 2026" : "Nov 02 - Nov 06, 2026",
-      total: "58,000",
-      status: isAr ? "مؤكد" : "Confirmed",
-      statusColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    },
-  ];
+  useEffect(() => {
+    let mounted = true;
+
+    Promise.all([
+      getDashboardMetrics().catch(() => null),
+      getProperties().catch(() => []),
+    ]).then(([metrics, props]) => {
+      if (!mounted) return;
+
+      if (metrics) {
+        setDashboardData(metrics);
+      }
+      if (Array.isArray(props)) {
+        setPropertiesCount({
+          rent: props.filter((p) => p.listing_type === "rent").length,
+          sale: props.filter((p) => p.listing_type === "sale").length,
+        });
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const kpis = dashboardData?.kpis;
+  const recentBookings = dashboardData?.recentBookings || [];
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -141,7 +115,7 @@ export default async function AdminDashboardPage({ params }: Props) {
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors">
-            221,103 <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "ج.م" : "EGP"}</span>
+            {kpis?.formattedRevenue || "0.00 EGP"}
           </div>
           <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-1.5">
             <span className="text-emerald-600 font-semibold">● {isAr ? "نشط" : "Active"}</span>
@@ -149,46 +123,51 @@ export default async function AdminDashboardPage({ params }: Props) {
           </div>
         </Link>
 
-        {/* Metric 2: Bookings */}
+        {/* Metric 2: Bookings Count */}
         <Link
           href="/admin/bookings"
           className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs hover:border-brand-terracotta/40 hover:shadow-md transition-all group block"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-brand-brown-muted uppercase tracking-wider">
-              {isAr ? "الحجوزات الشهرية" : "Monthly Bookings"}
+              {isAr ? "إجمالي الحجوزات" : "Total Bookings"}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
-              📋
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">
+              📅
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors">
-            19 <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "حجز" : "Bookings"}</span>
+            {kpis?.totalBookings ?? 0}{" "}
+            <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "حجز" : "Bookings"}</span>
           </div>
-          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-1">
-            <span className="text-amber-600 font-semibold">9</span>
-            <span>{isAr ? "بانتظار التأكيد الفوري" : "pending confirmation"}</span>
+          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-2">
+            <span className="text-emerald-700 font-semibold">{kpis?.confirmedBookings ?? 0} {isAr ? "مؤكد" : "Confirmed"}</span>
+            <span>•</span>
+            <span className="text-amber-700 font-semibold">{kpis?.pendingBookings ?? 0} {isAr ? "قيد الانتظار" : "Pending"}</span>
           </div>
         </Link>
 
-        {/* Metric 3: Properties */}
+        {/* Metric 3: Properties Portfolio */}
         <Link
           href="/admin/properties"
           className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs hover:border-brand-terracotta/40 hover:shadow-md transition-all group block"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-brand-brown-muted uppercase tracking-wider">
-              {isAr ? "العقارات والفلل المدرجة" : "Properties Listed"}
+              {isAr ? "المحفظة العقارية" : "Properties Portfolio"}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm font-bold">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
               🏡
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors">
-            {properties.length || 6} <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "وحدة" : "Units"}</span>
+            {kpis?.totalProperties ?? 0}{" "}
+            <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "وحدة فاخرة" : "Units"}</span>
           </div>
-          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-1">
-            <span>{isAr ? `إيجار ${staysCount} • بيع ${salesCount}` : `Stays: ${staysCount} | For Sale: ${salesCount}`}</span>
+          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-2">
+            <span>{propertiesCount.rent} {isAr ? "إيجار" : "Rent"}</span>
+            <span>•</span>
+            <span>{propertiesCount.sale} {isAr ? "بيع" : "Sale"}</span>
           </div>
         </Link>
 
@@ -199,39 +178,43 @@ export default async function AdminDashboardPage({ params }: Props) {
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-brand-brown-muted uppercase tracking-wider">
-              {isAr ? "طلبات الكونسيرج النشطة" : "Active VIP Leads"}
+              {isAr ? "طلبات الكونسيرج النشطة" : "Active Inquiries"}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
-              💬
+            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm font-bold">
+              🛎️
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors">
-            14 <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "استفسار" : "Inquiries"}</span>
+            {kpis?.activeLeads ?? 0}{" "}
+            <span className="text-xs font-sans font-normal text-brand-brown-muted">{isAr ? "طلب VIP" : "Leads"}</span>
           </div>
-          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-1">
-            <span className="text-emerald-600 font-semibold">{isAr ? "4 اليوم عبر واتساب" : "4 WhatsApp leads today"}</span>
+          <div className="mt-2 text-xs text-brand-brown-muted flex items-center gap-1.5">
+            <span className="text-emerald-600 font-semibold">● {isAr ? "مباشر" : "Live Desk"}</span>
+            <span>{isAr ? "واتساب + استفسارات" : "Direct WhatsApp"}</span>
           </div>
         </Link>
       </div>
 
-      {/* 3. Super Admin Exclusive Control Matrix */}
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs p-5 sm:p-7">
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-brand-border/60">
+      {/* 3. Section Command Shortcuts */}
+      <div className="bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-brand-border shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-brand-border/60 pb-4">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-brand-terracotta font-bold block mb-1">
-              {isAr ? "مصفوفة قيادة السوبر أدمن" : "SUPER ADMIN COMMAND MATRIX"}
-            </span>
             <h2 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
-              {isAr ? "أدوات الإدارة والتحكم الشاملة في المنصة" : "Executive System Control Hub"}
+              {isAr ? "مراكز التحكم والعمليات السريعة" : "Operational Command Centers"}
             </h2>
+            <p className="text-xs text-brand-brown-muted font-light mt-0.5">
+              {isAr
+                ? "الوصول المباشر إلى إدارة التجارب البحرية، وتذاكر الحفلات، والمشرفين، والتحصيلات المالية."
+                : "Direct access to yacht charters, event ticketing, staff administration, and financial ledgers."}
+            </p>
           </div>
-          <span className="hidden sm:inline-block px-3 py-1 rounded-full text-xs font-mono font-bold bg-brand-sand-light text-brand-brown border border-brand-border">
-            ROOT-LEVEL ACCESS
+          <span className="text-[11px] font-mono font-bold text-brand-terracotta uppercase tracking-wider">
+            {isAr ? "نظام موحد 11 موديول" : "Unified 11 Modules"}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-          {/* Card 1: Users & Staff */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 pt-2">
+          {/* Card 1: Staff & Roles */}
           <Link
             href="/admin/users"
             className="p-4 rounded-xl sm:rounded-2xl border border-brand-border/80 bg-brand-sand-light/40 hover:bg-white hover:border-brand-terracotta hover:shadow-md transition-all flex flex-col justify-between group"
@@ -244,7 +227,7 @@ export default async function AdminDashboardPage({ params }: Props) {
                 {isAr ? "المشرفون والأدوار" : "Staff & Roles"}
               </h3>
               <p className="text-[11px] text-brand-brown-muted font-light mt-1">
-                {isAr ? "3 حسابات إدارية نشطة" : "3 Active Admin Keys"}
+                {isAr ? "إدارة مديري الأقسام والصلاحيات" : "Access Control & RBAC"}
               </p>
             </div>
             <span className="text-[11px] font-bold text-brand-terracotta mt-3 block">
@@ -351,15 +334,15 @@ export default async function AdminDashboardPage({ params }: Props) {
             <div className="space-y-4 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-brand-brown-muted">{isAr ? "فلل إيجار سياحي نشطة" : "Vacation Rental Stays"}</span>
-                <span className="font-bold text-brand-brown">{isAr ? `${staysCount} فلل نشطة` : `${staysCount} Active`}</span>
+                <span className="font-bold text-brand-brown">{isAr ? `${propertiesCount.rent} فلل نشطة` : `${propertiesCount.rent} Active`}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-brand-brown-muted">{isAr ? "عقارات معروضة للبيع" : "Real Estate For Sale"}</span>
-                <span className="font-bold text-brand-brown">{isAr ? `${salesCount} عقار معروض` : `${salesCount} Active`}</span>
+                <span className="font-bold text-brand-brown">{isAr ? `${propertiesCount.sale} عقار معروض` : `${propertiesCount.sale} Active`}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-brand-brown-muted">{isAr ? "متوسط الإشغال (أكتوبر)" : "Average Occupancy (Oct)"}</span>
-                <span className="font-bold text-emerald-600">84.2%</span>
+                <span className="text-brand-brown-muted">{isAr ? "المشرفين النشطين" : "Active Staff Roster"}</span>
+                <span className="font-bold text-emerald-600">{kpis?.activeStaff ?? 0} {isAr ? "مشرف" : "Active"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-brand-brown-muted">{isAr ? "مكتب كونسيرج واتساب" : "WhatsApp Concierge Desk"}</span>
@@ -414,56 +397,76 @@ export default async function AdminDashboardPage({ params }: Props) {
               </Link>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-start text-xs">
-                <thead className="bg-brand-sand-light/60 text-brand-brown-muted font-bold text-[10px] uppercase tracking-wider border-b border-brand-border">
-                  <tr>
-                    <th className="py-3 px-4 text-start">{isAr ? "رقم المرجع" : "Reference"}</th>
-                    <th className="py-3 px-4 text-start">{isAr ? "العميل" : "Customer"}</th>
-                    <th className="py-3 px-4 text-start">{isAr ? "العقار / الفيلا" : "Property"}</th>
-                    <th className="py-3 px-4 text-start">{isAr ? "التواريخ" : "Dates"}</th>
-                    <th className="py-3 px-4 text-start">{isAr ? "الإجمالي" : "Total"}</th>
-                    <th className="py-3 px-4 text-end">{isAr ? "الحالة" : "Status"}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-brand-border/60">
-                  {mockBookings.map((b) => (
-                    <tr key={b.ref} className="hover:bg-brand-sand/30 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">
-                        {b.ref}
-                      </td>
-                      <td className="py-3.5 px-4 font-medium text-brand-brown">
-                        <div>
-                          <span>{isAr ? b.customerAr : b.customer}</span>
-                          <span className="block text-[10px] text-brand-brown-muted font-mono" dir="ltr">
-                            {b.phone}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="font-semibold text-brand-brown block line-clamp-1">
-                          {isAr ? b.propertyAr : b.property}
-                        </span>
-                        <span className="text-[10px] text-brand-brown-muted block">
-                          {b.duration}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-brand-brown-muted">
-                        {b.dates}
-                      </td>
-                      <td className="py-3.5 px-4 font-serif font-bold text-brand-brown">
-                        {b.total} <span className="text-[10px] font-sans font-normal">{isAr ? "ج.م" : "EGP"}</span>
-                      </td>
-                      <td className="py-3.5 px-4 text-end">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${b.statusColor}`}>
-                          {b.status}
-                        </span>
-                      </td>
+            {loading ? (
+              <div className="p-6">
+                <TableSkeleton rows={4} />
+              </div>
+            ) : recentBookings.length === 0 ? (
+              <div className="p-8 text-center text-xs text-brand-brown-muted">
+                {isAr ? "لا توجد حجوزات مسجلة حديثاً." : "No recent bookings recorded yet."}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-start text-xs">
+                  <thead className="bg-brand-sand-light/60 text-brand-brown-muted font-bold text-[10px] uppercase tracking-wider border-b border-brand-border">
+                    <tr>
+                      <th className="py-3 px-4 text-start">{isAr ? "رقم المرجع" : "Reference"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "العميل" : "Customer"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "العقار / الفيلا" : "Property"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "التواريخ" : "Dates"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "الإجمالي" : "Total"}</th>
+                      <th className="py-3 px-4 text-end">{isAr ? "الحالة" : "Status"}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-brand-border/60">
+                    {recentBookings.map((b) => (
+                      <tr key={b.reference} className="hover:bg-brand-sand/30 transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">
+                          {b.reference}
+                        </td>
+                        <td className="py-3.5 px-4 font-medium text-brand-brown">
+                          <div>
+                            <span>{b.customer.name}</span>
+                            {b.customer.phone && (
+                              <span className="block text-[10px] text-brand-brown-muted font-mono" dir="ltr">
+                                {b.customer.phone}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-semibold text-brand-brown block line-clamp-1">
+                            {isAr ? (b.bookable.title_ar || b.bookable.title) : b.bookable.title}
+                          </span>
+                          <span className="text-[10px] text-brand-brown-muted block">
+                            {b.nights} {isAr ? "ليالٍ" : "nights"} • {b.guests} {isAr ? "ضيوف" : "guests"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-brand-brown-muted font-mono text-[11px]" dir="ltr">
+                          {b.check_in} → {b.check_out}
+                        </td>
+                        <td className="py-3.5 px-4 font-serif font-bold text-brand-brown">
+                          {b.formatted_total}
+                        </td>
+                        <td className="py-3.5 px-4 text-end">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                              b.status === "confirmed"
+                                ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                : b.status === "cancelled"
+                                ? "bg-rose-100 text-rose-800 border-rose-300"
+                                : "bg-amber-100 text-amber-800 border-amber-300"
+                            }`}
+                          >
+                            {b.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
