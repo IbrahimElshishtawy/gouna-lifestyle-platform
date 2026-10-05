@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-  const { locale, toggleLocale, t } = useLanguage();
+  const { locale, setLocale, toggleLocale, t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,12 +26,12 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const isHomePage = pathname === "/";
+  const isHomePage = pathname === "/" || pathname === "";
   // Transparent only on the homepage hero before scroll
   const isTransparent = isHomePage && !isScrolled;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div className="fixed top-0 start-0 end-0 z-50 transition-all duration-300">
       {/* Top Announcement / Concierge Ribbon */}
       <div
         className={`transition-all duration-300 text-xs px-4 sm:px-6 lg:px-12 flex items-center justify-between border-b ${
@@ -49,7 +48,7 @@ export default function Navbar() {
             {t.nav.ribbonText}
           </span>
         </div>
-        <div className="flex items-center gap-4 sm:gap-5 text-[11px] shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4 text-[11px] shrink-0">
           <a
             href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
             target="_blank"
@@ -61,15 +60,34 @@ export default function Navbar() {
             <span className="sm:hidden">WhatsApp</span>
           </a>
           <span className="text-white/30">|</span>
-          <button
-            type="button"
-            onClick={toggleLocale}
-            className="hover:text-white font-bold transition flex items-center gap-1 cursor-pointer bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full"
-            aria-label="Switch Language"
-          >
-            <span>🌐</span>
-            <span>{t.common.switchLanguage}</span>
-          </button>
+
+          {/* Ribbon Bilingual Switcher Pill */}
+          <div className="flex items-center bg-white/10 backdrop-blur-md p-0.5 rounded-full border border-white/15 text-[10px] font-bold">
+            <button
+              type="button"
+              onClick={() => setLocale("en")}
+              className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                locale === "en"
+                  ? "bg-white text-brand-brown shadow-xs"
+                  : "text-white/80 hover:text-white"
+              }`}
+              aria-label="Switch to English"
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLocale("ar")}
+              className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                locale === "ar"
+                  ? "bg-brand-terracotta text-white shadow-xs"
+                  : "text-white/80 hover:text-white"
+              }`}
+              aria-label="التبديل إلى العربية"
+            >
+              عربي
+            </button>
+          </div>
         </div>
       </div>
 
@@ -94,7 +112,7 @@ export default function Navbar() {
                 priority
               />
             </div>
-            <div className="text-left rtl:text-right">
+            <div className="text-start">
               <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
                 {t.common.elGouna}
               </span>
@@ -108,7 +126,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav Links (White on Home Hero, Dark Brown otherwise for 100% Readability) */}
+          {/* Desktop Nav Links */}
           <nav
             className={`hidden md:flex items-center gap-8 text-sm font-semibold transition-colors duration-300 ${
               isTransparent ? "text-white/90" : "text-brand-brown"
@@ -154,8 +172,50 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          {/* Actions Button */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Desktop Actions & Language Toggle */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-4">
+            {/* Header Language Switcher */}
+            <div
+              className={`flex items-center p-1 rounded-xl border text-xs font-bold transition-all ${
+                isTransparent
+                  ? "bg-white/10 border-white/20 text-white"
+                  : "bg-brand-sand-light/60 border-brand-border text-brand-brown"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setLocale("en")}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  locale === "en"
+                    ? isTransparent
+                      ? "bg-white text-brand-brown shadow-xs"
+                      : "bg-brand-terracotta text-white shadow-xs"
+                    : isTransparent
+                    ? "text-white/80 hover:text-white"
+                    : "text-brand-brown-muted hover:text-brand-brown"
+                }`}
+                aria-label="Switch to English"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale("ar")}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  locale === "ar"
+                    ? isTransparent
+                      ? "bg-brand-terracotta text-white shadow-xs"
+                      : "bg-brand-terracotta text-white shadow-xs"
+                    : isTransparent
+                    ? "text-white/80 hover:text-white"
+                    : "text-brand-brown-muted hover:text-brand-brown"
+                }`}
+                aria-label="التبديل إلى العربية"
+              >
+                عربي
+              </button>
+            </div>
+
             <Link
               href="/stays?listing_type=rent"
               className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
@@ -173,7 +233,7 @@ export default function Navbar() {
                   ? "text-white hover:text-brand-terracotta"
                   : "text-brand-brown hover:text-brand-terracotta"
               }`}
-              aria-label="Toggle Menu"
+              aria-label={t.nav.toggleMenu}
             >
               {mobileMenuOpen ? (
                 <svg
@@ -208,7 +268,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu with Ultra-Luxury Styling */}
+        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div
             className={`md:hidden mx-3 mt-3 p-5 rounded-2xl border shadow-2xl flex flex-col gap-3 animate-fade-in ${
@@ -289,19 +349,37 @@ export default function Navbar() {
 
             {/* Quick Contact & Action Buttons */}
             <div className={`pt-3 mt-1 border-t flex flex-col gap-2.5 ${isTransparent ? "border-white/15" : "border-brand-border/40"}`}>
-              <button
-                type="button"
-                onClick={() => {
-                  toggleLocale();
-                  setMobileMenuOpen(false);
-                }}
-                className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold border flex items-center justify-center gap-2 transition-colors ${
-                  isTransparent ? "border-white/20 hover:bg-white/10 text-white" : "border-brand-border/80 hover:bg-black/5 text-brand-brown"
-                }`}
-              >
-                <span>🌐</span>
-                <span>{t.common.switchLanguage === "العربية" ? "التبديل إلى العربية" : "Switch to English"}</span>
-              </button>
+              {/* Mobile Language Switcher Row */}
+              <div className="flex items-center p-1 rounded-xl border border-brand-border/60 bg-brand-sand-light/50">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocale("en");
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition ${
+                    locale === "en"
+                      ? "bg-brand-terracotta text-white shadow-xs"
+                      : "text-brand-brown hover:text-brand-terracotta"
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLocale("ar");
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex-1 py-2 text-center rounded-lg text-xs font-bold transition ${
+                    locale === "ar"
+                      ? "bg-brand-terracotta text-white shadow-xs"
+                      : "text-brand-brown hover:text-brand-terracotta"
+                  }`}
+                >
+                  العربية
+                </button>
+              </div>
 
               <a
                 href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"

@@ -13,12 +13,19 @@ import ConciergeInquiry from "@/features/home/components/ConciergeInquiry";
 import FaqSection from "@/features/home/components/FaqSection";
 import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
-
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { setRequestLocale } from "next-intl/server";
 
 export const revalidate = 60; // ISR cache revalidation
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   const [properties, experiences] = await Promise.all([
     getProperties(),
     getExperiences(),

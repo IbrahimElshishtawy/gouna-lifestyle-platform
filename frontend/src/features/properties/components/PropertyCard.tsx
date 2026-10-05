@@ -1,13 +1,17 @@
+"use client";
+
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { Link } from "@/i18n/routing";
 import { Property } from "../types/property.types";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PropertyCardProps {
   property: Property;
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const { t } = useLanguage();
   const isRent = property.listing_type === "rent";
   const primaryImage =
     property.images?.find((img) => img.is_primary)?.url ||
@@ -27,7 +31,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         />
 
         {/* Top Floating Badges */}
-        <div className="absolute top-4 left-4 flex gap-2">
+        <div className="absolute top-4 start-4 flex gap-2">
           {property.location && (
             <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-brand-brown text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
               📍 {property.location.name}
@@ -35,7 +39,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           )}
           {property.is_featured && (
             <span className="px-3 py-1 bg-brand-terracotta text-white text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-              {isRent ? "Featured Stay" : "Exclusive Listing"}
+              {isRent ? t.propertyCard.featuredStay : t.propertyCard.exclusiveListing}
             </span>
           )}
         </div>
@@ -45,7 +49,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-brand-terracotta">
-            {property.category?.name || (isRent ? "Vacation Villa" : "Real Estate")}
+            {property.category?.name || (isRent ? t.propertyCard.vacationVilla : t.propertyCard.realEstate)}
           </span>
           <span className="text-[10px] font-mono text-brand-brown-muted">
             {property.reference_code}
@@ -65,13 +69,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         {/* Specs Strip */}
         <div className="flex items-center gap-4 text-xs text-brand-brown/80 pt-4 border-t border-brand-border/60 mt-4">
           <span className="flex items-center gap-1 font-medium">
-            <span>🛏️</span> {property.bedrooms} Beds
+            <span>🛏️</span> {property.bedrooms} {t.common.beds}
           </span>
           <span className="flex items-center gap-1 font-medium">
-            <span>🚿</span> {property.bathrooms} Baths
+            <span>🚿</span> {property.bathrooms} {t.common.baths}
           </span>
           <span className="flex items-center gap-1 font-medium">
-            <span>👥</span> {property.max_guests} Guests
+            <span>👥</span> {property.max_guests} {t.common.guests}
           </span>
         </div>
 
@@ -79,15 +83,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex items-center justify-between pt-4 mt-auto border-t border-brand-border/60">
           <div>
             <span className="text-[10px] text-brand-brown-muted uppercase tracking-wider block">
-              {isRent ? "Price per night" : "Guide Price"}
+              {isRent ? t.propertyCard.pricePerNight : t.propertyCard.guidePrice}
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-serif font-bold text-brand-brown">
                 {property.price_formatted}
               </span>
               <span className="text-[10px] text-brand-brown-muted font-medium">
-                {property.currency}
-                {isRent && " / night"}
+                {t.common.currency}
+                {isRent && ` ${t.common.perNight}`}
               </span>
             </div>
           </div>
@@ -96,7 +100,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             href={`/stays/${property.slug}`}
             className="px-4 py-2 bg-brand-sand-light hover:bg-brand-terracotta hover:text-white text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition duration-200"
           >
-            {isRent ? "Reserve" : "View"}
+            {isRent ? t.propertyCard.reserve : t.propertyCard.view}
           </Link>
         </div>
       </div>

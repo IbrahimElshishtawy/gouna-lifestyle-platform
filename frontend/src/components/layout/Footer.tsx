@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
@@ -24,7 +24,7 @@ export default function Footer() {
                   className="object-contain drop-shadow"
                 />
               </div>
-              <div>
+              <div className="text-start">
                 <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
                   {t.common.elGouna}
                 </span>
@@ -175,7 +175,7 @@ export default function Footer() {
               className="hover:text-brand-terracotta transition opacity-70 hover:opacity-100 flex items-center gap-1"
             >
               <span>🔐</span>
-              <span>Admin Portal</span>
+              <span>{t.admin.management}</span>
             </Link>
           </div>
         </div>

@@ -1,53 +1,36 @@
 import React from "react";
 import Link from "next/link";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 
-export default function NotFound() {
+export default function RootNotFound() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-brand-brown">
-      <Navbar />
-
-      <main className="flex-1 flex items-center justify-center pt-32 pb-20 px-6 lg:px-12 text-center">
-        <div className="max-w-xl mx-auto space-y-6">
-          <span className="inline-block px-3 py-1 bg-brand-terracotta/10 text-brand-terracotta text-xs font-bold uppercase tracking-[0.2em] rounded-full">
+    <html lang="en">
+      <body className="min-h-screen flex items-center justify-center bg-[#FAF8F5] text-[#3D2E26] p-6 text-center font-sans">
+        <div className="max-w-md space-y-4">
+          <span className="inline-block px-3 py-1 bg-[#B85D3B]/10 text-[#B85D3B] text-xs font-bold uppercase tracking-wider rounded-full">
             404 Error
           </span>
-
-          <h1 className="font-serif text-4xl sm:text-6xl font-bold text-brand-brown">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-[#3D2E26]">
             Page Not Found
           </h1>
-
-          <p className="text-sm sm:text-base text-brand-brown-muted leading-relaxed font-light">
-            The oasis, luxury villa, or experience you are looking for cannot be found or has moved along the Red Sea coast.
+          <p className="text-sm text-[#786B63]">
+            The page you are looking for does not exist or has moved.
           </p>
-
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-4">
+          <div className="pt-2 flex justify-center gap-3">
             <Link
-              href="/"
-              className="px-6 py-3.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm"
+              href="/en"
+              className="px-6 py-3 bg-[#B85D3B] text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-[#9A4A2B] transition"
             >
-              Return Home
+              English Home
             </Link>
             <Link
-              href="/stays"
-              className="px-6 py-3.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider transition border border-brand-border"
+              href="/ar"
+              className="px-6 py-3 bg-white border border-[#E8E2D9] text-[#3D2E26] rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:bg-stone-50 transition"
             >
-              Explore Stays
+              الرئيسية بالعربية
             </Link>
-            <a
-              href="https://wa.me/201000000000?text=Hello%20GouNow%20Concierge,%20I%20need%20help%20finding%20a%20page"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2"
-            >
-              <span>💬</span> Contact Concierge
-            </a>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </body>
+    </html>
   );
 }

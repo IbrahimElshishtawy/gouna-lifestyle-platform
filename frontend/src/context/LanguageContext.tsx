@@ -1,7 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useTransition } from "react";
+import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { dictionary, Locale } from "@/locales/dictionary";
+import { useRouter, usePathname } from "@/i18n/routing";
 
 interface LanguageContextType {
   locale: Locale;
@@ -9,41 +12,68 @@ interface LanguageContextType {
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
   t: typeof dictionary.en;
+  isPending: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
-  const [mounted, setMounted] = useState(false);
+export function LanguageProvider({
+  children,
+  initialLocale,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  const currentLocale = (useLocale() as Locale) || initialLocale || "en";
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  const dir: "ltr" | "rtl" = currentLocale === "ar" ? "rtl" : "ltr";
+  const t = (dictionary[currentLocale] || dictionary.en) as typeof dictionary.en;
 
   useEffect(() => {
-    setMounted(true);
-    const saved = localStorage.getItem("gounow_locale") as Locale | null;
-    if (saved === "ar" || saved === "en") {
-      setLocaleState(saved);
-      document.documentElement.lang = saved;
-      document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+    // Keep html attributes synchronized
+    document.documentElement.lang = currentLocale;
+    document.documentElement.dir = dir;
+    try {
+      localStorage.setItem("gounow_locale", currentLocale);
+    } catch {
+      // Storage unavailable in some private windows
     }
-  }, []);
+  }, [currentLocale, dir]);
 
   const setLocale = (newLocale: Locale) => {
-    setLocaleState(newLocale);
-    localStorage.setItem("gounow_locale", newLocale);
-    document.documentElement.lang = newLocale;
-    document.documentElement.dir = newLocale === "ar" ? "rtl" : "ltr";
+    if (newLocale === currentLocale) return;
+    startTransition(() => {
+      try {
+        localStorage.setItem("gounow_locale", newLocale);
+      } catch {
+        // ignore
+      }
+      const query = searchParams ? searchParams.toString() : "";
+      const targetPath = query ? `${pathname}?${query}` : pathname;
+      router.replace(targetPath, { locale: newLocale });
+    });
   };
 
   const toggleLocale = () => {
-    const next = locale === "en" ? "ar" : "en";
+    const next = currentLocale === "en" ? "ar" : "en";
     setLocale(next);
   };
 
-  const dir: "ltr" | "rtl" = locale === "ar" ? "rtl" : "ltr";
-  const t = dictionary[locale];
-
   return (
-    <LanguageContext.Provider value={{ locale, dir, setLocale, toggleLocale, t }}>
+    <LanguageContext.Provider
+      value={{
+        locale: currentLocale,
+        dir,
+        setLocale,
+        toggleLocale,
+        t,
+        isPending,
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );
@@ -52,13 +82,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    // Fallback default if used outside of provider during SSR
     return {
       locale: "en" as Locale,
       dir: "ltr" as "ltr" | "rtl",
       setLocale: () => {},
       toggleLocale: () => {},
       t: dictionary.en,
+      isPending: false,
     };
   }
   return context;

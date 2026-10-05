@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useTransition } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Property, QuoteCalculation } from "../types/property.types";
 import { calculateQuote, inquireProperty } from "../services/properties.api";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface Props {
   property: Property;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function BookingQuoteWidget({ property, initialQuote }: Props) {
+  const { t, locale } = useLanguage();
   const isRent = property.listing_type === "rent";
   const [isPending, startTransition] = useTransition();
 
@@ -34,7 +36,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
 
   const recalculate = () => {
     if (!checkIn || !checkOut || checkIn >= checkOut) {
-      setErrorMessage("Check-out date must be after check-in date.");
+      setErrorMessage(t.bookingQuote.dateValidation);
       return;
     }
 
@@ -49,7 +51,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
         });
         setQuote(q);
       } catch {
-        setErrorMessage("Unable to calculate quote. Please try again.");
+        setErrorMessage(t.bookingQuote.calculationError);
       }
     });
   };
@@ -71,7 +73,9 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
     setInquiryStatus("success");
 
     const text = encodeURIComponent(
-      `Hello GouNow VIP Concierge, I am inquiring about purchasing: ${property.title} (Ref: ${property.reference_code}).\nName: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
+      locale === "ar"
+        ? `مرحباً كونسيرج جو ناو VIP، أود الاستفسار عن شراء عقار: ${property.title} (المرجع: ${property.reference_code}).\nالاسم: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
+        : `Hello GouNow VIP Concierge, I am inquiring about purchasing: ${property.title} (Ref: ${property.reference_code}).\nName: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
     );
     window.open(`https://wa.me/201000000000?text=${text}`, "_blank");
   };
@@ -88,12 +92,12 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
               <span className="text-2xl font-serif font-bold text-brand-brown">
                 {property.price_formatted}
               </span>
-              <span className="text-xs text-brand-brown-muted font-normal ml-1">
-                {property.currency} / night
+              <span className="text-xs text-brand-brown-muted font-normal ms-1">
+                {t.common.currency} {t.common.perNight}
               </span>
             </div>
             <span className="text-[11px] px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold rounded-full border border-emerald-200">
-              Instant Booking
+              {t.bookingQuote.instantBooking}
             </span>
           </div>
 
@@ -101,7 +105,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">
-                Check-In
+                {t.bookingQuote.checkIn}
               </label>
               <input
                 type="date"
@@ -112,7 +116,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
             </div>
             <div className="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">
-                Check-Out
+                {t.bookingQuote.checkOut}
               </label>
               <input
                 type="date"
@@ -126,7 +130,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
           {/* Guests Selector */}
           <div className="p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs">
             <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted">
-              Guests
+              {t.bookingQuote.guests}
             </label>
             <select
               value={guests}
@@ -136,7 +140,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
               {Array.from({ length: property.max_guests }, (_, i) => i + 1).map(
                 (n) => (
                   <option key={n} value={n}>
-                    {n} {n === 1 ? "Guest" : "Guests"}
+                    {n} {n === 1 ? t.bookingQuote.guest : t.bookingQuote.guestsPlural}
                   </option>
                 )
               )}
@@ -155,50 +159,49 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
             <div className="space-y-2.5 text-xs border-t border-brand-border pt-4">
               <div className="flex justify-between text-brand-brown">
                 <span>
-                  {quote.currency}{" "}
+                  {t.common.currency}{" "}
                   {Math.round(
                     quote.subtotal_cents / 100 / quote.nights
                   ).toLocaleString()}{" "}
-                  &times; {quote.nights} nights
+                  &times; {quote.nights} {t.bookingQuote.nights}
                 </span>
                 <span className="font-semibold">
-                  {quote.currency} {quote.subtotal_formatted}
+                  {t.common.currency} {quote.subtotal_formatted}
                 </span>
               </div>
 
               {quote.cleaning_fee_cents > 0 && (
                 <div className="flex justify-between text-brand-brown-muted">
-                  <span>Cleaning Fee</span>
+                  <span>{t.bookingQuote.cleaningFee}</span>
                   <span>
-                    {quote.currency}{" "}
+                    {t.common.currency}{" "}
                     {(quote.cleaning_fee_cents / 100).toLocaleString()}
                   </span>
                 </div>
               )}
 
-
               {quote.tax_cents > 0 && (
                 <div className="flex justify-between text-brand-brown-muted">
-                  <span>Taxes (14% VAT)</span>
+                  <span>{t.bookingQuote.taxes}</span>
                   <span>
-                    {quote.currency}{" "}
+                    {t.common.currency}{" "}
                     {(quote.tax_cents / 100).toLocaleString()}
                   </span>
                 </div>
               )}
 
               <div className="flex justify-between font-bold text-sm text-brand-brown pt-3 border-t border-brand-border">
-                <span>Estimated Total</span>
+                <span>{t.bookingQuote.estimatedTotal}</span>
                 <span className="text-brand-terracotta text-base">
-                  {quote.currency} {quote.total_formatted}
+                  {t.common.currency} {quote.total_formatted}
                 </span>
               </div>
 
               {quote.deposit_cents > 0 && (
                 <div className="p-2.5 bg-amber-50/60 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex justify-between">
-                  <span>Required Deposit to Reserve:</span>
+                  <span>{t.bookingQuote.requiredDeposit}</span>
                   <span className="font-bold">
-                    {quote.currency}{" "}
+                    {t.common.currency}{" "}
                     {(quote.deposit_cents / 100).toLocaleString()}
                   </span>
                 </div>
@@ -217,10 +220,10 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
                 isPending || errorMessage ? "opacity-50 pointer-events-none" : ""
               }`}
             >
-              {isPending ? "Calculating..." : "Reserve Villa Now"}
+              {isPending ? t.bookingQuote.calculating : t.bookingQuote.reserveVillaNow}
             </Link>
             <p className="text-[10px] text-center text-brand-brown-muted mt-2">
-              🔒 You won&apos;t be charged yet &bull; 256-Bit SSL Secured
+              {t.bookingQuote.noChargeNotice}
             </p>
           </div>
         </div>
@@ -229,40 +232,39 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
         <div className="space-y-4">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-brand-brown-muted block">
-              Guide Price
+              {t.bookingQuote.guidePrice}
             </span>
             <div className="text-2xl font-serif font-bold text-brand-brown mt-1">
               {property.price_formatted}{" "}
               <span className="text-xs font-normal text-brand-brown-muted">
-                {property.currency}
+                {t.common.currency}
               </span>
             </div>
           </div>
 
           {inquiryStatus === "success" ? (
             <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs">
-              Thank you! Our property consultant will contact you with floorplans
-              and viewing dates.
+              {t.bookingQuote.inquirySuccess}
             </div>
           ) : (
             <form onSubmit={handleInquirySubmit} className="space-y-3 pt-3 border-t border-brand-border text-xs">
               <div>
                 <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                  Full Name *
+                  {t.bookingQuote.fullName}
                 </label>
                 <input
                   type="text"
                   required
                   value={inquiryName}
                   onChange={(e) => setInquiryName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder={t.bookingQuote.namePlaceholder}
                   className="w-full p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                  Phone / WhatsApp *
+                  {t.bookingQuote.phone}
                 </label>
                 <input
                   type="tel"
@@ -276,13 +278,13 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
 
               <div>
                 <label className="block text-[11px] font-bold text-brand-brown-muted mb-1">
-                  Questions or Preferred Viewing Date
+                  {t.bookingQuote.questions}
                 </label>
                 <textarea
                   rows={2}
                   value={inquiryMessage}
                   onChange={(e) => setInquiryMessage(e.target.value)}
-                  placeholder="Schedule private viewing, payment plan inquiries..."
+                  placeholder={t.bookingQuote.questionsPlaceholder}
                   className="w-full p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl focus:outline-none"
                 ></textarea>
               </div>
@@ -290,9 +292,9 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
               <button
                 type="submit"
                 disabled={inquiryStatus === "loading"}
-                className="w-full py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm"
+                className="w-full py-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer disabled:opacity-50"
               >
-                {inquiryStatus === "loading" ? "Sending..." : "Request Private Viewing"}
+                {inquiryStatus === "loading" ? t.bookingQuote.sending : t.bookingQuote.requestViewing}
               </button>
             </form>
           )}
