@@ -260,15 +260,21 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                 {/* Key Features */}
                 <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
                   <div className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
+                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                     <span>{t.vacationRentals.feature1}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
+                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                     <span>{t.vacationRentals.feature2}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
+                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
                     <span>{t.vacationRentals.feature3}</span>
                   </div>
                 </div>
@@ -307,7 +313,9 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                     onClick={() => setShowSpatialModal(true)}
                     className="py-2.5 sm:py-3 px-4 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
                   >
-                    <span>📐</span>
+                    <svg className="w-3.5 h-3.5 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                    </svg>
                     <span>{isAr ? "المجسم المعماري 3D" : "3D Architecture"}</span>
                   </button>
                 </div>

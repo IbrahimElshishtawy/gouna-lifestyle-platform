@@ -150,7 +150,11 @@ export default function DivingSection() {
         {/* Cinematic Marine Quote Ribbon */}
         <div className="mt-12 sm:mt-16 py-6 px-6 sm:px-8 rounded-2xl bg-cyan-950/20 border border-cyan-500/20 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left rtl:sm:text-right">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🐬</span>
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-cyan-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
             <p className="text-xs sm:text-sm text-cyan-100 font-light">
               {isAr
                 ? "جميع رحلات الغوص تشمل يخت خاص ومعدات احترافية وكابتن مرخص من غرفة سياحة الغوص (CDWS)."
