@@ -67,7 +67,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
         <div>
           <nav className="flex items-center gap-2 text-xs text-brand-brown-muted mb-2">
             <Link href="/" className="hover:text-brand-brown">
-              {t.common.home}
+              {t.nav.home}
             </Link>
             <span className="rtl:rotate-180">/</span>
             <Link href="/experiences" className="hover:text-brand-brown">

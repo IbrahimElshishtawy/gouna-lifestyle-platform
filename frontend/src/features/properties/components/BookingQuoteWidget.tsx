@@ -60,6 +60,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
     if (isRent && !quote) {
       recalculate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkIn, checkOut, guests]);
 
   const handleInquirySubmit = async (e: React.FormEvent) => {

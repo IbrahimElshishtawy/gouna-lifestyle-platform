@@ -180,7 +180,7 @@ export default function CheckoutClient({
       {/* Checkout Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-brand-brown-muted mb-6">
         <Link href="/" className="hover:text-brand-brown">
-          {t.common.home}
+          {t.nav.home}
         </Link>
         <span className="rtl:rotate-180">/</span>
         <Link href="/stays" className="hover:text-brand-brown">
@@ -535,7 +535,7 @@ export default function CheckoutClient({
                   {locale === "ar" ? "المدة والضيوف" : "Duration"}
                 </span>
                 <span className="font-bold text-brand-brown">
-                  {nights} {locale === "ar" ? "ليالي" : "Nights"} • {initialGuests} {t.propertyCard.guests}
+                  {nights} {locale === "ar" ? "ليالي" : "Nights"} • {initialGuests} {t.bookingQuote.guests}
                 </span>
               </div>
             </div>

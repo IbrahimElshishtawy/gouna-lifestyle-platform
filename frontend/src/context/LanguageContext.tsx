@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useTransition } from "react";
 import { useLocale } from "next-intl";
-import { useSearchParams } from "next/navigation";
+// Query string is read at click time via window.location.search to prevent CSR suspense bailout during static builds
 import { dictionary, Locale } from "@/locales/dictionary";
 import { useRouter, usePathname } from "@/i18n/routing";
 
@@ -28,7 +28,6 @@ export function LanguageProvider({
   const currentLocale = (useLocale() as Locale) || initialLocale || "en";
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const isRtl = currentLocale === "ar";
@@ -54,7 +53,7 @@ export function LanguageProvider({
       } catch {
         // ignore
       }
-      const query = searchParams ? searchParams.toString() : "";
+      const query = typeof window !== "undefined" && window.location.search ? window.location.search.replace(/^\?/, "") : "";
       const targetPath = query ? `${pathname}?${query}` : pathname;
       router.replace(targetPath, { locale: newLocale });
     });

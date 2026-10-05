@@ -64,7 +64,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                 {locale === "ar" ? "الجونة" : "El Gouna"}
               </span>
               <span className="block text-sm font-serif font-bold text-brand-brown tracking-wider">
-                {t.admin.title}
+                {locale === "ar" ? "إدارة جوناو" : "GOUNOW ADMIN"}
               </span>
             </div>
           </Link>
@@ -117,19 +117,19 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/bookings"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.allBookings}
+                  {locale === "ar" ? "جميع الحجوزات" : "All Bookings"}
                 </Link>
                 <Link
                   href="/admin/bookings?status=pending"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.pendingBookings}
+                  {locale === "ar" ? "حجوزات قيد الانتظار" : "Pending Bookings"}
                 </Link>
                 <Link
                   href="/admin/bookings?status=confirmed"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.confirmedBookings}
+                  {locale === "ar" ? "حجوزات مؤكدة" : "Confirmed"}
                 </Link>
               </div>
             )}
@@ -159,25 +159,25 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/properties"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.allProperties}
+                  {locale === "ar" ? "جميع العقارات" : "All Properties"}
                 </Link>
                 <Link
                   href="/admin/properties?type=rent"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.vacationVillas}
+                  {locale === "ar" ? "للإيجار (إقامات)" : "For Rent (Stays)"}
                 </Link>
                 <Link
                   href="/admin/properties?type=sale"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {t.admin.forSale}
+                  {locale === "ar" ? "للبيع" : "For Sale"}
                 </Link>
                 <Link
                   href="/admin/properties/create"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-terracotta font-semibold"
                 >
-                  {t.admin.addProperty}
+                  {locale === "ar" ? "+ إضافة عقار" : "+ Add Property"}
                 </Link>
               </div>
             )}
@@ -191,7 +191,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             >
               <div className="flex items-center">
                 <span className="me-3">🏷️</span>
-                <span>{t.admin.pricingEngine}</span>
+                <span>{locale === "ar" ? "محرك الأسعار" : "Pricing Engine"}</span>
               </div>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
@@ -233,7 +233,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             >
               <div className="flex items-center">
                 <span className="me-3">⛵</span>
-                <span>{t.admin.experiences}</span>
+                <span>{t.admin.experiencesNav}</span>
               </div>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${

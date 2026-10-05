@@ -47,14 +47,14 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
 
         <div className="hidden sm:block">
           <h1 className="text-lg font-bold text-brand-brown tracking-tight">
-            {t.admin.executiveOverview}
+            {locale === "ar" ? "نظرة عامة تنفيذية" : "Executive Overview"}
           </h1>
           <nav className="flex items-center text-xs text-brand-brown-muted gap-2">
             <Link
               href="/admin"
               className="hover:text-brand-terracotta transition"
             >
-              {t.admin.title}
+              {locale === "ar" ? "إدارة جوناو" : "GouNow Admin"}
             </Link>
             <span className="rtl:rotate-180">/</span>
             <span className="text-brand-brown font-medium">{t.admin.dashboard}</span>
