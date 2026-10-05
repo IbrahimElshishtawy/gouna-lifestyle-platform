@@ -106,17 +106,17 @@ export default function HeroSection() {
         </p>
 
         {/* Dual Cinematic Action CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 animate-fade-in-up [animation-delay:350ms]">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 mb-6 sm:mb-10 w-full sm:w-auto max-w-md sm:max-w-none animate-fade-in-up [animation-delay:350ms]">
           <a
             href="#stays"
-            className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-2"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <span>{locale === "ar" ? "استكشف الفلل والإقامات" : "Explore Curated Stays"}</span>
             <span className="rtl:rotate-180">→</span>
           </a>
           <a
             href="#experiences"
-            className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-2"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <span>{locale === "ar" ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving"}</span>
             <span className="rtl:rotate-180">→</span>
@@ -124,16 +124,16 @@ export default function HeroSection() {
         </div>
 
         {/* Master Luxury Search Card */}
-        <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-4 sm:p-6 lg:p-7 rounded-3xl sm:rounded-[2.5rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
+        <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-3 sm:p-6 lg:p-7 rounded-2xl sm:rounded-[2.5rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
           
           {/* Centered Segmented Tab Capsule */}
-          <div className="flex justify-center mb-5 sm:mb-6">
-            <div className="inline-flex p-1 sm:p-1.5 bg-[#F5EFEA]/90 backdrop-blur-md rounded-2xl sm:rounded-full border border-brand-border/80 shadow-inner max-w-full overflow-x-auto no-scrollbar gap-1">
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="inline-flex p-1 sm:p-1.5 bg-[#F5EFEA]/90 backdrop-blur-md rounded-xl sm:rounded-full border border-brand-border/80 shadow-inner max-w-full overflow-x-auto no-scrollbar gap-1">
               {/* Tab 1: Rent Stays */}
               <button
                 type="button"
                 onClick={() => setActiveTab("rent")}
-                className={`px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg sm:rounded-full text-[11px] sm:text-xs font-bold tracking-wide transition-all duration-300 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === "rent"
                     ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
                     : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"

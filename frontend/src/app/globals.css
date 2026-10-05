@@ -173,3 +173,64 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* 3D Depth & Spatial Utility Classes */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.transform-z-12 {
+  transform: translateZ(12px);
+}
+
+.transform-z-18 {
+  transform: translateZ(18px);
+}
+
+.transform-z-24 {
+  transform: translateZ(24px);
+}
+
+.transform-z-32 {
+  transform: translateZ(32px);
+}
+
+/* Cinematic Glow & Rim Lighting */
+.glow-cinematic {
+  box-shadow: 0 10px 40px -10px rgba(184, 93, 59, 0.3);
+}
+
+.glow-cyan-cinematic {
+  box-shadow: 0 10px 40px -10px rgba(6, 182, 212, 0.3);
+}
+
+.glow-ambient-dark {
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+}
+
+/* Mobile Polish & Touch Feedback */
+@media (pointer: coarse) {
+  .touch-scale:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Safe Area Insets for Modern Mobile Browsers */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

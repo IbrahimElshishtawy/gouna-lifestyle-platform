@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag, FadeIn } from "@/components/ui/MotionPrimitives";
+import Card3D from "@/components/ui/Card3D";
 
 export default function BrandPillarsSection() {
   const { t, locale } = useLanguage();
@@ -38,7 +39,7 @@ export default function BrandPillarsSection() {
   ];
 
   return (
-    <section className="py-24 sm:py-32 px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60">
+    <section className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60">
       <div className="max-w-7xl mx-auto">
         {/* Chapter Header & Narrative Split */}
         <FadeIn direction="up">
@@ -50,20 +51,20 @@ export default function BrandPillarsSection() {
         </FadeIn>
 
         {/* Editorial Narrative Split Banner */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center mb-16 sm:mb-20">
-          <div className="lg:col-span-7 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-16 items-center mb-10 sm:mb-16 lg:mb-20">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             <FadeIn direction="up" delay={100}>
-              <h2 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-semibold text-brand-brown leading-[1.15]">
+              <h2 className="font-serif text-2xl sm:text-4xl lg:text-6xl font-semibold text-brand-brown leading-[1.15]">
                 {t.brandPillars.title}
               </h2>
             </FadeIn>
             <FadeIn direction="up" delay={200}>
-              <p className="text-sm sm:text-base text-brand-brown-muted font-light leading-relaxed max-w-2xl">
+              <p className="text-xs sm:text-base text-brand-brown-muted font-light leading-relaxed max-w-2xl">
                 {t.brandPillars.description}
               </p>
             </FadeIn>
             <FadeIn direction="up" delay={300}>
-              <div className="pt-2 flex items-center gap-6 text-xs font-mono uppercase tracking-widest text-brand-terracotta">
+              <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-mono uppercase tracking-widest text-brand-terracotta">
                 <span className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   {t.common.verified}
@@ -76,10 +77,10 @@ export default function BrandPillarsSection() {
             </FadeIn>
           </div>
 
-          {/* Architectural Image Card on right */}
+          {/* Architectural Image Card on right with 3D Depth */}
           <div className="lg:col-span-5">
             <FadeIn direction="up" delay={250}>
-              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-brand-border group">
+              <div className="relative aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-brand-border group">
                 <Image
                   src="/assets/images/fanadir-villa.jpg"
                   alt="Curated El Gouna Living"
@@ -88,11 +89,11 @@ export default function BrandPillarsSection() {
                   className="object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-                <div className="absolute bottom-6 start-6 end-6 text-white space-y-1">
-                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#E5DCD3]">
+                <div className="absolute bottom-4 sm:bottom-6 start-4 sm:start-6 end-4 sm:end-6 text-white space-y-1">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] text-[#E5DCD3]">
                     {isAr ? "الجونة، البحر الأحمر" : "EL GOUNA, RED SEA"}
                   </span>
-                  <p className="font-serif text-lg font-bold">
+                  <p className="font-serif text-base sm:text-lg font-bold">
                     {isAr ? "حيث تلتقي الفخامة بالطبيعة البكر" : "Where Architectural Elegance Meets Untouched Waters"}
                   </p>
                 </div>
@@ -101,39 +102,53 @@ export default function BrandPillarsSection() {
           </div>
         </div>
 
-        {/* 3 Architectural Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 3 Architectural Pillars with 3D Depth */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
           {pillars.map((pillar, index) => (
             <FadeIn key={pillar.id} direction="up" delay={index * 150 + 200}>
-              <Link
-                href={pillar.link}
-                className="group h-full bg-white p-8 sm:p-10 rounded-3xl border border-brand-border/80 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/40 transition-all duration-500 hover:-translate-y-2 relative flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
-                      {pillar.number}
-                    </span>
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-brand-brown-muted">
-                      {pillar.tag}
-                    </span>
+              <Card3D maxTilt={6} glare={true} className="h-full">
+                <Link
+                  href={pillar.link}
+                  className="group h-full bg-white p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-brand-border/80 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/40 transition-all duration-500 relative flex flex-col justify-between preserve-3d"
+                >
+                  <div>
+                    <div
+                      className="flex items-center justify-between mb-5 sm:mb-8 transition-transform duration-300"
+                      style={{ transform: "translateZ(24px)" }}
+                    >
+                      <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
+                        {pillar.number}
+                      </span>
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-brand-brown-muted">
+                        {pillar.tag}
+                      </span>
+                    </div>
+
+                    <h3
+                      className="font-serif text-xl sm:text-2xl font-bold text-brand-brown mb-2 sm:mb-3 group-hover:text-brand-terracotta transition-colors"
+                      style={{ transform: "translateZ(18px)" }}
+                    >
+                      {pillar.title}
+                    </h3>
+                    <p
+                      className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed"
+                      style={{ transform: "translateZ(12px)" }}
+                    >
+                      {pillar.description}
+                    </p>
                   </div>
 
-                  <h3 className="font-serif text-2xl font-bold text-brand-brown mb-3 group-hover:text-brand-terracotta transition-colors">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed">
-                    {pillar.description}
-                  </p>
-                </div>
-
-                <div className="pt-8 mt-8 border-t border-brand-border/60 flex items-center justify-between text-xs font-bold text-brand-terracotta uppercase tracking-wider">
-                  <span>{t.common.discoverMore}</span>
-                  <span className="transform group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform duration-300">
-                    &rarr;
-                  </span>
-                </div>
-              </Link>
+                  <div
+                    className="pt-5 sm:pt-8 mt-5 sm:mt-8 border-t border-brand-border/60 flex items-center justify-between text-xs font-bold text-brand-terracotta uppercase tracking-wider"
+                    style={{ transform: "translateZ(20px)" }}
+                  >
+                    <span>{t.common.discoverMore}</span>
+                    <span className="transform group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform duration-300">
+                      &rarr;
+                    </span>
+                  </div>
+                </Link>
+              </Card3D>
             </FadeIn>
           ))}
         </div>

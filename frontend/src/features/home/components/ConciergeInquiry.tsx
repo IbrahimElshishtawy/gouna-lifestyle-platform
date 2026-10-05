@@ -46,9 +46,9 @@ export default function ConciergeInquiry() {
   };
 
   return (
-    <section id="concierge" className="py-20 sm:py-28 lg:py-32 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24">
+    <section id="concierge" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Left Column: Narrative & Direct VIP Channels (6 cols) */}
           <div className="lg:col-span-6">
             <ChapterTag
@@ -56,26 +56,26 @@ export default function ConciergeInquiry() {
               title={t.concierge.eyebrow}
               subtitle={t.concierge.subtitle}
             />
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.15]">
+            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.15]">
               {t.concierge.title}
             </h2>
-            <p className="text-xs sm:text-sm text-brand-brown-muted mt-4 font-light leading-relaxed max-w-lg">
+            <p className="text-xs sm:text-sm text-brand-brown-muted mt-3 sm:mt-4 font-light leading-relaxed max-w-lg">
               {t.concierge.subtitle}
             </p>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
               {/* Phone Channel */}
-              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg">
+              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg shrink-0">
                   📞
                 </div>
                 <div>
-                  <span className="block text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
                     {t.concierge.directPhone}
                   </span>
                   <a
                     href="tel:+201000000000"
-                    className="text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
+                    className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
                   >
                     +20 100 000 0000
                   </a>
@@ -83,17 +83,17 @@ export default function ConciergeInquiry() {
               </div>
 
               {/* Email Channel */}
-              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg">
+              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta text-lg shrink-0">
                   ✉️
                 </div>
                 <div>
-                  <span className="block text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
                     {t.concierge.clientEmail}
                   </span>
                   <a
                     href="mailto:concierge@gounow.com"
-                    className="text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
+                    className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors truncate block"
                   >
                     concierge@gounow.com
                   </a>
@@ -101,15 +101,15 @@ export default function ConciergeInquiry() {
               </div>
 
               {/* WhatsApp Fast Track */}
-              <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg">
+              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shrink-0">
                   💬
                 </div>
-                <div className="flex-1">
-                  <span className="block text-[11px] uppercase font-bold text-emerald-800 tracking-wider">
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-emerald-800 tracking-wider truncate">
                     {t.concierge.instantWhatsApp}
                   </span>
-                  <span className="block text-xs text-emerald-700 font-light">
+                  <span className="block text-[11px] sm:text-xs text-emerald-700 font-light truncate">
                     {t.concierge.whatsappSub}
                   </span>
                 </div>
@@ -117,7 +117,7 @@ export default function ConciergeInquiry() {
                   href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20would%20like%20VIP%20concierge%20assistance"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors"
+                  className="px-3 sm:px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shrink-0"
                 >
                   {t.concierge.chatNow}
                 </a>
@@ -127,9 +127,9 @@ export default function ConciergeInquiry() {
 
           {/* Right Column: Tailored Arrangements Form Card (6 cols) */}
           <div className="lg:col-span-6">
-            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-brand-border/80 shadow-xl relative overflow-hidden">
-              <div className="mb-6">
-                <h3 className="font-serif text-2xl font-bold text-brand-brown mb-1">
+            <div className="bg-white p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-brand-border/80 shadow-xl relative overflow-hidden">
+              <div className="mb-5 sm:mb-6">
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-brand-brown mb-1">
                   {t.concierge.formTitle}
                 </h3>
                 <p className="text-xs text-brand-brown-muted font-light">
@@ -138,11 +138,11 @@ export default function ConciergeInquiry() {
               </div>
 
               {status === "success" ? (
-                <div className="py-12 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
+                <div className="py-8 sm:py-12 text-center space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
                     ✓
                   </div>
-                  <h4 className="font-serif text-xl font-bold text-brand-brown">
+                  <h4 className="font-serif text-lg sm:text-xl font-bold text-brand-brown">
                     {t.concierge.successTitle}
                   </h4>
                   <p className="text-xs text-brand-brown-muted max-w-sm mx-auto font-light leading-relaxed">
@@ -162,9 +162,9 @@ export default function ConciergeInquiry() {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                    <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1">
                       {t.concierge.fullName}
                     </label>
                     <input
@@ -173,13 +173,13 @@ export default function ConciergeInquiry() {
                       placeholder="e.g. Lord Alexander Wright"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                      className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                      <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1">
                         {t.concierge.phone}
                       </label>
                       <input
@@ -188,12 +188,12 @@ export default function ConciergeInquiry() {
                         placeholder="+20 100 000 0000"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                        className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                      <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1">
                         {t.concierge.email}
                       </label>
                       <input
@@ -202,19 +202,19 @@ export default function ConciergeInquiry() {
                         placeholder="alexander@domain.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                        className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                    <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1">
                       {t.concierge.serviceOfInterest}
                     </label>
                     <select
                       value={service}
                       onChange={(e) => setService(e.target.value)}
-                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors cursor-pointer"
+                      className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors cursor-pointer"
                     >
                       <option value="villa-stay">{t.concierge.services.villaStay}</option>
                       <option value="yacht-charter">{t.concierge.services.yachtCharter}</option>
@@ -226,7 +226,7 @@ export default function ConciergeInquiry() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1.5">
+                    <label className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-brown mb-1">
                       {t.concierge.detailsLabel}
                     </label>
                     <textarea
@@ -234,7 +234,7 @@ export default function ConciergeInquiry() {
                       placeholder={t.concierge.detailsPlaceholder}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-4 py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
+                      className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
                     />
                   </div>
 
@@ -247,7 +247,7 @@ export default function ConciergeInquiry() {
                   <button
                     type="submit"
                     disabled={status === "loading"}
-                    className="w-full py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 cursor-pointer"
+                    className="w-full py-3.5 sm:py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                   >
                     {status === "loading"
                       ? t.concierge.sending
