@@ -125,8 +125,9 @@ export default function FeaturedVacationRentals({ properties }: Props) {
 
                 {/* Badges Overlay */}
                 <div className="absolute top-3 start-3 sm:top-4 sm:start-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                  <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1 border border-brand-border">
-                    <span>★</span> {t.common.topRated}
+                  <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                    <span>{t.common.topRated}</span>
                   </span>
                   <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
                     {t.common.lagoonAccess}
@@ -138,9 +139,11 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                   type="button"
                   onClick={() => setShowSpatialModal(true)}
                   aria-label="View 3D Spatial Layout"
-                  className="absolute bottom-3 start-3 sm:bottom-4 sm:start-4 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
+                  className="absolute bottom-3 start-3 sm:bottom-4 sm:start-4 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-[11px] font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
                 >
-                  <span className="text-sm">📐</span>
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                  </svg>
                   <span>{isAr ? "استكشف المخطط ثلاثي الأبعاد" : "Interactive 3D Model"}</span>
                 </button>
 
@@ -202,8 +205,9 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                 {/* Location & Rating Header */}
                 <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
                   <span>{activeProperty.location?.name || t.common.elGouna}</span>
-                  <span className="flex items-center gap-1 text-brand-brown">
-                    <span className="text-amber-500">★</span> 4.98 (24 {t.common.readReviews})
+                  <span className="flex items-center gap-1.5 text-brand-brown text-xs font-semibold">
+                    <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold">4.98</span>
+                    <span className="text-brand-brown-muted font-normal">(24 {t.common.readReviews})</span>
                   </span>
                 </div>
 

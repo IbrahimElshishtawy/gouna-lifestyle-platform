@@ -97,8 +97,9 @@ export default function FeaturedSales({ properties }: Props) {
 
                   {/* Badges Overlay */}
                   <div className="absolute top-3 start-3 sm:top-4 sm:start-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                    <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1 border border-brand-border">
-                      <span>🏛️</span> {t.sales.exclusiveListing}
+                    <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
+                      <span>{t.sales.exclusiveListing}</span>
                     </span>
                     <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
                       {t.sales.lagoonFrontage}
@@ -112,12 +113,17 @@ export default function FeaturedSales({ properties }: Props) {
                     aria-label="Explore 3D Architectural Model"
                     className="absolute bottom-3 start-3 sm:bottom-4 sm:start-4 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
                   >
-                    <span className="text-sm">📐</span>
+                    <svg className="w-3.5 h-3.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                    </svg>
                     <span>{isAr ? "المجسم المعماري 3D" : "Interactive 3D Model"}</span>
                   </button>
 
                   <div className="absolute bottom-3 end-3 sm:bottom-4 sm:end-4 z-10 px-2.5 sm:px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium rounded-xl flex items-center gap-1.5">
-                    <span>📍</span>
+                    <svg className="w-3.5 h-3.5 text-white/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                     <span>{activeProperty.location?.name || t.common.elGouna}</span>
                   </div>
                 </div>
@@ -128,8 +134,11 @@ export default function FeaturedSales({ properties }: Props) {
                 <div>
                   <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
                     <span>{activeProperty.category?.name || t.sales.signatureEstate}</span>
-                    <span className="flex items-center gap-1 text-brand-brown">
-                      <span className="text-amber-500">★</span> 4.95 {t.common.readReviews}
+                    <span className="flex items-center gap-1.5 text-brand-brown">
+                      <svg className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span>4.95 {t.common.readReviews}</span>
                     </span>
                   </div>
 
@@ -180,15 +189,21 @@ export default function FeaturedSales({ properties }: Props) {
                   {/* Investment Highlights */}
                   <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                       <span>{t.sales.feature1}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                       <span>{t.sales.feature2}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-600 font-bold">✓</span>
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                       <span>{t.sales.feature3}</span>
                     </div>
                   </div>
@@ -231,7 +246,9 @@ export default function FeaturedSales({ properties }: Props) {
                       onClick={() => setShowSpatialModal(true)}
                       className="py-2.5 sm:py-3 px-4 bg-white hover:bg-brand-sand-light text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
                     >
-                      <span>📐</span>
+                      <svg className="w-3.5 h-3.5 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                      </svg>
                       <span>{isAr ? "المجسم المعماري 3D" : "3D Architecture"}</span>
                     </button>
                   </div>

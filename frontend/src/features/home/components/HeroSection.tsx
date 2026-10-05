@@ -7,6 +7,27 @@ import { useLanguage } from "@/context/LanguageContext";
 
 import type { MediaDesignConfig } from "@/features/admin/types";
 
+const CINEMATIC_PRESETS = [
+  {
+    id: "dusk",
+    name_ar: "غروب الفلل الذهبي",
+    name_en: "Lagoon Sunset",
+    image: "/assets/images/hero-villa-dusk.jpg",
+  },
+  {
+    id: "lagoon",
+    name_ar: "مياه الفنار الفيروزية",
+    name_en: "Turquoise Lagoon",
+    image: "/assets/images/fanadir-villa.jpg",
+  },
+  {
+    id: "marine",
+    name_ar: "يخوت مارينا الجونة",
+    name_en: "Marina Yacht Life",
+    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85",
+  },
+];
+
 interface HeroSectionProps {
   heroConfig?: MediaDesignConfig["hero"];
 }
@@ -15,6 +36,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
+  const [activeScene, setActiveScene] = useState<"dusk" | "lagoon" | "marine">("dusk");
+  const currentPreset = CINEMATIC_PRESETS.find((p) => p.id === activeScene) || CINEMATIC_PRESETS[0];
+  const activeBgImage = heroConfig?.background_image || currentPreset.image;
+
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
   const [checkIn, setCheckIn] = useState("2026-10-24");
@@ -64,10 +89,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   };
 
   return (
-    <section className="relative min-h-[720px] lg:min-h-[840px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-36 sm:pt-40 lg:pt-44 pb-20 lg:pb-28">
+    <section className="relative min-h-[760px] lg:min-h-[880px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-36 sm:pt-40 lg:pt-44 pb-20 lg:pb-28">
       {/* Background Hero Image/Video with Feathered Dissolve */}
       <div 
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 transition-opacity duration-1000"
         style={{
           WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)",
           maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)"
@@ -84,12 +109,12 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           />
         ) : (
           <Image
-            src={heroConfig?.background_image || "/assets/images/hero-villa-dusk.jpg"}
+            src={activeBgImage}
             alt="Live the Unrivaled El Gouna Lifestyle"
             fill
             priority
             sizes="100vw"
-            className="w-full h-full object-cover object-center animate-ken-burns"
+            className="w-full h-full object-cover object-center animate-ken-burns transition-all duration-1000"
           />
         )}
         {/* Top Vignette for Transparent Header Contrast */}
@@ -99,6 +124,30 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/25 to-black/60 pointer-events-none" />
       </div>
 
+      {/* Floating Cinematic Scene Atmosphere Switcher (Desktop) */}
+      <aside
+        aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
+        className="absolute bottom-6 end-6 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
+      >
+        <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]">
+          {isAr ? "مشهد الجونة:" : "SCENE:"}
+        </span>
+        {CINEMATIC_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => setActiveScene(p.id as any)}
+            className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+              activeScene === p.id
+                ? "bg-brand-terracotta text-white shadow-md scale-105"
+                : "text-white/70 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            {isAr ? p.name_ar : p.name_en}
+          </button>
+        ))}
+      </aside>
+
       {/* Multi-tier Smoky Feathered Bottom Transition into Page */}
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#1C1412] via-[#1C1412]/70 to-transparent pointer-events-none z-0" />
       <div className="absolute inset-x-0 -bottom-1 h-40 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-[#FAF8F5]/30 to-transparent pointer-events-none z-10" />
@@ -106,6 +155,18 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
       {/* Main Content Container with Staggered Entrance Animations */}
       <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
+        {/* Cinematic Live Red Sea Telemetry Pill */}
+        <div className="inline-flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-[#FAF8F5] text-[10px] sm:text-[11px] font-mono tracking-wider mb-4 shadow-lg animate-fade-in-down">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-bold text-[#FAF8F5]">{isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}</span>
+          <span className="text-white/40">|</span>
+          <span className="text-amber-300 font-semibold">{isAr ? "28°C مشمس صافٍ" : "28°C Clear Sky"}</span>
+          <span className="hidden md:inline text-white/40">|</span>
+          <span className="hidden md:inline text-[#E5DCD3]">{isAr ? "مياه هادئة مثالية للإبحار" : "Calm Waters & Sailing"}</span>
+          <span className="hidden lg:inline text-white/40">|</span>
+          <span className="hidden lg:inline text-emerald-300 font-semibold">{isAr ? "الكونسيرج 24/7" : "Concierge Online"}</span>
+        </div>
+
         {/* Curated Luxury Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-4 sm:mb-6 shadow-md animate-fade-in-down animate-float">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
@@ -530,8 +591,51 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           </form>
         </div>
 
+        {/* Cinematic Ecosystem Metrics Bar */}
+        <div className="mt-8 sm:mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 w-full max-w-5xl text-start animate-fade-in-up [animation-delay:550ms]">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
+            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">120+</span>
+            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
+              {isAr ? "فيلا شاطئية معتمدة" : "Curated Lagoon Villas"}
+            </span>
+            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
+              {isAr ? "إطلالات لاجون وبحر مباشر" : "Private Shoreline & Pools"}
+            </span>
+          </div>
+
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
+            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">18</span>
+            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
+              {isAr ? "يخت فاخر للإبحار" : "Private Yacht Fleet"}
+            </span>
+            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
+              {isAr ? "رحلات جزيرة طويلة ومحميات الدلافين" : "Tawila Island Expeditions"}
+            </span>
+          </div>
+
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
+            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">24/7</span>
+            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
+              {isAr ? "خدمة كونسيرج VIP" : "Dedicated Concierge Desk"}
+            </span>
+            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
+              {isAr ? "شيف خاص وحجوزات حصرية" : "Private Chefs & Island Transfers"}
+            </span>
+          </div>
+
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
+            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">100%</span>
+            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
+              {isAr ? "حجز فندقي موثوق" : "Verified Booking Security"}
+            </span>
+            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
+              {isAr ? "دفع بنكي مشفر وإلغاء مرن" : "Encrypted Bank Checkout"}
+            </span>
+          </div>
+        </div>
+
         {/* Subtle Cinematic Scroll Down Indicator */}
-        <div className="mt-12 sm:mt-16 flex flex-col items-center gap-2 animate-fade-in-up [animation-delay:600ms]">
+        <div className="mt-10 sm:mt-12 flex flex-col items-center gap-2 animate-fade-in-up [animation-delay:600ms]">
           <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#E5DCD3]/70">
             {locale === "ar" ? "مرر للاستكشاف" : "SCROLL TO EXPLORE"}
           </span>
