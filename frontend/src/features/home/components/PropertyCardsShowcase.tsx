@@ -31,15 +31,14 @@ export default function PropertyCardsShowcase({
 
   // Extract unique categories
   const categories = useMemo(() => {
-    const map = new Map<string, { id: string; name_en: string; name_ar: string }>();
+    const map = new Map<string, { id: string; name: string }>();
     properties.forEach((p) => {
       if (p.category?.id) {
         const id = String(p.category.id);
         if (!map.has(id)) {
           map.set(id, {
             id,
-            name_en: p.category.name_en || "Estate",
-            name_ar: p.category.name_ar || "عقار فاخر",
+            name: p.category.name || "Estate",
           });
         }
       }
@@ -55,7 +54,7 @@ export default function PropertyCardsShowcase({
       const matchCat =
         activeCategory === "all" ||
         String(p.category?.id) === activeCategory ||
-        p.category?.name_en?.toLowerCase() === activeCategory.toLowerCase();
+        p.category?.name?.toLowerCase() === activeCategory.toLowerCase();
       return matchType && matchCat;
     });
   }, [properties, activeListingType, activeCategory]);
@@ -144,7 +143,7 @@ export default function PropertyCardsShowcase({
                     : "bg-white/60 text-brand-brown-muted border-brand-border/70 hover:bg-white hover:border-brand-border"
                 }`}
               >
-                {isAr ? cat.name_ar : cat.name_en}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -203,9 +202,9 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const images = property.images?.length
     ? property.images
-    : [{ id: 1, url: property.primary_image || "/assets/images/hero-villa-dusk.jpg" }];
+    : [{ id: 1, url: "/assets/images/hero-villa-dusk.jpg" }];
 
-  const currentImageUrl = images[currentImgIndex]?.url || property.primary_image || "/assets/images/hero-villa-dusk.jpg";
+  const currentImageUrl = images[currentImgIndex]?.url || "/assets/images/hero-villa-dusk.jpg";
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -219,9 +218,9 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
     setCurrentImgIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
-  const title = (isAr ? property.title_ar : property.title_en) || property.title_en || property.reference_number;
-  const locationName = (isAr ? property.location?.name_ar : property.location?.name_en) || "الجونة";
-  const categoryName = (isAr ? property.category?.name_ar : property.category?.name_en) || "فيلا فاخرة";
+  const title = (isAr ? property.title_ar : property.title) || property.title || property.reference_code;
+  const locationName = property.location?.name || (isAr ? "الجونة" : "El Gouna");
+  const categoryName = property.category?.name || (isAr ? "فيلا فاخرة" : "Luxury Villa");
 
   return (
     <article className="group bg-white rounded-3xl border border-brand-border/70 overflow-hidden shadow-xs hover:shadow-xl hover:border-brand-terracotta/40 transition-all duration-300 flex flex-col justify-between">
@@ -309,7 +308,7 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
 
           {/* Unit Title */}
           <Link
-            href={property.listing_type === "sale" ? `/stays/${property.slug}` : `/stays/${property.slug}`}
+            href={`/stays/${property.slug}`}
             className="block group-hover:text-brand-terracotta transition-colors"
           >
             <h3 className="font-serif text-lg sm:text-xl font-bold text-brand-brown leading-snug line-clamp-1">
@@ -341,7 +340,7 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
               {property.listing_type === "sale" ? (isAr ? "سعر العقار" : "Price") : (isAr ? "يبدأ من" : "Starting from")}
             </span>
             <div className="font-serif text-lg font-bold text-brand-terracotta">
-              {property.formatted_price || `${property.base_price_cents / 100} ${property.currency || "EGP"}`}
+              {property.price_formatted || `${property.price_cents / 100} ${property.currency || "EGP"}`}
               {property.listing_type === "rent" && (
                 <span className="text-xs font-normal text-brand-brown-muted">
                   {isAr ? " / ليلة" : " / night"}
