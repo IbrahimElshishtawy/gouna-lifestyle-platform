@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
+import { ChapterTag } from "@/components/ui/MotionPrimitives";
 
 interface Props {
   properties: Property[];
@@ -57,19 +58,18 @@ export default function FeaturedVacationRentals({ properties }: Props) {
   if (!activeProperty) return null;
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto">
+    <section id="stays" className="py-20 sm:py-28 lg:py-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto scroll-mt-24 border-b border-brand-border/60">
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12">
         <div>
-          <span className="text-[10px] sm:text-xs uppercase font-bold tracking-[0.2em] sm:tracking-[0.25em] text-brand-terracotta block mb-2">
-            {t.vacationRentals.eyebrow}
-          </span>
+          <ChapterTag
+            number="CHAPTER 02"
+            title={t.vacationRentals.eyebrow}
+            subtitle={t.vacationRentals.subtitle}
+          />
           <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
             {t.vacationRentals.title}
           </h2>
-          <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 max-w-2xl font-light leading-relaxed">
-            {t.vacationRentals.subtitle}
-          </p>
         </div>
 
         {/* Carousel & View All Controls */}

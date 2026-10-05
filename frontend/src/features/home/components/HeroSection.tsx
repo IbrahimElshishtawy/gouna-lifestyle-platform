@@ -101,9 +101,27 @@ export default function HeroSection() {
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-10 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
+        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-8 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
           {t.hero.subtitle}
         </p>
+
+        {/* Dual Cinematic Action CTAs */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 animate-fade-in-up [animation-delay:350ms]">
+          <a
+            href="#stays"
+            className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-2"
+          >
+            <span>{locale === "ar" ? "استكشف الفلل والإقامات" : "Explore Curated Stays"}</span>
+            <span className="rtl:rotate-180">→</span>
+          </a>
+          <a
+            href="#experiences"
+            className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center gap-2"
+          >
+            <span>{locale === "ar" ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving"}</span>
+            <span className="rtl:rotate-180">→</span>
+          </a>
+        </div>
 
         {/* Master Luxury Search Card */}
         <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-4 sm:p-6 lg:p-7 rounded-3xl sm:rounded-[2.5rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
@@ -515,6 +533,14 @@ export default function HeroSection() {
 
             </div>
           </form>
+        </div>
+
+        {/* Subtle Cinematic Scroll Down Indicator */}
+        <div className="mt-12 sm:mt-16 flex flex-col items-center gap-2 animate-fade-in-up [animation-delay:600ms]">
+          <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#E5DCD3]/70">
+            {locale === "ar" ? "مرر للاستكشاف" : "SCROLL TO EXPLORE"}
+          </span>
+          <div className="w-[1px] h-8 bg-gradient-to-b from-brand-terracotta via-white/50 to-transparent animate-pulse" />
         </div>
       </div>
     </section>

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { submitConciergeInquiry } from "../services/home.api";
 import { useLanguage } from "@/context/LanguageContext";
+import { ChapterTag } from "@/components/ui/MotionPrimitives";
 
 export default function ConciergeInquiry() {
   const { t, locale } = useLanguage();
@@ -45,14 +46,16 @@ export default function ConciergeInquiry() {
   };
 
   return (
-    <section id="concierge" className="py-20 lg:py-24 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80">
+    <section id="concierge" className="py-20 sm:py-28 lg:py-32 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Narrative & Direct VIP Channels (6 cols) */}
           <div className="lg:col-span-6">
-            <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-              {t.concierge.eyebrow}
-            </span>
+            <ChapterTag
+              number="CHAPTER 07"
+              title={t.concierge.eyebrow}
+              subtitle={t.concierge.subtitle}
+            />
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.15]">
               {t.concierge.title}
             </h2>

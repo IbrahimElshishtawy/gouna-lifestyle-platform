@@ -6,6 +6,7 @@ import HeroSection from "@/features/home/components/HeroSection";
 import BrandPillarsSection from "@/features/home/components/BrandPillarsSection";
 import FeaturedVacationRentals from "@/features/home/components/FeaturedVacationRentals";
 import FeaturedExperiences from "@/features/home/components/FeaturedExperiences";
+import DivingSection from "@/features/home/components/DivingSection";
 import FeaturedSales from "@/features/home/components/FeaturedSales";
 import TestimonialsSection from "@/features/home/components/TestimonialsSection";
 import EventsSection from "@/features/home/components/EventsSection";
@@ -53,7 +54,10 @@ export default async function HomePage({
           <FeaturedExperiences experiences={experiences} />
         </ScrollReveal>
 
-        {/* 5. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
+        {/* 5. The Deep: Red Sea Marine Expeditions & Diving */}
+        <DivingSection />
+
+        {/* 6. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
         <ScrollReveal animation="fade-up" duration={800}>
           <FeaturedSales properties={properties} />
         </ScrollReveal>

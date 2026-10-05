@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing, Locale } from "@/i18n/routing";
 import { LanguageProvider } from "@/context/LanguageContext";
+import CustomCursor from "@/components/ui/CustomCursor";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -135,6 +136,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         />
       </head>
       <body className={`min-h-full flex flex-col text-brand-brown bg-[#FAF8F5] antialiased selection:bg-brand-terracotta/20 selection:text-brand-terracotta ${fontClass}`}>
+        <CustomCursor />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LanguageProvider initialLocale={locale as Locale}>
             {children}

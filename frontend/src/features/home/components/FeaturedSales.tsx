@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
+import { ChapterTag } from "@/components/ui/MotionPrimitives";
 
 interface Props {
   properties: Property[];
@@ -28,20 +29,19 @@ export default function FeaturedSales({ properties }: Props) {
   if (!activeProperty) return null;
 
   return (
-    <section className="py-20 lg:py-24 px-6 lg:px-12 bg-white border-t border-brand-border/80">
+    <section id="sales" className="py-20 sm:py-28 lg:py-32 px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
-            <span className="text-xs uppercase font-bold tracking-[0.25em] text-brand-terracotta block mb-2">
-              {t.sales.eyebrow}
-            </span>
+            <ChapterTag
+              number="CHAPTER 05"
+              title={t.sales.eyebrow}
+              subtitle={t.sales.subtitle}
+            />
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown">
               {t.sales.title}
             </h2>
-            <p className="text-xs sm:text-sm text-brand-brown-muted mt-2 max-w-2xl font-light leading-relaxed">
-              {t.sales.subtitle}
-            </p>
           </div>
 
           <div className="mt-6 md:mt-0 flex items-center gap-4">
