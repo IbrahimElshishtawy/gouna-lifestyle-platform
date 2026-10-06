@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getAdminProperties, togglePropertyStatus } from "@/features/admin/services/admin.api";
+import { getAdminProperties, togglePropertyStatus, deleteAdminProperty } from "@/features/admin/services/admin.api";
 import type { AdminPropertyItem, AdminPropertySummary } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
@@ -37,6 +37,17 @@ export default function AdminPropertiesPage() {
     isOpen: false,
     property: null,
     action: "pause",
+    loading: false,
+  });
+
+  // Action Dialog State for Property Deletion
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    property: AdminPropertyItem | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    property: null,
     loading: false,
   });
 
@@ -125,6 +136,40 @@ export default function AdminPropertiesPage() {
           : "Failed to update property display status.",
       });
       setDialogState((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleDeleteClick = (prop: AdminPropertyItem) => {
+    setDeleteDialog({
+      isOpen: true,
+      property: prop,
+      loading: false,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.property) return;
+    setDeleteDialog((prev) => ({ ...prev, loading: true }));
+    try {
+      await deleteAdminProperty(deleteDialog.property.id);
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم حذف العقار بنجاح." : "Property deleted successfully.",
+      });
+      setProperties((prev) => prev.filter((p) => p.id !== deleteDialog.property?.id));
+      setSummary((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+        published: deleteDialog.property?.is_published ? Math.max(0, prev.published - 1) : prev.published,
+        paused: !deleteDialog.property?.is_published ? Math.max(0, prev.paused - 1) : prev.paused,
+      }));
+      setDeleteDialog({ isOpen: false, property: null, loading: false });
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر حذف العقار لوجود حجوزات نشطة مرتبطة به." : "Cannot delete property with active bookings."),
+      });
+      setDeleteDialog((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -413,14 +458,32 @@ export default function AdminPropertiesPage() {
                         )}
                       </td>
 
-                      {/* Control Actions (Toggle Pause/Display Button) */}
+                      {/* Control Actions */}
                       <td className="py-3.5 px-4 text-end">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          {/* Manage Listing Link */}
+                          <Link
+                            href={`/admin/properties/${prop.id}`}
+                            className="px-2.5 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg text-xs font-bold border border-brand-border transition"
+                            title={isAr ? "إدارة وتعديل الوحدة والموقع" : "Manage property and geolocation"}
+                          >
+                            {isAr ? "إدارة" : "Manage"}
+                          </Link>
+
+                          {/* Dedicated Pricing & Calendar Jump */}
+                          <Link
+                            href={`/admin/pricing?property_id=${prop.id}`}
+                            className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg text-xs font-bold border border-amber-200 transition"
+                            title={isAr ? "قواعد الأسعار والتقويم والخصومات" : "Pricing rules, calendar & discounts"}
+                          >
+                            <span>📅 {isAr ? "الأسعار" : "Pricing"}</span>
+                          </Link>
+
                           {/* Toggle Button */}
                           <button
                             type="button"
                             onClick={() => handleToggleClick(prop)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                               prop.is_published
                                 ? "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
                                 : "bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300"
@@ -432,19 +495,29 @@ export default function AdminPropertiesPage() {
                             }
                           >
                             {prop.is_published
-                              ? isAr ? "إيقاف العرض" : "Pause Display"
-                              : isAr ? "تفعيل العرض" : "Activate Display"}
+                              ? isAr ? "إيقاف" : "Pause"
+                              : isAr ? "تفعيل" : "Activate"}
                           </button>
 
                           {/* Public View Link */}
                           <Link
                             href={`/stays/${prop.slug}`}
                             target="_blank"
-                            className="px-2.5 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg text-xs font-medium border border-brand-border"
+                            className="px-2 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg text-xs font-medium border border-brand-border"
                             title={isAr ? "معاينة الوحدة على الموقع العام" : "View on public website"}
                           >
                             {isAr ? "عرض" : "View"}
                           </Link>
+
+                          {/* Delete Action */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteClick(prop)}
+                            className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200 cursor-pointer transition"
+                            title={isAr ? "حذف الوحدة نهائياً" : "Delete property listing"}
+                          >
+                            🗑️
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -483,6 +556,23 @@ export default function AdminPropertiesPage() {
         isLoading={dialogState.loading}
         onConfirm={handleConfirmToggle}
         onCancel={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Confirmation Dialog for Property Deletion */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title={isAr ? "تأكيد حذف أو أرشفة العقار" : "Confirm Property Deletion"}
+        description={
+          isAr
+            ? `هل أنت متأكد من رغبتك في حذف العقار [${deleteDialog.property?.reference_number}] (${deleteDialog.property?.title_ar || deleteDialog.property?.title_en}) نهائياً من النظام؟ لا يمكن حذف العقارات المرتبطة بحجوزات نشطة حفاظاً على سلامة العمليات المالية.`
+            : `Are you sure you want to permanently delete [${deleteDialog.property?.reference_number}]? Properties with active bookings cannot be deleted.`
+        }
+        confirmText={isAr ? "نعم، حذف العقار" : "Yes, Delete Property"}
+        cancelText={isAr ? "إلغاء" : "Cancel"}
+        isDestructive={true}
+        isLoading={deleteDialog.loading}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteDialog((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

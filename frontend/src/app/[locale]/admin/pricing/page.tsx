@@ -126,12 +126,12 @@ export default function AdminPricingPage() {
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
-    message: string;
+    description: string;
     action: () => Promise<void>;
   }>({
     isOpen: false,
     title: "",
-    message: "",
+    description: "",
     action: async () => {},
   });
 
@@ -339,7 +339,7 @@ export default function AdminPricingPage() {
     setConfirmDialog({
       isOpen: true,
       title: isAr ? "حذف قاعدة السعر الموسمي" : "Delete Pricing Rule",
-      message: isAr
+      description: isAr
         ? `هل أنت متأكد من حذف قاعدة السعر «${rule.name_en}»؟ سيعود العقار لسعر الليلة الأساسي لهذه التواريخ.`
         : `Are you sure you want to delete rule "${rule.name_en}"? Nights will revert to the property's base rate.`,
       action: async () => {
@@ -476,7 +476,7 @@ export default function AdminPricingPage() {
     setConfirmDialog({
       isOpen: true,
       title: isAr ? "حذف كود الخصم" : "Delete Discount",
-      message: isAr
+      description: isAr
         ? `هل أنت متأكد من حذف كود الخصم «${d.code || d.name_en}»؟`
         : `Are you sure you want to delete promo code "${d.code || d.name_en}"?`,
       action: async () => {
@@ -945,7 +945,10 @@ export default function AdminPricingPage() {
                 <LoadingState message={isAr ? "جاري احتساب أسعار التقويم اليومية..." : "Computing daily pricing matrix..."} />
               </div>
             ) : calendarDays.length === 0 ? (
-              <EmptyState title={isAr ? "لا توجد بيانات تقويم" : "No calendar data available"} />
+              <EmptyState
+                title={isAr ? "لا توجد بيانات تقويم" : "No calendar data available"}
+                description={isAr ? "يرجى اختيار عقار وشهر صالحين لعرض مصفوفة الأسعار." : "Please select a property and month to view the daily rates."}
+              />
             ) : (
               <div>
                 <div className="grid grid-cols-7 gap-2">
@@ -1734,7 +1737,7 @@ export default function AdminPricingPage() {
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
         title={confirmDialog.title}
-        message={confirmDialog.message}
+        description={confirmDialog.description}
         onConfirm={async () => {
           await confirmDialog.action();
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));

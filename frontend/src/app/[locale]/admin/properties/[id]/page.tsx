@@ -137,6 +137,55 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleSaveLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!property) return;
+    setLocationSaving(true);
+    setFeedback(null);
+    try {
+      const res = await updateAdminProperty(property.id, {
+        latitude: locationForm.latitude,
+        longitude: locationForm.longitude,
+        map_url: locationForm.map_url,
+        address: locationForm.address,
+      });
+      setProperty((prev: any) => ({
+        ...prev,
+        latitude: locationForm.latitude,
+        longitude: locationForm.longitude,
+        map_url: locationForm.map_url,
+        address: locationForm.address,
+      }));
+      setFeedback({
+        type: "success",
+        message: res.message || (isAr ? "تم حفظ إحداثيات وموقع العقار بنجاح." : "Location coordinates saved successfully."),
+      });
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر حفظ إحداثيات الموقع." : "Failed to save location coordinates."),
+      });
+    } finally {
+      setLocationSaving(false);
+    }
+  };
+
+  const handleDeleteProperty = async () => {
+    if (!property) return;
+    setDeleteLoading(true);
+    try {
+      await deleteAdminProperty(property.id);
+      router.push("/admin/properties");
+    } catch (err: any) {
+      setDeleteLoading(false);
+      setDeleteModalOpen(false);
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر حذف العقار لوجود حجوزات نشطة مرتبطة به." : "Cannot delete property with active bookings."),
+      });
+    }
+  };
+
   const handleAddBlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!blockForm.start_date || !blockForm.end_date) return;
@@ -282,6 +331,14 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 flex-wrap">
+          <Link
+            href={`/admin/pricing?property_id=${property.id}`}
+            className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition border border-amber-200 flex items-center gap-1.5 shadow-xs"
+          >
+            <span>📅</span>
+            <span>{isAr ? "محرك الأسعار والتقويم" : "Pricing & Calendar"}</span>
+          </Link>
+
           <PermissionGuard permission="manage_properties">
             <button
               onClick={handleToggleVisibility}
@@ -307,6 +364,16 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
           >
             {isAr ? "معاينة بالموقع" : "Live Preview"} ↗
           </Link>
+
+          <PermissionGuard permission="manage_properties">
+            <button
+              onClick={() => setDeleteModalOpen(true)}
+              className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition border border-rose-200 cursor-pointer"
+              title={isAr ? "حذف أو أرشفة العقار نهائياً" : "Delete / Archive Property"}
+            >
+              {isAr ? "حذف الوحدة" : "Delete"}
+            </button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -337,6 +404,16 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
           }`}
         >
           {isAr ? "المواصفات والبيانات" : "Specifications & Overview"}
+        </button>
+        <button
+          onClick={() => setActiveTab("location")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTab === "location"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          {isAr ? "الموقع والخريطة الجغرافية" : "Location & Geolocation"}
         </button>
         <button
           onClick={() => setActiveTab("availability")}
@@ -477,12 +554,118 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-brand-brown-muted">{isAr ? "إجمالي العائد المحقق:" : "Historical Revenue:"}</span>
-                  <span className="font-bold text-emerald-700 font-serif">{property.stats?.formatted_revenue || "0 EGP"}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Tab 1.5: Location & Map */}
+      {activeTab === "location" && (
+        <form onSubmit={handleSaveLocation} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-border shadow-xs space-y-6 text-xs">
+              <div className="border-b border-brand-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-brand-brown">
+                    {isAr ? "الموقع الجغرافي والإحداثيات (Geolocation & Coordinates)" : "Geolocation & Coordinates"}
+                  </h3>
+                  <p className="text-brand-brown-muted text-xs mt-0.5">
+                    {isAr
+                      ? "تحديد إحداثيات GPS الدقيقة لظهور العقار على خريطة الجونة وتوجيه النزلاء عبر خرائط Google."
+                      : "Pin precise GPS coordinates for the interactive El Gouna map and guest navigation."}
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={locationSaving}
+                  className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white rounded-xl font-bold transition shadow-xs cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                >
+                  {locationSaving ? (isAr ? "جارٍ الحفظ..." : "Saving...") : (isAr ? "حفظ التعديلات" : "Save Location Details")}
+                </button>
+              </div>
+
+              {/* Address input */}
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1.5">
+                  {isAr ? "العنوان النصي أو الحي / الكومباوند" : "Detailed Address / Street"}
+                </label>
+                <input
+                  type="text"
+                  value={locationForm.address}
+                  onChange={(e) => setLocationForm({ ...locationForm, address: e.target.value })}
+                  placeholder={isAr ? "مثال: فيلا 42، مارينا أبو تيج، الجونة" : "e.g. Villa 42, Abu Tig Marina, El Gouna"}
+                  className="w-full px-4 py-2.5 rounded-xl border border-brand-border bg-brand-sand-light/40 text-brand-brown text-xs focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
+                />
+              </div>
+
+              {/* LocationPicker */}
+              <div className="pt-2">
+                <LocationPicker
+                  value={locationForm}
+                  onChange={(loc) => {
+                    setLocationForm((prev) => ({
+                      ...prev,
+                      latitude: loc.latitude,
+                      longitude: loc.longitude,
+                      map_url: loc.map_url || prev.map_url,
+                      address: loc.address || prev.address,
+                    }));
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Location Summary Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-3xl border border-brand-border shadow-xs space-y-4 text-xs">
+              <h3 className="text-base font-bold text-brand-brown border-b border-brand-border pb-3">
+                {isAr ? "حالة الإحداثيات المسجلة" : "Geolocation Dossier"}
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-1 border-b border-brand-border/40">
+                  <span className="text-brand-brown-muted">{isAr ? "خط العرض (Latitude):" : "Latitude:"}</span>
+                  <span className="font-mono font-bold text-brand-brown">
+                    {locationForm.latitude !== null ? locationForm.latitude : (isAr ? "غير محدد" : "Not set")}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-brand-border/40">
+                  <span className="text-brand-brown-muted">{isAr ? "خط الطول (Longitude):" : "Longitude:"}</span>
+                  <span className="font-mono font-bold text-brand-brown">
+                    {locationForm.longitude !== null ? locationForm.longitude : (isAr ? "غير محدد" : "Not set")}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-brand-border/40">
+                  <span className="text-brand-brown-muted">{isAr ? "المنطقة / الكومباوند:" : "Area / Compound:"}</span>
+                  <span className="font-bold text-brand-brown">{locationName}</span>
+                </div>
+              </div>
+
+              {locationForm.latitude && locationForm.longitude && (
+                <div className="pt-3">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${locationForm.latitude},${locationForm.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2 px-3 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown font-bold text-xs border border-brand-border flex items-center justify-center gap-1.5 transition"
+                  >
+                    <span>🧭</span>
+                    <span>{isAr ? "فتح الموقع في خرائط Google" : "Open in Google Maps"} ↗</span>
+                  </a>
+                </div>
+              )}
+
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                <strong className="block mb-1">{isAr ? "💡 ملحوظة أمنية ونظامية:" : "💡 Platform Notice:"}</strong>
+                {isAr
+                  ? "يتم التحقق من صحة الإحداثيات وسريانها ضمن حدود جمهورية مصر العربية ومنطقة البحر الأحمر برمجياً."
+                  : "All coordinates undergo strict backend bounds validation within Egyptian / Red Sea boundaries."}
+              </div>
+            </div>
+          </div>
+        </form>
       )}
 
       {/* Tab 2: Availability & Blocks */}
@@ -884,6 +1067,23 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
           )}
         </div>
       )}
+
+      {/* Confirm Property Deletion Dialog */}
+      <ConfirmDialog
+        isOpen={deleteModalOpen}
+        title={isAr ? "تأكيد حذف أو أرشفة العقار" : "Confirm Property Deletion"}
+        description={
+          isAr
+            ? `هل أنت متأكد من رغبتك في حذف العقار [${property.reference_number}] (${title}) نهائياً من النظام؟ لا يمكن حذف العقارات التي تحتوي على حجوزات نشطة أو قادمة حفاظاً على سلامة البيانات المالية.`
+            : `Are you sure you want to permanently delete [${property.reference_number}] (${title})? Properties with active or upcoming bookings cannot be deleted.`
+        }
+        confirmText={isAr ? "نعم، حذف العقار" : "Yes, Delete Property"}
+        cancelText={isAr ? "إلغاء" : "Cancel"}
+        isDestructive={true}
+        isLoading={deleteLoading}
+        onConfirm={handleDeleteProperty}
+        onCancel={() => setDeleteModalOpen(false)}
+      />
     </div>
   );
 }
