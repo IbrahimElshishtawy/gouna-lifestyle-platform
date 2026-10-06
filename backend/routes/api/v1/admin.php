@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\CustomerApiController;
 use App\Http\Controllers\Api\V1\Admin\DashboardApiController;
 use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
 use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
+use App\Http\Controllers\Api\V1\Admin\PricingApiController;
 use App\Http\Controllers\Api\V1\Admin\PropertyApiController;
 use App\Http\Controllers\Api\V1\Admin\SettingsApiController;
 use App\Http\Controllers\Api\V1\Admin\StaffApiController;
@@ -32,18 +33,38 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::post('/{id}/extend', [BookingApiController::class, 'extendStay'])->name('extend');
     });
 
-    // 3. Properties & Units Management, Availability & Dynamic Pricing
+    // 3. Properties & Units Management, Location & Availability
     Route::prefix('properties')->as('properties.')->group(function () {
         Route::get('/', [PropertyApiController::class, 'index'])->name('index');
+        Route::post('/', [PropertyApiController::class, 'store'])->name('store');
         Route::get('/taxonomies', [PropertyApiController::class, 'taxonomies'])->name('taxonomies');
+        Route::post('/parse-location', [PropertyApiController::class, 'parseLocation'])->name('parse-location');
         Route::get('/{id}', [PropertyApiController::class, 'show'])->name('show');
         Route::put('/{id}', [PropertyApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PropertyApiController::class, 'destroy'])->name('destroy');
         Route::match(['put', 'patch'], '/{id}/toggle-status', [PropertyApiController::class, 'toggleStatus'])->name('toggle-status');
         Route::get('/{id}/calendar', [PropertyApiController::class, 'availabilityCalendar'])->name('calendar');
         Route::post('/{id}/availability-blocks', [PropertyApiController::class, 'addAvailabilityBlock'])->name('add-block');
         Route::delete('/{id}/availability-blocks/{blockId}', [PropertyApiController::class, 'removeAvailabilityBlock'])->name('remove-block');
         Route::post('/{id}/seasonal-prices', [PropertyApiController::class, 'addSeasonalPrice'])->name('add-seasonal-price');
         Route::delete('/{id}/seasonal-prices/{seasonId}', [PropertyApiController::class, 'removeSeasonalPrice'])->name('remove-seasonal-price');
+    });
+
+    // 3.1 Dedicated Pricing Engine Module
+    Route::prefix('pricing')->as('pricing.')->group(function () {
+        Route::get('/', [PricingApiController::class, 'overview'])->name('overview');
+        Route::get('/calendar', [PricingApiController::class, 'calendar'])->name('calendar');
+        Route::post('/preview', [PricingApiController::class, 'previewQuote'])->name('preview');
+        Route::post('/analyze-overlap', [PricingApiController::class, 'analyzeOverlap'])->name('analyze-overlap');
+        Route::get('/rules', [PricingApiController::class, 'rules'])->name('rules');
+        Route::post('/rules', [PricingApiController::class, 'storeRule'])->name('rules.store');
+        Route::put('/rules/{id}', [PricingApiController::class, 'updateRule'])->name('rules.update');
+        Route::delete('/rules/{id}', [PricingApiController::class, 'deleteRule'])->name('rules.destroy');
+        Route::post('/override', [PricingApiController::class, 'overrideDateRange'])->name('override');
+        Route::get('/discounts', [PricingApiController::class, 'discounts'])->name('discounts');
+        Route::post('/discounts', [PricingApiController::class, 'storeDiscount'])->name('discounts.store');
+        Route::put('/discounts/{id}/toggle', [PricingApiController::class, 'toggleDiscount'])->name('discounts.toggle');
+        Route::delete('/discounts/{id}', [PricingApiController::class, 'deleteDiscount'])->name('discounts.destroy');
     });
 
     // 4. Media Design & Homepage CMS Control

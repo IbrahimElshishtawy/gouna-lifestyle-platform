@@ -411,3 +411,195 @@ export async function updateMediaDesignConfig(
   });
 }
 
+/**
+ * 10. Properties Management
+ */
+export async function createAdminProperty(
+  payload: Record<string, any>
+): Promise<{ success: boolean; message: string; data: import("../types").AdminPropertyItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").AdminPropertyItem }>("/admin/properties", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminProperty(
+  id: number
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/properties/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function parseLocationCoordinates(
+  queryOrUrl: string
+): Promise<import("../types").LocationParseResult> {
+  return apiClient<import("../types").LocationParseResult>("/admin/properties/parse-location", {
+    method: "POST",
+    body: JSON.stringify({ url: queryOrUrl }),
+  });
+}
+
+/**
+ * 10. Pricing Engine Module
+ */
+export async function getPricingOverview(): Promise<import("../types").PricingOverviewResponse> {
+  return apiClient<import("../types").PricingOverviewResponse>("/admin/pricing");
+}
+
+export async function getPricingCalendarMatrix(
+  propertyId: number,
+  year?: number,
+  month?: number
+): Promise<import("../types").PricingCalendarMatrixResponse> {
+  const query = new URLSearchParams();
+  query.set("property_id", propertyId.toString());
+  if (year) query.set("year", year.toString());
+  if (month) query.set("month", month.toString());
+
+  return apiClient<import("../types").PricingCalendarMatrixResponse>(`/admin/pricing/calendar?${query.toString()}`);
+}
+
+export async function previewPriceQuote(payload: {
+  property_id: number;
+  check_in: string;
+  check_out: string;
+  guests?: number;
+  promo_code?: string;
+}): Promise<import("../types").PricePreviewResponse> {
+  return apiClient<import("../types").PricePreviewResponse>("/admin/pricing/preview", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function analyzeSeasonalOverlap(payload: {
+  property_id: number;
+  start_date: string;
+  end_date: string;
+  priority: number;
+  ignore_season_id?: number;
+}): Promise<{ success: boolean; data: import("../types").SeasonalOverlapResponse }> {
+  return apiClient<{ success: boolean; data: import("../types").SeasonalOverlapResponse }>("/admin/pricing/analyze-overlap", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getPricingRules(params?: {
+  property_id?: number;
+  search?: string;
+  is_active?: boolean;
+  page?: number;
+}): Promise<PaginatedResponse<import("../types").SeasonalPriceItem>> {
+  const query = new URLSearchParams();
+  if (params?.property_id) query.set("property_id", params.property_id.toString());
+  if (params?.search) query.set("search", params.search);
+  if (typeof params?.is_active === "boolean") query.set("is_active", params.is_active.toString());
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  return apiClient<PaginatedResponse<import("../types").SeasonalPriceItem>>(`/admin/pricing/rules${qs ? `?${qs}` : ""}`);
+}
+
+export async function createPricingRule(payload: {
+  property_id: number;
+  name_en: string;
+  name_ar?: string;
+  start_date: string;
+  end_date: string;
+  price_cents: number;
+  priority?: number;
+  min_stay_nights?: number;
+  is_active?: boolean;
+  notes?: string;
+}): Promise<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }>("/admin/pricing/rules", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updatePricingRule(
+  id: number,
+  payload: Partial<{
+    name_en: string;
+    name_ar?: string;
+    start_date: string;
+    end_date: string;
+    price_cents: number;
+    priority: number;
+    min_stay_nights: number;
+    is_active: boolean;
+    notes: string;
+  }>
+): Promise<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }>(`/admin/pricing/rules/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deletePricingRule(id: number): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/pricing/rules/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function applyPriceOverride(payload: {
+  property_id: number;
+  start_date: string;
+  end_date: string;
+  price_cents: number;
+  min_stay_nights?: number;
+  reason?: string;
+}): Promise<{ success: boolean; message: string; data: any }> {
+  return apiClient<{ success: boolean; message: string; data: any }>("/admin/pricing/override", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getAdminDiscounts(params?: {
+  search?: string;
+  page?: number;
+}): Promise<PaginatedResponse<import("../types").AdminDiscountItem>> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set("search", params.search);
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  return apiClient<PaginatedResponse<import("../types").AdminDiscountItem>>(`/admin/pricing/discounts${qs ? `?${qs}` : ""}`);
+}
+
+export async function createAdminDiscount(payload: {
+  name_en: string;
+  name_ar?: string;
+  code?: string;
+  type: "percentage" | "fixed";
+  value: number;
+  currency?: string;
+  valid_from?: string;
+  valid_until?: string;
+  min_stay_nights?: number;
+  is_active?: boolean;
+}): Promise<{ success: boolean; message: string; data: import("../types").AdminDiscountItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").AdminDiscountItem }>("/admin/pricing/discounts", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function toggleAdminDiscount(id: number): Promise<{ success: boolean; message: string; data: import("../types").AdminDiscountItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").AdminDiscountItem }>(`/admin/pricing/discounts/${id}/toggle`, {
+    method: "PUT",
+  });
+}
+
+export async function deleteAdminDiscount(id: number): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/pricing/discounts/${id}`, {
+    method: "DELETE",
+  });
+}
+
+

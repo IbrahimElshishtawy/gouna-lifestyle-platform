@@ -3,6 +3,7 @@
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   getAdminPropertyDetails,
   togglePropertyStatus,
@@ -11,8 +12,11 @@ import {
   removePropertyAvailabilityBlock,
   addPropertySeasonalPrice,
   removePropertySeasonalPrice,
+  updateAdminProperty,
+  deleteAdminProperty,
 } from "@/features/admin/services/admin.api";
 import type { PropertyCalendarResponse } from "@/features/admin/types";
+import LocationPicker from "@/features/admin/components/LocationPicker";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -31,11 +35,30 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
   const propertyId = parseInt(resolvedParams.id, 10);
   const { locale } = useLanguage();
   const isAr = locale === "ar";
+  const router = useRouter();
 
   const [property, setProperty] = useState<any | null>(null);
   const [calendarData, setCalendarData] = useState<PropertyCalendarResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "availability" | "pricing" | "amenities" | "media" | "bookings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "location" | "availability" | "pricing" | "amenities" | "media" | "bookings">("overview");
+
+  // Location Form State
+  const [locationForm, setLocationForm] = useState<{
+    latitude: number | null;
+    longitude: number | null;
+    map_url: string;
+    address: string;
+  }>({
+    latitude: null,
+    longitude: null,
+    map_url: "",
+    address: "",
+  });
+  const [locationSaving, setLocationSaving] = useState(false);
+
+  // Property Deletion State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Availability Block Form State
   const [blockForm, setBlockForm] = useState({
@@ -67,6 +90,12 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
     try {
       const data = await getAdminPropertyDetails(propertyId);
       setProperty(data);
+      setLocationForm({
+        latitude: data.latitude ? parseFloat(data.latitude) : null,
+        longitude: data.longitude ? parseFloat(data.longitude) : null,
+        map_url: data.map_url || "",
+        address: data.address || "",
+      });
       const cal = await getPropertyCalendar(propertyId, new Date().getFullYear());
       setCalendarData(cal);
     } catch {

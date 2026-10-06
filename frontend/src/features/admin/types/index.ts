@@ -486,3 +486,192 @@ export interface AdminCustomerItem {
 export interface PlatformSettingsMap {
   [key: string]: string | number | boolean | null;
 }
+
+// 9. Pricing Engine Types & Contracts
+export interface PricingOverviewPropertyItem {
+  id: number;
+  reference_number: string;
+  title_en: string;
+  title_ar: string | null;
+  base_price_cents: number;
+  formatted_base_price: string;
+  currency: string;
+  min_stay_nights: number;
+  cleaning_fee_cents: number;
+  service_fee_cents: number;
+  tax_percentage: number;
+  is_published: boolean;
+  active_seasons_count: number;
+  location_name: string;
+  category_name: string;
+}
+
+export interface PricingOverviewRuleItem {
+  id: number;
+  property_id: number;
+  property_title: string;
+  property_reference: string;
+  name_en: string;
+  start_date: string;
+  end_date: string;
+  price_cents: number;
+  formatted_price: string;
+  priority: number;
+  min_stay_nights: number | null;
+}
+
+export interface PricingOverviewResponse {
+  summary: {
+    total_rent_inventory: number;
+    total_active_seasonal_rules: number;
+    total_active_discounts: number;
+    average_nightly_rate_cents: number;
+    formatted_average_nightly_rate: string;
+  };
+  properties: PricingOverviewPropertyItem[];
+  upcoming_rules: PricingOverviewRuleItem[];
+}
+
+export interface PricingCalendarDayItem {
+  date: string;
+  day: number;
+  day_of_week: string;
+  price_cents: number;
+  price_formatted: string;
+  season_name: string;
+  seasonal_price_id: number | null;
+  priority: number;
+  min_stay_nights: number;
+  is_base_price: boolean;
+  currency: string;
+}
+
+export interface PricingCalendarMatrixResponse {
+  property: {
+    id: number;
+    reference_number: string;
+    title_en: string;
+    title_ar: string | null;
+    base_price_cents: number;
+    formatted_base_price: string;
+    currency: string;
+    min_stay_nights: number;
+  };
+  year: number;
+  month: number;
+  calendar: PricingCalendarDayItem[];
+}
+
+export interface NightlyPriceBreakdownItem {
+  price_cents: number;
+  seasonal_price_id: number | null;
+  season_name: string | null;
+  is_base_price: boolean;
+  priority: number;
+  min_stay_nights: number | null;
+  night_date: string;
+  day_of_week: string;
+  currency: string;
+  price_formatted: string;
+}
+
+export interface PriceQuoteBreakdown {
+  nights: number;
+  nightly_prices: NightlyPriceBreakdownItem[];
+  subtotal_cents: number;
+  subtotal_formatted: string;
+  cleaning_fee_cents: number;
+  service_fee_cents: number;
+  discount_cents: number;
+  discount_id: number | null;
+  promo_code: string | null;
+  tax_percentage: number;
+  tax_cents: number;
+  total_cents: number;
+  total_formatted: string;
+  deposit_cents: number;
+  amount_remaining_cents: number;
+  currency: string;
+  min_stay_required: number;
+  property_min_stay: number;
+  seasonal_min_stay_override: number | null;
+  satisfies_min_stay: boolean;
+}
+
+export interface PriceQuoteExplanation {
+  base_nightly_rate: string;
+  nights_count: number;
+  subtotal: string;
+  cleaning_fee: string;
+  service_fee: string;
+  discount: string;
+  tax: string;
+  final_total: string;
+  deposit_required: string;
+  min_stay_check: {
+    required: number;
+    actual: number;
+    satisfied: boolean;
+    message: string;
+  };
+}
+
+export interface PricePreviewResponse {
+  success: boolean;
+  property: {
+    id: number;
+    reference_number: string;
+    title_en: string;
+    currency: string;
+  };
+  quote: PriceQuoteBreakdown;
+  explanation: PriceQuoteExplanation;
+}
+
+export interface SeasonalOverlapItem {
+  season_id: number;
+  season_name: string;
+  existing_priority: number;
+  new_priority: number;
+  overlap_start: string;
+  overlap_end: string;
+  existing_price_cents: number;
+  outcome: "new_rule_wins" | "existing_rule_wins" | "equal_priority";
+  message: string;
+}
+
+export interface SeasonalOverlapResponse {
+  has_overlap: boolean;
+  conflicts_count: number;
+  overlaps: SeasonalOverlapItem[];
+}
+
+export interface AdminDiscountItem {
+  id: number;
+  name_en: string;
+  name_ar?: string | null;
+  code: string | null;
+  type: "percentage" | "fixed";
+  value: number;
+  currency?: string | null;
+  applies_to_all: boolean;
+  min_stay_nights?: number | null;
+  min_booking_amount_cents?: number | null;
+  max_uses?: number | null;
+  used_count: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface LocationParseResult {
+  success: boolean;
+  latitude?: number;
+  longitude?: number;
+  source?: string;
+  formatted_coordinates?: string;
+  map_url?: string;
+  message?: string;
+}
+

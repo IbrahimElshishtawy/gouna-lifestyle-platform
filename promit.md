@@ -1,581 +1,187 @@
-# GOUNOW ADMIN DASHBOARD
+# GOUNOW ADMIN
 
-## BOOKINGS, STAYS & PROPERTIES — PRODUCTION UX/UI IMPLEMENTATION
+# PROPERTIES + VILLAS + UNITS + LOCATION + PRICING ENGINE
 
-You are working on the GouNow platform admin dashboard.
+## PRODUCTION IMPLEMENTATION PROMPT
 
-Your task is to redesign and implement the **Bookings, Stays, Properties, Units/Villas, Availability, Pricing, and related operational workflows** inside the existing admin dashboard.
+You are implementing the GouNow Admin Dashboard.
 
-The goal is NOT to create random CRUD pages.
+The goal is to build a production-grade administration system for managing:
 
-The goal is to build a **production-grade operational admin experience** that is:
-
-* Clear
-* Fast
-* Practical
-* Scalable
-* Consistent
-* Easy for administrators to understand
-* Easy to operate under heavy daily usage
-* Permission-aware
-* Error-resistant
-* Connected to the existing Laravel backend
-* Compatible with the existing Next.js frontend architecture
-* Consistent with the existing GouNow visual identity
-* Not visually repetitive
-* Not overloaded with cards
-* Not dependent on unnecessary animations
-* Not a redesign of the entire website
-
----
-
-# 1. CRITICAL RULES
-
-Before changing anything:
-
-1. Inspect the existing frontend completely.
-2. Inspect the existing backend API completely.
-3. Inspect existing database models/resources/relations.
-4. Inspect existing authentication and authorization.
-5. Inspect existing admin roles and permissions.
-6. Inspect existing API response structures.
-7. Inspect existing design system/components.
-8. Inspect existing routing.
-9. Inspect existing loading/error/empty states.
-10. Inspect existing forms and validation.
-11. Inspect existing booking/property models.
-12. Inspect existing tests.
-
-DO NOT assume that an API exists.
-
-DO NOT invent backend endpoints when an existing endpoint already provides the required operation.
-
-DO NOT duplicate business logic in the frontend.
-
-DO NOT bypass backend authorization.
-
-DO NOT directly manipulate database state from the frontend.
-
-DO NOT create fake data for production screens unless explicitly required for development fallback.
-
-DO NOT rewrite unrelated parts of the application.
-
-DO NOT replace the existing visual identity unnecessarily.
-
-DO NOT introduce a new UI library unless absolutely necessary.
-
-DO NOT create huge monolithic components.
-
-DO NOT put everything into one page.
-
----
-
-# 2. PRODUCT ARCHITECTURE
-
-Use this conceptual separation:
-
-Properties = Inventory
-
-Bookings = Reservations
-
-Stays = Actual guest occupancy
-
-Guests = Customers
-
-Payments = Money
-
-Owners / Partners = Property ownership
-
-Never mix these responsibilities unnecessarily.
-
-A booking represents a reservation lifecycle.
-
-A stay represents the actual physical occupancy lifecycle.
-
-A property represents inventory.
-
-A unit/villa represents a bookable inventory item belonging to a property.
-
----
-
-# 3. ADMIN INFORMATION ARCHITECTURE
-
-The admin sidebar should use this structure:
-
-Dashboard
-
-Bookings
-
-* All Bookings
-* Upcoming
-* Active Stays
-* Check-ins
-* Check-outs
-* Cancellations
-* Calendar
-
-Properties
-
-* All Properties
-* Pending Approval
-* Active
-* Suspended
-* Units / Villas
+* Properties
+* Villas
+* Residential Units
+* Property Information
+* Location
+* Media
+* Amenities
 * Availability
-* Pricing
 * Maintenance
+* Pricing
+* Seasonal Pricing
+* Holiday Pricing
+* Weekend Pricing
+* Discounts
+* Minimum Stay
+* Pricing Calendar
+* Price Overrides
 
-Guests
+The system must be practical for real administrative use.
 
-Owners / Partners
+Do not build a visual prototype.
 
-Payments
+Do not build fake CRUD.
 
-* Transactions
-* Refunds
-* Payouts
+Do not create fake APIs.
 
-Services
-
-Reviews
-
-Reports
-
-Notifications
-
-Settings
-
-Do not necessarily create every item as a new route if the existing architecture can provide the same functionality through filters/tabs.
-
-Prefer fewer meaningful screens over unnecessary navigation.
+Use the existing Laravel backend and Next.js frontend architecture.
 
 ---
 
-# 4. BOOKING MANAGEMENT UX
+# 1. FIRST: AUDIT THE EXISTING PROJECT
 
-## 4.1 Booking Overview
+Before changing any code, inspect:
 
-Create a professional booking management page.
+* Next.js structure
+* Existing Admin Dashboard
+* Existing design system
+* Existing components
+* Existing routes
+* Existing API client
+* Authentication
+* Authorization
+* Admin roles
+* Permissions
+* Laravel routes
+* Controllers
+* Requests
+* Resources
+* Models
+* Relationships
+* Migrations
+* Database schema
+* Property-related tables
+* Booking-related tables
+* Pricing-related tables
+* Location fields
+* Media/storage system
+* Existing tests
 
-At the top:
+Do not assume the architecture.
 
-* Page title
-* Short contextual description
-* Primary action if authorized
-* Search
-* Filters
-* View switcher if useful
+Do not replace working architecture unnecessarily.
 
-Avoid excessive KPI cards.
+Do not create duplicate models.
 
-If summary statistics are useful, use a compact summary row:
+Do not create duplicate tables.
 
-* Total
-* Pending
-* Confirmed
-* Active
-* Completed
-* Cancelled
-
-The numbers must come from real backend data.
-
----
-
-# 5. BOOKING TABLE
-
-Build a high-quality operational table.
-
-Columns should include:
-
-* Booking ID
-* Guest
-* Property
-* Unit
-* Check-in
-* Check-out
-* Guests
-* Amount
-* Payment status
-* Booking status
-* Created at
-* Actions
-
-Do NOT show every possible field in the default table.
-
-Use progressive disclosure.
-
-Allow:
-
-* Search
-* Status filtering
-* Payment filtering
-* Property filtering
-* Date filtering
-* Guest filtering
-* Sorting
-* Pagination
-
-Use server-side filtering and pagination where supported.
-
-Do not load thousands of records unnecessarily.
+Do not create duplicate API endpoints.
 
 ---
 
-# 6. BOOKING ROW UX
+# 2. CORE DOMAIN MODEL
 
-The row should communicate status immediately.
+Use this conceptual structure:
 
-Use clear status badges:
-
-Pending
-Confirmed
-Checked-in
-Checked-out
-Cancelled
-No-show
-
-Payment:
-
-Unpaid
-Partially Paid
-Paid
-Refunded
-Failed
-
-Do not rely only on colors.
-
-Use text/icon/state combinations where appropriate.
-
----
-
-# 7. BOOKING ACTIONS
-
-Actions should depend on the booking state.
+Property
+↓
+Units
+↓
+Unit Type
 
 Examples:
 
-Pending:
+Property
+├── Villa 01
+├── Villa 02
+├── Apartment 101
+├── Apartment 102
+└── Chalet 03
 
-* View
-* Confirm
-* Cancel
+Important:
 
-Confirmed:
+A Villa should normally be a Unit Type.
 
-* View
-* Check-in
-* Cancel
+Do NOT create:
 
-Checked-in:
+Property → Villa → Unit
 
-* View
-* Extend Stay
-* Add Service
-* Check-out
+unless the existing business model explicitly requires a separate Villa entity.
 
-Checked-out:
+If the villa itself is bookable, it is a Unit.
 
-* View
-* Refund if applicable
-* View receipt
+Recommended conceptual model:
 
-Cancelled:
+Unit
 
-* View
-* View refund
-* View history
-
-Never show impossible actions.
-
-Never allow the frontend to bypass backend state validation.
+* Villa
+* Apartment
+* Chalet
+* Studio
+* Room
+* Other
 
 ---
 
-# 8. BOOKING DETAILS
+# 3. PROPERTY RESPONSIBILITY
 
-Create a dedicated Booking Details experience.
+The Property represents the main inventory/container.
 
-The screen should not become a giant wall of information.
+Admin can manage:
 
-Use a clear hierarchy.
+## Basic Information
 
-Header:
-
-* Booking ID
-* Current booking status
-* Payment status
-* Main contextual actions
-
-Example:
-
-Booking #GN-12345
-
-Confirmed
-Paid
-
-[Check-in]
-[More]
-
----
-
-# 9. BOOKING DETAILS SECTIONS
-
-Use tabs or clearly separated sections.
-
-Recommended:
-
-Overview
-Guest
-Stay
-Payment
-Activity
-
-## Overview
-
-Show:
-
-* Property
-* Unit
-* Check-in
-* Check-out
-* Number of guests
-* Duration
-* Booking creation date
-* Total amount
-
-The property and unit should be clickable.
-
-The guest should be clickable.
-
-The payment section should be clickable.
-
-This creates a connected operational workflow.
-
----
-
-# 10. GUEST SECTION
-
-Display:
-
-* Guest name
-* Phone
-* Email
-* Number of guests
-* Relevant booking information
-
-Sensitive information must follow backend authorization.
-
-Never expose unnecessary PII.
-
-Never display sensitive information simply because it exists in the API.
-
----
-
-# 11. STAY MANAGEMENT
-
-Create a dedicated operational Stay Management experience.
-
-The purpose is not to duplicate bookings.
-
-It answers:
-
-"Who is physically staying now?"
-
-Provide:
-
-* Currently staying
-* Expected arrivals
-* Expected departures
-* Today's check-ins
-* Today's check-outs
-* Late check-outs
-
-Use operational tables/lists instead of excessive cards.
-
----
-
-# 12. STAY STATUS
-
-Recommended states:
-
-Expected
-Checked-in
-In progress
-Checked-out
-Extended
-No-show
-
-The actual state machine must come from the backend.
-
-Do not implement an independent frontend state machine.
-
----
-
-# 13. CHECK-IN UX
-
-When an authorized admin clicks Check-in:
-
-Open a confirmation/action flow.
-
-Show:
-
-* Guest
-* Property
-* Unit
-* Booking
-* Scheduled check-in
-* Current time
-* Important notes
-
-Then:
-
-[Confirm Check-in]
-
-After successful completion:
-
-* Update the booking
-* Update the stay
-* Refresh affected data
-* Show success feedback
-* Add activity entry if backend supports it
-
-Do not optimistically display a successful state if the backend operation fails.
-
----
-
-# 14. CHECK-OUT UX
-
-When clicking Check-out:
-
-Show:
-
-* Guest
-* Property
-* Unit
-* Booking
-* Scheduled checkout
-* Current stay status
-* Outstanding payment if applicable
-* Relevant notes
-
-If outstanding payment prevents checkout according to backend business rules, explain the reason clearly.
-
-Do not silently block the user.
-
-Do not invent business rules.
-
-Use backend validation as the authority.
-
----
-
-# 15. EXTEND STAY
-
-Provide an Extend Stay workflow where supported.
-
-The flow should:
-
-1. Select new checkout date.
-2. Validate availability.
-3. Show price impact.
-4. Show updated total if applicable.
-5. Confirm.
-6. Send request to backend.
-7. Refresh booking/stay state.
-
-Never assume availability.
-
-Never calculate authoritative pricing only on the frontend.
-
----
-
-# 16. BOOKING ACTIVITY TIMELINE
-
-Create a professional timeline.
-
-Example:
-
-Booking created
-↓
-Payment received
-↓
-Booking confirmed
-↓
-Guest checked in
-↓
-Service added
-↓
-Guest checked out
-
-Each event should show:
-
-* Event
-* Timestamp
-* Actor when available
-* Relevant metadata
-
-This is an operational audit trail.
-
-Do not fabricate timeline events.
-
----
-
-# 17. PROPERTY MANAGEMENT UX
-
-Properties represent inventory.
-
-Create a dedicated Properties section.
-
-Top:
-
-Properties
-
-Short description
-
-Primary action:
-
-* Add Property
-
-Then:
-
-Search
-Filters
-View mode
-
-Possible view modes:
-
-* Table
-* Compact grid
-
-Do not force a visual grid if it reduces operational efficiency.
-
-For large property inventories, table view should be the default.
-
----
-
-# 18. PROPERTY LIST
-
-Default fields:
-
-* Property
-* Type
-* Location
-* Owner
-* Units
-* Availability
+* Property name
+* Property type
+* Description
+* Owner/Partner
 * Status
-* Rating if available
-* Updated at
-* Actions
+* Internal reference
+* Creation date
+* Last update
 
-Do not overload the table.
+## Location
 
-Use details pages for secondary information.
+* Country
+* Governorate
+* City
+* Area
+* Address
+* Latitude
+* Longitude
+* Map URL
+* Location accuracy/source
+
+## General Information
+
+* Total units
+* General capacity
+* Property rules
+* Shared facilities
+* Services
+* Amenities
+
+## Media
+
+* Cover image
+* Gallery
+* Videos if supported
+
+## Operations
+
+* Availability
+* Maintenance
+* Units
+* Bookings
+* Activity
 
 ---
 
-# 19. PROPERTY STATUS
+# 4. PROPERTY STATUS
 
-Possible states depending on backend:
+Use only states supported by the backend.
+
+Possible states:
 
 Draft
 Pending Approval
@@ -584,155 +190,441 @@ Suspended
 Maintenance
 Archived
 
-Do not create states that don't exist in the backend.
-
-The UI must reflect the actual backend domain model.
+Do not invent additional states if the backend does not support them.
 
 ---
 
-# 20. PROPERTY DETAILS
+# 5. LOCATION MANAGEMENT — VERY IMPORTANT
 
-Property details should use a structured layout.
+Location selection must be extremely easy for the admin.
 
-Header:
+DO NOT force the admin to manually enter latitude and longitude.
 
-Property name
+Provide two primary methods.
 
-Status
+---
+
+# 6. LOCATION METHOD A — GPS / MAP PICKER
+
+The property form must contain:
 
 Location
 
-Owner
+[ Use Current Location ]
 
-Primary actions
+[ Pick Location on Map ]
 
-Possible actions:
+When the administrator chooses:
 
-Edit
-Publish
-Unpublish
-Suspend
-Archive
+Use Current Location
 
-Only show actions allowed by the current user's permissions and property state.
+request browser/device geolocation permission.
+
+If permission is granted:
+
+* Get latitude
+* Get longitude
+* Store coordinates
+* Update the location preview
+* Show the selected location clearly
+
+Do not silently fail.
+
+If permission is denied:
+
+Display a useful message:
+
+"Location access was denied. You can select the location manually on the map or paste a Google Maps link."
+
+Do not expose browser errors directly.
 
 ---
 
-# 21. PROPERTY DETAILS TABS
+# 7. MAP LOCATION PICKER
 
-Recommended:
+Provide a map-based location selector where the administrator can:
+
+* Open map
+* Search location if supported
+* Move map
+* Drop/select marker
+* Confirm location
+
+After selecting:
+
+Show:
+
+Latitude
+Longitude
+
+and a human-readable location if reverse geocoding is available.
+
+Example:
+
+Location selected
+
+Cairo, Egypt
+
+Latitude:
+30.0444
+
+Longitude:
+31.2357
+
+[Confirm Location]
+
+Do not require the admin to type coordinates.
+
+---
+
+# 8. LOCATION METHOD B — PASTE MAP LINK
+
+Provide:
+
+Paste Google Maps location link
+
+Example:
+
+https://www.google.com/maps/...
+
+The system should:
+
+1. Accept the URL.
+2. Validate the URL.
+3. Extract coordinates when possible.
+4. Validate latitude and longitude.
+5. Save the normalized coordinates.
+6. Display the resulting location.
+7. Show the map preview.
+8. Allow the admin to confirm.
+
+Do NOT trust arbitrary URL parameters.
+
+Only parse supported location formats.
+
+---
+
+# 9. GOOGLE MAPS LINK HANDLING
+
+Support common Google Maps formats where technically possible.
+
+Examples may include:
+
+* Coordinates embedded directly
+* `@lat,lng`
+* `/place/.../@lat,lng`
+* Query parameter coordinate formats
+
+Do not assume every Google Maps URL can be parsed.
+
+If parsing fails:
+
+Display:
+
+"Unable to detect the exact coordinates from this link. Please choose the location on the map."
+
+Do not save invalid coordinates.
+
+---
+
+# 10. LOCATION DATA MODEL
+
+Prefer storing normalized geographic data:
+
+latitude
+longitude
+
+Optionally:
+
+map_url
+formatted_address
+country
+governorate
+city
+area
+
+The database should treat latitude/longitude as the authoritative geographic coordinates.
+
+Do not store only the Google Maps URL.
+
+The link is useful as a reference, but coordinates should be first-class data.
+
+---
+
+# 11. LOCATION VALIDATION
+
+Validate:
+
+Latitude:
+
+-90 ≤ latitude ≤ 90
+
+Longitude:
+
+-180 ≤ longitude ≤ 180
+
+Reject:
+
+* Empty coordinates
+* NaN
+* Infinity
+* Invalid strings
+* Malformed URLs
+
+Do validation on both:
+
+Frontend
+Backend
+
+Frontend validation is for UX.
+
+Backend validation is authoritative.
+
+---
+
+# 12. LOCATION UX
+
+Do not make the form visually complicated.
+
+Use:
+
+Location
+
+[Search / paste Google Maps link]
+
+OR
+
+[Use GPS]
+
+OR
+
+[Pick on Map]
+
+Then show:
+
+Selected Location
+
+Address
+Latitude
+Longitude
+
+Map Preview
+
+[Change Location]
+
+This should feel simple.
+
+---
+
+# 13. LOCATION SECURITY
+
+Do not trust client-provided location metadata.
+
+Validate all location data on the backend.
+
+Do not allow arbitrary HTML in address fields.
+
+Sanitize user-controlled text.
+
+Do not expose internal geocoding API keys to the browser.
+
+If an external geocoding service is used:
+
+Prefer server-side integration where appropriate.
+
+---
+
+# 14. UNIT / VILLA MANAGEMENT
+
+Inside each Property:
+
+Units
+
+Example:
+
+Villa 01
+Villa 02
+Apartment 101
+Apartment 102
+
+Admin can:
+
+* Add unit
+* Edit unit
+* View unit
+* Block unit
+* Unblock unit
+* Set maintenance
+* Manage availability
+* Manage pricing
+* View bookings
+
+---
+
+# 15. UNIT FIELDS
+
+Each Unit may contain:
+
+* Unit name
+* Unit type
+* Capacity
+* Bedrooms
+* Bathrooms
+* Beds
+* Area
+* Floor
+* View
+* Description
+* Amenities
+* Media
+* Status
+* Availability
+* Pricing
+
+Only implement fields supported by the existing backend.
+
+Do not add meaningless fields.
+
+---
+
+# 16. UNIT TYPES
+
+Use a controlled type system.
+
+Examples:
+
+Villa
+Apartment
+Chalet
+Studio
+Room
+Other
+
+Do not hardcode these directly into dozens of components.
+
+Prefer backend configuration or centralized constants where appropriate.
+
+---
+
+# 17. UNIT STATUS
+
+Possible:
+
+Available
+Occupied
+Blocked
+Maintenance
+Inactive
+
+Use backend-supported statuses.
+
+Do not allow invalid transitions.
+
+---
+
+# 18. PROPERTY DETAILS PAGE
+
+Create:
+
+/admin/properties/[id]
+
+Recommended sections:
 
 Overview
 Units
 Media
 Amenities
-Pricing
-Availability
 Services
+Availability
+Pricing
 Maintenance
+Bookings
 Activity
 
-Only implement tabs that map to real backend capabilities.
+Use tabs if appropriate.
 
-Do not create empty tabs simply to make the interface look complete.
-
----
-
-# 22. PROPERTY OVERVIEW
-
-Show:
-
-* Name
-* Description
-* Type
-* Location
-* Address
-* Owner
-* Status
-* Capacity
-* Created date
-* Updated date
-
-Use sections.
-
-Do not turn every field into a separate card.
+Do not create a separate page for every small property field.
 
 ---
 
-# 23. UNITS / VILLAS
+# 19. UNIT DETAILS PAGE
 
-A property may contain multiple bookable units.
+Create:
 
-Example:
+/admin/properties/[propertyId]/units/[unitId]
 
-Property
-├── Villa A
-├── Villa B
-├── Villa C
-└── Villa D
-
-Each unit should support, where backend allows:
-
-* Name
-* Type
-* Capacity
-* Bedrooms
-* Bathrooms
-* Beds
-* Amenities
-* Images
-* Pricing
-* Availability
-* Status
-
-The user should be able to navigate:
-
-Property → Unit → Bookings
-
-and:
-
-Booking → Unit → Property
-
----
-
-# 24. UNIT DETAILS UX
-
-Create a dedicated Unit Details page or drawer depending on the existing routing architecture.
-
-Header:
-
-Unit name
-Status
-Property name
-
-Actions:
-
-Edit
-Block
-Unblock
-Maintenance
-
-Tabs/sections:
+Recommended sections:
 
 Overview
 Bookings
-Pricing
 Availability
+Pricing
 Media
 Amenities
 Activity
 
-Again, do not create fake functionality.
+---
+
+# 20. PROPERTY LIST
+
+Create a production-grade property table.
+
+Columns:
+
+Property
+Type
+Location
+Owner
+Units
+Availability
+Status
+Updated
+Actions
+
+Actions:
+
+View
+Edit
+Publish
+Suspend
+Archive
+
+Only show actions allowed by permissions and current state.
 
 ---
 
-# 25. AVAILABILITY MANAGEMENT
+# 21. UNIT LIST
 
-Availability is one of the most important operational screens.
+Inside property:
 
-Build a calendar-oriented experience.
+Unit
+Type
+Capacity
+Status
+Availability
+Current Booking
+Price
+Actions
 
-Allow admins to understand:
+Do not overload the table.
+
+---
+
+# 22. AVAILABILITY
+
+Availability is separate from pricing.
+
+Availability answers:
+
+"Can this unit be booked?"
+
+Pricing answers:
+
+"How much does this unit cost?"
+
+Never merge these concepts.
+
+Availability states may include:
 
 Available
 Booked
@@ -740,319 +632,394 @@ Blocked
 Maintenance
 Unavailable
 
-Use a clear legend.
-
-Do not rely only on colors.
-
-Calendar interactions must be safe.
-
-Before changing availability:
-
-* Validate permission
-* Validate current state
-* Validate conflicts
-* Confirm destructive changes
+Use a calendar.
 
 ---
 
-# 26. PRICING MANAGEMENT
+# 23. AVAILABILITY CALENDAR
 
-Pricing should be separated from general property editing.
+Admin should be able to:
 
-Show:
+* View dates
+* View bookings
+* View blocked dates
+* View maintenance
+* Block date range
+* Unblock date range
 
-* Base price
-* Seasonal pricing
-* Weekend pricing if supported
-* Holiday pricing if supported
-* Minimum nights
-* Maximum nights
+Before blocking:
 
-Use date ranges where applicable.
+Check:
 
-Never make frontend calculations authoritative.
+* Existing bookings
+* Existing reservations
+* Current state
+* Permissions
 
-The backend remains the source of truth for final pricing.
+If blocking conflicts with an existing confirmed booking:
 
----
+DO NOT silently override it.
 
-# 27. PROPERTY MEDIA
-
-Media management should support:
-
-* Cover image
-* Gallery
-* Videos if supported
-
-Provide:
-
-* Upload
-* Remove
-* Reorder
-* Set cover
-
-Only implement capabilities actually supported by the backend/storage architecture.
-
-Do not expose private storage URLs if the architecture uses protected media.
+Show the conflict.
 
 ---
 
-# 28. AMENITIES
+# 24. PRICING ENGINE
 
-Create reusable amenity management.
+Pricing must be a separate module.
 
-Avoid hardcoding dozens of amenities directly inside components.
+Sidebar:
 
-Use backend-provided amenity data where available.
+Pricing Engine
 
-Support:
+Subsections:
 
-* Add
-* Remove
-* Edit if authorized
-
----
-
-# 29. MAINTENANCE
-
-Property/unit maintenance should be operational.
-
-Show:
-
-* Open issues
-* In progress
-* Resolved
-* Priority
-* Assigned staff
-* Created date
-* Updated date
-
-Do not mix maintenance issues into booking logic.
+Overview
+Base Prices
+Seasonal Rules
+Weekend Rules
+Holiday Rules
+Discounts
+Minimum Stay
+Pricing Calendar
+Price Overrides
+Price Preview
 
 ---
 
-# 30. GLOBAL SEARCH
+# 25. PRICING HIERARCHY
 
-If supported by the existing architecture, provide admin search capable of finding:
+Use:
 
-* Booking
-* Guest
-* Property
-* Unit
+Global Rules
+↓
+Property Rules
+↓
+Unit Rules
+↓
+Date-specific Override
 
-Search should return clearly categorized results.
+The most specific valid rule wins.
 
 Example:
 
-Bookings
-#GN-12345
+Global:
+Weekend +10%
 
-Guests
-Ahmed Mohamed
+Property:
+Summer +30%
 
-Properties
-Sunset Villa
+Unit:
+Villa 01 base = 7,000
 
-Units
-Villa A
+Date override:
+August 10 = 12,000
 
-Do not create a search engine in the frontend.
-
-Use backend search APIs where appropriate.
+The final price must be calculated by the backend pricing engine.
 
 ---
 
-# 31. EMPTY STATES
+# 26. BASE PRICE
 
-Every screen must have intentional empty states.
+Admin can define:
+
+Base price per night
+
+Example:
+
+Villa 01
+
+Base:
+5,000 EGP / night
+
+The system should clearly display currency.
+
+Do not hardcode currency logic into frontend components.
+
+Use the project's currency configuration.
+
+---
+
+# 27. SEASONAL PRICING
+
+Admin can create:
+
+Season name
+Start date
+End date
+Pricing rule
+Applicable property/unit
+Priority
+Status
 
 Examples:
 
-No bookings found.
+Summer
+01 June → 30 September
 
-No properties found.
+Eid
+Holiday period
 
-No active stays.
-
-No upcoming check-ins.
-
-No maintenance issues.
-
-Do not show blank tables.
-
-Do not use fake data.
-
-Provide useful actions when appropriate.
+Winter
+01 October → 31 May
 
 ---
 
-# 32. LOADING STATES
+# 28. WEEKEND PRICING
 
-Use proper skeleton/loading states.
+Admin can define weekend adjustments.
 
-Do not freeze the entire dashboard.
+Examples:
 
-For tables:
+Friday
+Saturday
 
-Show table skeleton.
++20%
 
-For details:
+or:
 
-Show section skeleton.
+Weekend fixed price
 
-For actions:
+The exact business logic must be determined by the existing backend pricing model.
 
-Disable only the affected action.
-
-Do not block the entire interface unnecessarily.
-
----
-
-# 33. ERROR STATES
-
-Errors must be understandable.
-
-Bad:
-
-"Request failed."
-
-Better:
-
-"Unable to confirm this booking. The booking may have changed or is no longer available."
-
-If backend returns validation information, display safe human-readable messages.
-
-Never display:
-
-* SQL errors
-* stack traces
-* internal server paths
-* secrets
-* raw exception messages
-* sensitive backend details
+Do not create frontend-only pricing rules.
 
 ---
 
-# 34. DESTRUCTIVE ACTIONS
+# 29. HOLIDAY PRICING
 
-For:
+Allow configured holiday periods.
 
-* Cancel booking
-* Refund
-* Suspend property
-* Archive property
-* Delete media
-* Block availability
+Fields:
 
-Use confirmation dialogs.
-
-The confirmation should explain:
-
-What will happen.
-
-What may be affected.
-
-Whether the action is reversible.
-
-Do not use generic:
-
-"Are you sure?"
+Holiday name
+Start
+End
+Pricing rule
+Priority
+Applicable inventory
+Status
 
 ---
 
-# 35. UNSAVED CHANGES
+# 30. MINIMUM STAY
 
-Forms must detect unsaved changes.
+Allow:
 
-If the user attempts to leave:
+Global minimum stay
 
-Show a clear confirmation.
+Property minimum stay
 
-Do not silently lose form data.
+Unit minimum stay
 
----
+Season minimum stay
 
-# 36. FORMS
+Date-specific minimum stay
 
-All forms must:
+Example:
 
-* Validate inputs
-* Show field-level errors
-* Preserve valid input after errors
-* Disable duplicate submission
-* Show loading state
-* Handle backend validation errors
-* Refresh affected data after success
+Summer:
+Minimum 5 nights
 
-Avoid giant forms.
-
-Use logical sections.
-
-Example property form:
-
-Basic Information
-Location
-Capacity
-Amenities
-Media
-Pricing
-Availability
+Normal:
+Minimum 2 nights
 
 ---
 
-# 37. RESPONSIVE UX
+# 31. DISCOUNTS
 
-The admin dashboard must work on:
+Keep discounts separate from base pricing.
 
-* Desktop
-* Laptop
-* Tablet
+Possible:
 
-Desktop is the primary admin environment.
+Early booking
+Last minute
+Weekly
+Monthly
+Promotion
 
-For smaller screens:
+Fields:
 
-Do not simply shrink tables.
+Name
+Type
+Value
+Start
+End
+Eligibility
+Priority
+Status
 
-Use:
-
-* Horizontal scrolling
-* Responsive columns
-* Drawer details
-* Stacked information
-* Compact actions
-
----
-
-# 38. ACCESSIBILITY
-
-Use:
-
-* Keyboard navigation
-* Visible focus states
-* Semantic buttons
-* Proper labels
-* Accessible dialogs
-* Accessible form errors
-* Sufficient contrast
-
-Never use icons as the only indication of important meaning.
+Never apply discounts blindly on the frontend.
 
 ---
 
-# 39. PERMISSIONS
+# 32. PRICE OVERRIDES
 
-Frontend visibility must respect backend permissions.
+Allow an authorized admin to override a specific date/range.
 
-Possible permissions:
+Example:
 
-booking.view
-booking.create
-booking.update
-booking.cancel
-booking.checkin
-booking.checkout
-booking.refund
+Villa 01
+10 August → 15 August
+
+8,000 EGP/night
+
+The UI must clearly show that this is an override.
+
+---
+
+# 33. PRICING CALENDAR
+
+Create a calendar-based pricing interface.
+
+Example:
+
+August
+
+Villa 01
+
+1   2   3   4   5   6   7
+5k  5k  5k  7k  7k  7k  7k
+
+8   9   10  11  12
+8k  8k  8k  8k  8k
+
+The admin should be able to select a date range and apply a pricing rule.
+
+Example:
+
+Select:
+
+01 Aug → 15 Aug
+
+Set:
+
+8,000 EGP/night
+
+Confirm.
+
+The backend must validate and persist the change.
+
+---
+
+# 34. PRICE PREVIEW
+
+Create a Price Preview tool.
+
+Admin selects:
+
+Property
+Unit
+Check-in
+Check-out
+Guests
+
+The system returns the backend-calculated price breakdown.
+
+Example:
+
+Base price
+5,000
+
+Season adjustment
++1,000
+
+Weekend adjustment
++500
+
+Cleaning
++300
+
+Service fee
++200
+
+Discount
+-500
+
+Final:
+6,500 EGP
+
+The frontend must NOT calculate the authoritative final price itself.
+
+---
+
+# 35. PRICE EXPLANATION
+
+Every final price should be explainable.
+
+The admin must be able to understand:
+
+Why is this price 8,000?
+
+The backend should return the applied pricing rules.
+
+The frontend displays:
+
+Base price
++
+Season rule
++
+Weekend rule
++
+Fees
+----
+
+# Discount
+
+Final amount
+
+---
+
+# 36. PRIORITY / CONFLICTS
+
+Pricing rules can overlap.
+
+Do not silently choose a random rule.
+
+Implement the backend's defined priority system.
+
+The admin UI should clearly show:
+
+Rule priority
+Active dates
+Applicable inventory
+Conflict warnings
+
+---
+
+# 37. PROPERTY ↔ UNIT ↔ PRICING
+
+Navigation must be connected.
+
+From Property:
+
+Property
+→ Units
+→ Unit
+→ Pricing
+
+From Pricing:
+
+Pricing Rule
+→ Property
+→ Unit
+
+From Booking:
+
+Booking
+→ Property
+→ Unit
+→ Applied Price Breakdown
+
+Do not create isolated modules.
+
+---
+
+# 38. ADMIN PERMISSIONS
+
+Use existing permission architecture.
+
+Potential permissions:
 
 property.view
 property.create
@@ -1065,147 +1032,286 @@ unit.view
 unit.create
 unit.update
 unit.block
-
-pricing.view
-pricing.update
+unit.maintenance
 
 availability.view
 availability.update
 
-maintenance.view
-maintenance.manage
+pricing.view
+pricing.create
+pricing.update
+pricing.delete
+pricing.override
 
-Use the actual permission system already implemented by the project if it differs.
+location.update
 
-Do not hardcode role names unnecessarily.
+Never rely only on frontend permission checks.
 
-Backend authorization is always authoritative.
+Backend authorization remains authoritative.
 
 ---
 
-# 40. DATA FETCHING
+# 39. FORMS
 
-Follow the existing frontend data-fetching architecture.
+Property form:
 
-Do not introduce another state management strategy without a strong reason.
+Basic Information
+Location
+Capacity
+Amenities
+Media
+Rules
 
-Use:
+Unit form:
 
-* Proper caching where appropriate
-* Request cancellation
-* Pagination
-* Debounced search
-* Server-side filters
-* Refetch/invalidation after mutations
+Basic Information
+Capacity
+Features
+Amenities
+Media
+
+Pricing form:
+
+Rule
+Dates
+Scope
+Value
+Priority
+Status
+
+Do not create huge forms without logical sections.
+
+---
+
+# 40. LOCATION FORM UX
+
+The final property location component should look conceptually like:
+
+Location
+
+[ Search or paste Google Maps link................ ]
+
+[ Use GPS ]   [ Pick on Map ]
+
+---
+
+Selected location:
+
+Cairo, Egypt
+
+Latitude:
+30.0444
+
+Longitude:
+31.2357
+
+[ Change Location ]
+
+Map Preview
+
+---
+
+If no location:
+
+"No location selected yet."
+
+---
+
+# 41. LOCATION ERROR UX
+
+Examples:
+
+GPS permission denied:
+
+"Location access was denied. You can paste a map link or choose the location manually."
+
+Invalid link:
+
+"This map link doesn't contain a recognizable location."
+
+Invalid coordinates:
+
+"The selected coordinates are invalid."
+
+Geocoding failure:
+
+"Location selected, but the address could not be resolved. The coordinates are still saved."
+
+Never show raw exceptions.
+
+---
+
+# 42. RESPONSIVE DESIGN
+
+Desktop-first admin interface.
+
+Must remain usable on:
+
+Desktop
+Laptop
+Tablet
+
+Do not simply shrink tables.
+
+Use responsive layouts.
+
+---
+
+# 43. VISUAL DESIGN
+
+Maintain the existing GouNow design system.
+
+The UI should feel:
+
+Professional
+Clean
+Operational
+Fast
+Modern
 
 Avoid:
 
-Fetching the same data repeatedly.
+Excessive cards
+Huge gradients
+Unnecessary animations
+Overly decorative dashboards
+Random colors
+Huge shadows
+Visual clutter
 
-Fetching the entire database.
+Use cards only where they improve grouping.
 
-N+1 frontend requests.
+Use:
 
-Unnecessary polling.
-
----
-
-# 41. API INTEGRATION
-
-Before implementing each feature:
-
-Find the existing API endpoint.
-
-Verify:
-
-HTTP method
-Path
-Authentication
-Authorization
-Request body
-Validation
-Response
-Error structure
-Pagination
-Filtering
-Sorting
-
-If an endpoint is missing:
-
-DO NOT silently invent it.
-
-Document the missing backend capability and implement the minimum backend endpoint required, following the existing Laravel architecture.
+Tables for datasets
+Calendars for dates
+Tabs for related data
+Drawers for quick inspection
+Dialogs for confirmation
+Forms for editing
 
 ---
 
-# 42. BACKEND INTEGRATION RULE
+# 44. LOADING STATES
 
-Laravel remains responsible for:
+Implement:
 
-* Business rules
-* Authorization
-* Booking state transitions
-* Pricing
-* Availability
-* Payment rules
-* Refund rules
-* Data integrity
-* Concurrency
-* Validation
+Table skeletons
+Form loading states
+Map loading states
+Pricing calculation loading states
+Calendar loading states
 
-Next.js remains responsible for:
-
-* Presentation
-* Interaction
-* Form state
-* Client-side validation for UX
-* Loading states
-* Error presentation
-* Navigation
-
-Never duplicate authoritative business rules.
+Do not freeze the entire page unnecessarily.
 
 ---
 
-# 43. CONCURRENCY
+# 45. EMPTY STATES
 
-This is extremely important.
+Examples:
 
-Booking operations can be concurrent.
+No properties found.
 
-Do not assume:
+No units found.
 
-"If the UI says available, it is definitely available."
+No pricing rules configured.
 
-The backend must validate the final operation.
+No availability restrictions.
 
-The frontend must gracefully handle conflicts.
+No location selected.
 
-Example:
-
-Two admins attempt to modify the same booking.
-
-The second operation must receive a safe conflict response.
-
-Display:
-
-"This booking was updated by another operation. Refreshing the latest information..."
-
-Then refresh the relevant data.
+Every empty state should explain what to do next where applicable.
 
 ---
 
-# 44. URL / ROUTING DESIGN
+# 46. ERROR HANDLING
 
-Use meaningful routes.
+Never expose:
 
-Example:
+SQL errors
+Stack traces
+Internal paths
+Database details
+Secrets
+Raw exceptions
 
-/admin/bookings
+Use human-readable errors.
 
-/admin/bookings/[id]
+---
 
-/admin/stays
+# 47. DESTRUCTIVE ACTIONS
+
+Require confirmation for:
+
+Delete
+Archive
+Suspend
+Block availability
+Remove media
+Delete pricing rule
+
+Explain the consequences.
+
+---
+
+# 48. DATA INTEGRITY
+
+The backend is authoritative.
+
+Frontend must never:
+
+* Invent prices
+* Override availability
+* Bypass permissions
+* Directly modify database
+* Assume booking availability
+* Assume pricing validity
+
+Every mutation goes through backend APIs.
+
+---
+
+# 49. CONCURRENCY
+
+Handle:
+
+Two admins editing the same property.
+
+Two admins editing pricing.
+
+Two admins modifying availability.
+
+Two admins changing the same unit.
+
+If conflict occurs:
+
+Tell the user that the data changed.
+
+Refresh latest state.
+
+Do not silently overwrite newer data.
+
+---
+
+# 50. PERFORMANCE
+
+For large inventories:
+
+Use:
+
+Server-side pagination
+Server-side filtering
+Debounced search
+Caching where appropriate
+Selective refetching
+
+Do not fetch every property/unit/pricing rule at once.
+
+---
+
+# 51. ROUTES
+
+Recommended:
 
 /admin/properties
 
@@ -1219,486 +1325,189 @@ Example:
 
 /admin/properties/[id]/pricing
 
-Use the existing routing conventions if different.
+/admin/pricing
 
-Do not create unnecessary nested routes.
+/admin/pricing/calendar
 
----
+/admin/pricing/rules
 
-# 45. UX PRINCIPLE: PROGRESSIVE DISCLOSURE
-
-The default screen should answer:
-
-"What is happening?"
-
-The details screen should answer:
-
-"Why is it happening?"
-
-The action flow should answer:
-
-"What can I do?"
-
-Do not show every piece of information at once.
+Adapt to existing routing conventions instead of blindly replacing them.
 
 ---
 
-# 46. UX PRINCIPLE: FEWER CLICKS
+# 52. TESTING
 
-Common workflows should be extremely fast.
+Test:
 
-Admin needs to:
-
-Find booking
-→ Open booking
-→ Check status
-→ Execute action
-
-or:
-
-Find property
-→ Open property
-→ Open unit
-→ Check availability
-
-Avoid forcing users through unnecessary screens.
-
----
-
-# 47. UX PRINCIPLE: CONTEXT PRESERVATION
-
-When navigating back:
-
-Preserve:
-
-* Search
-* Filters
-* Pagination
-* Sorting
-* Selected tab
-
-Do not force admins to rebuild their context after every action.
+Property creation
+Property editing
+Property publishing
+Property suspension
+Unit creation
+Unit editing
+Unit blocking
+Availability updates
+Location selection
+GPS permission handling
+Map link parsing
+Invalid location links
+Invalid coordinates
+Pricing creation
+Pricing update
+Pricing conflicts
+Pricing calendar
+Price preview
+Permissions
+Unauthorized actions
+Loading states
+Error states
+Empty states
 
 ---
 
-# 48. UX PRINCIPLE: ACTION-FIRST DESIGN
-
-The most important actions should be easy to find.
-
-Examples:
-
-Booking:
-
-Check-in
-Check-out
-Cancel
-
-Property:
-
-Edit
-Publish
-Suspend
-
-Unit:
-
-Block
-Unblock
-Maintenance
-
-Do not bury primary operational actions inside three nested menus.
-
----
-
-# 49. VISUAL DESIGN
-
-Keep the existing GouNow visual identity.
-
-Improve hierarchy rather than inventing an unrelated design.
-
-Use:
-
-* Consistent spacing
-* Clear typography
-* Controlled card usage
-* Professional tables
-* Subtle borders
-* Clear status indicators
-* Consistent buttons
-* Consistent forms
-* Consistent dialogs
-
-Avoid:
-
-* Excessive gradients
-* Excessive glassmorphism
-* Huge cards
-* Excessive shadows
-* Random colors
-* Decorative animations
-* Dashboard clutter
-
-The interface should feel like a serious production operations platform.
-
----
-
-# 50. DO NOT MAKE EVERYTHING A CARD
-
-Use:
-
-Tables for datasets.
-
-Lists for activity.
-
-Tabs for related information.
-
-Calendars for availability.
-
-Drawers for quick inspection.
-
-Dialogs for confirmation.
-
-Cards only when grouping information improves comprehension.
-
-This is critical.
-
----
-
-# 51. PROPERTY ↔ BOOKING CONNECTIONS
-
-Every relevant entity should be navigable.
-
-Booking:
-
-Guest → Guest profile
-
-Property → Property details
-
-Unit → Unit details
-
-Payment → Payment details
-
-Stay → Stay details
-
-Property:
-
-Owner → Owner profile
-
-Unit → Unit details
-
-Bookings → Booking list filtered to property
-
-Availability → Availability calendar
-
-This creates a connected admin system instead of isolated CRUD pages.
-
----
-
-# 52. AUDITABILITY
-
-Every important mutation should produce or consume backend audit/activity information where supported.
-
-Important actions:
-
-* Booking status change
-* Check-in
-* Check-out
-* Cancellation
-* Refund
-* Property publish
-* Property suspension
-* Availability block
-* Pricing change
-
-Do not create fake audit records from the frontend.
-
----
-
-# 53. PERFORMANCE
-
-The implementation must be optimized for large datasets.
-
-Do not:
-
-* Render thousands of table rows
-* Load all properties
-* Load all bookings
-* Fetch unnecessary relations
-* Re-render the entire dashboard after one action
-
-Use:
-
-Pagination
-Filtering
-Memoization where appropriate
-Virtualization only where actually necessary
-Server-side operations
-
----
-
-# 54. TESTING
-
-Before finishing:
-
-Run existing tests.
-
-Add tests for important workflows.
+# 53. LOCATION TEST CASES
 
 At minimum test:
 
-Booking list loading
-
-Booking filtering
-
-Booking details
-
-Permission restrictions
-
-Confirm booking
-
-Cancel booking
-
-Check-in
-
-Check-out
-
-Property list
-
-Property details
-
-Unit navigation
-
-Availability changes
-
-Pricing changes
-
-Error handling
-
-Loading states
-
-Empty states
-
-Unauthorized operations
-
-Concurrent/conflict responses where practical
+1. Valid Google Maps URL.
+2. Google Maps URL with `@lat,lng`.
+3. Direct coordinate URL.
+4. Invalid URL.
+5. URL without coordinates.
+6. GPS permission granted.
+7. GPS permission denied.
+8. Invalid latitude.
+9. Invalid longitude.
+10. Backend validation failure.
+11. Existing property location editing.
+12. Removing/changing location if allowed.
 
 ---
 
-# 55. FINAL VALIDATION
+# 54. FINAL VALIDATION
 
-After implementation verify:
+Before declaring completion:
 
-1. No TypeScript errors.
-2. No lint errors.
-3. No broken routes.
-4. No broken imports.
-5. No console errors.
-6. No duplicated components unnecessarily.
-7. No fake API endpoints.
-8. No unauthorized actions.
-9. No raw backend errors exposed.
-10. No sensitive data leakage.
-11. No broken mobile/tablet layout.
-12. No unnecessary API requests.
-13. No duplicated business logic.
-14. No destructive action without confirmation.
-15. No empty page without proper empty state.
+Run:
 
----
+TypeScript checks
+Lint
+Unit tests
+Integration tests
+Existing backend tests
+Existing frontend tests
 
-# 56. IMPLEMENTATION ORDER
+Verify:
 
-Execute in this order.
+No broken imports.
 
-## STEP 1 — AUDIT
+No broken routes.
 
-Inspect:
+No console errors.
 
-Frontend
-Backend
-Routes
-API
-Models
-Permissions
-Components
-Design system
-Tests
+No fake endpoints.
 
-Produce a short implementation map before editing.
+No fake data.
+
+No unauthorized operations.
+
+No sensitive data leakage.
+
+No invalid pricing calculations.
+
+No invalid location data.
+
+No duplicate business logic.
 
 ---
 
-## STEP 2 — DESIGN SYSTEM ALIGNMENT
+# 55. IMPLEMENTATION ORDER
 
-Identify reusable:
+Follow exactly:
 
-Table
-Button
-Badge
-Modal
-Drawer
-Form
-Input
-Select
-Date picker
-Tabs
-Pagination
-Skeleton
-Toast
-Empty state
-Error state
+PHASE 1
+Audit existing architecture.
 
-Reuse existing components.
+PHASE 2
+Map existing database/API capabilities.
 
-Create reusable components only when genuinely missing.
+PHASE 3
+Implement/reuse Property management.
 
----
+PHASE 4
+Implement Units/Villas.
 
-## STEP 3 — BOOKING MANAGEMENT
+PHASE 5
+Implement Location management.
 
-Implement:
+PHASE 6
+Implement Availability.
 
-Booking list
-Filters
-Search
-Pagination
-Booking details
-Booking actions
-Activity timeline
+PHASE 7
+Implement Pricing Engine.
 
----
+PHASE 8
+Implement Pricing Calendar.
 
-## STEP 4 — STAY MANAGEMENT
+PHASE 9
+Implement Price Preview.
 
-Implement:
+PHASE 10
+Implement permissions and authorization checks.
 
-Active stays
-Arrivals
-Departures
-Check-in
-Check-out
-Extend stay where supported
+PHASE 11
+Implement loading/error/empty states.
+
+PHASE 12
+Testing.
+
+PHASE 13
+UX polish.
 
 ---
 
-## STEP 5 — PROPERTY MANAGEMENT
+# 56. IMPORTANT: DO NOT OVERBUILD
 
-Implement:
-
-Property list
-Property details
-Property status
-Property editing
-
----
-
-## STEP 6 — UNITS / VILLAS
-
-Implement:
-
-Unit list
-Unit details
-Unit editing
-Unit availability
-Unit bookings
-
----
-
-## STEP 7 — AVAILABILITY
-
-Implement:
-
-Calendar
-Availability status
-Blocking/unblocking
-Conflict handling
-
----
-
-## STEP 8 — PRICING
-
-Implement:
-
-Pricing display
-Pricing editing
-Date ranges
-Backend-authoritative calculations
-
----
-
-## STEP 9 — MEDIA / AMENITIES / SERVICES
-
-Implement only backend-supported capabilities.
-
----
-
-## STEP 10 — POLISH
-
-Improve:
-
-Loading
-Errors
-Empty states
-Responsive behavior
-Accessibility
-Transitions
-Navigation
-Context preservation
-
----
-
-# 57. IMPORTANT: DO NOT OVERBUILD
-
-Do NOT add:
+Do not introduce:
 
 Kubernetes
-
 Redis
-
 Kafka
-
 RabbitMQ
-
 Microservices
+New authentication
+New database
+New state-management framework
+New UI framework
 
-A new database
+unless the existing project genuinely requires them.
 
-A new authentication system
-
-A new state management framework
-
-A new UI framework
-
-A new API architecture
-
-unless the existing project explicitly requires them.
-
-This task is primarily about building the best admin UX on top of the existing GouNow architecture.
+Use the current GouNow architecture.
 
 ---
 
-# 58. FINAL DELIVERABLE
+# 57. FINAL REPORT
 
-When finished, provide:
+When finished, report:
 
 1. Files changed.
-2. Routes added/changed.
-3. Components added.
+2. Components created.
+3. Routes created/modified.
 4. API endpoints consumed.
-5. Backend endpoints added, if any.
-6. Permissions used.
-7. Tests added.
-8. Tests executed.
-9. Problems discovered.
-10. Problems fixed.
-11. Remaining limitations.
+5. Backend endpoints added.
+6. Database changes.
+7. Permissions used.
+8. Location implementation.
+9. Google Maps link formats supported.
+10. Pricing engine implementation.
+11. Pricing hierarchy.
+12. Availability implementation.
+13. Tests added.
+14. Tests executed.
+15. Errors discovered.
+16. Errors fixed.
+17. Remaining limitations.
 
-Most importantly:
+Do not claim a feature is complete if it is only visually implemented.
 
-Do not claim completion if a feature is only visually implemented.
-
-Every displayed action must either:
-
-* work against the real backend,
-* or clearly be marked as unavailable because the backend capability does not exist.
-
-The final result must feel like a real production administration system used daily by operations staff, not a UI prototype.
+Every action visible in the UI must either work with the real backend or clearly indicate that the backend capability is unavailable.

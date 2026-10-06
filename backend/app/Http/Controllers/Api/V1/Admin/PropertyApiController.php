@@ -11,9 +11,11 @@ use App\Models\Location;
 use App\Models\Property;
 use App\Models\PropertyCategory;
 use App\Models\SeasonalPrice;
+use App\Services\LocationParserService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PropertyApiController extends Controller
 {
@@ -238,6 +240,107 @@ class PropertyApiController extends Controller
     }
 
     /**
+     * Create a new property / unit inventory item.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'title_en' => ['required', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
+            'property_category_id' => ['nullable', 'exists:property_categories,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
+            'listing_type' => ['required', 'string', 'in:rent,sale,both'],
+            'compound' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'map_url' => ['nullable', 'string', 'max:1000'],
+            'bedrooms' => ['required', 'integer', 'min:0'],
+            'bathrooms' => ['required', 'integer', 'min:0'],
+            'max_guests' => ['required', 'integer', 'min:1'],
+            'area_sqm' => ['nullable', 'numeric', 'min:0'],
+            'floor' => ['nullable', 'integer'],
+            'building' => ['nullable', 'string', 'max:100'],
+            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'max_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'check_in_time' => ['nullable', 'string'],
+            'check_out_time' => ['nullable', 'string'],
+            'base_price_cents' => ['nullable', 'integer', 'min:0'],
+            'sale_price_cents' => ['nullable', 'integer', 'min:0'],
+            'currency' => ['nullable', 'string', 'size:3'],
+            'cleaning_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'service_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'tax_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'is_published' => ['nullable', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
+            'is_available' => ['nullable', 'boolean'],
+            'status' => ['nullable', 'in:draft,published,archived'],
+            'description_en' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
+            'short_description_en' => ['nullable', 'string'],
+            'short_description_ar' => ['nullable', 'string'],
+            'house_rules_en' => ['nullable', 'string'],
+            'house_rules_ar' => ['nullable', 'string'],
+            'amenity_ids' => ['nullable', 'array'],
+            'amenity_ids.*' => ['exists:amenities,id'],
+        ]);
+
+        $baseSlug = Str::slug($validated['title_en'] ?? 'property');
+        $slug = $baseSlug;
+        $count = 1;
+        while (Property::where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$count}";
+            $count++;
+        }
+
+        $refPrefix = match($validated['listing_type'] ?? 'rent') {
+            'sale' => 'GON-S-',
+            default => 'GON-V-',
+        };
+        $reference = $refPrefix . strtoupper(Str::random(6));
+        while (Property::where('reference_number', $reference)->exists()) {
+            $reference = $refPrefix . strtoupper(Str::random(6));
+        }
+
+        $isPublished = (bool) ($validated['is_published'] ?? false);
+        $status = $validated['status'] ?? ($isPublished ? 'published' : 'draft');
+
+        $amenityIds = $validated['amenity_ids'] ?? [];
+        unset($validated['amenity_ids']);
+
+        $property = Property::create(array_merge($validated, [
+            'slug' => $slug,
+            'reference_number' => $reference,
+            'status' => $status,
+            'currency' => $validated['currency'] ?? 'EGP',
+            'is_published' => $isPublished,
+            'is_available' => $validated['is_available'] ?? true,
+            'is_featured' => $validated['is_featured'] ?? false,
+        ]));
+
+        if (!empty($amenityIds)) {
+            $property->amenities()->sync($amenityIds);
+        }
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'property_created',
+            'entity_type' => 'Property',
+            'entity_id' => $property->id,
+            'description' => "Property [{$property->reference_number}] created by admin.",
+            'new_values' => $property->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إنشاء العقار بنجاح.',
+            'data' => $property->load(['category', 'location', 'amenities']),
+        ], 201);
+    }
+
+    /**
      * Update property details.
      */
     public function update(int $id, Request $request): JsonResponse
@@ -247,28 +350,52 @@ class PropertyApiController extends Controller
         $validated = $request->validate([
             'title_en' => ['nullable', 'string', 'max:255'],
             'title_ar' => ['nullable', 'string', 'max:255'],
+            'property_category_id' => ['nullable', 'exists:property_categories,id'],
+            'location_id' => ['nullable', 'exists:locations,id'],
+            'listing_type' => ['nullable', 'string', 'in:rent,sale,both'],
             'compound' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string'],
+            'address' => ['nullable', 'string', 'max:500'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'map_url' => ['nullable', 'string', 'max:1000'],
             'bedrooms' => ['nullable', 'integer', 'min:0'],
             'bathrooms' => ['nullable', 'integer', 'min:0'],
             'max_guests' => ['nullable', 'integer', 'min:1'],
             'area_sqm' => ['nullable', 'numeric', 'min:0'],
+            'floor' => ['nullable', 'integer'],
+            'building' => ['nullable', 'string', 'max:100'],
             'min_stay_nights' => ['nullable', 'integer', 'min:1'],
             'max_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'check_in_time' => ['nullable', 'string'],
+            'check_out_time' => ['nullable', 'string'],
             'base_price_cents' => ['nullable', 'integer', 'min:0'],
             'sale_price_cents' => ['nullable', 'integer', 'min:0'],
+            'currency' => ['nullable', 'string', 'size:3'],
             'cleaning_fee_cents' => ['nullable', 'integer', 'min:0'],
             'service_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'tax_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'is_published' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
             'is_available' => ['nullable', 'boolean'],
+            'status' => ['nullable', 'in:draft,published,archived'],
             'description_en' => ['nullable', 'string'],
             'description_ar' => ['nullable', 'string'],
+            'short_description_en' => ['nullable', 'string'],
+            'short_description_ar' => ['nullable', 'string'],
             'house_rules_en' => ['nullable', 'string'],
             'house_rules_ar' => ['nullable', 'string'],
+            'amenity_ids' => ['nullable', 'array'],
+            'amenity_ids.*' => ['exists:amenities,id'],
         ]);
 
+        $amenityIds = $validated['amenity_ids'] ?? null;
+        unset($validated['amenity_ids']);
+
         $property->update($validated);
+
+        if (is_array($amenityIds)) {
+            $property->amenities()->sync($amenityIds);
+        }
 
         ActivityLog::create([
             'user_id' => $request->user()?->id,
@@ -284,8 +411,67 @@ class PropertyApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث بيانات العقار بنجاح.',
-            'data' => $property,
+            'data' => $property->fresh(['category', 'location', 'amenities']),
         ]);
+    }
+
+    /**
+     * Delete or archive a property.
+     */
+    public function destroy(int $id, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+
+        $hasActiveBookings = Booking::where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->whereDate('check_out', '>=', now()->toDateString())
+            ->exists();
+
+        if ($hasActiveBookings) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف هذا العقار لوجود حجوزات نشطة أو مؤكدة حالياً عليه.',
+            ], 422);
+        }
+
+        $propertyRef = $property->reference_number;
+        $property->update(['status' => 'archived', 'is_published' => false, 'is_available' => false]);
+        $property->delete();
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'property_archived',
+            'entity_type' => 'Property',
+            'entity_id' => $id,
+            'description' => "Property [{$propertyRef}] was archived/deleted by admin.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم أرشفة العقار بنجاح.',
+        ]);
+    }
+
+    /**
+     * Parse and normalize location coordinates from input URL or coordinates.
+     */
+    public function parseLocation(Request $request, LocationParserService $parser): JsonResponse
+    {
+        $input = $request->input('url') ?? $request->input('location') ?? $request->input('query');
+
+        if (empty($input)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please provide a Google Maps URL or coordinates string.',
+            ], 422);
+        }
+
+        $result = $parser->parse((string) $input);
+
+        return response()->json($result, $result['success'] ? 200 : 422);
     }
 
     /**
