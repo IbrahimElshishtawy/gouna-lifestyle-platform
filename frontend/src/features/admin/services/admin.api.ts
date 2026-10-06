@@ -23,28 +23,81 @@ export async function getDashboardMetrics(): Promise<DashboardData> {
 }
 
 /**
- * 2. Bookings Management
+ * 2. Bookings Management & Stays Operations
  */
 export async function getAdminBookings(params?: {
   status?: string;
+  payment_status?: string;
+  property_id?: number;
+  check_in_from?: string;
+  check_in_to?: string;
+  search?: string;
   page?: number;
-}): Promise<PaginatedResponse<AdminBookingItem>> {
+  per_page?: number;
+}): Promise<PaginatedResponse<AdminBookingItem> & { summary: import("../types").AdminBookingSummary }> {
   const query = new URLSearchParams();
   if (params?.status) query.set("status", params.status);
+  if (params?.payment_status) query.set("payment_status", params.payment_status);
+  if (params?.property_id) query.set("property_id", params.property_id.toString());
+  if (params?.check_in_from) query.set("check_in_from", params.check_in_from);
+  if (params?.check_in_to) query.set("check_in_to", params.check_in_to);
+  if (params?.search) query.set("search", params.search);
   if (params?.page) query.set("page", params.page.toString());
+  if (params?.per_page) query.set("per_page", params.per_page.toString());
 
   const qs = query.toString();
-  return apiClient<PaginatedResponse<AdminBookingItem>>(`/admin/bookings${qs ? `?${qs}` : ""}`);
+  return apiClient<PaginatedResponse<AdminBookingItem> & { summary: import("../types").AdminBookingSummary }>(
+    `/admin/bookings${qs ? `?${qs}` : ""}`
+  );
+}
+
+export async function getAdminBookingDetails(id: number): Promise<import("../types").AdminBookingDetail> {
+  const res = await apiClient<SingleResponse<import("../types").AdminBookingDetail>>(`/admin/bookings/${id}`);
+  return res.data;
 }
 
 export async function updateBookingStatus(
   id: number,
-  status: "confirmed" | "cancelled" | "completed"
+  status: "pending" | "confirmed" | "cancelled" | "completed"
 ): Promise<{ success: boolean; message: string }> {
   return apiClient<{ success: boolean; message: string }>(`/admin/bookings/${id}/status`, {
     method: "PUT",
     body: JSON.stringify({ status }),
   });
+}
+
+export async function checkinBooking(
+  id: number,
+  notes?: string
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/bookings/${id}/checkin`, {
+    method: "POST",
+    body: JSON.stringify({ notes }),
+  });
+}
+
+export async function checkoutBooking(
+  id: number,
+  notes?: string
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/bookings/${id}/checkout`, {
+    method: "POST",
+    body: JSON.stringify({ notes }),
+  });
+}
+
+export async function extendBookingStay(
+  id: number,
+  newCheckOut: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
+  return apiClient<{ success: boolean; message: string; data?: unknown }>(`/admin/bookings/${id}/extend`, {
+    method: "POST",
+    body: JSON.stringify({ new_check_out: newCheckOut }),
+  });
+}
+
+export async function getAdminStays(): Promise<import("../types").AdminStaysResponse> {
+  return apiClient<import("../types").AdminStaysResponse>("/admin/bookings/stays");
 }
 
 export async function refundBooking(
@@ -231,14 +284,114 @@ export async function togglePropertyStatus(
   );
 }
 
+export async function getAdminPropertyDetails(id: number): Promise<import("../types").AdminPropertyItem & {
+  seasonalPrices: import("../types").SeasonalPriceItem[];
+  availabilityBlocks: import("../types").AvailabilityBlockItem[];
+  recent_bookings: Array<{
+    id: number;
+    reference: string;
+    customer_name: string;
+    check_in: string;
+    check_out: string;
+    nights: number;
+    guests: number;
+    formatted_total: string;
+    status: string;
+    payment_status: string;
+  }>;
+  stats: {
+    total_bookings: number;
+    total_revenue_cents: number;
+    formatted_revenue: string;
+    seasonal_prices_count: number;
+    availability_blocks_count: number;
+  };
+  amenities: Array<{ id: number; name_en: string; name_ar: string; group: string }>;
+}> {
+  const res = await apiClient<SingleResponse<any>>(`/admin/properties/${id}`);
+  return res.data;
+}
+
+export async function getPropertyCalendar(id: number, year?: number): Promise<import("../types").PropertyCalendarResponse> {
+  const query = new URLSearchParams();
+  if (year) query.set("year", year.toString());
+  const qs = query.toString();
+  return apiClient<import("../types").PropertyCalendarResponse>(`/admin/properties/${id}/calendar${qs ? `?${qs}` : ""}`);
+}
+
+export const getPropertyAvailabilityCalendar = getPropertyCalendar;
+
 export async function updateAdminProperty(
   id: number,
-  payload: Record<string, unknown>
-): Promise<{ success: boolean; message: string }> {
-  return apiClient<{ success: boolean; message: string }>(`/admin/properties/${id}`, {
+  payload: Record<string, any>
+): Promise<{ success: boolean; message: string; data: any }> {
+  return apiClient<{ success: boolean; message: string; data: any }>(`/admin/properties/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
+}
+
+export async function addPropertyAvailabilityBlock(
+  id: number,
+  payload: { start_date: string; end_date: string; status: "blocked" | "maintenance" | "owner_use"; reason?: string }
+): Promise<{ success: boolean; message: string; data: import("../types").AvailabilityBlockItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").AvailabilityBlockItem }>(
+    `/admin/properties/${id}/availability-blocks`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function removePropertyAvailabilityBlock(
+  id: number,
+  blockId: number
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(
+    `/admin/properties/${id}/availability-blocks/${blockId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+export async function addPropertySeasonalPrice(
+  id: number,
+  payload: {
+    name_en: string;
+    name_ar?: string;
+    start_date: string;
+    end_date: string;
+    price_cents: number;
+    priority?: number;
+    min_stay_nights?: number;
+    notes?: string;
+  }
+): Promise<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }> {
+  return apiClient<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }>(
+    `/admin/properties/${id}/seasonal-prices`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function removePropertySeasonalPrice(
+  id: number,
+  seasonId: number
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(
+    `/admin/properties/${id}/seasonal-prices/${seasonId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+export async function getAdminTaxonomies(): Promise<import("../types").AdminTaxonomiesResponse> {
+  return apiClient<import("../types").AdminTaxonomiesResponse>("/admin/properties/taxonomies");
 }
 
 /**

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Link, useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 import { login, challenge2fa } from "@/lib/api/auth";
@@ -63,6 +64,14 @@ export default function AdminLoginPage() {
               ? "تعذر الاتصال بالخادم. يرجى التأكد من تشغيل خادم النظام."
               : "Unable to reach the backend server. Please verify the API is running."
           );
+        } else if (err.status === 422 || err.message?.includes("given data was invalid")) {
+          const fieldMsg = err.fieldErrors?.email?.[0] || err.fieldErrors?.password?.[0];
+          setError(
+            fieldMsg ||
+              (isAr
+                ? "بيانات الدخول غير صحيحة. يرجى مراجعة البريد وكلمة المرور."
+                : "Invalid credentials. Please verify your email and password.")
+          );
         } else {
           setError(err.message);
         }
@@ -96,10 +105,27 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-brand-brown flex flex-col justify-between items-center p-4 sm:p-6 selection:bg-brand-terracotta/20 selection:text-brand-terracotta">
-      {/* Top Bar: Minimal Brand & Language Switch */}
+      {/* Top Bar: Official El Gouna Brand & Language Switch */}
       <header className="w-full max-w-sm sm:max-w-md flex items-center justify-between py-2">
-        <Link href="/" className="font-serif text-lg font-bold tracking-wider text-brand-brown hover:text-brand-terracotta transition">
-          GOUNOW
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="relative h-9 w-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-brand-terracotta/25 to-brand-brown/40 border border-brand-terracotta/40 shadow-xs group-hover:scale-105 transition-all duration-200 p-1">
+            <Image
+              src="/assets/images/official-elgouna-icon.png"
+              alt="El Gouna"
+              width={22}
+              height={22}
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className="text-start leading-tight">
+            <span className="block text-[9px] uppercase font-bold tracking-[0.2em] text-brand-terracotta">
+              {isAr ? "الجونة" : "EL GOUNA"}
+            </span>
+            <span className="block text-sm font-serif font-bold tracking-wider text-brand-brown">
+              GOUNOW
+            </span>
+          </div>
         </Link>
 
         <div className="flex items-center gap-1 text-xs">
@@ -128,8 +154,21 @@ export default function AdminLoginPage() {
       {/* Main Centered Compact Card */}
       <main className="w-full max-w-sm sm:max-w-md my-auto py-4">
         <div className="bg-white rounded-2xl border border-brand-border/70 shadow-xs sm:shadow-sm p-6 sm:p-8">
-          {/* Header */}
-          <div className="mb-6">
+          {/* Header with El Gouna Identity */}
+          <div className="mb-6 flex flex-col items-center text-center">
+            <div className="mb-3 relative h-12 w-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/15 via-brand-terracotta/20 to-brand-brown/10 border border-brand-terracotta/30 p-2 shadow-xs">
+              <Image
+                src="/assets/images/official-elgouna-icon.png"
+                alt="El Gouna"
+                width={30}
+                height={30}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta mb-1">
+              {isAr ? "الجونة — البحر الأحمر" : "EL GOUNA — RED SEA"}
+            </span>
             <h1 className="font-serif text-xl sm:text-2xl font-bold text-brand-brown tracking-tight">
               {isAr ? "تسجيل الدخول للإدارة" : "Management Sign In"}
             </h1>
@@ -140,7 +179,7 @@ export default function AdminLoginPage() {
 
           {/* Error Message (Clean Text) */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50/90 border border-red-200/80 text-red-700 text-xs rounded-lg leading-relaxed">
+            <div className="mb-4 p-3 bg-red-50/90 border border-red-200/80 text-red-700 text-xs rounded-lg leading-relaxed text-center">
               {error}
             </div>
           )}

@@ -146,10 +146,22 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   {isAr ? "جميع الحجوزات" : "All Bookings"}
                 </Link>
                 <Link
+                  href="/admin/stays"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta font-medium"
+                >
+                  {isAr ? "إدارة الإقامات والوصول" : "Active Stays & Check-ins"}
+                </Link>
+                <Link
+                  href="/admin/bookings/calendar"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "تقويم الحجوزات" : "Bookings Calendar"}
+                </Link>
+                <Link
                   href="/admin/bookings?status=pending"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "حجوزات قيد الانتظار" : "Pending Bookings"}
+                  {isAr ? "حجوزات قيد الانتظار" : "Pending Confirmation"}
                 </Link>
                 <Link
                   href="/admin/bookings?status=confirmed"

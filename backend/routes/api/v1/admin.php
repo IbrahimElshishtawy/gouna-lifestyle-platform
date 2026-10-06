@@ -20,19 +20,30 @@ Route::middleware(['admin', '2fa'])->group(function () {
     // 1. Dashboard Command Center
     Route::get('/dashboard', [DashboardApiController::class, 'index'])->name('dashboard');
 
-    // 2. Bookings Management
+    // 2. Bookings Management & Operational Stays
     Route::prefix('bookings')->as('bookings.')->group(function () {
         Route::get('/', [BookingApiController::class, 'index'])->name('index');
+        Route::get('/stays', [BookingApiController::class, 'stays'])->name('stays');
+        Route::get('/{id}', [BookingApiController::class, 'show'])->name('show');
         Route::put('/{id}/status', [BookingApiController::class, 'updateStatus'])->name('status');
         Route::post('/{id}/refund', [BookingApiController::class, 'refund'])->name('refund');
+        Route::post('/{id}/checkin', [BookingApiController::class, 'checkin'])->name('checkin');
+        Route::post('/{id}/checkout', [BookingApiController::class, 'checkout'])->name('checkout');
+        Route::post('/{id}/extend', [BookingApiController::class, 'extendStay'])->name('extend');
     });
 
-    // 3. Properties & Units Management (Pause / Resume Display & CRUD)
+    // 3. Properties & Units Management, Availability & Dynamic Pricing
     Route::prefix('properties')->as('properties.')->group(function () {
         Route::get('/', [PropertyApiController::class, 'index'])->name('index');
+        Route::get('/taxonomies', [PropertyApiController::class, 'taxonomies'])->name('taxonomies');
         Route::get('/{id}', [PropertyApiController::class, 'show'])->name('show');
         Route::put('/{id}', [PropertyApiController::class, 'update'])->name('update');
         Route::match(['put', 'patch'], '/{id}/toggle-status', [PropertyApiController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/{id}/calendar', [PropertyApiController::class, 'availabilityCalendar'])->name('calendar');
+        Route::post('/{id}/availability-blocks', [PropertyApiController::class, 'addAvailabilityBlock'])->name('add-block');
+        Route::delete('/{id}/availability-blocks/{blockId}', [PropertyApiController::class, 'removeAvailabilityBlock'])->name('remove-block');
+        Route::post('/{id}/seasonal-prices', [PropertyApiController::class, 'addSeasonalPrice'])->name('add-seasonal-price');
+        Route::delete('/{id}/seasonal-prices/{seasonId}', [PropertyApiController::class, 'removeSeasonalPrice'])->name('remove-seasonal-price');
     });
 
     // 4. Media Design & Homepage CMS Control

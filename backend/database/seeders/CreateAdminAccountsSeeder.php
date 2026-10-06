@@ -67,10 +67,35 @@ class CreateAdminAccountsSeeder extends Seeder
                 'two_factor_secret' => null,
             ]
         );
-        $admin->roles()->sync([$adminRole->id]);
+        $salesRole = Role::firstOrCreate(
+            ['name' => 'sales'],
+            [
+                'display_name' => 'Sales Representative',
+                'description' => 'Real estate & experiences sales agent.',
+                'is_system' => true,
+            ]
+        );
+
+        // 4. Sales Account
+        $sales = User::updateOrCreate(
+            ['email' => 'sales@gounow.com'],
+            [
+                'name' => 'GouNow Sales Agent',
+                'password' => Hash::make('GouNow@2026!Secure'),
+                'phone' => '+201000000003',
+                'locale' => 'en',
+                'is_admin' => true,
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'two_factor_confirmed_at' => null,
+                'two_factor_secret' => null,
+            ]
+        );
+        $sales->roles()->sync([$salesRole->id]);
 
         $this->command->info('Created accounts successfully:');
         $this->command->info('Super Admin: superadmin@gounow.com | Password: SuperAdmin@2026!');
         $this->command->info('Admin: admin@gounow.com | Password: Admin@2026!');
+        $this->command->info('Sales: sales@gounow.com | Password: GouNow@2026!Secure');
     }
 }

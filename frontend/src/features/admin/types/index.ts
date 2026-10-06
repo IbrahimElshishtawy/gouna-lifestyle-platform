@@ -63,9 +63,19 @@ export interface DashboardData {
   recentActivities: ActivityLogItem[];
 }
 
-// 2. Bookings
-export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
-export type PaymentStatus = "pending" | "paid" | "partially_paid" | "refunded" | "failed";
+// 2. Bookings & Stays
+export type BookingStatus = "draft" | "pending" | "awaiting_payment" | "payment_processing" | "confirmed" | "completed" | "cancelled" | "refunded";
+export type PaymentStatus = "unpaid" | "pending" | "partially_paid" | "paid" | "refunded" | "partially_refunded" | "failed";
+export type StayStatus = "expected" | "in_house" | "checked_out" | "cancelled";
+
+export interface AdminBookingSummary {
+  total: number;
+  pending: number;
+  confirmed: number;
+  active_stays: number;
+  completed: number;
+  cancelled: number;
+}
 
 export interface AdminBookingItem {
   id: number;
@@ -81,6 +91,7 @@ export interface AdminBookingItem {
     title: string;
     title_ar?: string | null;
     slug: string;
+    reference_number?: string;
     type: "property" | "experience" | "vehicle";
   };
   check_in: string;
@@ -91,10 +102,195 @@ export interface AdminBookingItem {
   formatted_total: string;
   amount_paid_cents: number;
   formatted_paid: string;
+  amount_remaining_cents?: number;
+  formatted_remaining?: string;
   currency: string;
   status: BookingStatus;
   payment_status: PaymentStatus;
+  stay_status?: StayStatus;
   created_at: string;
+}
+
+export interface AdminBookingDetail {
+  id: number;
+  reference: string;
+  status: BookingStatus;
+  payment_status: PaymentStatus;
+  stay_status: StayStatus;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  guests: number;
+  currency: string;
+  financials: {
+    subtotal_cents: number;
+    cleaning_fee_cents: number;
+    service_fee_cents: number;
+    tax_cents: number;
+    discount_cents: number;
+    total_cents: number;
+    deposit_cents: number;
+    amount_paid_cents: number;
+    amount_remaining_cents: number;
+    refund_amount_cents: number;
+    formatted_subtotal: string;
+    formatted_total: string;
+    formatted_paid: string;
+    formatted_remaining: string;
+    formatted_refund: string;
+  };
+  customer: {
+    id: number;
+    name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string | null;
+    nationality: string | null;
+    country_of_residence: string | null;
+    bookings_count: number;
+  };
+  property: {
+    id: number;
+    reference_number: string;
+    slug: string;
+    title_en: string;
+    title_ar: string | null;
+    compound?: string | null;
+    address?: string | null;
+    bedrooms: number;
+    bathrooms: number;
+    max_guests: number;
+    area_sqm: number | null;
+    primary_image: string;
+    location: {
+      id: number;
+      name_en: string;
+      name_ar: string;
+    };
+    category: {
+      id: number;
+      name_en: string;
+      name_ar: string;
+    };
+  } | null;
+  internal_notes: string | null;
+  source: string;
+  promo_code: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  transactions: Array<{
+    id: number;
+    type: string;
+    amount_cents: number;
+    formatted_amount: string;
+    currency: string;
+    gateway: string;
+    gateway_reference: string | null;
+    status: string;
+    created_at: string;
+  }>;
+  timeline: Array<{
+    id: number;
+    action: string;
+    description: string;
+    user_name: string;
+    created_at: string;
+  }>;
+}
+
+export interface AdminStayItem {
+  id: number;
+  reference: string;
+  customer: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+  bookable: {
+    id: number;
+    title: string;
+    title_ar?: string | null;
+    reference_number?: string;
+    slug: string;
+  };
+  check_in: string;
+  check_out: string;
+  nights: number;
+  guests: number;
+  status: BookingStatus;
+  payment_status: PaymentStatus;
+  stay_status: StayStatus;
+  total_cents: number;
+  formatted_total: string;
+  amount_paid_cents: number;
+  formatted_paid: string;
+  amount_remaining_cents: number;
+  formatted_remaining: string;
+}
+
+export interface AdminStaysResponse {
+  summary: {
+    active_stays_count: number;
+    today_checkins_count: number;
+    today_checkouts_count: number;
+    upcoming_arrivals_count: number;
+    upcoming_departures_count: number;
+  };
+  data: {
+    active_stays: AdminStayItem[];
+    today_checkins: AdminStayItem[];
+    today_checkouts: AdminStayItem[];
+    upcoming_arrivals: AdminStayItem[];
+    upcoming_departures: AdminStayItem[];
+  };
+}
+
+export interface AvailabilityBlockItem {
+  id: number;
+  start_date: string;
+  end_date: string;
+  status: "blocked" | "maintenance" | "owner_use";
+  reason?: string | null;
+  type?: "block";
+}
+
+export interface SeasonalPriceItem {
+  id: number;
+  name_en: string;
+  name_ar?: string | null;
+  start_date: string;
+  end_date: string;
+  price_cents: number;
+  formatted_price: string;
+  priority: number;
+  min_stay_nights?: number | null;
+}
+
+export interface PropertyCalendarResponse {
+  property_id: number;
+  reference_number: string;
+  year: number;
+  base_price_cents: number;
+  booked_ranges: Array<{
+    id: number;
+    reference: string;
+    guest_name: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+    type: "booking";
+  }>;
+  blocked_ranges: AvailabilityBlockItem[];
+  seasonal_prices: SeasonalPriceItem[];
+}
+
+export interface AdminTaxonomiesResponse {
+  categories: Array<{ id: number; name_en: string; name_ar: string; slug: string }>;
+  locations: Array<{ id: number; name_en: string; name_ar: string; slug: string }>;
+  amenities: Array<{ id: number; name_en: string; name_ar: string; group: string; icon: string | null }>;
 }
 
 export interface AdminPropertyItem {

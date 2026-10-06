@@ -1,1142 +1,1704 @@
-أيوه، فهمت المطلوب بالضبط. أنت مش عايز Prompt واحد يقول للـ AI "كمّل الموقع"، لأن ده غالبًا هيخليه يعمل **Frontend شكله حلو لكن منفصل عن الـ Backend** أو يكرر نفس الـ UI ويكسر حاجات موجودة.
+# GOUNOW ADMIN DASHBOARD
 
-الملفين بيحددوا أساس المنظومة: **11 Module + RBAC + Backend APIs + Audit Logs + Finance + Booking lifecycle + Concierge + CRM**، والهدف الأساسي إننا نحولهم لخطة تنفيذ تدريجية قبل ما الـ AI يبدأ يكتب كود.  
+## BOOKINGS, STAYS & PROPERTIES — PRODUCTION UX/UI IMPLEMENTATION
 
-أنا أقترح تستخدم **Prompt مستقل لكل مرحلة**، وتنفذهم بالترتيب. والأهم: كل Prompt يمنع الـ AI من اختراع Backend أو بيانات وهمية أو تغيير Architecture بدون إذنك.
+You are working on the GouNow platform admin dashboard.
 
----
+Your task is to redesign and implement the **Bookings, Stays, Properties, Units/Villas, Availability, Pricing, and related operational workflows** inside the existing admin dashboard.
 
-# المرحلة 0 — Audit وفهم المشروع قبل لمس أي كود
+The goal is NOT to create random CRUD pages.
 
-**دي أهم مرحلة. لا تخلي الـ AI يعدل أي ملف في البداية.**
+The goal is to build a **production-grade operational admin experience** that is:
 
-```text
-You are a Senior Full-Stack Architect, Security Engineer, UX Engineer, and Next.js Engineer.
-
-I have an existing Next.js web application for a luxury Gouna platform.
-
-The platform includes:
-
-- Luxury villa/chalet rentals
-- Real estate sales
-- Yacht bookings
-- Experiences and diving
-- Events and ticketing
-- VIP concierge services
-- Customer CRM
-- Investors
-- Finance and payouts
-- Staff management
-- RBAC permissions
-- Audit logs
-- Platform settings
-- Admin dashboard
-
-IMPORTANT:
-
-Do NOT start coding.
-Do NOT redesign the application yet.
-Do NOT create fake APIs.
-Do NOT create mock backend data.
-Do NOT replace existing components.
-Do NOT change the existing architecture.
-
-Your first task is to perform a complete technical audit of the existing project.
-
-Analyze:
-
-1. Next.js version
-2. App Router structure
-3. TypeScript configuration
-4. Tailwind configuration
-5. Existing UI architecture
-6. Existing components
-7. Existing layouts
-8. Existing pages
-9. Existing API clients
-10. Existing backend integration
-11. Authentication
-12. Authorization
-13. Session handling
-14. Environment variables
-15. API endpoints already implemented
-16. Database-related code
-17. State management
-18. Forms
-19. Validation
-20. Error handling
-21. Loading states
-22. Empty states
-23. Responsive behavior
-24. Accessibility
-25. Security weaknesses
-26. Secrets exposure risks
-27. XSS risks
-28. CSRF risks where applicable
-29. IDOR/BOLA risks
-30. Broken authorization risks
-31. Rate limiting requirements
-32. Input validation
-33. File upload risks
-34. Payment-related risks
-35. Admin privilege escalation risks
-36. Audit logging gaps
-37. Dependency risks
-38. Production configuration problems
-
-Then compare the existing project against the supplied Gouna platform specification.
-
-Create a report with:
-
-A. Existing Architecture
-B. Existing Frontend Modules
-C. Existing Backend Integration
-D. Existing Authentication
-E. Existing Authorization
-F. Missing APIs
-G. Missing UI
-H. Security Risks
-I. Architecture Problems
-J. Duplicate Components
-K. Components that should be reused
-L. Components that should be redesigned
-M. Components that should NOT be touched
-N. Required Backend contracts
-O. Recommended implementation order
-
-For every finding classify it as:
-
-CRITICAL
-HIGH
-MEDIUM
-LOW
-
-IMPORTANT:
-
-Do not modify files during this stage.
-
-At the end provide:
-
-1. Current architecture map
-2. Frontend → Backend dependency map
-3. Module dependency map
-4. Permission dependency map
-5. Security risk map
-6. Recommended implementation roadmap
-
-Wait for approval before making code changes.
-```
+* Clear
+* Fast
+* Practical
+* Scalable
+* Consistent
+* Easy for administrators to understand
+* Easy to operate under heavy daily usage
+* Permission-aware
+* Error-resistant
+* Connected to the existing Laravel backend
+* Compatible with the existing Next.js frontend architecture
+* Consistent with the existing GouNow visual identity
+* Not visually repetitive
+* Not overloaded with cards
+* Not dependent on unnecessary animations
+* Not a redesign of the entire website
 
 ---
 
-# المرحلة 1 — تثبيت الـ Architecture
+# 1. CRITICAL RULES
 
-بعد ما يخلص الـ Audit، استخدم:
+Before changing anything:
 
-```text
-You are now acting as the Lead Software Architect.
+1. Inspect the existing frontend completely.
+2. Inspect the existing backend API completely.
+3. Inspect existing database models/resources/relations.
+4. Inspect existing authentication and authorization.
+5. Inspect existing admin roles and permissions.
+6. Inspect existing API response structures.
+7. Inspect existing design system/components.
+8. Inspect existing routing.
+9. Inspect existing loading/error/empty states.
+10. Inspect existing forms and validation.
+11. Inspect existing booking/property models.
+12. Inspect existing tests.
 
-Based on the previous audit, redesign the internal architecture of the existing Next.js project WITHOUT changing the visual design yet.
+DO NOT assume that an API exists.
 
-The objective is to create a clean, scalable, maintainable architecture.
+DO NOT invent backend endpoints when an existing endpoint already provides the required operation.
 
-The platform contains:
+DO NOT duplicate business logic in the frontend.
 
-1. Dashboard
-2. Bookings
-3. Properties
-4. Pricing Engine
-5. Yachts & Experiences
-6. Events & Ticketing
-7. Staff / Roles / Permissions
-8. VIP Concierge
-9. Finance
-10. Platform Settings / Security
-11. Customers / Investors / CRM
+DO NOT bypass backend authorization.
 
-ARCHITECTURE RULES:
+DO NOT directly manipulate database state from the frontend.
 
-- Do not duplicate business logic.
-- Do not put business logic inside UI components.
-- Do not call APIs directly from random components.
-- Create a centralized API/data-access layer.
-- Create centralized authentication handling.
-- Create centralized authorization handling.
-- Create centralized validation.
-- Create centralized error handling.
-- Create reusable table patterns.
-- Create reusable modal patterns.
-- Create reusable form patterns.
-- Create reusable loading states.
-- Create reusable empty states.
-- Create reusable confirmation dialogs.
-- Create reusable permission guards.
-- Keep domain logic separated by module.
-- Keep shared components separate from domain components.
+DO NOT create fake data for production screens unless explicitly required for development fallback.
 
-Recommended conceptual structure:
+DO NOT rewrite unrelated parts of the application.
 
-app/
-components/
-features/
-lib/
-services/
-hooks/
-types/
-schemas/
-config/
-providers/
-middleware/
+DO NOT replace the existing visual identity unnecessarily.
 
-Do not blindly follow this structure if the existing project already has a better architecture.
+DO NOT introduce a new UI library unless absolutely necessary.
 
-Preserve good existing architecture.
+DO NOT create huge monolithic components.
 
-For every architectural change explain:
-
-- Why it is needed
-- What problem it solves
-- What files are affected
-- What dependencies it creates
-- Whether it affects backend integration
-
-Do not introduce unnecessary libraries.
-
-Do not rewrite the entire project.
-
-Perform incremental refactoring only.
-
-At the end provide the final architecture tree and dependency rules.
-```
+DO NOT put everything into one page.
 
 ---
 
-# المرحلة 2 — Backend Contract أولًا
+# 2. PRODUCT ARCHITECTURE
 
-دي المرحلة اللي هتمنع أكبر مشكلة عندك: **Frontend يتصمم على API وهمية وبعدها يطلع مش متوافق مع الـ Backend.**
+Use this conceptual separation:
 
-الـ specification نفسه محدد APIs مثل dashboard وbookings وproperties وstaff وconcierge. 
+Properties = Inventory
 
-```text
-You are now acting as a Senior Backend Integration Architect.
+Bookings = Reservations
 
-Before modifying frontend UI, inspect the existing backend integration and establish a strict Frontend ↔ Backend contract.
+Stays = Actual guest occupancy
 
-IMPORTANT:
+Guests = Customers
 
-The frontend must never invent backend behavior.
+Payments = Money
 
-Do not create fake API responses.
+Owners / Partners = Property ownership
 
-Do not silently assume database fields.
+Never mix these responsibilities unnecessarily.
 
-Do not assume an endpoint exists.
+A booking represents a reservation lifecycle.
 
-Do not change backend behavior from the frontend.
+A stay represents the actual physical occupancy lifecycle.
 
-For every module define:
+A property represents inventory.
 
-1. Endpoint
-2. HTTP method
-3. Authentication requirement
-4. Required permission
-5. Request body
-6. Query parameters
-7. Response structure
-8. Pagination
-9. Filtering
-10. Sorting
-11. Validation errors
-12. Authorization errors
-13. Not-found behavior
-14. Server errors
-15. Loading behavior
-16. Empty-state behavior
+A unit/villa represents a bookable inventory item belonging to a property.
 
-Modules:
+---
+
+# 3. ADMIN INFORMATION ARCHITECTURE
+
+The admin sidebar should use this structure:
 
 Dashboard
+
 Bookings
+
+* All Bookings
+* Upcoming
+* Active Stays
+* Check-ins
+* Check-outs
+* Cancellations
+* Calendar
+
 Properties
-Pricing
-Yachts
-Experiences
-Events
-Staff
-Permissions
-Concierge
-Finance
+
+* All Properties
+* Pending Approval
+* Active
+* Suspended
+* Units / Villas
+* Availability
+* Pricing
+* Maintenance
+
+Guests
+
+Owners / Partners
+
+Payments
+
+* Transactions
+* Refunds
+* Payouts
+
+Services
+
+Reviews
+
+Reports
+
+Notifications
+
 Settings
-Audit Logs
-Customers
-Investors
 
-Create a typed API contract for every endpoint.
+Do not necessarily create every item as a new route if the existing architecture can provide the same functionality through filters/tabs.
 
-If an endpoint does not exist in the backend:
+Prefer fewer meaningful screens over unnecessary navigation.
 
-DO NOT fake it.
+---
 
-Mark it as:
+# 4. BOOKING MANAGEMENT UX
 
-BACKEND REQUIRED
+## 4.1 Booking Overview
 
-For every frontend action identify its backend operation.
+Create a professional booking management page.
+
+At the top:
+
+* Page title
+* Short contextual description
+* Primary action if authorized
+* Search
+* Filters
+* View switcher if useful
+
+Avoid excessive KPI cards.
+
+If summary statistics are useful, use a compact summary row:
+
+* Total
+* Pending
+* Confirmed
+* Active
+* Completed
+* Cancelled
+
+The numbers must come from real backend data.
+
+---
+
+# 5. BOOKING TABLE
+
+Build a high-quality operational table.
+
+Columns should include:
+
+* Booking ID
+* Guest
+* Property
+* Unit
+* Check-in
+* Check-out
+* Guests
+* Amount
+* Payment status
+* Booking status
+* Created at
+* Actions
+
+Do NOT show every possible field in the default table.
+
+Use progressive disclosure.
+
+Allow:
+
+* Search
+* Status filtering
+* Payment filtering
+* Property filtering
+* Date filtering
+* Guest filtering
+* Sorting
+* Pagination
+
+Use server-side filtering and pagination where supported.
+
+Do not load thousands of records unnecessarily.
+
+---
+
+# 6. BOOKING ROW UX
+
+The row should communicate status immediately.
+
+Use clear status badges:
+
+Pending
+Confirmed
+Checked-in
+Checked-out
+Cancelled
+No-show
+
+Payment:
+
+Unpaid
+Partially Paid
+Paid
+Refunded
+Failed
+
+Do not rely only on colors.
+
+Use text/icon/state combinations where appropriate.
+
+---
+
+# 7. BOOKING ACTIONS
+
+Actions should depend on the booking state.
+
+Examples:
+
+Pending:
+
+* View
+* Confirm
+* Cancel
+
+Confirmed:
+
+* View
+* Check-in
+* Cancel
+
+Checked-in:
+
+* View
+* Extend Stay
+* Add Service
+* Check-out
+
+Checked-out:
+
+* View
+* Refund if applicable
+* View receipt
+
+Cancelled:
+
+* View
+* View refund
+* View history
+
+Never show impossible actions.
+
+Never allow the frontend to bypass backend state validation.
+
+---
+
+# 8. BOOKING DETAILS
+
+Create a dedicated Booking Details experience.
+
+The screen should not become a giant wall of information.
+
+Use a clear hierarchy.
+
+Header:
+
+* Booking ID
+* Current booking status
+* Payment status
+* Main contextual actions
 
 Example:
 
-Approve Booking
-→ PUT /api/v1/admin/bookings/{id}/status
-→ permission: bookings.approve
-→ body: { status: "confirmed" }
+Booking #GN-12345
 
-Property Update
-→ PUT /api/v1/admin/properties/{id}
-→ permission: properties.update
+Confirmed
+Paid
 
-Staff Creation
-→ POST /api/v1/admin/staff
-→ permission: staff.create
-
-Concierge Update
-→ PUT /api/v1/admin/concierge/{id}
-→ permission: concierge.update
-
-Create a single source of truth for API contracts.
-
-Do not duplicate endpoint definitions throughout the application.
-
-At the end produce:
-
-API Contract Matrix
-Permission Matrix
-Request/Response Type Matrix
-Error Matrix
-Frontend Action → Backend Endpoint Matrix
-```
+[Check-in]
+[More]
 
 ---
 
-# المرحلة 3 — Authentication + RBAC Security
+# 9. BOOKING DETAILS SECTIONS
 
-هنا بنقفل النظام من ناحية الصلاحيات.
+Use tabs or clearly separated sections.
 
-المواصفات أصلًا بتطلب RBAC، granular permissions، 2FA، وإمكانية إنهاء الجلسات. 
+Recommended:
 
-```text
-You are now acting as a Senior Application Security Engineer.
+Overview
+Guest
+Stay
+Payment
+Activity
 
-Implement and audit the authentication and authorization architecture.
+## Overview
 
-The platform contains these roles:
+Show:
 
-SUPER_ADMIN
-OPERATIONS_ADMIN
-REAL_ESTATE_DIRECTOR
-VIP_CONCIERGE_AGENT
-and any additional roles already supported by the backend.
+* Property
+* Unit
+* Check-in
+* Check-out
+* Number of guests
+* Duration
+* Booking creation date
+* Total amount
 
-IMPORTANT SECURITY PRINCIPLE:
+The property and unit should be clickable.
 
-Frontend permissions are UX protection only.
+The guest should be clickable.
 
-The backend MUST remain the final authority.
+The payment section should be clickable.
 
-Never rely on:
-
-- hidden buttons
-- disabled buttons
-- route hiding
-- frontend role checks alone
-
-for actual security.
-
-Implement:
-
-1. Authentication state
-2. Session validation
-3. Token/session expiration handling
-4. Protected routes
-5. Role-based access
-6. Permission-based access
-7. Server-side authorization where applicable
-8. Permission guards
-9. Route guards
-10. API authorization handling
-11. 401 handling
-12. 403 handling
-13. Session expiration handling
-14. Forced logout handling
-15. Multi-session handling if supported
-16. 2FA state handling
-17. Secure logout
-
-Create granular permissions such as:
-
-bookings.view
-bookings.create
-bookings.update
-bookings.cancel
-bookings.refund
-bookings.approve
-
-properties.view
-properties.create
-properties.update
-properties.delete
-properties.publish
-
-pricing.view
-pricing.create
-pricing.update
-pricing.delete
-
-finance.view
-finance.refund
-finance.payout
-finance.export
-
-staff.view
-staff.create
-staff.update
-staff.delete
-staff.force_logout
-
-settings.view
-settings.update
-
-audit.view
-
-concierge.view
-concierge.assign
-concierge.update
-concierge.convert
-
-customers.view
-customers.update
-customers.export
-
-investors.view
-investors.create
-investors.update
-
-IMPORTANT:
-
-Never expose permissions that the authenticated user does not have.
-
-Never trust role/permission values coming from client-side storage.
-
-Never store sensitive authorization information in insecure client-controlled locations.
-
-Do not expose secrets.
-
-Do not expose internal API keys.
-
-Do not expose payment secret keys.
-
-Do not expose database credentials.
-
-At the end perform an authorization audit and report possible:
-
-- IDOR
-- BOLA
-- privilege escalation
-- broken access control
-- unauthorized API access
-- session fixation
-- insecure token handling
-```
+This creates a connected operational workflow.
 
 ---
 
-# المرحلة 4 — Security Hardening
+# 10. GUEST SECTION
 
-هنا نحقق طلبك بتاع إن الموقع مايبقاش سهل يتلعب فيه.
+Display:
 
-**مهم:** مفيش موقع نقدر نضمن إنه "مستحيل الاختراق"، لكن نقدر نخليه مبني بأسلوب دفاعي قوي ونقلل المخاطر بشكل كبير.
+* Guest name
+* Phone
+* Email
+* Number of guests
+* Relevant booking information
 
-```text
-You are now acting as a defensive Web Application Security Engineer.
+Sensitive information must follow backend authorization.
 
-Harden the existing application against common web application vulnerabilities.
+Never expose unnecessary PII.
 
-This is defensive security work only.
-
-Do not create offensive exploitation tools.
-
-Do not add attack payloads.
-
-Do not create malware.
-
-Do not create credential harvesting.
-
-Do not create unauthorized access mechanisms.
-
-Audit and harden the application against:
-
-1. Broken Access Control
-2. IDOR / BOLA
-3. XSS
-4. CSRF where applicable
-5. SQL Injection through backend integration
-6. Command Injection risks
-7. SSRF risks
-8. File Upload vulnerabilities
-9. Path Traversal
-10. Open Redirects
-11. Authentication weaknesses
-12. Session vulnerabilities
-13. Privilege escalation
-14. Rate-limit abuse
-15. Brute-force attempts
-16. Sensitive information disclosure
-17. API enumeration
-18. Excessive data exposure
-19. Mass assignment
-20. Unsafe redirects
-21. Insecure CORS
-22. Security header weaknesses
-23. Dependency vulnerabilities
-24. Debug information exposure
-25. Production error leakage
-
-Frontend requirements:
-
-- Never expose secrets.
-- Never trust client input.
-- Validate forms.
-- Sanitize where required.
-- Handle API errors safely.
-- Never display raw server exceptions to users.
-- Do not expose stack traces.
-- Do not expose database errors.
-- Do not expose internal service information.
-
-Backend requirements:
-
-- Validate all input.
-- Authorize every protected operation.
-- Apply rate limiting.
-- Apply proper request size limits.
-- Validate file types and file sizes.
-- Use secure storage for uploaded files.
-- Use secure HTTP headers.
-- Use secure cookie/session configuration where applicable.
-- Log security-sensitive events.
-- Avoid logging passwords, tokens, payment secrets, or sensitive personal data.
-
-For every security improvement explain:
-
-Threat
-→ Risk
-→ Mitigation
-→ Implementation
-→ Verification
-
-Do not claim the system is "100% secure".
-
-At the end generate a Security Hardening Checklist.
-```
+Never display sensitive information simply because it exists in the API.
 
 ---
 
-# المرحلة 5 — UI/UX بدون تكرار التصميم
+# 11. STAY MANAGEMENT
 
-دي مهمة جدًا لأنك قلت إنك **مش عايز التصميم يبقى متشابه**.
+Create a dedicated operational Stay Management experience.
 
-المقصود هنا مش إن كل Module يبقى له Design غريب؛ يبقى عندنا **Design System واحد** لكن كل Module له interaction pattern مناسب لطبيعته.
+The purpose is not to duplicate bookings.
 
-```text
-You are now acting as a Senior Product Designer and UX Architect.
+It answers:
 
-Redesign the admin dashboard UI while preserving the existing business requirements and backend contracts.
+"Who is physically staying now?"
 
-IMPORTANT:
+Provide:
 
-Do NOT create repetitive pages.
+* Currently staying
+* Expected arrivals
+* Expected departures
+* Today's check-ins
+* Today's check-outs
+* Late check-outs
 
-Do NOT make every module look identical.
+Use operational tables/lists instead of excessive cards.
 
-Do NOT use the same card layout everywhere.
+---
 
-Do NOT turn every screen into a generic CRUD table.
+# 12. STAY STATUS
 
-The application should have ONE coherent Design System but DIFFERENT UX patterns based on the job being performed.
+Recommended states:
+
+Expected
+Checked-in
+In progress
+Checked-out
+Extended
+No-show
+
+The actual state machine must come from the backend.
+
+Do not implement an independent frontend state machine.
+
+---
+
+# 13. CHECK-IN UX
+
+When an authorized admin clicks Check-in:
+
+Open a confirmation/action flow.
+
+Show:
+
+* Guest
+* Property
+* Unit
+* Booking
+* Scheduled check-in
+* Current time
+* Important notes
+
+Then:
+
+[Confirm Check-in]
+
+After successful completion:
+
+* Update the booking
+* Update the stay
+* Refresh affected data
+* Show success feedback
+* Add activity entry if backend supports it
+
+Do not optimistically display a successful state if the backend operation fails.
+
+---
+
+# 14. CHECK-OUT UX
+
+When clicking Check-out:
+
+Show:
+
+* Guest
+* Property
+* Unit
+* Booking
+* Scheduled checkout
+* Current stay status
+* Outstanding payment if applicable
+* Relevant notes
+
+If outstanding payment prevents checkout according to backend business rules, explain the reason clearly.
+
+Do not silently block the user.
+
+Do not invent business rules.
+
+Use backend validation as the authority.
+
+---
+
+# 15. EXTEND STAY
+
+Provide an Extend Stay workflow where supported.
+
+The flow should:
+
+1. Select new checkout date.
+2. Validate availability.
+3. Show price impact.
+4. Show updated total if applicable.
+5. Confirm.
+6. Send request to backend.
+7. Refresh booking/stay state.
+
+Never assume availability.
+
+Never calculate authoritative pricing only on the frontend.
+
+---
+
+# 16. BOOKING ACTIVITY TIMELINE
+
+Create a professional timeline.
+
+Example:
+
+Booking created
+↓
+Payment received
+↓
+Booking confirmed
+↓
+Guest checked in
+↓
+Service added
+↓
+Guest checked out
+
+Each event should show:
+
+* Event
+* Timestamp
+* Actor when available
+* Relevant metadata
+
+This is an operational audit trail.
+
+Do not fabricate timeline events.
+
+---
+
+# 17. PROPERTY MANAGEMENT UX
+
+Properties represent inventory.
+
+Create a dedicated Properties section.
+
+Top:
+
+Properties
+
+Short description
+
+Primary action:
+
+* Add Property
+
+Then:
+
+Search
+Filters
+View mode
+
+Possible view modes:
+
+* Table
+* Compact grid
+
+Do not force a visual grid if it reduces operational efficiency.
+
+For large property inventories, table view should be the default.
+
+---
+
+# 18. PROPERTY LIST
+
+Default fields:
+
+* Property
+* Type
+* Location
+* Owner
+* Units
+* Availability
+* Status
+* Rating if available
+* Updated at
+* Actions
+
+Do not overload the table.
+
+Use details pages for secondary information.
+
+---
+
+# 19. PROPERTY STATUS
+
+Possible states depending on backend:
+
+Draft
+Pending Approval
+Active
+Suspended
+Maintenance
+Archived
+
+Do not create states that don't exist in the backend.
+
+The UI must reflect the actual backend domain model.
+
+---
+
+# 20. PROPERTY DETAILS
+
+Property details should use a structured layout.
+
+Header:
+
+Property name
+
+Status
+
+Location
+
+Owner
+
+Primary actions
+
+Possible actions:
+
+Edit
+Publish
+Unpublish
+Suspend
+Archive
+
+Only show actions allowed by the current user's permissions and property state.
+
+---
+
+# 21. PROPERTY DETAILS TABS
+
+Recommended:
+
+Overview
+Units
+Media
+Amenities
+Pricing
+Availability
+Services
+Maintenance
+Activity
+
+Only implement tabs that map to real backend capabilities.
+
+Do not create empty tabs simply to make the interface look complete.
+
+---
+
+# 22. PROPERTY OVERVIEW
+
+Show:
+
+* Name
+* Description
+* Type
+* Location
+* Address
+* Owner
+* Status
+* Capacity
+* Created date
+* Updated date
+
+Use sections.
+
+Do not turn every field into a separate card.
+
+---
+
+# 23. UNITS / VILLAS
+
+A property may contain multiple bookable units.
+
+Example:
+
+Property
+├── Villa A
+├── Villa B
+├── Villa C
+└── Villa D
+
+Each unit should support, where backend allows:
+
+* Name
+* Type
+* Capacity
+* Bedrooms
+* Bathrooms
+* Beds
+* Amenities
+* Images
+* Pricing
+* Availability
+* Status
+
+The user should be able to navigate:
+
+Property → Unit → Bookings
+
+and:
+
+Booking → Unit → Property
+
+---
+
+# 24. UNIT DETAILS UX
+
+Create a dedicated Unit Details page or drawer depending on the existing routing architecture.
+
+Header:
+
+Unit name
+Status
+Property name
+
+Actions:
+
+Edit
+Block
+Unblock
+Maintenance
+
+Tabs/sections:
+
+Overview
+Bookings
+Pricing
+Availability
+Media
+Amenities
+Activity
+
+Again, do not create fake functionality.
+
+---
+
+# 25. AVAILABILITY MANAGEMENT
+
+Availability is one of the most important operational screens.
+
+Build a calendar-oriented experience.
+
+Allow admins to understand:
+
+Available
+Booked
+Blocked
+Maintenance
+Unavailable
+
+Use a clear legend.
+
+Do not rely only on colors.
+
+Calendar interactions must be safe.
+
+Before changing availability:
+
+* Validate permission
+* Validate current state
+* Validate conflicts
+* Confirm destructive changes
+
+---
+
+# 26. PRICING MANAGEMENT
+
+Pricing should be separated from general property editing.
+
+Show:
+
+* Base price
+* Seasonal pricing
+* Weekend pricing if supported
+* Holiday pricing if supported
+* Minimum nights
+* Maximum nights
+
+Use date ranges where applicable.
+
+Never make frontend calculations authoritative.
+
+The backend remains the source of truth for final pricing.
+
+---
+
+# 27. PROPERTY MEDIA
+
+Media management should support:
+
+* Cover image
+* Gallery
+* Videos if supported
+
+Provide:
+
+* Upload
+* Remove
+* Reorder
+* Set cover
+
+Only implement capabilities actually supported by the backend/storage architecture.
+
+Do not expose private storage URLs if the architecture uses protected media.
+
+---
+
+# 28. AMENITIES
+
+Create reusable amenity management.
+
+Avoid hardcoding dozens of amenities directly inside components.
+
+Use backend-provided amenity data where available.
+
+Support:
+
+* Add
+* Remove
+* Edit if authorized
+
+---
+
+# 29. MAINTENANCE
+
+Property/unit maintenance should be operational.
+
+Show:
+
+* Open issues
+* In progress
+* Resolved
+* Priority
+* Assigned staff
+* Created date
+* Updated date
+
+Do not mix maintenance issues into booking logic.
+
+---
+
+# 30. GLOBAL SEARCH
+
+If supported by the existing architecture, provide admin search capable of finding:
+
+* Booking
+* Guest
+* Property
+* Unit
+
+Search should return clearly categorized results.
+
+Example:
+
+Bookings
+#GN-12345
+
+Guests
+Ahmed Mohamed
+
+Properties
+Sunset Villa
+
+Units
+Villa A
+
+Do not create a search engine in the frontend.
+
+Use backend search APIs where appropriate.
+
+---
+
+# 31. EMPTY STATES
+
+Every screen must have intentional empty states.
+
+Examples:
+
+No bookings found.
+
+No properties found.
+
+No active stays.
+
+No upcoming check-ins.
+
+No maintenance issues.
+
+Do not show blank tables.
+
+Do not use fake data.
+
+Provide useful actions when appropriate.
+
+---
+
+# 32. LOADING STATES
+
+Use proper skeleton/loading states.
+
+Do not freeze the entire dashboard.
+
+For tables:
+
+Show table skeleton.
+
+For details:
+
+Show section skeleton.
+
+For actions:
+
+Disable only the affected action.
+
+Do not block the entire interface unnecessarily.
+
+---
+
+# 33. ERROR STATES
+
+Errors must be understandable.
+
+Bad:
+
+"Request failed."
+
+Better:
+
+"Unable to confirm this booking. The booking may have changed or is no longer available."
+
+If backend returns validation information, display safe human-readable messages.
+
+Never display:
+
+* SQL errors
+* stack traces
+* internal server paths
+* secrets
+* raw exception messages
+* sensitive backend details
+
+---
+
+# 34. DESTRUCTIVE ACTIONS
+
+For:
+
+* Cancel booking
+* Refund
+* Suspend property
+* Archive property
+* Delete media
+* Block availability
+
+Use confirmation dialogs.
+
+The confirmation should explain:
+
+What will happen.
+
+What may be affected.
+
+Whether the action is reversible.
+
+Do not use generic:
+
+"Are you sure?"
+
+---
+
+# 35. UNSAVED CHANGES
+
+Forms must detect unsaved changes.
+
+If the user attempts to leave:
+
+Show a clear confirmation.
+
+Do not silently lose form data.
+
+---
+
+# 36. FORMS
+
+All forms must:
+
+* Validate inputs
+* Show field-level errors
+* Preserve valid input after errors
+* Disable duplicate submission
+* Show loading state
+* Handle backend validation errors
+* Refresh affected data after success
+
+Avoid giant forms.
+
+Use logical sections.
+
+Example property form:
+
+Basic Information
+Location
+Capacity
+Amenities
+Media
+Pricing
+Availability
+
+---
+
+# 37. RESPONSIVE UX
+
+The admin dashboard must work on:
+
+* Desktop
+* Laptop
+* Tablet
+
+Desktop is the primary admin environment.
+
+For smaller screens:
+
+Do not simply shrink tables.
 
 Use:
 
-- Shared typography
-- Shared spacing system
-- Shared navigation
-- Shared buttons
-- Shared form controls
-- Shared status system
-- Shared modal behavior
-- Shared tables
-- Shared visual language
-
-But each module should have its own information architecture.
-
-Examples:
-
-Dashboard
-→ command center
-→ KPIs
-→ live activity
-→ critical alerts
-→ charts
-
-Bookings
-→ operational workspace
-→ filters
-→ reservation table
-→ calendar
-→ timeline
-→ booking drawer/modal
-
-Properties
-→ inventory management
-→ gallery
-→ map
-→ availability calendar
-→ property details
-
-Pricing
-→ rule builder
-→ season timeline
-→ pricing simulator
-
-Yachts
-→ fleet management
-→ availability slots
-→ schedule
-
-Events
-→ event management
-→ ticket tiers
-→ capacity
-→ QR operations
-
-Concierge
-→ CRM/work queue
-→ priorities
-→ assignment
-→ timeline
-→ communication
-
-Finance
-→ financial command center
-→ transactions
-→ payouts
-→ reconciliation
-
-Staff
-→ security administration
-→ users
-→ roles
-→ permissions
-→ sessions
-
-Audit
-→ security timeline
-→ filters
-→ event details
-
-CRM
-→ customer 360
-→ history
-→ preferences
-→ communication
-
-Every page must prioritize:
-
-1. Clarity
-2. Speed
-3. Information hierarchy
-4. Practical workflow
-5. Error prevention
-6. Responsive behavior
-7. Accessibility
-
-Avoid unnecessary animations.
-
-Animations should communicate state changes, not decorate the interface.
-
-Do not sacrifice usability for visual effects.
-```
+* Horizontal scrolling
+* Responsive columns
+* Drawer details
+* Stacked information
+* Compact actions
 
 ---
 
-# المرحلة 6 — تحويل كل Module إلى Workflow عملي
+# 38. ACCESSIBILITY
 
-بدل ما نخلي AI يعمل CRUD وخلاص.
+Use:
 
-```text
-You are now acting as a Senior Product Engineer.
+* Keyboard navigation
+* Visible focus states
+* Semantic buttons
+* Proper labels
+* Accessible dialogs
+* Accessible form errors
+* Sufficient contrast
 
-Convert every dashboard module from simple CRUD screens into complete operational workflows.
+Never use icons as the only indication of important meaning.
 
-For every action define:
+---
 
-User Intent
-→ UI Action
-→ Validation
-→ Permission Check
-→ API Request
-→ Backend Processing
-→ Success State
-→ Error State
-→ Audit Event
-→ UI Refresh
+# 39. PERMISSIONS
 
-Implement this for:
+Frontend visibility must respect backend permissions.
 
-Bookings
-Properties
-Pricing
-Yachts
-Events
-Staff
-Concierge
-Finance
-Customers
-Investors
-Settings
+Possible permissions:
+
+booking.view
+booking.create
+booking.update
+booking.cancel
+booking.checkin
+booking.checkout
+booking.refund
+
+property.view
+property.create
+property.update
+property.publish
+property.suspend
+property.archive
+
+unit.view
+unit.create
+unit.update
+unit.block
+
+pricing.view
+pricing.update
+
+availability.view
+availability.update
+
+maintenance.view
+maintenance.manage
+
+Use the actual permission system already implemented by the project if it differs.
+
+Do not hardcode role names unnecessarily.
+
+Backend authorization is always authoritative.
+
+---
+
+# 40. DATA FETCHING
+
+Follow the existing frontend data-fetching architecture.
+
+Do not introduce another state management strategy without a strong reason.
+
+Use:
+
+* Proper caching where appropriate
+* Request cancellation
+* Pagination
+* Debounced search
+* Server-side filters
+* Refetch/invalidation after mutations
+
+Avoid:
+
+Fetching the same data repeatedly.
+
+Fetching the entire database.
+
+N+1 frontend requests.
+
+Unnecessary polling.
+
+---
+
+# 41. API INTEGRATION
+
+Before implementing each feature:
+
+Find the existing API endpoint.
+
+Verify:
+
+HTTP method
+Path
+Authentication
+Authorization
+Request body
+Validation
+Response
+Error structure
+Pagination
+Filtering
+Sorting
+
+If an endpoint is missing:
+
+DO NOT silently invent it.
+
+Document the missing backend capability and implement the minimum backend endpoint required, following the existing Laravel architecture.
+
+---
+
+# 42. BACKEND INTEGRATION RULE
+
+Laravel remains responsible for:
+
+* Business rules
+* Authorization
+* Booking state transitions
+* Pricing
+* Availability
+* Payment rules
+* Refund rules
+* Data integrity
+* Concurrency
+* Validation
+
+Next.js remains responsible for:
+
+* Presentation
+* Interaction
+* Form state
+* Client-side validation for UX
+* Loading states
+* Error presentation
+* Navigation
+
+Never duplicate authoritative business rules.
+
+---
+
+# 43. CONCURRENCY
+
+This is extremely important.
+
+Booking operations can be concurrent.
+
+Do not assume:
+
+"If the UI says available, it is definitely available."
+
+The backend must validate the final operation.
+
+The frontend must gracefully handle conflicts.
 
 Example:
 
-Booking Confirmation:
+Two admins attempt to modify the same booking.
 
-User clicks Confirm
-↓
-Check bookings.update/approve permission
-↓
-Validate booking state
-↓
-Confirm availability
-↓
-Send API request
-↓
-Backend processes transaction
-↓
-Booking becomes Confirmed
-↓
-Audit event recorded
-↓
-Notification generated
-↓
-UI updates
-↓
-Success message
+The second operation must receive a safe conflict response.
 
-If any step is not supported by the backend:
+Display:
 
-DO NOT simulate it.
+"This booking was updated by another operation. Refreshing the latest information..."
 
-Mark the missing backend capability.
-
-Every destructive operation must require:
-
-- explicit confirmation
-- clear description
-- affected resource
-- permission verification
-- proper API response handling
-
-For financial actions:
-
-Require additional confirmation where appropriate.
-
-For irreversible actions:
-
-Use stronger confirmation UX.
-
-For high-risk actions:
-
-Require appropriate elevated permission.
-
-Never use optimistic UI for irreversible financial/security actions unless the backend contract explicitly supports it.
-```
+Then refresh the relevant data.
 
 ---
 
-# المرحلة 7 — Error Handling + Loading + Empty States
+# 44. URL / ROUTING DESIGN
 
-دي هتمنع الموقع من شكل "بيطلع Error وخلاص".
+Use meaningful routes.
 
-```text
-You are now acting as a Senior Frontend Reliability Engineer.
+Example:
 
-Implement a unified application state system.
+/admin/bookings
 
-Every asynchronous operation must support:
+/admin/bookings/[id]
 
-1. Loading
-2. Success
-3. Empty
-4. Validation Error
-5. Unauthorized
-6. Forbidden
-7. Not Found
-8. Conflict
-9. Rate Limited
-10. Server Error
-11. Network Error
-12. Timeout
+/admin/stays
 
-Create a consistent error-handling architecture.
+/admin/properties
 
-Rules:
+/admin/properties/[id]
 
-Never show raw API errors.
+/admin/properties/[id]/units
 
-Never show stack traces.
+/admin/properties/[id]/units/[unitId]
 
-Never expose database errors.
+/admin/properties/[id]/availability
 
-Never expose internal server paths.
+/admin/properties/[id]/pricing
 
-Never expose secrets.
+Use the existing routing conventions if different.
 
-Never silently swallow errors.
+Do not create unnecessary nested routes.
 
-Every error should provide:
+---
 
-- Human-readable message
-- Appropriate action
-- Retry where appropriate
-- Support/reference ID where appropriate
+# 45. UX PRINCIPLE: PROGRESSIVE DISCLOSURE
+
+The default screen should answer:
+
+"What is happening?"
+
+The details screen should answer:
+
+"Why is it happening?"
+
+The action flow should answer:
+
+"What can I do?"
+
+Do not show every piece of information at once.
+
+---
+
+# 46. UX PRINCIPLE: FEWER CLICKS
+
+Common workflows should be extremely fast.
+
+Admin needs to:
+
+Find booking
+→ Open booking
+→ Check status
+→ Execute action
+
+or:
+
+Find property
+→ Open property
+→ Open unit
+→ Check availability
+
+Avoid forcing users through unnecessary screens.
+
+---
+
+# 47. UX PRINCIPLE: CONTEXT PRESERVATION
+
+When navigating back:
+
+Preserve:
+
+* Search
+* Filters
+* Pagination
+* Sorting
+* Selected tab
+
+Do not force admins to rebuild their context after every action.
+
+---
+
+# 48. UX PRINCIPLE: ACTION-FIRST DESIGN
+
+The most important actions should be easy to find.
 
 Examples:
 
-401
-→ Session expired
-→ Sign in again
+Booking:
 
-403
-→ You do not have permission to perform this action
+Check-in
+Check-out
+Cancel
 
-404
-→ Resource no longer exists
+Property:
 
-409
-→ Resource changed or booking conflict occurred
+Edit
+Publish
+Suspend
 
-422
-→ Validation errors
+Unit:
 
-429
-→ Too many requests
+Block
+Unblock
+Maintenance
 
-500
-→ Something went wrong
-→ Try again later
+Do not bury primary operational actions inside three nested menus.
 
-Implement reusable:
+---
 
-ErrorBoundary
-ApiErrorHandler
-Toast system
-Form error system
-Loading skeletons
+# 49. VISUAL DESIGN
+
+Keep the existing GouNow visual identity.
+
+Improve hierarchy rather than inventing an unrelated design.
+
+Use:
+
+* Consistent spacing
+* Clear typography
+* Controlled card usage
+* Professional tables
+* Subtle borders
+* Clear status indicators
+* Consistent buttons
+* Consistent forms
+* Consistent dialogs
+
+Avoid:
+
+* Excessive gradients
+* Excessive glassmorphism
+* Huge cards
+* Excessive shadows
+* Random colors
+* Decorative animations
+* Dashboard clutter
+
+The interface should feel like a serious production operations platform.
+
+---
+
+# 50. DO NOT MAKE EVERYTHING A CARD
+
+Use:
+
+Tables for datasets.
+
+Lists for activity.
+
+Tabs for related information.
+
+Calendars for availability.
+
+Drawers for quick inspection.
+
+Dialogs for confirmation.
+
+Cards only when grouping information improves comprehension.
+
+This is critical.
+
+---
+
+# 51. PROPERTY ↔ BOOKING CONNECTIONS
+
+Every relevant entity should be navigable.
+
+Booking:
+
+Guest → Guest profile
+
+Property → Property details
+
+Unit → Unit details
+
+Payment → Payment details
+
+Stay → Stay details
+
+Property:
+
+Owner → Owner profile
+
+Unit → Unit details
+
+Bookings → Booking list filtered to property
+
+Availability → Availability calendar
+
+This creates a connected admin system instead of isolated CRUD pages.
+
+---
+
+# 52. AUDITABILITY
+
+Every important mutation should produce or consume backend audit/activity information where supported.
+
+Important actions:
+
+* Booking status change
+* Check-in
+* Check-out
+* Cancellation
+* Refund
+* Property publish
+* Property suspension
+* Availability block
+* Pricing change
+
+Do not create fake audit records from the frontend.
+
+---
+
+# 53. PERFORMANCE
+
+The implementation must be optimized for large datasets.
+
+Do not:
+
+* Render thousands of table rows
+* Load all properties
+* Load all bookings
+* Fetch unnecessary relations
+* Re-render the entire dashboard after one action
+
+Use:
+
+Pagination
+Filtering
+Memoization where appropriate
+Virtualization only where actually necessary
+Server-side operations
+
+---
+
+# 54. TESTING
+
+Before finishing:
+
+Run existing tests.
+
+Add tests for important workflows.
+
+At minimum test:
+
+Booking list loading
+
+Booking filtering
+
+Booking details
+
+Permission restrictions
+
+Confirm booking
+
+Cancel booking
+
+Check-in
+
+Check-out
+
+Property list
+
+Property details
+
+Unit navigation
+
+Availability changes
+
+Pricing changes
+
+Error handling
+
+Loading states
+
 Empty states
-Retry actions
-Confirmation states
 
-Make the UI resilient to slow APIs and temporary network failures.
-```
+Unauthorized operations
 
----
-
-# المرحلة 8 — Backend ↔ Frontend Integration Verification
-
-دي مرحلة **ممنوع فيها الشكل فقط**؛ بنختبر إن كل زر فعلًا مربوط بالـ Backend.
-
-```text
-You are now acting as a Full-Stack Integration QA Engineer.
-
-Audit every interactive feature in the admin dashboard.
-
-For every button, form, filter, modal, table action, and workflow answer:
-
-1. What does it do?
-2. Which permission is required?
-3. Which API endpoint does it call?
-4. What request does it send?
-5. What response does it expect?
-6. What happens on success?
-7. What happens on failure?
-8. Is the operation audited?
-9. Is the operation idempotent where required?
-10. Is the UI synchronized with the backend state?
-
-Create a matrix:
-
-UI Element
-→ Module
-→ Action
-→ Permission
-→ Endpoint
-→ HTTP Method
-→ Request
-→ Response
-→ Error States
-→ Audit Event
-
-Search the entire project for:
-
-- TODO
-- FIXME
-- mock data
-- fake API
-- hardcoded IDs
-- hardcoded users
-- hardcoded permissions
-- fake success responses
-- console.log
-- temporary bypasses
-- disabled security checks
-- placeholder endpoints
-
-Remove production-only fake behavior.
-
-Do not remove intentional demo/example data without verifying its purpose.
-
-If backend functionality is missing:
-
-mark it as BACKEND REQUIRED.
-
-Do not implement fake behavior to make the UI appear functional.
-```
+Concurrent/conflict responses where practical
 
 ---
 
-# المرحلة 9 — Security + Production Readiness Audit
+# 55. FINAL VALIDATION
 
-```text
-You are now acting as a Senior Production Security Auditor.
+After implementation verify:
 
-Perform a final pre-production audit of the entire application.
-
-Check:
-
-AUTHENTICATION
-- session handling
-- expiration
-- logout
-- forced logout
-- 2FA
-- password handling
-
-AUTHORIZATION
-- RBAC
-- granular permissions
-- server-side enforcement
-- route protection
-- API protection
-- privilege escalation
-
-DATA SECURITY
-- secrets
-- environment variables
-- PII
-- payment information
-- logs
-- API responses
-
-APPLICATION SECURITY
-- XSS
-- CSRF where applicable
-- IDOR/BOLA
-- injection risks
-- SSRF
-- file uploads
-- path traversal
-- open redirects
-- CORS
-- security headers
-
-API SECURITY
-- validation
-- rate limiting
-- pagination
-- maximum request size
-- error handling
-- authorization
-- sensitive field exposure
-
-BUSINESS LOGIC
-- double booking
-- race conditions
-- duplicate payments
-- duplicate refunds
-- unauthorized discounts
-- unauthorized financial changes
-- unauthorized property publishing
-- unauthorized staff creation
-
-AUDITABILITY
-- sensitive actions logged
-- actor
-- role
-- action
-- resource
-- resource ID
-- timestamp
-- result
-- appropriate request metadata
-
-PRODUCTION
-- debug disabled
-- production error pages
-- secure configuration
-- dependency audit
-- build verification
-- environment validation
-
-Do not claim "100% secure".
-
-Instead produce:
-
-Security Score
-Critical Findings
-High Findings
-Medium Findings
-Low Findings
-Fixed Findings
-Remaining Backend Findings
-Remaining Infrastructure Findings
-Production Blockers
-Recommended Next Steps
-```
+1. No TypeScript errors.
+2. No lint errors.
+3. No broken routes.
+4. No broken imports.
+5. No console errors.
+6. No duplicated components unnecessarily.
+7. No fake API endpoints.
+8. No unauthorized actions.
+9. No raw backend errors exposed.
+10. No sensitive data leakage.
+11. No broken mobile/tablet layout.
+12. No unnecessary API requests.
+13. No duplicated business logic.
+14. No destructive action without confirmation.
+15. No empty page without proper empty state.
 
 ---
 
-# المرحلة 10 — Final UX + Architecture Quality Review
+# 56. IMPLEMENTATION ORDER
 
-آخر Prompt قبل الـ Production:
+Execute in this order.
 
-```text
-You are now acting as:
+## STEP 1 — AUDIT
 
-- Senior UX Designer
-- Senior Frontend Engineer
-- Senior Backend Integration Engineer
-- Software Architect
-- Security Engineer
-- QA Engineer
+Inspect:
 
-Perform a final complete review.
+Frontend
+Backend
+Routes
+API
+Models
+Permissions
+Components
+Design system
+Tests
 
-The goal is NOT to add more features.
-
-The goal is to ensure the existing system is:
-
-- Practical
-- Understandable
-- Fast
-- Secure
-- Maintainable
-- Scalable
-- Consistent
-- Backend-connected
-- Production-ready
-
-Review every module:
-
-Dashboard
-Bookings
-Properties
-Pricing
-Yachts
-Events
-Staff
-Concierge
-Finance
-Settings
-Audit Logs
-Customers
-Investors
-
-For every module evaluate:
-
-1. UX quality
-2. Information architecture
-3. Backend integration
-4. Permission enforcement
-5. Error handling
-6. Loading states
-7. Empty states
-8. Validation
-9. Accessibility
-10. Responsiveness
-11. Security
-12. Performance
-13. Maintainability
-14. Reusability
-15. Visual consistency
-16. Workflow efficiency
-
-IMPORTANT:
-
-Do not redesign the whole application unnecessarily.
-
-Do not introduce visual changes just for the sake of change.
-
-Only change something if it improves:
-
-- usability
-- clarity
-- performance
-- consistency
-- security
-- maintainability
-
-At the end produce a Production Readiness Report:
-
-READY
-NOT READY
-BLOCKED BY BACKEND
-BLOCKED BY INFRASTRUCTURE
-BLOCKED BY SECURITY
-OPTIONAL IMPROVEMENTS
-```
+Produce a short implementation map before editing.
 
 ---
 
-# الترتيب اللي أنصحك تمشي به
+## STEP 2 — DESIGN SYSTEM ALIGNMENT
 
-```text
-PHASE 0
-Audit Existing Project
-        ↓
-PHASE 1
-Architecture
-        ↓
-PHASE 2
-Backend Contracts
-        ↓
-PHASE 3
-Authentication + RBAC
-        ↓
-PHASE 4
-Security Hardening
-        ↓
-PHASE 5
-UI/UX + Design System
-        ↓
-PHASE 6
-Operational Workflows
-        ↓
-PHASE 7
-Error / Loading / Empty States
-        ↓
-PHASE 8
-Frontend ↔ Backend Verification
-        ↓
-PHASE 9
-Security Audit
-        ↓
-PHASE 10
-Production Readiness
-```
+Identify reusable:
+
+Table
+Button
+Badge
+Modal
+Drawer
+Form
+Input
+Select
+Date picker
+Tabs
+Pagination
+Skeleton
+Toast
+Empty state
+Error state
+
+Reuse existing components.
+
+Create reusable components only when genuinely missing.
+
+---
+
+## STEP 3 — BOOKING MANAGEMENT
+
+Implement:
+
+Booking list
+Filters
+Search
+Pagination
+Booking details
+Booking actions
+Activity timeline
+
+---
+
+## STEP 4 — STAY MANAGEMENT
+
+Implement:
+
+Active stays
+Arrivals
+Departures
+Check-in
+Check-out
+Extend stay where supported
+
+---
+
+## STEP 5 — PROPERTY MANAGEMENT
+
+Implement:
+
+Property list
+Property details
+Property status
+Property editing
+
+---
+
+## STEP 6 — UNITS / VILLAS
+
+Implement:
+
+Unit list
+Unit details
+Unit editing
+Unit availability
+Unit bookings
+
+---
+
+## STEP 7 — AVAILABILITY
+
+Implement:
+
+Calendar
+Availability status
+Blocking/unblocking
+Conflict handling
+
+---
+
+## STEP 8 — PRICING
+
+Implement:
+
+Pricing display
+Pricing editing
+Date ranges
+Backend-authoritative calculations
+
+---
+
+## STEP 9 — MEDIA / AMENITIES / SERVICES
+
+Implement only backend-supported capabilities.
+
+---
+
+## STEP 10 — POLISH
+
+Improve:
+
+Loading
+Errors
+Empty states
+Responsive behavior
+Accessibility
+Transitions
+Navigation
+Context preservation
+
+---
+
+# 57. IMPORTANT: DO NOT OVERBUILD
+
+Do NOT add:
+
+Kubernetes
+
+Redis
+
+Kafka
+
+RabbitMQ
+
+Microservices
+
+A new database
+
+A new authentication system
+
+A new state management framework
+
+A new UI framework
+
+A new API architecture
+
+unless the existing project explicitly requires them.
+
+This task is primarily about building the best admin UX on top of the existing GouNow architecture.
+
+---
+
+# 58. FINAL DELIVERABLE
+
+When finished, provide:
+
+1. Files changed.
+2. Routes added/changed.
+3. Components added.
+4. API endpoints consumed.
+5. Backend endpoints added, if any.
+6. Permissions used.
+7. Tests added.
+8. Tests executed.
+9. Problems discovered.
+10. Problems fixed.
+11. Remaining limitations.
+
+Most importantly:
+
+Do not claim completion if a feature is only visually implemented.
+
+Every displayed action must either:
+
+* work against the real backend,
+* or clearly be marked as unavailable because the backend capability does not exist.
+
+The final result must feel like a real production administration system used daily by operations staff, not a UI prototype.

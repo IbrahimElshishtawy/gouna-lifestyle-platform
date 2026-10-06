@@ -4,7 +4,14 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Amenity;
+use App\Models\AvailabilityBlock;
+use App\Models\Booking;
+use App\Models\Location;
 use App\Models\Property;
+use App\Models\PropertyCategory;
+use App\Models\SeasonalPrice;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -165,14 +172,68 @@ class PropertyApiController extends Controller
     }
 
     /**
-     * Show single property details for admin.
+     * Show single property details for admin with its full inventory relationships.
      */
     public function show(int $id): JsonResponse
     {
-        $property = Property::with(['category', 'location', 'images', 'amenities'])->findOrFail($id);
+        $property = Property::with([
+            'category',
+            'location',
+            'images',
+            'amenities',
+            'seasonalPrices' => function ($q) {
+                $q->orderBy('start_date');
+            },
+            'availabilityBlocks' => function ($q) {
+                $q->orderBy('start_date');
+            },
+        ])->findOrFail($id);
+
+        $recentBookings = Booking::with('customer')
+            ->where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'reference' => $b->reference,
+                    'customer_name' => $b->customer?->full_name ?? 'Guest User',
+                    'check_in' => $b->check_in ? $b->check_in->toDateString() : '',
+                    'check_out' => $b->check_out ? $b->check_out->toDateString() : '',
+                    'nights' => $b->nights,
+                    'guests' => $b->guests,
+                    'total_cents' => (int) $b->total_cents,
+                    'formatted_total' => number_format(((int) $b->total_cents) / 100, 2) . ' ' . ($b->currency ?? 'EGP'),
+                    'status' => $b->status,
+                    'payment_status' => $b->payment_status,
+                ];
+            });
+
+        $totalBookingsCount = Booking::where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->count();
+
+        $totalRevenueCents = Booking::where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->whereIn('payment_status', ['paid', 'partially_paid'])
+            ->sum('amount_paid_cents');
+
+        $data = $property->toArray();
+        $data['formatted_base_price'] = number_format(((int) $property->base_price_cents) / 100, 2) . ' ' . ($property->currency ?? 'EGP');
+        $data['formatted_sale_price'] = $property->sale_price_cents ? number_format(((int) $property->sale_price_cents) / 100, 2) . ' ' . ($property->currency ?? 'EGP') : null;
+        $data['recent_bookings'] = $recentBookings;
+        $data['stats'] = [
+            'total_bookings' => $totalBookingsCount,
+            'total_revenue_cents' => (int) $totalRevenueCents,
+            'formatted_revenue' => number_format(((int) $totalRevenueCents) / 100, 2) . ' ' . ($property->currency ?? 'EGP'),
+            'seasonal_prices_count' => $property->seasonalPrices->count(),
+            'availability_blocks_count' => $property->availabilityBlocks->count(),
+        ];
 
         return response()->json([
-            'data' => $property,
+            'data' => $data,
         ]);
     }
 
@@ -186,11 +247,25 @@ class PropertyApiController extends Controller
         $validated = $request->validate([
             'title_en' => ['nullable', 'string', 'max:255'],
             'title_ar' => ['nullable', 'string', 'max:255'],
+            'compound' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'bedrooms' => ['nullable', 'integer', 'min:0'],
+            'bathrooms' => ['nullable', 'integer', 'min:0'],
+            'max_guests' => ['nullable', 'integer', 'min:1'],
+            'area_sqm' => ['nullable', 'numeric', 'min:0'],
+            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'max_stay_nights' => ['nullable', 'integer', 'min:1'],
             'base_price_cents' => ['nullable', 'integer', 'min:0'],
             'sale_price_cents' => ['nullable', 'integer', 'min:0'],
+            'cleaning_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'service_fee_cents' => ['nullable', 'integer', 'min:0'],
             'is_published' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
             'is_available' => ['nullable', 'boolean'],
+            'description_en' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
+            'house_rules_en' => ['nullable', 'string'],
+            'house_rules_ar' => ['nullable', 'string'],
         ]);
 
         $property->update($validated);
@@ -210,6 +285,275 @@ class PropertyApiController extends Controller
             'success' => true,
             'message' => 'تم تحديث بيانات العقار بنجاح.',
             'data' => $property,
+        ]);
+    }
+
+    /**
+     * Unified availability calendar data for a property (Booked intervals + Blocked intervals).
+     */
+    public function availabilityCalendar(int $id, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $year = (int) $request->query('year', now()->year);
+
+        $startDate = Carbon::createFromDate($year, 1, 1)->startOfYear()->toDateString();
+        $endDate = Carbon::createFromDate($year, 12, 31)->endOfYear()->toDateString();
+
+        // 1. Confirmed / In-progress Bookings occupying inventory
+        $bookings = Booking::with('customer')
+            ->where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->whereIn('status', ['confirmed', 'paid', 'pending', 'completed'])
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('check_in', [$startDate, $endDate])
+                    ->orWhereBetween('check_out', [$startDate, $endDate])
+                    ->orWhere(function ($sub) use ($startDate, $endDate) {
+                        $sub->where('check_in', '<=', $startDate)
+                            ->where('check_out', '>=', $endDate);
+                    });
+            })
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'reference' => $b->reference,
+                    'guest_name' => $b->customer?->full_name ?? 'Guest User',
+                    'start_date' => $b->check_in ? $b->check_in->toDateString() : '',
+                    'end_date' => $b->check_out ? $b->check_out->toDateString() : '',
+                    'status' => $b->status,
+                    'type' => 'booking',
+                ];
+            });
+
+        // 2. Administrative availability blocks (maintenance, owner use, blocked)
+        $blocks = AvailabilityBlock::where('property_id', $property->id)
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                    ->orWhereBetween('end_date', [$startDate, $endDate])
+                    ->orWhere(function ($sub) use ($startDate, $endDate) {
+                        $sub->where('start_date', '<=', $startDate)
+                            ->where('end_date', '>=', $endDate);
+                    });
+            })
+            ->get()
+            ->map(function ($ab) {
+                return [
+                    'id' => $ab->id,
+                    'start_date' => $ab->start_date ? $ab->start_date->toDateString() : '',
+                    'end_date' => $ab->end_date ? $ab->end_date->toDateString() : '',
+                    'status' => $ab->status,
+                    'reason' => $ab->reason,
+                    'type' => 'block',
+                ];
+            });
+
+        // 3. Seasonal pricing periods
+        $seasons = SeasonalPrice::where('property_id', $property->id)
+            ->where('is_active', true)
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_date', [$startDate, $endDate])
+                    ->orWhereBetween('end_date', [$startDate, $endDate]);
+            })
+            ->get()
+            ->map(function ($sp) {
+                return [
+                    'id' => $sp->id,
+                    'name_en' => $sp->name_en,
+                    'name_ar' => $sp->name_ar,
+                    'start_date' => $sp->start_date ? $sp->start_date->toDateString() : '',
+                    'end_date' => $sp->end_date ? $sp->end_date->toDateString() : '',
+                    'price_cents' => (int) $sp->price_cents,
+                    'formatted_price' => number_format(((int) $sp->price_cents) / 100, 2) . ' EGP',
+                    'priority' => (int) $sp->priority,
+                ];
+            });
+
+        return response()->json([
+            'property_id' => $property->id,
+            'reference_number' => $property->reference_number,
+            'year' => $year,
+            'base_price_cents' => (int) $property->base_price_cents,
+            'booked_ranges' => $bookings,
+            'blocked_ranges' => $blocks,
+            'seasonal_prices' => $seasons,
+        ]);
+    }
+
+    /**
+     * Add an administrative availability block (Maintenance, Owner Use, Closed).
+     */
+    public function addAvailabilityBlock(int $id, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+
+        $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'status' => ['required', 'string', 'in:blocked,maintenance,owner_use'],
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $startDate = Carbon::parse($request->input('start_date'))->toDateString();
+        $endDate = Carbon::parse($request->input('end_date'))->toDateString();
+
+        // Validate conflict with confirmed bookings
+        $hasConflict = Booking::where('bookable_type', Property::class)
+            ->where('bookable_id', $property->id)
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('check_in', [$startDate, $endDate])
+                    ->orWhereBetween('check_out', [$startDate, $endDate])
+                    ->orWhere(function ($sub) use ($startDate, $endDate) {
+                        $sub->where('check_in', '<=', $startDate)
+                            ->where('check_out', '>=', $endDate);
+                    });
+            })
+            ->exists();
+
+        if ($hasConflict) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot block these dates: Conflicting confirmed reservation exists within the requested date range.',
+            ], 422);
+        }
+
+        $block = AvailabilityBlock::create([
+            'property_id' => $property->id,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'status' => $request->input('status', 'blocked'),
+            'reason' => $request->input('reason'),
+            'created_by' => $request->user()?->id,
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'availability_blocked',
+            'entity_type' => 'Property',
+            'entity_id' => $property->id,
+            'description' => "Availability blocked for [{$property->reference_number}] from {$startDate} to {$endDate}. Reason: {$block->reason}",
+            'new_values' => $block->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Availability block created successfully.',
+            'data' => $block,
+        ]);
+    }
+
+    /**
+     * Remove an administrative availability block.
+     */
+    public function removeAvailabilityBlock(int $id, int $blockId, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $block = AvailabilityBlock::where('property_id', $property->id)->findOrFail($blockId);
+
+        $oldValues = $block->toArray();
+        $block->delete();
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'availability_unblocked',
+            'entity_type' => 'Property',
+            'entity_id' => $property->id,
+            'description' => "Availability unblocked for [{$property->reference_number}] between {$oldValues['start_date']} and {$oldValues['end_date']}.",
+            'old_values' => $oldValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Availability block removed successfully.',
+        ]);
+    }
+
+    /**
+     * Add a seasonal price rule to a property.
+     */
+    public function addSeasonalPrice(int $id, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+
+        $validated = $request->validate([
+            'name_en' => ['required', 'string', 'max:255'],
+            'name_ar' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'price_cents' => ['required', 'integer', 'min:0'],
+            'priority' => ['nullable', 'integer', 'min:1'],
+            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $season = SeasonalPrice::create(array_merge($validated, [
+            'property_id' => $property->id,
+            'is_active' => true,
+        ]));
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'seasonal_price_added',
+            'entity_type' => 'Property',
+            'entity_id' => $property->id,
+            'description' => "Seasonal price rule [{$season->name_en}] added to property [{$property->reference_number}]. Rate: " . number_format($season->price_cents / 100, 2) . " EGP/night.",
+            'new_values' => $season->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Seasonal price rule added successfully.',
+            'data' => $season,
+        ]);
+    }
+
+    /**
+     * Remove a seasonal price rule from a property.
+     */
+    public function removeSeasonalPrice(int $id, int $seasonId, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $season = SeasonalPrice::where('property_id', $property->id)->findOrFail($seasonId);
+
+        $oldValues = $season->toArray();
+        $season->delete();
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'seasonal_price_removed',
+            'entity_type' => 'Property',
+            'entity_id' => $property->id,
+            'description' => "Seasonal price rule [{$oldValues['name_en']}] removed from property [{$property->reference_number}].",
+            'old_values' => $oldValues,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Seasonal price rule removed successfully.',
+        ]);
+    }
+
+    /**
+     * Get taxonomy options for properties (Categories, Locations, Amenities).
+     */
+    public function taxonomies(): JsonResponse
+    {
+        $categories = PropertyCategory::orderBy('name_en')->get(['id', 'name_en', 'name_ar', 'slug']);
+        $locations = Location::orderBy('name_en')->get(['id', 'name_en', 'name_ar', 'slug']);
+        $amenities = Amenity::orderBy('name_en')->get(['id', 'name_en', 'name_ar', 'group', 'icon']);
+
+        return response()->json([
+            'categories' => $categories,
+            'locations' => $locations,
+            'amenities' => $amenities,
         ]);
     }
 }
