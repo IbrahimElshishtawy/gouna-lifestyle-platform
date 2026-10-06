@@ -305,6 +305,10 @@ export interface AdminPropertyItem {
   max_guests: number;
   area_sqm: number | null;
   compound?: string | null;
+  address?: string | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  map_url?: string | null;
   is_published: boolean;
   is_available: boolean;
   is_featured: boolean;

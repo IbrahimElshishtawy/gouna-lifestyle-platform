@@ -91,8 +91,8 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
       const data = await getAdminPropertyDetails(propertyId);
       setProperty(data);
       setLocationForm({
-        latitude: data.latitude ? parseFloat(data.latitude) : null,
-        longitude: data.longitude ? parseFloat(data.longitude) : null,
+        latitude: data.latitude ? parseFloat(String(data.latitude)) : null,
+        longitude: data.longitude ? parseFloat(String(data.longitude)) : null,
         map_url: data.map_url || "",
         address: data.address || "",
       });
