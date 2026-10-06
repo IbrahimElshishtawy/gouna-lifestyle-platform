@@ -177,8 +177,12 @@ class AuthController extends Controller
             $token = $user->createToken($deviceName)->plainTextToken;
         } else {
             Auth::login($user, (bool) $request->input('remember', false));
-            $request->session()->regenerate();
-            $request->session()->put('2fa_verified', false);
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+                $request->session()->put('2fa_verified', false);
+            } else {
+                $token = $user->createToken($request->input('device_name', 'API-Client'))->plainTextToken;
+            }
         }
 
         $user->update([
