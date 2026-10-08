@@ -32,20 +32,27 @@ export async function getAdminVenues(params?: {
   if (params?.status && params.status !== "all") query.append("status", params.status);
   if (params?.page) query.append("page", String(params.page));
 
-  const res = await apiClient.get<any>(`/admin/venues?${query.toString()}`);
-  return res;
+  return apiClient<{ data: AdminVenueItem[]; meta?: any }>(`/admin/venues?${query.toString()}`);
 }
 
 export async function createAdminVenue(payload: any): Promise<AdminVenueItem> {
-  const res = await apiClient.post<any>("/admin/venues", payload);
+  const res = await apiClient<{ data: AdminVenueItem }>("/admin/venues", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function updateAdminVenue(id: number, payload: any): Promise<AdminVenueItem> {
-  const res = await apiClient.put<any>(`/admin/venues/${id}`, payload);
+  const res = await apiClient<{ data: AdminVenueItem }>(`/admin/venues/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteAdminVenue(id: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/venues/${id}`);
+  await apiClient<void>(`/admin/venues/${id}`, {
+    method: "DELETE",
+  });
 }

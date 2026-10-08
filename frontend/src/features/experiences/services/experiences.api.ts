@@ -214,3 +214,8 @@ export async function deleteAdminExperience(id: number): Promise<{ success: bool
     method: "DELETE",
   });
 }
+
+export async function getAdminExperienceById(id: number): Promise<{ success: boolean; data: AdminExperienceItem }> {
+  return apiClient(`/admin/experiences/${id}`);
+}
+

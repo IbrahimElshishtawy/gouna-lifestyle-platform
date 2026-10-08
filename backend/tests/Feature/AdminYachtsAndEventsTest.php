@@ -101,6 +101,36 @@ class AdminYachtsAndEventsTest extends TestCase
             ]);
         $pkgRes->assertStatus(201)
             ->assertJsonPath('data.name_en', 'VIP Sunset Toast Cruise');
+        $pkgId = $pkgRes->json('data.id');
+
+        // 4.1 Add Add-on
+        $addonRes = $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/v1/admin/yachts/{$yachtId}/addons", [
+                'name_en' => 'Live Saxophonist & DJ',
+                'price' => 7500.00,
+                'pricing_model' => 'per_booking',
+            ]);
+        $addonRes->assertStatus(201)
+            ->assertJsonPath('data.name_en', 'Live Saxophonist & DJ');
+        $addonId = $addonRes->json('data.id');
+
+        // 4.2 Test Authoritative Price Calculation
+        $priceRes = $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/v1/admin/yachts/{$yachtId}/calculate-price", [
+                'date' => now()->next('Friday')->toDateString(), // weekend
+                'duration_hours' => 4, // 1 extra hour
+                'package_id' => $pkgId,
+                'addon_ids' => [$addonId],
+            ]);
+        $priceRes->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure(['data' => ['base_price', 'weekend_adjustment', 'extra_hours_cost', 'addons_cost', 'final_price']]);
+
+        // 4.3 View Bookings
+        $bookingsRes = $this->actingAs($this->admin, 'sanctum')
+            ->getJson("/api/v1/admin/yachts/{$yachtId}/bookings");
+        $bookingsRes->assertStatus(200)
+            ->assertJsonPath('success', true);
 
         // 5. Add Availability Block
         $blockRes = $this->actingAs($this->admin, 'sanctum')

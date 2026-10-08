@@ -77,6 +77,10 @@ export interface AdminYachtItem {
   rules_ar?: string;
   cancellation_policy_en?: string;
   cancellation_policy_ar?: string;
+  short_description_en?: string;
+  short_description_ar?: string;
+  description_en?: string;
+  description_ar?: string;
   cover_image?: string;
   cover_url?: string;
   gallery?: string[];
@@ -123,46 +127,54 @@ export async function getAdminYachts(params?: {
   if (params?.status && params.status !== "all") query.append("status", params.status);
   if (params?.page) query.append("page", String(params.page));
 
-  const res = await apiClient.get<any>(`/admin/yachts?${query.toString()}`);
-  return res;
+  return apiClient<{ data: AdminYachtItem[]; meta?: any }>(`/admin/yachts?${query.toString()}`);
 }
 
 export async function getYachtDashboard(): Promise<YachtDashboardData> {
-  const res = await apiClient.get<any>("/admin/yachts/dashboard");
+  const res = await apiClient<{ data: YachtDashboardData }>("/admin/yachts/dashboard");
   return res.data;
 }
 
 export async function getYachtTaxonomies(): Promise<YachtTaxonomies> {
-  const res = await apiClient.get<any>("/admin/yachts/taxonomies");
+  const res = await apiClient<{ data: YachtTaxonomies }>("/admin/yachts/taxonomies");
   return res.data;
 }
 
 export async function getYachtById(id: number): Promise<AdminYachtItem> {
-  const res = await apiClient.get<any>(`/admin/yachts/${id}`);
+  const res = await apiClient<{ data: AdminYachtItem }>(`/admin/yachts/${id}`);
   return res.data;
 }
 
 export async function createAdminYacht(payload: any): Promise<AdminYachtItem> {
-  const res = await apiClient.post<any>("/admin/yachts", payload);
+  const res = await apiClient<{ data: AdminYachtItem }>("/admin/yachts", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function updateAdminYacht(id: number, payload: any): Promise<AdminYachtItem> {
-  const res = await apiClient.put<any>(`/admin/yachts/${id}`, payload);
+  const res = await apiClient<{ data: AdminYachtItem }>(`/admin/yachts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteAdminYacht(id: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/yachts/${id}`);
+  await apiClient<void>(`/admin/yachts/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export async function toggleAdminYachtStatus(id: number): Promise<{ status: string }> {
-  const res = await apiClient.patch<any>(`/admin/yachts/${id}/toggle-status`);
-  return res;
+  return apiClient<{ status: string }>(`/admin/yachts/${id}/toggle-status`, {
+    method: "PATCH",
+  });
 }
 
 export async function getYachtAvailability(id: number): Promise<any> {
-  const res = await apiClient.get<any>(`/admin/yachts/${id}/availability`);
+  const res = await apiClient<any>(`/admin/yachts/${id}/availability`);
   return res.data;
 }
 
@@ -172,33 +184,62 @@ export async function addYachtAvailabilityBlock(id: number, payload: {
   status: string;
   reason?: string;
 }): Promise<any> {
-  const res = await apiClient.post<any>(`/admin/yachts/${id}/availability-blocks`, payload);
+  const res = await apiClient<any>(`/admin/yachts/${id}/availability-blocks`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res;
 }
 
 export async function removeYachtAvailabilityBlock(id: number, blockId: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/yachts/${id}/availability-blocks/${blockId}`);
+  await apiClient<void>(`/admin/yachts/${id}/availability-blocks/${blockId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function addYachtPackage(id: number, payload: any): Promise<any> {
-  const res = await apiClient.post<any>(`/admin/yachts/${id}/packages`, payload);
+  const res = await apiClient<any>(`/admin/yachts/${id}/packages`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteYachtPackage(id: number, packageId: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/yachts/${id}/packages/${packageId}`);
+  await apiClient<void>(`/admin/yachts/${id}/packages/${packageId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function addYachtAddon(id: number, payload: any): Promise<any> {
-  const res = await apiClient.post<any>(`/admin/yachts/${id}/addons`, payload);
+  const res = await apiClient<any>(`/admin/yachts/${id}/addons`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteYachtAddon(id: number, addonId: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/yachts/${id}/addons/${addonId}`);
+  await apiClient<void>(`/admin/yachts/${id}/addons/${addonId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function getYachtBookings(id: number): Promise<any> {
-  const res = await apiClient.get<any>(`/admin/yachts/${id}/bookings`);
-  return res;
+  return apiClient<any>(`/admin/yachts/${id}/bookings`);
 }
+
+export async function calculateYachtPrice(id: number, payload: {
+  date: string;
+  duration_hours?: number;
+  package_id?: number;
+  addon_ids?: number[];
+  guests?: number;
+}): Promise<any> {
+  const res = await apiClient<any>(`/admin/yachts/${id}/calculate-price`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+

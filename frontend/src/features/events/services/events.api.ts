@@ -111,56 +111,68 @@ export async function getAdminEvents(params?: {
   if (params?.venue_id) query.append("venue_id", String(params.venue_id));
   if (params?.page) query.append("page", String(params.page));
 
-  const res = await apiClient.get<any>(`/admin/events?${query.toString()}`);
-  return res;
+  return apiClient<{ data: AdminEventItem[]; meta?: any }>(`/admin/events?${query.toString()}`);
 }
 
 export async function getEventDashboard(): Promise<EventDashboardData> {
-  const res = await apiClient.get<any>("/admin/events/dashboard");
+  const res = await apiClient<{ data: EventDashboardData }>("/admin/events/dashboard");
   return res.data;
 }
 
 export async function getEventTaxonomies(): Promise<EventTaxonomies> {
-  const res = await apiClient.get<any>("/admin/events/taxonomies");
+  const res = await apiClient<{ data: EventTaxonomies }>("/admin/events/taxonomies");
   return res.data;
 }
 
 export async function getEventById(id: number): Promise<{ data: AdminEventItem; stats: any }> {
-  const res = await apiClient.get<any>(`/admin/events/${id}`);
-  return res;
+  return apiClient<{ data: AdminEventItem; stats: any }>(`/admin/events/${id}`);
 }
 
 export async function createAdminEvent(payload: any): Promise<AdminEventItem> {
-  const res = await apiClient.post<any>("/admin/events", payload);
+  const res = await apiClient<{ data: AdminEventItem }>("/admin/events", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function updateAdminEvent(id: number, payload: any): Promise<AdminEventItem> {
-  const res = await apiClient.put<any>(`/admin/events/${id}`, payload);
+  const res = await apiClient<{ data: AdminEventItem }>(`/admin/events/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteAdminEvent(id: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/events/${id}`);
+  await apiClient<void>(`/admin/events/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export async function toggleAdminEventStatus(id: number): Promise<{ status: string }> {
-  const res = await apiClient.patch<any>(`/admin/events/${id}/toggle-status`);
-  return res;
+  return apiClient<{ status: string }>(`/admin/events/${id}/toggle-status`, {
+    method: "PATCH",
+  });
 }
 
 export async function getEventTickets(id: number): Promise<TicketType[]> {
-  const res = await apiClient.get<any>(`/admin/events/${id}/tickets`);
+  const res = await apiClient<{ data: TicketType[] }>(`/admin/events/${id}/tickets`);
   return res.data;
 }
 
 export async function saveEventTicketType(id: number, payload: any): Promise<TicketType> {
-  const res = await apiClient.post<any>(`/admin/events/${id}/tickets`, payload);
+  const res = await apiClient<{ data: TicketType }>(`/admin/events/${id}/tickets`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 
 export async function deleteEventTicketType(id: number, ticketTypeId: number): Promise<void> {
-  await apiClient.delete<any>(`/admin/events/${id}/tickets/${ticketTypeId}`);
+  await apiClient<void>(`/admin/events/${id}/tickets/${ticketTypeId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function getEventOrders(id: number, params?: { status?: string; page?: number }): Promise<any> {
@@ -168,18 +180,21 @@ export async function getEventOrders(id: number, params?: { status?: string; pag
   if (params?.status) query.append("status", params.status);
   if (params?.page) query.append("page", String(params.page));
 
-  const res = await apiClient.get<any>(`/admin/events/${id}/orders?${query.toString()}`);
-  return res;
+  return apiClient<any>(`/admin/events/${id}/orders?${query.toString()}`);
 }
 
 export async function cancelEventOrder(id: number, orderId: number): Promise<any> {
-  const res = await apiClient.post<any>(`/admin/events/${id}/orders/${orderId}/cancel`, {});
-  return res;
+  return apiClient<any>(`/admin/events/${id}/orders/${orderId}/cancel`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
 }
 
 export async function refundEventOrder(id: number, orderId: number): Promise<any> {
-  const res = await apiClient.post<any>(`/admin/events/${id}/orders/${orderId}/refund`, {});
-  return res;
+  return apiClient<any>(`/admin/events/${id}/orders/${orderId}/refund`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
 }
 
 export async function performTicketCheckin(id: number, payload: {
@@ -187,21 +202,28 @@ export async function performTicketCheckin(id: number, payload: {
   device_info?: string;
 }): Promise<CheckInResult> {
   try {
-    const res = await apiClient.post<any>(`/admin/events/${id}/check-in`, payload);
-    return res;
+    return await apiClient<CheckInResult>(`/admin/events/${id}/check-in`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
   } catch (err: any) {
-    if (err?.response?.data) {
-      return err.response.data as CheckInResult;
+    if (err?.data && typeof err.data === "object") {
+      return err.data as CheckInResult;
     }
     return {
       success: false,
       result: "invalid",
-      message: err.message || "Network check-in validation failed.",
+      message: err?.message || "Network check-in validation failed.",
     };
   }
 }
 
 export async function searchCheckinTickets(id: number, q: string): Promise<any[]> {
-  const res = await apiClient.get<any>(`/admin/events/${id}/check-in/search?q=${encodeURIComponent(q)}`);
+  const res = await apiClient<{ data: any[] }>(`/admin/events/${id}/check-in/search?q=${encodeURIComponent(q)}`);
   return res.data || [];
 }
+
+export const createEventTicketType = saveEventTicketType;
+export const performEventCheckIn = performTicketCheckin;
+export const searchEventTicketsForCheckin = searchCheckinTickets;
+
