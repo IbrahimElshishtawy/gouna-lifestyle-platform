@@ -547,34 +547,34 @@ class BookingApiController extends Controller
 
         $activeStays = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid', 'completed'])
-            ->where('check_in', '<=', $today)
-            ->where('check_out', '>=', $today)
+            ->whereDate('check_in', '<=', $today)
+            ->whereDate('check_out', '>=', $today)
             ->orderBy('check_out')
             ->get();
 
         $todayCheckIns = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid', 'pending'])
-            ->where('check_in', $today)
+            ->whereDate('check_in', $today)
             ->orderByDesc('created_at')
             ->get();
 
         $todayCheckOuts = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid', 'completed'])
-            ->where('check_out', $today)
+            ->whereDate('check_out', $today)
             ->orderByDesc('created_at')
             ->get();
 
         $upcomingArrivals = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid'])
-            ->where('check_in', '>', $today)
-            ->where('check_in', '<=', $next7Days)
+            ->whereDate('check_in', '>', $today)
+            ->whereDate('check_in', '<=', $next7Days)
             ->orderBy('check_in')
             ->get();
 
         $upcomingDepartures = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid', 'completed'])
-            ->where('check_out', '>', $today)
-            ->where('check_out', '<=', $next7Days)
+            ->whereDate('check_out', '>', $today)
+            ->whereDate('check_out', '<=', $next7Days)
             ->orderBy('check_out')
             ->get();
 

@@ -650,7 +650,7 @@ class RichDemoMockSeeder extends Seeder
                     'amount_paid_cents' => $paid,
                     'amount_remaining_cents' => $remaining,
                     'currency' => 'EGP',
-                    'payment_type' => 'card',
+                    'payment_type' => $bPlan['payment_status'] === 'paid' ? 'full' : 'deposit',
                     'payment_method_id' => $cardMethod?->id,
                     'status' => $bPlan['status'],
                     'payment_status' => $bPlan['payment_status'],
