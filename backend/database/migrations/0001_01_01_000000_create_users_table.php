@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('locale', 5)->default('en');
             $table->boolean('is_admin')->default(false);
+            $table->string('scope')->default('all');
             $table->boolean('is_active')->default(true);
             $table->boolean('force_password_change')->default(false);
             $table->string('two_factor_secret')->nullable();

@@ -436,7 +436,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/users"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "فريق الإدارة والمشرفين" : "Admin Staff & Roles"}
+                  {isAr ? "فريق الإدارة والمشرفين" : "Admin Staff & Scopes"}
+                </Link>
+                <Link
+                  href="/admin/roles"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "الأدوار ومصفوفة الصلاحيات (RBAC)" : "Roles & Permissions (RBAC)"}
                 </Link>
               </div>
             )}
@@ -448,7 +454,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               onClick={() => toggleSection("concierge")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <span>{isAr ? "طلبات الكونسيرج" : "VIP Concierge"}</span>
+              <span>{isAr ? "عمليات الكونسيرج" : "VIP Concierge"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.concierge ? "rotate-90 rtl:rotate-90" : ""
@@ -463,7 +469,19 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/concierge"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "طلبات ورسائل النزلاء" : "Inquiries & WhatsApp Leads"}
+                  {isAr ? "لوحة الطلبات والعمليات" : "All Requests & Board"}
+                </Link>
+                <Link
+                  href="/admin/concierge?queue=urgent"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta text-rose-600 font-medium"
+                >
+                  {isAr ? "الطلبات العاجلة (Urgent)" : "Urgent Requests"}
+                </Link>
+                <Link
+                  href="/admin/concierge?queue=quoted"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "عروض الأسعار والمتابعة" : "Active Quotes"}
                 </Link>
               </div>
             )}
@@ -517,7 +535,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/settings"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "إعدادات النظام وسجلات الأمان" : "System Rules & Logs"}
+                  {isAr ? "إعدادات وسياسات المنصة" : "System Policies & Settings"}
+                </Link>
+                <Link
+                  href="/admin/activity"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "سجل التدقيق الأمني (Audit Logs)" : "Activity & Audit Logs"}
                 </Link>
               </div>
             )}

@@ -894,6 +894,8 @@ class AuthController extends Controller
                 'customers' => 'all',
                 'events' => 'all',
                 'experiences' => 'all',
+                'yachts' => 'all',
+                'concierge' => 'all',
                 'reports' => 'all',
             ];
         } else {
@@ -908,6 +910,8 @@ class AuthController extends Controller
                 'customers' => in_array('property_manager', $roles, true) ? 'all' : (in_array('sales', $roles, true) ? 'assigned' : 'none'),
                 'events' => in_array('events_manager', $roles, true) ? 'all' : 'none',
                 'experiences' => in_array('events_manager', $roles, true) ? 'all' : 'none',
+                'yachts' => in_array('yacht_manager', $roles, true) ? 'all' : 'none',
+                'concierge' => in_array('concierge_manager', $roles, true) ? 'all' : (in_array('concierge_agent', $roles, true) ? 'assigned' : 'none'),
                 'reports' => in_array('finance', $roles, true) ? 'all' : 'none',
             ];
         }

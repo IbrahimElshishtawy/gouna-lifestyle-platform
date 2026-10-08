@@ -112,11 +112,29 @@ export async function refundBooking(
 }
 
 /**
- * 3. Staff & Administrative Users
+ * 3. Staff & Administrative Users (RBAC)
  */
-export async function getAdminStaff(): Promise<{ staff: AdminStaffItem[]; roles: AdminRoleItem[] }> {
-  const res = await apiClient<SingleResponse<{ staff: AdminStaffItem[]; roles: AdminRoleItem[] }>>("/admin/users");
+export async function getAdminStaff(params?: {
+  search?: string;
+  role?: string;
+  status?: string;
+  scope?: string;
+  page?: number;
+}): Promise<{ staff: AdminStaffItem[]; roles: AdminRoleItem[]; meta?: any }> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set("search", params.search);
+  if (params?.role) query.set("role", params.role);
+  if (params?.status) query.set("status", params.status);
+  if (params?.scope) query.set("scope", params.scope);
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  const res = await apiClient<SingleResponse<{ staff: AdminStaffItem[]; roles: AdminRoleItem[]; meta?: any }>>(`/admin/users${qs ? `?${qs}` : ""}`);
   return res.data;
+}
+
+export async function getAdminStaffMember(id: number): Promise<SingleResponse<AdminStaffItem>> {
+  return apiClient<SingleResponse<AdminStaffItem>>(`/admin/users/${id}`);
 }
 
 export async function createAdminStaff(payload: {
@@ -125,6 +143,7 @@ export async function createAdminStaff(payload: {
   password?: string;
   phone?: string;
   role: string;
+  scope: string;
 }): Promise<SingleResponse<AdminStaffItem>> {
   return apiClient<SingleResponse<AdminStaffItem>>("/admin/users", {
     method: "POST",
@@ -142,6 +161,25 @@ export async function updateAdminStaff(
   });
 }
 
+export async function suspendAdminStaff(id: number, reason?: string): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/users/${id}/suspend`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export async function reactivateAdminStaff(id: number): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/users/${id}/reactivate`, {
+    method: "POST",
+  });
+}
+
+export async function forceLogoutAdminStaff(id: number): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/users/${id}/force-logout`, {
+    method: "POST",
+  });
+}
+
 export async function deleteAdminStaff(id: number): Promise<{ success: boolean }> {
   return apiClient<{ success: boolean }>(`/admin/users/${id}`, {
     method: "DELETE",
@@ -149,41 +187,192 @@ export async function deleteAdminStaff(id: number): Promise<{ success: boolean }
 }
 
 /**
- * 4. VIP Concierge & Leads
+ * 3.1 Roles & Permissions Management
  */
-export async function getAdminConciergeLeads(params?: {
+export async function getAdminRoles(): Promise<AdminRoleItem[]> {
+  const res = await apiClient<SingleResponse<AdminRoleItem[]>>("/admin/roles");
+  return res.data;
+}
+
+export async function getAdminRole(id: number): Promise<SingleResponse<AdminRoleItem>> {
+  return apiClient<SingleResponse<AdminRoleItem>>(`/admin/roles/${id}`);
+}
+
+export async function createAdminRole(payload: {
+  name: string;
+  display_name: string;
+  description?: string;
+  permissions: string[];
+}): Promise<SingleResponse<AdminRoleItem>> {
+  return apiClient<SingleResponse<AdminRoleItem>>("/admin/roles", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAdminRole(
+  id: number,
+  payload: {
+    display_name?: string;
+    description?: string;
+    permissions?: string[];
+  }
+): Promise<SingleResponse<AdminRoleItem>> {
+  return apiClient<SingleResponse<AdminRoleItem>>(`/admin/roles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAdminRole(id: number): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(`/admin/roles/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getAdminPermissionsGrouped(): Promise<import("../types").GroupedPermissionsMap> {
+  const res = await apiClient<SingleResponse<import("../types").GroupedPermissionsMap>>("/admin/roles/permissions");
+  return res.data;
+}
+
+/**
+ * 4. VIP Concierge Operations & Workflows
+ */
+export async function getConciergeDashboard(): Promise<import("../types").ConciergeDashboardResponse> {
+  const res = await apiClient<SingleResponse<import("../types").ConciergeDashboardResponse>>("/admin/concierge/dashboard");
+  return res.data;
+}
+
+export async function getAdminConciergeRequests(params?: {
+  queue?: string;
   status?: string;
+  priority?: string;
   type?: string;
+  assigned_to?: number;
+  search?: string;
   page?: number;
-}): Promise<PaginatedResponse<AdminLeadItem>> {
+  per_page?: number;
+}): Promise<PaginatedResponse<import("../types").ConciergeRequestItem>> {
   const query = new URLSearchParams();
+  if (params?.queue) query.set("queue", params.queue);
   if (params?.status) query.set("status", params.status);
+  if (params?.priority) query.set("priority", params.priority);
   if (params?.type) query.set("type", params.type);
+  if (params?.assigned_to) query.set("assigned_to", params.assigned_to.toString());
+  if (params?.search) query.set("search", params.search);
   if (params?.page) query.set("page", params.page.toString());
+  if (params?.per_page) query.set("per_page", params.per_page.toString());
 
   const qs = query.toString();
-  return apiClient<PaginatedResponse<AdminLeadItem>>(`/admin/concierge${qs ? `?${qs}` : ""}`);
+  return apiClient<PaginatedResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge${qs ? `?${qs}` : ""}`);
 }
+
+export const getAdminConciergeLeads = getAdminConciergeRequests;
+
+export async function getAdminConciergeRequest(id: number): Promise<import("../types").ConciergeRequestItem> {
+  const res = await apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}`);
+  return res.data;
+}
+
+export async function createConciergeRequest(payload: {
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  type: string;
+  priority?: string;
+  subject: string;
+  description: string;
+  guest_count?: number;
+  requested_date?: string;
+  preferred_time?: string;
+  location?: string;
+  budget?: number;
+  assigned_to_user_id?: number | null;
+}): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>("/admin/concierge", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateConciergeRequest(
+  id: number,
+  payload: Partial<import("../types").ConciergeRequestItem>
+): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function assignConciergeRequest(
+  id: number,
+  userId: number | null,
+  notes?: string
+): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}/assign`, {
+    method: "POST",
+    body: JSON.stringify({ assigned_to_user_id: userId, assignment_notes: notes }),
+  });
+}
+
+export const assignConciergeLead = (id: number, userId: number) => assignConciergeRequest(id, userId);
 
 export async function updateConciergeStatus(
   id: number,
   status: string,
   notes?: string
-): Promise<SingleResponse<AdminLeadItem>> {
-  return apiClient<SingleResponse<AdminLeadItem>>(`/admin/concierge/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({ status, admin_notes: notes }),
+): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}/status`, {
+    method: "POST",
+    body: JSON.stringify({ status, notes }),
   });
 }
 
-export async function assignConciergeLead(
+export async function addConciergeNote(
   id: number,
-  userId: number
-): Promise<SingleResponse<AdminLeadItem>> {
-  return apiClient<SingleResponse<AdminLeadItem>>(`/admin/concierge/${id}/assign`, {
+  content: string,
+  isCustomerVisible: boolean = false
+): Promise<SingleResponse<import("../types").ConciergeNoteItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeNoteItem>>(`/admin/concierge/${id}/notes`, {
     method: "POST",
-    body: JSON.stringify({ user_id: userId }),
+    body: JSON.stringify({ content, is_customer_visible: isCustomerVisible }),
   });
+}
+
+export async function createConciergeQuote(
+  id: number,
+  payload: {
+    items: Array<{
+      item_type: string;
+      item_id?: number | null;
+      title: string;
+      description?: string;
+      quantity: number;
+      unit_price: number;
+    }>;
+    discount?: number;
+    fees?: number;
+    valid_until?: string;
+    notes?: string;
+  }
+): Promise<SingleResponse<import("../types").ConciergeQuoteItem>> {
+  return apiClient<SingleResponse<import("../types").ConciergeQuoteItem>>(`/admin/concierge/${id}/quotes`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function acceptConciergeQuote(
+  id: number,
+  quoteId: number
+): Promise<{ success: boolean; message: string; data: { quote: import("../types").ConciergeQuoteItem; booking: any; request: import("../types").ConciergeRequestItem } }> {
+  return apiClient<{ success: boolean; message: string; data: { quote: import("../types").ConciergeQuoteItem; booking: any; request: import("../types").ConciergeRequestItem } }>(
+    `/admin/concierge/${id}/quotes/${quoteId}/accept`,
+    {
+      method: "POST",
+    }
+  );
 }
 
 /**
@@ -241,9 +430,19 @@ export async function updateAdminSettings(
 }
 
 export async function getAdminAuditLogs(params?: {
+  search?: string;
+  action?: string;
+  user_id?: number;
+  from?: string;
+  to?: string;
   page?: number;
 }): Promise<PaginatedResponse<ActivityLogItem>> {
   const query = new URLSearchParams();
+  if (params?.search) query.set("search", params.search);
+  if (params?.action) query.set("action", params.action);
+  if (params?.user_id) query.set("user_id", params.user_id.toString());
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
   if (params?.page) query.set("page", params.page.toString());
 
   const qs = query.toString();

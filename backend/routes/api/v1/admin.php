@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
 use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
 use App\Http\Controllers\Api\V1\Admin\PricingApiController;
 use App\Http\Controllers\Api\V1\Admin\PropertyApiController;
+use App\Http\Controllers\Api\V1\Admin\RoleApiController;
 use App\Http\Controllers\Api\V1\Admin\SettingsApiController;
 use App\Http\Controllers\Api\V1\Admin\StaffApiController;
 use App\Http\Controllers\Api\V1\Admin\VenueApiController;
@@ -150,15 +151,36 @@ Route::middleware(['admin', '2fa'])->group(function () {
     Route::prefix('users')->as('users.')->group(function () {
         Route::get('/', [StaffApiController::class, 'index'])->name('index');
         Route::post('/', [StaffApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [StaffApiController::class, 'show'])->name('show');
         Route::put('/{id}', [StaffApiController::class, 'update'])->name('update');
         Route::delete('/{id}', [StaffApiController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/suspend', [StaffApiController::class, 'suspend'])->name('suspend');
+        Route::post('/{id}/reactivate', [StaffApiController::class, 'reactivate'])->name('reactivate');
+        Route::post('/{id}/force-logout', [StaffApiController::class, 'forceLogout'])->name('force-logout');
     });
 
-    // 6. VIP Concierge & Leads
+    // 5.1 Roles & Permissions (RBAC)
+    Route::prefix('roles')->as('roles.')->group(function () {
+        Route::get('/', [RoleApiController::class, 'index'])->name('index');
+        Route::get('/permissions', [RoleApiController::class, 'permissions'])->name('permissions');
+        Route::post('/', [RoleApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [RoleApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [RoleApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoleApiController::class, 'destroy'])->name('destroy');
+    });
+
+    // 6. VIP Concierge Operations & Quotes
     Route::prefix('concierge')->as('concierge.')->group(function () {
         Route::get('/', [ConciergeApiController::class, 'index'])->name('index');
+        Route::get('/dashboard', [ConciergeApiController::class, 'dashboard'])->name('dashboard');
+        Route::post('/', [ConciergeApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [ConciergeApiController::class, 'show'])->name('show');
         Route::put('/{id}', [ConciergeApiController::class, 'update'])->name('update');
         Route::post('/{id}/assign', [ConciergeApiController::class, 'assign'])->name('assign');
+        Route::post('/{id}/status', [ConciergeApiController::class, 'updateStatus'])->name('status');
+        Route::post('/{id}/notes', [ConciergeApiController::class, 'addNote'])->name('notes.store');
+        Route::post('/{id}/quotes', [ConciergeApiController::class, 'createQuote'])->name('quotes.store');
+        Route::post('/{id}/quotes/{quoteId}/accept', [ConciergeApiController::class, 'acceptQuote'])->name('quotes.accept');
     });
 
     // 7. Finances & Payment Transactions

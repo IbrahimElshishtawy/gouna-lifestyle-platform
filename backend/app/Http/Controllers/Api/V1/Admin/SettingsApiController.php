@@ -57,8 +57,32 @@ class SettingsApiController extends Controller
     {
         $query = ActivityLog::with('user')->orderByDesc('created_at');
 
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhere('action', 'like', "%{$search}%")
+                  ->orWhere('entity_type', 'like', "%{$search}%");
+            });
+        }
+
         if ($action = $request->query('action')) {
             $query->where('action', $action);
+        }
+
+        if ($userId = $request->query('user_id')) {
+            $query->where('user_id', $userId);
+        }
+
+        if ($entityType = $request->query('entity_type')) {
+            $query->where('entity_type', $entityType);
+        }
+
+        if ($from = $request->query('from')) {
+            $query->whereDate('created_at', '>=', $from);
+        }
+
+        if ($to = $request->query('to')) {
+            $query->whereDate('created_at', '<=', $to);
         }
 
         $paginator = $query->paginate(25);

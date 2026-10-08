@@ -32,6 +32,14 @@ class RoleAndPermissionSeeder extends Seeder
             ['name' => 'manage_bookings', 'display_name' => 'Manage Bookings', 'group' => 'bookings'],
             ['name' => 'manage_payments', 'display_name' => 'Manage Payments & Refunds', 'group' => 'payments'],
 
+            // Yachts
+            ['name' => 'manage_yachts', 'display_name' => 'Manage Yachts & Fleet', 'group' => 'yachts'],
+            ['name' => 'view_yachts', 'display_name' => 'View Yachts', 'group' => 'yachts'],
+
+            // Concierge
+            ['name' => 'manage_concierge', 'display_name' => 'Manage Concierge Requests & Quotes', 'group' => 'concierge'],
+            ['name' => 'view_concierge', 'display_name' => 'View Concierge Requests', 'group' => 'concierge'],
+
             // Experiences & Vehicles
             ['name' => 'manage_experiences', 'display_name' => 'Manage Experiences', 'group' => 'experiences'],
             ['name' => 'manage_vehicles', 'display_name' => 'Manage Car Rentals', 'group' => 'vehicles'],
@@ -51,7 +59,9 @@ class RoleAndPermissionSeeder extends Seeder
 
             // Administration & Settings
             ['name' => 'manage_settings', 'display_name' => 'Manage System Settings', 'group' => 'system'],
-            ['name' => 'manage_users', 'display_name' => 'Manage Admins & Roles', 'group' => 'system'],
+            ['name' => 'manage_users', 'display_name' => 'Manage Admins & Staff', 'group' => 'system'],
+            ['name' => 'manage_roles', 'display_name' => 'Manage Roles & Permissions', 'group' => 'system'],
+            ['name' => 'view_audit_logs', 'display_name' => 'View Audit & Activity Logs', 'group' => 'system'],
             ['name' => 'view_reports', 'display_name' => 'View Financial & Business Reports', 'group' => 'reports'],
         ];
 
@@ -81,6 +91,32 @@ class RoleAndPermissionSeeder extends Seeder
                     'view_dashboard', 'view_properties', 'create_properties', 'edit_properties', 'delete_properties',
                     'manage_pricing', 'manage_availability', 'manage_bookings', 'manage_customers',
                     'manage_leads', 'manage_media',
+                ],
+            ],
+            'yacht_manager' => [
+                'display_name' => 'Yacht Fleet Manager',
+                'description' => 'Oversees yacht fleet, marina charters, dynamic boat pricing, and schedules.',
+                'is_system' => false,
+                'permissions' => [
+                    'view_dashboard', 'manage_yachts', 'view_yachts', 'manage_pricing', 'manage_availability',
+                    'manage_bookings', 'manage_customers', 'manage_media',
+                ],
+            ],
+            'concierge_manager' => [
+                'display_name' => 'Concierge Operations Manager',
+                'description' => 'Assigns and supervises concierge requests, custom quotes, and VIP bookings.',
+                'is_system' => false,
+                'permissions' => [
+                    'view_dashboard', 'manage_concierge', 'view_concierge', 'manage_bookings', 'manage_customers',
+                    'manage_leads', 'view_yachts', 'view_properties',
+                ],
+            ],
+            'concierge_agent' => [
+                'display_name' => 'Concierge Desk Agent',
+                'description' => 'Handles assigned concierge requests, client quotes, and reservation workflows.',
+                'is_system' => false,
+                'permissions' => [
+                    'view_dashboard', 'view_concierge', 'manage_concierge', 'view_yachts', 'view_properties',
                 ],
             ],
             'sales' => [
@@ -115,6 +151,14 @@ class RoleAndPermissionSeeder extends Seeder
                 'is_system' => true,
                 'permissions' => [
                     'view_dashboard', 'manage_payments', 'manage_bookings', 'view_reports',
+                ],
+            ],
+            'support_agent' => [
+                'display_name' => 'Support Agent',
+                'description' => 'Customer support desk for general inquiries and guest communications.',
+                'is_system' => false,
+                'permissions' => [
+                    'view_dashboard', 'manage_customers', 'view_concierge',
                 ],
             ],
             'staff' => [

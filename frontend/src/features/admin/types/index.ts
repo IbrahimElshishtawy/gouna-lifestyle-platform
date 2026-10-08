@@ -498,6 +498,7 @@ export interface AdminStaffItem {
   roles: string[];
   permissions?: string[];
   two_factor_enabled: boolean;
+  scope?: string;
   last_login_at: string | null;
   last_login_ip: string | null;
   created_at: string;
@@ -509,31 +510,145 @@ export interface AdminRoleItem {
   display_name: string;
   description: string | null;
   is_system: boolean;
+  users_count?: number;
   permissions_count?: number;
   permissions?: string[];
+  created_at?: string;
 }
 
-// 5. VIP Concierge / Leads
-export type LeadStatus = "new" | "contacted" | "in_progress" | "converted" | "closed";
-export type LeadType = "general" | "concierge" | "property_inquiry" | "experience_inquiry" | "real_estate";
+export interface GroupedPermissionsMap {
+  [group: string]: Array<{
+    id: number;
+    name: string;
+    display_name: string;
+    description: string | null;
+  }>;
+}
 
-export interface AdminLeadItem {
+// 5. VIP Concierge Operations Domain
+export type ConciergePriority = "low" | "normal" | "high" | "urgent";
+export type ConciergeStatus =
+  | "new"
+  | "assigned"
+  | "in_progress"
+  | "waiting_customer"
+  | "waiting_partner"
+  | "quoted"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "rejected"
+  | "escalated";
+
+export type ConciergeType = "yacht" | "experience" | "event" | "dining" | "vip" | "custom" | "transportation" | "stay";
+
+export interface ConciergeNoteItem {
   id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  type: LeadType;
-  source: string | null;
-  message: string;
-  status: LeadStatus;
+  user_id: number | null;
+  user_name: string;
+  content: string;
+  is_customer_visible: boolean;
+  created_at: string;
+}
+
+export interface ConciergeQuoteItemDetail {
+  id: number;
+  item_type: string;
+  item_id: number | null;
+  title: string;
+  description: string | null;
+  quantity: number;
+  unit_price_cents: number;
+  total_price_cents: number;
+  formatted_unit_price?: string;
+  formatted_total_price?: string;
+}
+
+export interface ConciergeQuoteItem {
+  id: number;
+  quote_number: string;
+  status: "draft" | "sent" | "viewed" | "accepted" | "rejected" | "expired" | "cancelled";
+  subtotal_cents: number;
+  discount_cents: number;
+  fees_cents: number;
+  total_cents: number;
+  formatted_total: string;
+  currency: string;
+  valid_until: string | null;
+  notes: string | null;
+  items: ConciergeQuoteItemDetail[];
+  created_at: string;
+}
+
+export interface ConciergeRequestItem {
+  id: number;
+  request_number: string;
+  customer_id: number;
+  customer: {
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    vip_status?: boolean;
+    total_spent_cents?: number;
+    bookings_count?: number;
+  };
+  assigned_to_user_id: number | null;
   assigned_to: {
     id: number;
     name: string;
+    email: string;
+    role?: string;
+    scope?: string;
   } | null;
-  admin_notes: string | null;
+  booking_id: number | null;
+  booking: {
+    id: number;
+    reference: string;
+    status: string;
+    total_cents: number;
+    formatted_total?: string;
+  } | null;
+  type: ConciergeType;
+  priority: ConciergePriority;
+  status: ConciergeStatus;
+  subject: string;
+  description: string;
+  guest_count: number | null;
+  requested_date: string | null;
+  preferred_time: string | null;
+  location: string | null;
+  budget_cents: number | null;
+  formatted_budget: string | null;
+  currency: string;
+  metadata?: Record<string, any>;
+  notes_count?: number;
+  quotes_count?: number;
+  notes?: ConciergeNoteItem[];
+  quotes?: ConciergeQuoteItem[];
   created_at: string;
   updated_at: string;
 }
+
+export interface ConciergeDashboardKPIs {
+  new_requests: number;
+  urgent_requests: number;
+  unassigned_requests: number;
+  in_progress_requests: number;
+  quoted_requests: number;
+  confirmed_requests: number;
+  completed_today: number;
+  conversion_rate_percentage: number;
+}
+
+export interface ConciergeDashboardResponse {
+  kpis: ConciergeDashboardKPIs;
+  recent_urgent: ConciergeRequestItem[];
+}
+
+export type LeadStatus = ConciergeStatus;
+export type LeadType = ConciergeType;
+export type AdminLeadItem = ConciergeRequestItem;
 
 // 6. Finances & Payment Transactions
 export interface AdminTransactionItem {
