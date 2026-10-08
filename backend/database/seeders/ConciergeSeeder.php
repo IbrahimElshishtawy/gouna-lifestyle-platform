@@ -57,7 +57,6 @@ class ConciergeSeeder extends Seeder
         $quote1 = ConciergeQuote::updateOrCreate(
             ['concierge_request_id' => $req1->id, 'quote_number' => 'QT-20261008-0001'],
             [
-                'version' => 1,
                 'status' => 'pending',
                 'currency' => 'EGP',
                 'subtotal_cents' => 4500000,
@@ -95,10 +94,12 @@ class ConciergeSeeder extends Seeder
             ['reference' => 'BK-CON-2026-0001'],
             [
                 'customer_id' => $customer->id,
-                'property_id' => $property?->id,
+                'bookable_type' => Property::class,
+                'bookable_id' => $property?->id,
                 'check_in' => now()->addDays(5)->toDateString(),
                 'check_out' => now()->addDays(6)->toDateString(),
-                'guests_count' => 2,
+                'nights' => 1,
+                'guests' => 2,
                 'status' => 'confirmed',
                 'subtotal_cents' => 1800000,
                 'total_cents' => 1800000,
@@ -134,7 +135,6 @@ class ConciergeSeeder extends Seeder
         $quote2 = ConciergeQuote::updateOrCreate(
             ['concierge_request_id' => $req2->id, 'quote_number' => 'QT-20261008-0002'],
             [
-                'version' => 1,
                 'status' => 'accepted',
                 'currency' => 'EGP',
                 'subtotal_cents' => 1800000,
