@@ -235,35 +235,75 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             </button>
             {openSections.pricing && (
               <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
+                {/* 1. Overview */}
                 <Link
-                  href="/admin/pricing"
+                  href="/admin/pricing?tab=overview"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "نظرة عامة والأسعار الأساسية" : "Overview & Base Rates"}
+                  {isAr ? "نظرة عامة على الأسعار" : "Overview"}
                 </Link>
+                {/* 2. Base Prices */}
                 <Link
-                  href="/admin/pricing?tab=seasons"
+                  href="/admin/pricing?tab=base"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "قواعد المواسم والعطلات" : "Seasonal & Holiday Rules"}
+                  {isAr ? "الأسعار الأساسية للوحدات" : "Base Prices"}
                 </Link>
+                {/* 3. Seasonal Rules */}
                 <Link
-                  href="/admin/pricing?tab=calendar"
+                  href="/admin/pricing?tab=seasons&type=season"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "تقويم الأسعار الشهري" : "Pricing Calendar Matrix"}
+                  {isAr ? "قواعد المواسم" : "Seasonal Rules"}
                 </Link>
+                {/* 4. Weekend Rules */}
                 <Link
-                  href="/admin/pricing?tab=preview"
+                  href="/admin/pricing?tab=seasons&type=weekend"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "محاكي التسعير الفوري" : "Quote Simulator"}
+                  {isAr ? "تسعير عطلات نهاية الأسبوع" : "Weekend Rules"}
                 </Link>
+                {/* 5. Holiday Rules */}
+                <Link
+                  href="/admin/pricing?tab=seasons&type=holiday"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "تسعير الأعياد والمناسبات" : "Holiday Rules"}
+                </Link>
+                {/* 6. Discounts */}
                 <Link
                   href="/admin/pricing?tab=discounts"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "الخصومات وكوبونات الترويج" : "Discounts & Promo Codes"}
+                  {isAr ? "الخصومات والكوبونات" : "Discounts"}
+                </Link>
+                {/* 7. Minimum Stay */}
+                <Link
+                  href="/admin/pricing?tab=seasons&type=min_stay"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "شروط الحد الأدنى للإقامة" : "Minimum Stay"}
+                </Link>
+                {/* 8. Pricing Calendar */}
+                <Link
+                  href="/admin/pricing?tab=calendar"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "تقويم الأسعار والتواريخ" : "Pricing Calendar"}
+                </Link>
+                {/* 9. Price Overrides */}
+                <Link
+                  href="/admin/pricing?tab=seasons&type=override"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "استثناءات وتعديلات التواريخ" : "Price Overrides"}
+                </Link>
+                {/* 10. Price Preview */}
+                <Link
+                  href="/admin/pricing?tab=preview"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "معاينة ومحاكاة التسعير" : "Price Preview"}
                 </Link>
               </div>
             )}

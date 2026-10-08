@@ -60,6 +60,7 @@ Route::middleware(['admin', '2fa'])->group(function () {
     // 3.1 Dedicated Pricing Engine Module
     Route::prefix('pricing')->as('pricing.')->group(function () {
         Route::get('/', [PricingApiController::class, 'overview'])->name('overview');
+        Route::get('/overview', [PricingApiController::class, 'overview'])->name('overview.alias');
         Route::get('/calendar', [PricingApiController::class, 'calendar'])->name('calendar');
         Route::post('/preview', [PricingApiController::class, 'previewQuote'])->name('preview');
         Route::post('/analyze-overlap', [PricingApiController::class, 'analyzeOverlap'])->name('analyze-overlap');

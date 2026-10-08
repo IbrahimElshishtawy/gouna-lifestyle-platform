@@ -124,14 +124,15 @@ record_test("Admin Properties: Complete Inventory & Counters Retrieved", s == 20
 
 # 14. Admin Property Display Status Toggle (Pause & Activate)
 if len(props_list) > 0:
+    # 14. Admin Property Display Status Toggle (Pause & Activate)
     prop_id = props_list[0]["id"]
-    s_toggle, b_toggle = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={}, token=token)
+    s_toggle, b_toggle = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={"is_published": False}, token=token)
     new_status = b_toggle.get("data", {}).get("status") if b_toggle else None
     new_published = b_toggle.get("data", {}).get("is_published") if b_toggle else None
     record_test("Admin Properties: Toggle Display Status (Pause)", s_toggle == 200 and new_published is False and new_status == "draft", f"Status={s_toggle}, NewStatus={new_status}, Published={new_published}")
     
-    # Toggle back to original active state
-    s_toggle2, b_toggle2 = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={}, token=token)
+    # Toggle back to active state
+    s_toggle2, b_toggle2 = request_api(f"/admin/properties/{prop_id}/toggle-status", method="PATCH", data={"is_published": True}, token=token)
     restored_status = b_toggle2.get("data", {}).get("status") if b_toggle2 else None
     restored_published = b_toggle2.get("data", {}).get("is_published") if b_toggle2 else None
     record_test("Admin Properties: Toggle Display Status (Restore Active)", s_toggle2 == 200 and restored_published is True and restored_status == "published", f"Status={s_toggle2}, RestoredStatus={restored_status}")

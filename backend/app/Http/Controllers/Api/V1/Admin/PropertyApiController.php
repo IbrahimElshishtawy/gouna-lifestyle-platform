@@ -114,6 +114,7 @@ class PropertyApiController extends Controller
                 ],
                 'primary_image' => $primaryImg,
                 'created_at' => $p->created_at ? $p->created_at->toIso8601String() : null,
+                'updated_at' => $p->updated_at ? $p->updated_at->toIso8601String() : null,
             ];
         });
 
@@ -241,10 +242,27 @@ class PropertyApiController extends Controller
             ->whereIn('payment_status', ['paid', 'partially_paid'])
             ->sum('amount_paid_cents');
 
+        $recentActivity = ActivityLog::with('user')
+            ->where('entity_type', 'Property')
+            ->where('entity_id', $property->id)
+            ->orderByDesc('created_at')
+            ->limit(15)
+            ->get()
+            ->map(function ($act) {
+                return [
+                    'id' => $act->id,
+                    'user_name' => $act->user?->name ?? 'Administrator',
+                    'action' => $act->action,
+                    'description' => $act->description,
+                    'created_at' => $act->created_at ? $act->created_at->toIso8601String() : '',
+                ];
+            });
+
         $data = $property->toArray();
         $data['formatted_base_price'] = number_format(((int) $property->base_price_cents) / 100, 2) . ' ' . ($property->currency ?? 'EGP');
         $data['formatted_sale_price'] = $property->sale_price_cents ? number_format(((int) $property->sale_price_cents) / 100, 2) . ' ' . ($property->currency ?? 'EGP') : null;
         $data['recent_bookings'] = $recentBookings;
+        $data['recent_activity'] = $recentActivity;
         $data['stats'] = [
             'total_bookings' => $totalBookingsCount,
             'total_revenue_cents' => (int) $totalRevenueCents,
@@ -446,9 +464,26 @@ class PropertyApiController extends Controller
                 ];
             });
 
+        $recentActivity = ActivityLog::with('user')
+            ->where('entity_type', 'Property')
+            ->where('entity_id', $unit->id)
+            ->orderByDesc('created_at')
+            ->limit(15)
+            ->get()
+            ->map(function ($act) {
+                return [
+                    'id' => $act->id,
+                    'user_name' => $act->user?->name ?? 'Administrator',
+                    'action' => $act->action,
+                    'description' => $act->description,
+                    'created_at' => $act->created_at ? $act->created_at->toIso8601String() : '',
+                ];
+            });
+
         $data = $unit->toArray();
         $data['formatted_base_price'] = number_format(((int) $unit->base_price_cents) / 100, 2) . ' ' . ($unit->currency ?? 'EGP');
         $data['recent_bookings'] = $recentBookings;
+        $data['recent_activity'] = $recentActivity;
 
         return response()->json([
             'data' => $data,

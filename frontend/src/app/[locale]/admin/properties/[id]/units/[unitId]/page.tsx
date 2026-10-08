@@ -42,7 +42,7 @@ export default function AdminPropertyUnitDetailPage({ params }: PageProps) {
   const [unit, setUnit] = useState<AdminPropertyUnitDetail | null>(null);
   const [calendarData, setCalendarData] = useState<PropertyCalendarResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "availability" | "pricing" | "amenities" | "media" | "bookings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "availability" | "pricing" | "amenities" | "media" | "bookings" | "activity">("overview");
 
   // Edit Unit Form State
   const [unitForm, setUnitForm] = useState({
@@ -485,6 +485,16 @@ export default function AdminPropertyUnitDetailPage({ params }: PageProps) {
         >
           {isAr ? "الحجوزات المرتبطة" : "Bookings"}
         </button>
+        <button
+          onClick={() => setActiveTab("activity")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            activeTab === "activity"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          {isAr ? "سجل العمليات" : "Activity Log"}
+        </button>
       </div>
 
       {/* TAB 1: OVERVIEW */}
@@ -837,9 +847,29 @@ export default function AdminPropertyUnitDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-border shadow-xs space-y-4 text-xs">
-              <h3 className="text-base font-bold text-brand-brown border-b border-brand-border pb-3">
-                {isAr ? "قواعد الأسعار الخاصة بهذه الوحدة" : "Unit Seasonal Pricing Rules"}
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-border pb-3">
+                <h3 className="text-base font-bold text-brand-brown">
+                  {isAr ? "قواعد الأسعار الخاصة بهذه الوحدة" : "Unit Seasonal Pricing Rules"}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/pricing?tab=calendar&property_id=${unit.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border text-xs font-bold transition shadow-2xs"
+                  >
+                    <span>📅</span>
+                    <span>{isAr ? "فتح تقويم التسعير" : "Pricing Calendar"}</span>
+                    <span className="text-[10px]">↗</span>
+                  </Link>
+                  <Link
+                    href={`/admin/pricing?tab=preview&property_id=${unit.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border text-xs font-bold transition shadow-2xs"
+                  >
+                    <span>🧮</span>
+                    <span>{isAr ? "محاكي عروض الأسعار" : "Quote Simulator"}</span>
+                    <span className="text-[10px]">↗</span>
+                  </Link>
+                </div>
+              </div>
 
               {!calendarData?.seasonal_prices || calendarData.seasonal_prices.length === 0 ? (
                 <div className="text-brand-brown-muted py-4">
@@ -1043,6 +1073,66 @@ export default function AdminPropertyUnitDetailPage({ params }: PageProps) {
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">
                           {b.status}
                         </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB: ACTIVITY LOG */}
+      {activeTab === "activity" && (
+        <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden text-xs">
+          <div className="p-6 border-b border-brand-border flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-serif font-bold text-brand-brown">
+                {isAr ? "سجل العمليات والنشاط للوحدة" : "Sub-Unit Activity Log & Audit Trail"}
+              </h3>
+              <p className="text-[11px] text-brand-brown-muted mt-0.5">
+                {isAr
+                  ? "تسجيل لكافة التعديلات الإدارية وحركات الأسعار والمخزون الخاصة بهذه الوحدة."
+                  : "Audit log of changes and operations for this sub-unit."}
+              </p>
+            </div>
+            <span className="text-xs text-brand-brown-muted font-mono">
+              {unit.recent_activity?.length || 0} {isAr ? "سجلات" : "events"}
+            </span>
+          </div>
+
+          {!unit.recent_activity || unit.recent_activity.length === 0 ? (
+            <div className="p-8 text-center text-brand-brown-muted">
+              {isAr ? "لا توجد سجلات نشاط مسجلة لهذه الوحدة حتى الآن." : "No activity logs recorded for this sub-unit yet."}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-start">
+                <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-bold text-[10px]">
+                  <tr>
+                    <th className="py-3 px-4 text-start">{isAr ? "التوقيت" : "Timestamp"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "المسؤول" : "Actor"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "نوع الإجراء" : "Action"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "التفاصيل" : "Description"}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-border/60">
+                  {unit.recent_activity.map((act: any) => (
+                    <tr key={act.id} className="hover:bg-brand-sand-light/30">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-brand-brown-muted" dir="ltr">
+                        {act.created_at ? new Date(act.created_at).toLocaleString() : "-"}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-brand-brown">
+                        {act.user_name || "Administrator"}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-brand-sand-light text-brand-brown border border-brand-border uppercase">
+                          {act.action}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-brand-brown font-medium">
+                        {act.description}
                       </td>
                     </tr>
                   ))}

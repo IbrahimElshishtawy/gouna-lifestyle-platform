@@ -23,8 +23,7 @@ class CalculateBookingQuoteQuery
         $dateStr = $date->toDateString();
         $dayName = $date->format('l');
 
-        // Query candidate rules following the Pricing Hierarchy:
-        // Unit-specific rules -> Property-level rules (if unit) -> Global rules (property_id is null)
+        // Retrieve candidates covering this date
         $candidates = SeasonalPrice::where('is_active', true)
             ->where(function ($q) use ($property) {
                 $q->where('property_id', $property->id);
@@ -35,9 +34,41 @@ class CalculateBookingQuoteQuery
             })
             ->whereDate('start_date', '<=', $dateStr)
             ->whereDate('end_date', '>=', $dateStr)
-            ->orderByDesc('priority')
-            ->orderByDesc('id')
             ->get();
+
+        // Sort candidates by Pricing Hierarchy (Section 25 of promit.md):
+        // Tier 4: Date-specific Override (rule_type === 'override')
+        // Tier 3: Unit-specific Rule (property_id === $property->id)
+        // Tier 2: Property-level Rule (property_id === $property->parent_id)
+        // Tier 1: Global Rule (property_id === null)
+        $candidates = $candidates->sort(function (SeasonalPrice $a, SeasonalPrice $b) use ($property) {
+            $getTier = function (SeasonalPrice $sp) use ($property): int {
+                if ($sp->rule_type === 'override') {
+                    return 4;
+                }
+                if ($sp->property_id === $property->id) {
+                    return 3;
+                }
+                if ($property->parent_id && $sp->property_id === $property->parent_id) {
+                    return 2;
+                }
+                return 1;
+            };
+
+            $tierA = $getTier($a);
+            $tierB = $getTier($b);
+            if ($tierA !== $tierB) {
+                return $tierB <=> $tierA;
+            }
+
+            $pA = (int) $a->priority;
+            $pB = (int) $b->priority;
+            if ($pA !== $pB) {
+                return $pB <=> $pA;
+            }
+
+            return $b->id <=> $a->id;
+        })->values();
 
         // Match first candidate that conforms to days_of_week constraint (if weekend/day restricted)
         $winner = $candidates->first(function (SeasonalPrice $sp) use ($dayName) {

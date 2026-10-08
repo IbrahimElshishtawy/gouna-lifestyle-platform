@@ -355,13 +355,13 @@ export default function AdminPropertiesPage() {
               <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
                 <tr>
                   <th className="py-3 px-4 text-start">{isAr ? "العقار / الوحدة" : "Property"}</th>
-                  <th className="py-3 px-4 text-start">{isAr ? "كود الوحدة" : "Reference"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "النوع" : "Type"}</th>
                   <th className="py-3 px-4 text-start">{isAr ? "المنطقة" : "Location"}</th>
-                  <th className="py-3 px-4 text-start">{isAr ? "نوع الإدراج" : "Listing"}</th>
-                  <th className="py-3 px-4 text-start">{isAr ? "المواصفات" : "Specs"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "الوحدات" : "Units"}</th>
                   <th className="py-3 px-4 text-start">{isAr ? "السعر" : "Pricing"}</th>
-                  <th className="py-3 px-4 text-start">{isAr ? "حالة العرض للجمهور" : "Display Status"}</th>
-                  <th className="py-3 px-4 text-end">{isAr ? "إجراءات التحكم" : "Actions"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "الحالة" : "Status"}</th>
+                  <th className="py-3 px-4 text-start">{isAr ? "آخر تحديث" : "Updated"}</th>
+                  <th className="py-3 px-4 text-end">{isAr ? "الإجراءات" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-border/60">
@@ -412,20 +412,10 @@ export default function AdminPropertiesPage() {
                         </div>
                       </td>
 
-                      {/* Reference Code */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">
-                        {prop.reference_number}
-                      </td>
-
-                      {/* Location */}
-                      <td className="py-3.5 px-4 text-brand-brown font-medium">
-                        {locName}
-                      </td>
-
-                      {/* Type Badge */}
+                      {/* Type Badge & Category */}
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-0.5 ${
                             prop.listing_type === "rent"
                               ? "bg-blue-50 text-blue-700 border border-blue-200"
                               : "bg-purple-50 text-purple-700 border border-purple-200"
@@ -435,13 +425,32 @@ export default function AdminPropertiesPage() {
                             ? isAr ? "إيجار عطلات" : "Rent"
                             : isAr ? "بيع وتملك" : "Sale"}
                         </span>
+                        <span className="text-[10px] text-brand-brown-muted block">
+                          {catName}
+                        </span>
                       </td>
 
-                      {/* Specs */}
-                      <td className="py-3.5 px-4 text-brand-brown-muted">
-                        <span>{prop.bedrooms} {isAr ? "غرف" : "Bed"}</span> &bull;{" "}
-                        <span>{prop.bathrooms} {isAr ? "حمام" : "Bath"}</span>
-                        {prop.max_guests ? ` • ${prop.max_guests} ${isAr ? "ضيوف" : "Guests"}` : ""}
+                      {/* Location */}
+                      <td className="py-3.5 px-4 text-brand-brown font-medium">
+                        <div>{locName}</div>
+                        {prop.compound && (
+                          <div className="text-[10px] text-brand-brown-muted">{prop.compound}</div>
+                        )}
+                      </td>
+
+                      {/* Units */}
+                      <td className="py-3.5 px-4">
+                        {typeof prop.units_count === "number" && prop.units_count > 0 ? (
+                          <Link
+                            href={`/admin/properties/${prop.id}?tab=units`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border transition"
+                          >
+                            <span>🏨</span>
+                            <span>{prop.units_count} {isAr ? "وحدات" : "Units"}</span>
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-brand-brown-muted font-medium">1 {isAr ? "وحدة" : "Unit"}</span>
+                        )}
                       </td>
 
                       {/* Pricing */}
@@ -457,14 +466,31 @@ export default function AdminPropertiesPage() {
                         {prop.is_published ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                            <span>{isAr ? "معروض للعملاء (نشط)" : "Active Displayed"}</span>
+                            <span>{isAr ? "معروض (نشط)" : "Active"}</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
-                            <span>{isAr ? "متوقف عن العرض (مخفي)" : "Display Paused"}</span>
+                            <span>{isAr ? "متوقف (مخفي)" : "Paused"}</span>
                           </span>
                         )}
+                      </td>
+
+                      {/* Updated Timestamp */}
+                      <td className="py-3.5 px-4 text-brand-brown-muted text-[11px] whitespace-nowrap">
+                        {prop.updated_at
+                          ? new Date(prop.updated_at).toLocaleDateString(isAr ? "ar-EG" : "en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : prop.created_at
+                          ? new Date(prop.created_at).toLocaleDateString(isAr ? "ar-EG" : "en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "-"}
                       </td>
 
                       {/* Control Actions */}

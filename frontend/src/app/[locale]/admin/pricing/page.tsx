@@ -62,6 +62,7 @@ export default function AdminPricingPage() {
   const [rulesLoading, setRulesLoading] = useState(false);
   const [ruleSearch, setRuleSearch] = useState("");
   const [rulePropertyFilter, setRulePropertyFilter] = useState<number | "">("");
+  const [ruleTypeFilter, setRuleTypeFilter] = useState<string>("all");
 
   // Rule Create / Edit Modal State
   const [isRuleModalOpen, setIsRuleModalOpen] = useState(false);
@@ -142,9 +143,26 @@ export default function AdminPricingPage() {
 
   // Sync tab from URL if changed
   useEffect(() => {
-    const tabParam = searchParams.get("tab") as PricingTab;
-    if (tabParam && ["overview", "seasons", "calendar", "preview", "discounts"].includes(tabParam)) {
-      setActiveTab(tabParam);
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "base") {
+      setActiveTab("overview");
+      setTimeout(() => {
+        const el = document.getElementById("base-prices");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else if (tabParam && ["overview", "seasons", "calendar", "preview", "discounts"].includes(tabParam)) {
+      setActiveTab(tabParam as PricingTab);
+    }
+
+    const typeParam = searchParams.get("type");
+    if (typeParam) {
+      if (["season", "holiday", "weekend", "override"].includes(typeParam)) {
+        setRuleTypeFilter(typeParam);
+        setActiveTab("seasons");
+      } else if (typeParam === "min_stay") {
+        setRuleTypeFilter("all");
+        setActiveTab("seasons");
+      }
     }
   }, [searchParams]);
 
@@ -182,6 +200,7 @@ export default function AdminPricingPage() {
     try {
       const res = await getPricingRules({
         property_id: rulePropertyFilter ? Number(rulePropertyFilter) : undefined,
+        rule_type: ruleTypeFilter !== "all" ? (ruleTypeFilter as any) : undefined,
         search: ruleSearch.trim() || undefined,
       });
       setRules(res.data);
@@ -190,7 +209,7 @@ export default function AdminPricingPage() {
     } finally {
       setRulesLoading(false);
     }
-  }, [rulePropertyFilter, ruleSearch]);
+  }, [rulePropertyFilter, ruleTypeFilter, ruleSearch]);
 
   useEffect(() => {
     if (activeTab === "seasons") {
@@ -627,7 +646,7 @@ export default function AdminPricingPage() {
       {/* Tab 1: Base Prices & Inventory Overview */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
+          <div id="base-prices" className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
             <div className="p-5 border-b border-brand-border flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-serif font-bold text-brand-brown">
@@ -671,7 +690,20 @@ export default function AdminPricingPage() {
                       <tr key={prop.id} className="hover:bg-brand-sand-light/20 transition">
                         <td className="py-3.5 px-4">
                           <div>
-                            <span className="font-bold block">{prop.title_en}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <Link
+                                href={prop.parent_id ? `/admin/properties/${prop.parent_id}/units/${prop.id}` : `/admin/properties/${prop.id}`}
+                                className="font-bold hover:text-brand-terracotta hover:underline transition"
+                              >
+                                {prop.title_en}
+                              </Link>
+                              {prop.parent_id && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                  <span>🏢</span>
+                                  <span>{prop.parent_title || (isAr ? "وحدة فرعية" : "Sub-Unit")}</span>
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[10px] text-brand-brown-muted font-mono">{prop.reference_number}</span>
                           </div>
                         </td>
@@ -742,7 +774,31 @@ export default function AdminPricingPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Rule Type Filter Pills */}
+                <div className="flex items-center p-1 bg-brand-sand-light/60 rounded-xl border border-brand-border text-[11px]">
+                  {[
+                    { id: "all", label_en: "All Rules", label_ar: "الكل" },
+                    { id: "season", label_en: "Seasons", label_ar: "مواسم" },
+                    { id: "holiday", label_en: "Holidays", label_ar: "أعياد" },
+                    { id: "weekend", label_en: "Weekends", label_ar: "عطلات أسبوعية" },
+                    { id: "override", label_en: "Overrides", label_ar: "استثناءات خاصة" },
+                  ].map((pill) => (
+                    <button
+                      key={pill.id}
+                      type="button"
+                      onClick={() => setRuleTypeFilter(pill.id)}
+                      className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+                        ruleTypeFilter === pill.id
+                          ? "bg-brand-terracotta text-white shadow-2xs"
+                          : "text-brand-brown-muted hover:text-brand-brown"
+                      }`}
+                    >
+                      {isAr ? pill.label_ar : pill.label_en}
+                    </button>
+                  ))}
+                </div>
+
                 <input
                   type="text"
                   placeholder={isAr ? "بحث بالاسم أو العقار..." : "Search rule name..."}
@@ -815,8 +871,30 @@ export default function AdminPricingPage() {
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="font-medium text-brand-brown">{rule.property_title}</span>
-                          <span className="text-[10px] text-brand-brown-muted block font-mono">{rule.property_reference}</span>
+                          <div>
+                            {rule.property_id ? (
+                              <Link
+                                href={
+                                  rule.parent_id
+                                    ? `/admin/properties/${rule.parent_id}/units/${rule.property_id}`
+                                    : `/admin/properties/${rule.property_id}`
+                                }
+                                className="font-medium text-brand-brown hover:text-brand-terracotta hover:underline transition"
+                              >
+                                {rule.property_title}
+                              </Link>
+                            ) : (
+                              <span className="font-medium text-brand-brown">{rule.property_title}</span>
+                            )}
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] text-brand-brown-muted font-mono">{rule.property_reference}</span>
+                              {rule.parent_id && (
+                                <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[8px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                  {isAr ? "وحدة فرعية" : "Sub-Unit"}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-[11px]">
                           {rule.start_date} → {rule.end_date}
@@ -902,11 +980,28 @@ export default function AdminPricingPage() {
                   onChange={(e) => setSelectedPropertyId(Number(e.target.value))}
                   className="text-xs bg-brand-sand-light border border-brand-border rounded-xl px-3 py-2 font-bold text-brand-brown focus:ring-1 focus:ring-brand-terracotta"
                 >
-                  {overviewData?.properties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title_en} ({p.formatted_base_price}/night)
-                    </option>
-                  ))}
+                  {/* Main Properties */}
+                  <optgroup label={isAr ? "عقارات وفيلا رئيسية" : "Main Properties / Villas"}>
+                    {overviewData?.properties
+                      .filter((p) => !p.parent_id)
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title_en} ({p.formatted_base_price}/night)
+                        </option>
+                      ))}
+                  </optgroup>
+                  {/* Sub-Units */}
+                  {overviewData?.properties.some((p) => !!p.parent_id) && (
+                    <optgroup label={isAr ? "وحدات وشاليهات تابعة" : "Sub-Units & Chalets"}>
+                      {overviewData?.properties
+                        .filter((p) => !!p.parent_id)
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.title_en} • {p.parent_title || "Sub-Unit"} ({p.formatted_base_price}/night)
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 
@@ -1043,11 +1138,28 @@ export default function AdminPricingPage() {
                   required
                   className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3 font-medium text-brand-brown"
                 >
-                  {overviewData?.properties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title_en}
-                    </option>
-                  ))}
+                  {/* Main Properties */}
+                  <optgroup label={isAr ? "عقارات وفيلا رئيسية" : "Main Properties / Villas"}>
+                    {overviewData?.properties
+                      .filter((p) => !p.parent_id)
+                      .map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.title_en}
+                        </option>
+                      ))}
+                  </optgroup>
+                  {/* Sub-Units */}
+                  {overviewData?.properties.some((p) => !!p.parent_id) && (
+                    <optgroup label={isAr ? "وحدات وشاليهات تابعة" : "Sub-Units & Chalets"}>
+                      {overviewData?.properties
+                        .filter((p) => !!p.parent_id)
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.title_en} • {p.parent_title || "Sub-Unit"}
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 

@@ -307,6 +307,13 @@ export async function getAdminPropertyDetails(id: number): Promise<import("../ty
     availability_blocks_count: number;
   };
   amenities: Array<{ id: number; name_en: string; name_ar: string; group: string }>;
+  recent_activity?: Array<{
+    id: number;
+    user_name: string;
+    action: string;
+    description: string;
+    created_at: string;
+  }>;
 }> {
   const res = await apiClient<SingleResponse<any>>(`/admin/properties/${id}`);
   return res.data;
@@ -552,12 +559,14 @@ export async function analyzeSeasonalOverlap(payload: {
 
 export async function getPricingRules(params?: {
   property_id?: number;
+  rule_type?: "season" | "holiday" | "weekend" | "override";
   search?: string;
   is_active?: boolean;
   page?: number;
 }): Promise<PaginatedResponse<import("../types").SeasonalPriceItem>> {
   const query = new URLSearchParams();
   if (params?.property_id) query.set("property_id", params.property_id.toString());
+  if (params?.rule_type) query.set("rule_type", params.rule_type);
   if (params?.search) query.set("search", params.search);
   if (typeof params?.is_active === "boolean") query.set("is_active", params.is_active.toString());
   if (params?.page) query.set("page", params.page.toString());

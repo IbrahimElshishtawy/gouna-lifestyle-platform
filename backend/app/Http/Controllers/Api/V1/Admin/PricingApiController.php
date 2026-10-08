@@ -28,7 +28,7 @@ class PricingApiController extends Controller
             ->where('base_price_cents', '>', 0)
             ->avg('base_price_cents') ?? 0;
 
-        $properties = Property::with(['location', 'category'])
+        $properties = Property::with(['location', 'category', 'parent'])
             ->whereIn('listing_type', ['rent', 'both'])
             ->withCount([
                 'seasonalPrices as active_seasons_count' => function ($q) {
@@ -40,6 +40,8 @@ class PricingApiController extends Controller
             ->map(function (Property $p) {
                 return [
                     'id' => $p->id,
+                    'parent_id' => $p->parent_id,
+                    'parent_title' => $p->parent?->title_en,
                     'reference_number' => $p->reference_number,
                     'title_en' => $p->title_en,
                     'title_ar' => $p->title_ar,
@@ -229,7 +231,7 @@ class PricingApiController extends Controller
      */
     public function rules(Request $request): JsonResponse
     {
-        $query = SeasonalPrice::with('property')->orderByDesc('start_date');
+        $query = SeasonalPrice::with(['property.parent'])->orderByDesc('start_date');
 
         if ($propertyId = $request->query('property_id')) {
             if ($propertyId === 'global') {
@@ -264,6 +266,7 @@ class PricingApiController extends Controller
             return [
                 'id' => $sp->id,
                 'property_id' => $sp->property_id,
+                'parent_id' => $sp->property?->parent_id,
                 'property_title' => $sp->property ? $sp->property->title_en : 'Global (All Inventory)',
                 'property_reference' => $sp->property ? $sp->property->reference_number : 'GLOBAL',
                 'rule_type' => $sp->rule_type ?? 'season',

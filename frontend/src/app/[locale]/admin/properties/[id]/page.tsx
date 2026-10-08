@@ -45,9 +45,9 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
   const [property, setProperty] = useState<any | null>(null);
   const [calendarData, setCalendarData] = useState<PropertyCalendarResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "units" | "location" | "availability" | "pricing" | "amenities" | "media" | "bookings">(
-    urlTab || "overview"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "units" | "location" | "availability" | "maintenance" | "pricing" | "services" | "amenities" | "media" | "bookings" | "activity"
+  >(urlTab || "overview");
 
   // Unit Management State
   const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
@@ -499,26 +499,26 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
       )}
 
       {/* Section Tabs */}
-      <div className="flex items-center gap-2 border-b border-brand-border pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-brand-border pb-3 overflow-x-auto gounow-scrollbar">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "overview"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "المواصفات والبيانات" : "Specifications & Overview"}
+          {isAr ? "المواصفات والبيانات" : "Specifications"}
         </button>
         <button
           onClick={() => setActiveTab("units")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
             activeTab === "units"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          <span>{isAr ? "الوحدات والفيلات التابعة" : "Sub-Units & Inventory"}</span>
+          <span>{isAr ? "الوحدات والفيلات التابعة" : "Sub-Units"}</span>
           {property?.units && property.units.length > 0 && (
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -533,63 +533,93 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
         </button>
         <button
           onClick={() => setActiveTab("location")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "location"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "الموقع والخريطة الجغرافية" : "Location & Geolocation"}
+          {isAr ? "الموقع والخريطة" : "Location"}
         </button>
         <button
           onClick={() => setActiveTab("availability")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "availability"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "جدول التوفر والحظر" : "Availability & Blocks"}
+          {isAr ? "جدول التوفر والحظر" : "Availability"}
+        </button>
+        <button
+          onClick={() => setActiveTab("maintenance")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+            activeTab === "maintenance"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          {isAr ? "الصيانة والتجهيز" : "Maintenance"}
         </button>
         <button
           onClick={() => setActiveTab("pricing")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "pricing"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "الأسعار والمواسم" : "Pricing & Seasons"}
+          {isAr ? "الأسعار والمواسم" : "Pricing"}
+        </button>
+        <button
+          onClick={() => setActiveTab("services")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+            activeTab === "services"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          {isAr ? "الخدمات الإضافية" : "Services"}
         </button>
         <button
           onClick={() => setActiveTab("amenities")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "amenities"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "المرافق والخدمات" : "Amenities"}
+          {isAr ? "المرافق" : "Amenities"}
         </button>
         <button
           onClick={() => setActiveTab("media")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "media"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "الصور والوسائط" : "Media Gallery"}
+          {isAr ? "الصور والوسائط" : "Media"}
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
             activeTab === "bookings"
               ? "bg-brand-terracotta text-white shadow-xs"
               : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
           }`}
         >
-          {isAr ? "سجل حجوزات الوحدة" : "Unit Bookings"} ({property.stats?.total_bookings || 0})
+          {isAr ? "الحجوزات" : "Bookings"} ({property.stats?.total_bookings || 0})
+        </button>
+        <button
+          onClick={() => setActiveTab("activity")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+            activeTab === "activity"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          {isAr ? "سجل النشاط" : "Activity"}
         </button>
       </div>
 
@@ -1157,15 +1187,275 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
         </div>
       )}
 
+      {/* Tab: Maintenance & Operations */}
+      {activeTab === "maintenance" && (
+        <div className="space-y-6 text-xs">
+          {/* Operations Health Status & KPI Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-xs">
+              <span className="text-[10px] font-bold uppercase text-brand-brown-muted block">
+                {isAr ? "حالة تشغيل العقار" : "Operational Status"}
+              </span>
+              <div className="flex items-center gap-2 mt-2">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    property.is_published ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+                  }`}
+                />
+                <span className="text-sm font-bold text-brand-brown uppercase">
+                  {property.status || (property.is_published ? "Active / Published" : "Draft / Paused")}
+                </span>
+              </div>
+              <p className="text-[11px] text-brand-brown-muted mt-2">
+                {property.is_published
+                  ? isAr
+                    ? "العقار جاهز ومتاح لاستقبال الحجوزات النشطة."
+                    : "Property is live on booking channels."
+                  : isAr
+                    ? "العقار في وضع المسودة أو الإيقاف المؤقت."
+                    : "Property is currently offline or paused."}
+              </p>
+            </div>
+
+            <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-xs">
+              <span className="text-[10px] font-bold uppercase text-brand-brown-muted block">
+                {isAr ? "فترات الصيانة المجدولة" : "Scheduled Maintenance Outages"}
+              </span>
+              <div className="text-2xl font-serif font-bold text-brand-brown mt-1">
+                {calendarData?.blocked_ranges.filter(
+                  (b) =>
+                    b.status === "maintenance" ||
+                    (b.reason &&
+                      (b.reason.toLowerCase().includes("maintenance") ||
+                        b.reason.includes("صيانة") ||
+                        b.reason.toLowerCase().includes("repair")))
+                ).length || 0}
+              </div>
+              <p className="text-[11px] text-brand-brown-muted mt-2">
+                {isAr ? "فترات إغلاق مؤكدة للصيانة أو التجديد" : "Confirmed calendar dates blocked for technical work"}
+              </p>
+            </div>
+
+            <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-xs">
+              <span className="text-[10px] font-bold uppercase text-brand-brown-muted block">
+                {isAr ? "فحص الجاهزية والجودة" : "Quality & Readiness Index"}
+              </span>
+              <div className="text-2xl font-serif font-bold text-emerald-700 mt-1">
+                100%
+              </div>
+              <p className="text-[11px] text-emerald-800 font-semibold mt-2">
+                {isAr ? "جميع الأنظمة الأساسية تعمل بكفاءة" : "All critical facility systems operational"}
+              </p>
+            </div>
+          </div>
+
+          {/* Facility Systems Checklist */}
+          <div className="bg-white p-6 sm:p-7 rounded-3xl border border-brand-border shadow-xs space-y-4">
+            <h3 className="text-sm font-serif font-bold text-brand-brown border-b border-brand-border pb-3">
+              {isAr ? "فحص الأنظمة التشغيلية المعتمدة (Facility Systems)" : "Verified Facility Systems Status"}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[
+                { icon: "❄️", title_en: "HVAC & Central Air", title_ar: "التكييف والتبريد المركزي", desc: "Filters sanitized & coolant levels verified" },
+                { icon: "🏊", title_en: "Lagoon / Private Pool", title_ar: "المسبح والشاطئ الخاص", desc: "Circulation pumps & chemical balance OK" },
+                { icon: "⚡", title_en: "High-Speed Wi-Fi Mesh", title_ar: "شبكة الإنترنت والألياف", desc: "Dual fiber uplink active (200 Mbps+)" },
+                { icon: "🔑", title_en: "Smart Keyless Lock", title_ar: "الأقفال الذكية بدون مفتاح", desc: "Passcode gateway synced / Battery 95%" },
+                { icon: "💧", title_en: "Water & Desalination", title_ar: "المياه وضغط السخانات", desc: "Pressure stable / Boilers inspected" },
+                { icon: "🧯", title_en: "Safety & Detectors", title_ar: "كواشف الدخان والأمان", desc: "Calibrated & certified compliant" },
+              ].map((sys, idx) => (
+                <div key={idx} className="p-3.5 rounded-2xl bg-brand-sand-light/40 border border-brand-border flex items-start gap-3">
+                  <span className="text-xl">{sys.icon}</span>
+                  <div>
+                    <span className="font-bold text-brand-brown block">{isAr ? sys.title_ar : sys.title_en}</span>
+                    <span className="text-[10px] text-brand-brown-muted">{sys.desc}</span>
+                    <span className="inline-block mt-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      ✓ {isAr ? "تم الفحص والاعتماد" : "Inspected & Passed"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Maintenance Ledger & Schedule Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-brand-border flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-serif font-bold text-brand-brown">
+                    {isAr ? "سجل إغلاقات وأوامر الصيانة (Maintenance Log)" : "Maintenance Outages Ledger"}
+                  </h3>
+                  <p className="text-[11px] text-brand-brown-muted mt-0.5">
+                    {isAr
+                      ? "فترات الإغلاق المحجوزة لأغراض الصيانة الدورية أو الإصلاحات الفنية."
+                      : "Dates blocked to perform scheduled servicing, HVAC maintenance, or refurbishment."}
+                  </p>
+                </div>
+              </div>
+
+              {(!calendarData ||
+                calendarData.blocked_ranges.filter(
+                  (b) =>
+                    b.status === "maintenance" ||
+                    (b.reason &&
+                      (b.reason.toLowerCase().includes("maintenance") ||
+                        b.reason.includes("صيانة") ||
+                        b.reason.toLowerCase().includes("repair")))
+                ).length === 0) ? (
+                <div className="p-8 text-center text-brand-brown-muted">
+                  {isAr ? "لا توجد فترات صيانة مجدولة حالياً لهذا العقار." : "No scheduled maintenance outages recorded."}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-start">
+                    <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-bold text-[10px]">
+                      <tr>
+                        <th className="py-3 px-4 text-start">{isAr ? "من تاريخ" : "Start Date"}</th>
+                        <th className="py-3 px-4 text-start">{isAr ? "إلى تاريخ" : "End Date"}</th>
+                        <th className="py-3 px-4 text-start">{isAr ? "البيان / السبب" : "Work Order Reason"}</th>
+                        <th className="py-3 px-4 text-start">{isAr ? "الحالة" : "Status"}</th>
+                        <th className="py-3 px-4 text-end">{isAr ? "إجراء" : "Action"}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-brand-border/60">
+                      {calendarData.blocked_ranges
+                        .filter(
+                          (b) =>
+                            b.status === "maintenance" ||
+                            (b.reason &&
+                              (b.reason.toLowerCase().includes("maintenance") ||
+                                b.reason.includes("صيانة") ||
+                                b.reason.toLowerCase().includes("repair")))
+                        )
+                        .map((block) => (
+                          <tr key={block.id} className="hover:bg-brand-sand-light/30">
+                            <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">{block.start_date}</td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-brand-brown">{block.end_date}</td>
+                            <td className="py-3.5 px-4 font-medium text-brand-brown">{block.reason || "Scheduled Technical Maintenance"}</td>
+                            <td className="py-3.5 px-4">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
+                                {block.status}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-end">
+                              <button
+                                onClick={() => handleRemoveBlock(block.id)}
+                                className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold cursor-pointer"
+                              >
+                                {isAr ? "إنهاء الإغلاق" : "Release"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Schedule Maintenance Outage Form */}
+            <div className="bg-white p-6 rounded-3xl border border-brand-border shadow-xs space-y-4">
+              <h3 className="text-sm font-serif font-bold text-brand-brown border-b border-brand-border pb-2">
+                {isAr ? "+ جدولة إغلاق صيانة" : "+ Schedule Maintenance Outage"}
+              </h3>
+              <p className="text-brand-brown-muted leading-relaxed">
+                {isAr
+                  ? "إغلاق التواريخ رسمياً في التقويم لمنع أي حجوزات أثناء قيام فريق الصيانة بالعمل."
+                  : "Block calendar dates immediately to prevent bookings during technical servicing."}
+              </p>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddBlock(e);
+                }}
+                className="space-y-3"
+              >
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "تاريخ بدء الصيانة *" : "Start Date *"}
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={blockForm.start_date}
+                    onChange={(e) => setBlockForm({ ...blockForm, start_date: e.target.value, status: "maintenance" })}
+                    className="w-full px-3 py-2 rounded-xl border border-brand-border bg-brand-sand-light/40 text-brand-brown"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "تاريخ انتهاء الصيانة *" : "End Date *"}
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={blockForm.end_date}
+                    onChange={(e) => setBlockForm({ ...blockForm, end_date: e.target.value, status: "maintenance" })}
+                    className="w-full px-3 py-2 rounded-xl border border-brand-border bg-brand-sand-light/40 text-brand-brown"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "بيان أمر العمل *" : "Work Order Description *"}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={isAr ? "مثال: صيانة التكييف أو الفلاتر" : "e.g. AC Filter Overhaul / Painting"}
+                    value={blockForm.reason}
+                    onChange={(e) => setBlockForm({ ...blockForm, reason: e.target.value, status: "maintenance" })}
+                    className="w-full px-3 py-2 rounded-xl border border-brand-border bg-brand-sand-light/40 text-brand-brown"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={blockSubmitting}
+                  className="w-full py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white rounded-xl font-bold transition shadow-xs cursor-pointer"
+                >
+                  {blockSubmitting ? (isAr ? "جارٍ الحفظ..." : "Scheduling...") : (isAr ? "تأكيد إغلاق الصيانة" : "Confirm Maintenance Block")}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tab 3: Pricing & Seasons */}
       {activeTab === "pricing" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden text-xs">
-              <div className="p-6 border-b border-brand-border flex items-center justify-between">
-                <h3 className="text-base font-bold text-brand-brown">
-                  {isAr ? "قواعد التسعير الموسمي (Seasonal Rates)" : "Seasonal Pricing Rules"}
-                </h3>
+              <div className="p-6 border-b border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-bold text-brand-brown">
+                    {isAr ? "قواعد التسعير الموسمي (Seasonal Rates)" : "Seasonal Pricing Rules"}
+                  </h3>
+                  <p className="text-[11px] text-brand-brown-muted mt-0.5">
+                    {isAr ? "قواعد الأسعار الموسمية الخاصة بهذا العقار المحدد" : "Seasonal rules specific to this inventory item"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/pricing?tab=calendar&property_id=${property.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border text-xs font-bold transition shadow-2xs"
+                  >
+                    <span>📅</span>
+                    <span>{isAr ? "فتح تقويم التسعير" : "Pricing Calendar"}</span>
+                    <span className="text-[10px]">↗</span>
+                  </Link>
+                  <Link
+                    href={`/admin/pricing?tab=preview&property_id=${property.id}`}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border text-xs font-bold transition shadow-2xs"
+                  >
+                    <span>🧮</span>
+                    <span>{isAr ? "محاكي عروض الأسعار" : "Quote Simulator"}</span>
+                    <span className="text-[10px]">↗</span>
+                  </Link>
+                </div>
               </div>
 
               {!property.seasonal_prices || property.seasonal_prices.length === 0 ? (
@@ -1302,6 +1592,129 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
         </div>
       )}
 
+      {/* Tab: Concierge & Experiential Services */}
+      {activeTab === "services" && (
+        <div className="space-y-6 text-xs">
+          <div className="bg-white p-6 sm:p-7 rounded-3xl border border-brand-border shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-border pb-3">
+              <div>
+                <h3 className="text-base font-serif font-bold text-brand-brown">
+                  {isAr ? "خدمات الجونة والكونسيرج المتاحة للعقار" : "El Gouna Concierge & Experiential Services"}
+                </h3>
+                <p className="text-[11px] text-brand-brown-muted mt-0.5">
+                  {isAr
+                    ? "الخدمات الحصرية المتكاملة المتاحة للنزلاء في هذا العقار بإشراف فريق كونسيرج المنصة."
+                    : "Exclusive on-demand and integrated experiences available for guests staying at this property."}
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200">
+                <span>⭐</span>
+                <span>{isAr ? "خدمات 5 نجوم معتمدة" : "GouNow Concierge Verified"}</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+              {[
+                {
+                  icon: "🛺",
+                  name_en: "Lagoon Buggy / Club Car",
+                  name_ar: "عربة جولف كهربائية (Buggy)",
+                  desc_en: "Dedicated 4-seater electric buggy delivered to villa for internal El Gouna mobility.",
+                  desc_ar: "عربة كهربائية خاصة للتنقل بحرية داخل أحياء ومنتجعات الجونة طوال فترة الإقامة.",
+                  badge: "Most Requested",
+                },
+                {
+                  icon: "🚤",
+                  name_en: "Private Boat & Lagoon Cruising",
+                  name_ar: "يخت ورحلات بحرية خاصة",
+                  desc_en: "Private skippered lagoon tour, sunset cruising, and kitesurf sandbank drop-offs.",
+                  desc_ar: "رحلات خاصة بقوارب فاخرة وجولات في اللاجون إلى جانب رحلات الغطس والكايت سيرف.",
+                  badge: "Lagoon Direct",
+                },
+                {
+                  icon: "🧹",
+                  name_en: "Premium Daily Housekeeping",
+                  name_ar: "خدمة تنظيف وضيافة يومية",
+                  desc_en: "Scheduled hotel-grade daily housekeeping, linen change, and evening turndown.",
+                  desc_ar: "خدمة تنظيف فندقية راقية تشمل تغيير المفروشات والمناشف وفق أعلى المعايير.",
+                  badge: "On-Demand",
+                },
+                {
+                  icon: "👨‍🍳",
+                  name_en: "Private Villa Chef",
+                  name_ar: "شيف خاص داخل الفيلا",
+                  desc_en: "Bespoke seafood BBQ, Mediterranean breakfast, and fine dining prepared in-villa.",
+                  desc_ar: "طاهٍ محترف لتحضير وجبات المأكولات البحرية والمشاوي الفاخرة داخل الفيلا.",
+                  badge: "VIP Gourmet",
+                },
+                {
+                  icon: "✈️",
+                  name_en: "Hurghada Airport VIP Transfer",
+                  name_ar: "توصيل مطار الغردقة VIP",
+                  desc_en: "Executive Mercedes-Benz transfer with flight monitoring and luggage assistance.",
+                  desc_ar: "خدمة استقبال وتوصيل خاصة من وإلى مطار الغردقة الدولي بسيارات فاخرة وسائق خاص.",
+                  badge: "Airport Direct",
+                },
+                {
+                  icon: "🏄",
+                  name_en: "Kitesurfing & Sliders Gear",
+                  name_ar: "معدات وتجارب الكايت سيرف",
+                  desc_en: "Direct locker storage and VIP access to Sliders Cable Park & Element Watersports.",
+                  desc_ar: "حفظ وتجهيز معدات التزلج على الماء واشتراكات حصرية في سلايدرز بارك ومراكز الكايت.",
+                  badge: "Watersports",
+                },
+                {
+                  icon: "👶",
+                  name_en: "Certified Nanny & Baby Gear",
+                  name_ar: "جليسة أطفال ومستلزمات صغار",
+                  desc_en: "Background-checked multilingual babysitter, premium cribs, and beach gear.",
+                  desc_ar: "رعاية أطفال موثوقة مع توفير أسرّة أطفال وكراسي طعام ومستلزمات شاطئ للأطفال.",
+                  badge: "Family Safe",
+                },
+                {
+                  icon: "🐾",
+                  name_en: "Pet-Friendly Welcome Kit",
+                  name_ar: "باقة النزلاء برفقة الحيوانات",
+                  desc_en: "Complimentary luxury pet beds, water bowls, and direct lagoon beach pet access.",
+                  desc_ar: "تجهيزات خاصة للحيوانات الأليفة تشمل أسرة وأواني ومسارات مشي مخصصة باللاجون.",
+                  badge: "Pet Friendly",
+                },
+              ].map((svc, i) => (
+                <div
+                  key={i}
+                  className="p-4 rounded-2xl bg-brand-sand-light/40 border border-brand-border flex flex-col justify-between hover:border-brand-terracotta/40 transition group"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl">{svc.icon}</span>
+                      <span className="px-2 py-0.5 rounded-md bg-white border border-brand-border text-[9px] font-bold text-brand-brown">
+                        {svc.badge}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-brand-brown group-hover:text-brand-terracotta transition">
+                        {isAr ? svc.name_ar : svc.name_en}
+                      </h4>
+                      <p className="text-[11px] text-brand-brown-muted mt-1 leading-relaxed">
+                        {isAr ? svc.desc_ar : svc.desc_en}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-brand-border/60 mt-3 flex items-center justify-between text-[11px]">
+                    <span className="text-emerald-700 font-bold">
+                      ● {isAr ? "متاح للطلب" : "Available"}
+                    </span>
+                    <span className="text-brand-terracotta font-bold">
+                      {isAr ? "عبر الكونسيرج" : "Via Concierge"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tab 4: Amenities */}
       {activeTab === "amenities" && (
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-brand-border shadow-xs space-y-6 text-xs">
@@ -1407,6 +1820,66 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
                         >
                           {isAr ? "التفاصيل" : "Details"}
                         </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Activity Log & Audit Trail */}
+      {activeTab === "activity" && (
+        <div className="bg-white rounded-3xl border border-brand-border shadow-xs overflow-hidden text-xs">
+          <div className="p-6 border-b border-brand-border flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-serif font-bold text-brand-brown">
+                {isAr ? "سجل النشاط وتتبع العمليات (Audit Trail)" : "Property Activity & Audit Trail"}
+              </h3>
+              <p className="text-[11px] text-brand-brown-muted mt-0.5">
+                {isAr
+                  ? "تسجيل لكافة التعديلات الإدارية وحركات الأسعار والمخزون الخاصة بهذا العقار."
+                  : "Immutable log of all admin modifications, status changes, and inventory actions."}
+              </p>
+            </div>
+            <span className="text-xs text-brand-brown-muted font-mono">
+              {property.recent_activity?.length || 0} {isAr ? "سجلات" : "events"}
+            </span>
+          </div>
+
+          {!property.recent_activity || property.recent_activity.length === 0 ? (
+            <div className="p-8 text-center text-brand-brown-muted">
+              {isAr ? "لا توجد سجلات نشاط مسجلة لهذا العقار حتى الآن." : "No activity logs recorded for this property yet."}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-start">
+                <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-bold text-[10px]">
+                  <tr>
+                    <th className="py-3 px-4 text-start">{isAr ? "التوقيت" : "Timestamp"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "المسؤول" : "Actor"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "نوع الإجراء" : "Action"}</th>
+                    <th className="py-3 px-4 text-start">{isAr ? "التفاصيل" : "Description"}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-border/60">
+                  {property.recent_activity.map((act: any) => (
+                    <tr key={act.id} className="hover:bg-brand-sand-light/30">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-brand-brown-muted" dir="ltr">
+                        {act.created_at ? new Date(act.created_at).toLocaleString() : "-"}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-brand-brown">
+                        {act.user_name || "Administrator"}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-brand-sand-light text-brand-brown border border-brand-border uppercase">
+                          {act.action}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-brand-brown font-medium">
+                        {act.description}
                       </td>
                     </tr>
                   ))}

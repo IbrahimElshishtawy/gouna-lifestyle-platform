@@ -261,6 +261,9 @@ export interface AvailabilityBlockItem {
 export interface SeasonalPriceItem {
   id: number;
   property_id?: number | null;
+  parent_id?: number | null;
+  property_title?: string;
+  property_reference?: string;
   name_en: string;
   name_ar?: string | null;
   start_date: string;
@@ -356,6 +359,25 @@ export interface AdminPropertyUnitDetail extends AdminPropertyUnitItem {
   availability_blocks?: AvailabilityBlockItem[];
   seasonal_prices?: SeasonalPriceItem[];
   bookings?: AdminBookingItem[];
+  recent_bookings?: Array<{
+    id: number;
+    reference: string;
+    customer_name: string;
+    check_in: string;
+    check_out: string;
+    nights: number;
+    guests: number;
+    formatted_total: string;
+    status: string;
+    payment_status: string;
+  }>;
+  recent_activity?: Array<{
+    id: number;
+    user_name: string;
+    action: string;
+    description: string;
+    created_at: string;
+  }>;
 }
 
 export interface AdminPropertyItem {
@@ -399,6 +421,7 @@ export interface AdminPropertyItem {
   };
   primary_image: string;
   created_at: string | null;
+  updated_at?: string | null;
 }
 
 export interface AdminPropertySummary {
@@ -564,6 +587,8 @@ export interface PlatformSettingsMap {
 // 9. Pricing Engine Types & Contracts
 export interface PricingOverviewPropertyItem {
   id: number;
+  parent_id?: number | null;
+  parent_title?: string | null;
   reference_number: string;
   title_en: string;
   title_ar: string | null;
