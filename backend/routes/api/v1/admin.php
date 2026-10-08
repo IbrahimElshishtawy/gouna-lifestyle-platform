@@ -90,6 +90,7 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::post('/{id}/addons', [YachtApiController::class, 'storeAddon'])->name('addons.store');
         Route::delete('/{id}/addons/{addonId}', [YachtApiController::class, 'deleteAddon'])->name('addons.destroy');
         Route::get('/{id}/bookings', [YachtApiController::class, 'bookings'])->name('bookings');
+        Route::post('/{id}/calculate-price', [YachtApiController::class, 'calculatePrice'])->name('calculate-price');
     });
 
     // 3.07 Events, Ticketing & Check-In Station

@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /checkout/mock/
-Disallow: /locale/
-
-Sitemap: https://gounow.com/sitemap.xml
