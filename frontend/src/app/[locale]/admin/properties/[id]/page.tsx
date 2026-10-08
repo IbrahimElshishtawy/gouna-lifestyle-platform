@@ -3,7 +3,7 @@
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   getAdminPropertyDetails,
   togglePropertyStatus,
@@ -14,6 +14,8 @@ import {
   removePropertySeasonalPrice,
   updateAdminProperty,
   deleteAdminProperty,
+  createAdminPropertyUnit,
+  deleteAdminPropertyUnit,
 } from "@/features/admin/services/admin.api";
 import type { PropertyCalendarResponse } from "@/features/admin/types";
 import LocationPicker from "@/features/admin/components/LocationPicker";
@@ -33,6 +35,9 @@ interface PageProps {
 export default function AdminPropertyDetailPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const propertyId = parseInt(resolvedParams.id, 10);
+  const searchParams = useSearchParams();
+  const urlTab = searchParams.get("tab") as any;
+
   const { locale } = useLanguage();
   const isAr = locale === "ar";
   const router = useRouter();
@@ -40,7 +45,35 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
   const [property, setProperty] = useState<any | null>(null);
   const [calendarData, setCalendarData] = useState<PropertyCalendarResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"overview" | "location" | "availability" | "pricing" | "amenities" | "media" | "bookings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "units" | "location" | "availability" | "pricing" | "amenities" | "media" | "bookings">(
+    urlTab || "overview"
+  );
+
+  // Unit Management State
+  const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
+  const [unitForm, setUnitForm] = useState({
+    unit_number: "",
+    title_en: "",
+    title_ar: "",
+    view: "Lagoon View",
+    bedrooms: 2,
+    bathrooms: 2,
+    max_guests: 4,
+    area_sqm: "" as number | "",
+    base_price: "",
+    status: "published" as "published" | "draft",
+  });
+  const [unitSubmitting, setUnitSubmitting] = useState(false);
+  const [unitSearch, setUnitSearch] = useState("");
+  const [deleteUnitModal, setDeleteUnitModal] = useState<{
+    isOpen: boolean;
+    unit: any | null;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    unit: null,
+    loading: false,
+  });
 
   // Location Form State
   const [locationForm, setLocationForm] = useState<{
@@ -111,6 +144,78 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId]);
+
+  const handleCreateUnit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!property) return;
+    setUnitSubmitting(true);
+    setFeedback(null);
+    try {
+      const priceCents = Math.round(parseFloat(unitForm.base_price || "0") * 100);
+      const res = await createAdminPropertyUnit(property.id, {
+        unit_number: unitForm.unit_number,
+        title_en: unitForm.title_en,
+        title_ar: unitForm.title_ar || undefined,
+        view: unitForm.view,
+        bedrooms: Number(unitForm.bedrooms),
+        bathrooms: Number(unitForm.bathrooms),
+        max_guests: Number(unitForm.max_guests),
+        area_sqm: unitForm.area_sqm ? Number(unitForm.area_sqm) : undefined,
+        base_price_cents: priceCents,
+        currency: property.currency || "EGP",
+        status: unitForm.status,
+        listing_type: "rent",
+      });
+
+      setFeedback({
+        type: "success",
+        message: res.message || (isAr ? "تمت إضافة الوحدة التابعة بنجاح!" : "Sub-unit added successfully!"),
+      });
+
+      setIsAddUnitModalOpen(false);
+      setUnitForm({
+        unit_number: "",
+        title_en: "",
+        title_ar: "",
+        view: "Lagoon View",
+        bedrooms: 2,
+        bathrooms: 2,
+        max_guests: 4,
+        area_sqm: "",
+        base_price: "",
+        status: "published",
+      });
+
+      await fetchProperty();
+    } catch (err: any) {
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر إضافة الوحدة التابعة." : "Failed to create sub-unit."),
+      });
+    } finally {
+      setUnitSubmitting(false);
+    }
+  };
+
+  const handleConfirmDeleteUnit = async () => {
+    if (!property || !deleteUnitModal.unit) return;
+    setDeleteUnitModal((prev) => ({ ...prev, loading: true }));
+    try {
+      await deleteAdminPropertyUnit(property.id, deleteUnitModal.unit.id);
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم حذف الوحدة التابعة بنجاح." : "Sub-unit deleted successfully.",
+      });
+      setDeleteUnitModal({ isOpen: false, unit: null, loading: false });
+      await fetchProperty();
+    } catch (err: any) {
+      setDeleteUnitModal((prev) => ({ ...prev, loading: false }));
+      setFeedback({
+        type: "error",
+        message: err.message || (isAr ? "تعذر حذف الوحدة التابعة." : "Cannot delete unit with active bookings."),
+      });
+    }
+  };
 
   const handleToggleVisibility = async () => {
     if (!property) return;
@@ -406,6 +511,27 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
           {isAr ? "المواصفات والبيانات" : "Specifications & Overview"}
         </button>
         <button
+          onClick={() => setActiveTab("units")}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+            activeTab === "units"
+              ? "bg-brand-terracotta text-white shadow-xs"
+              : "text-brand-brown-muted hover:text-brand-brown hover:bg-brand-sand-light"
+          }`}
+        >
+          <span>{isAr ? "الوحدات والفيلات التابعة" : "Sub-Units & Inventory"}</span>
+          {property?.units && property.units.length > 0 && (
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                activeTab === "units"
+                  ? "bg-white/20 text-white"
+                  : "bg-brand-sand text-brand-brown border border-brand-border"
+              }`}
+            >
+              {property.units.length}
+            </span>
+          )}
+        </button>
+        <button
           onClick={() => setActiveTab("location")}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
             activeTab === "location"
@@ -558,6 +684,229 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab 1.1: Sub-Units & Inventory */}
+      {activeTab === "units" && (
+        <div className="space-y-6">
+          {/* Summary KPIs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-brand-border shadow-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
+                {isAr ? "إجمالي الوحدات التابعة" : "Total Sub-Units"}
+              </span>
+              <span className="text-2xl font-serif font-bold text-brand-brown">
+                {property.units ? property.units.length : 0}
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-brand-border shadow-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
+                {isAr ? "الوحدات المعروضة (نشطة)" : "Active / Published"}
+              </span>
+              <span className="text-2xl font-serif font-bold text-emerald-700">
+                {property.units ? property.units.filter((u: any) => u.is_published).length : 0}
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-brand-border shadow-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
+                {isAr ? "إجمالي الغرف المتاحة" : "Total Bedrooms"}
+              </span>
+              <span className="text-2xl font-serif font-bold text-brand-terracotta">
+                {property.units ? property.units.reduce((acc: number, u: any) => acc + (u.bedrooms || 0), 0) : 0}
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-brand-border shadow-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-brown-muted block mb-1">
+                {isAr ? "السعة الاستيعابية القصوى" : "Max Guest Capacity"}
+              </span>
+              <span className="text-2xl font-serif font-bold text-brand-brown">
+                {property.units ? property.units.reduce((acc: number, u: any) => acc + (u.max_guests || 0), 0) : 0} {isAr ? "نزيل" : "Guests"}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-brand-border shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="w-full sm:w-72 relative">
+              <input
+                type="text"
+                value={unitSearch}
+                onChange={(e) => setUnitSearch(e.target.value)}
+                placeholder={isAr ? "بحث برقم الوحدة، الاسم، أو الإطلالة..." : "Search by unit #, title, or view..."}
+                className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl px-3.5 py-2.5 focus:outline-hidden focus:border-brand-terracotta"
+              />
+            </div>
+
+            <PermissionGuard permission="manage_properties">
+              <button
+                type="button"
+                onClick={() => setIsAddUnitModalOpen(true)}
+                className="w-full sm:w-auto px-4 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>＋</span>
+                <span>{isAr ? "إضافة وحدة جديدة للكمبوند" : "Add Sub-Unit"}</span>
+              </button>
+            </PermissionGuard>
+          </div>
+
+          {/* Units List */}
+          {(!property.units || property.units.length === 0) ? (
+            <div className="bg-white rounded-3xl border border-brand-border p-8 text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-brand-sand/50 text-brand-brown-muted mx-auto flex items-center justify-center text-2xl">
+                🏨
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-brand-brown">
+                  {isAr ? "لا توجد وحدات تابعة مسجلة بعد" : "No Sub-Units Added Yet"}
+                </h4>
+                <p className="text-xs text-brand-brown-muted max-w-md mx-auto mt-1">
+                  {isAr
+                    ? "يمكنك تقسيم هذا العقار أو الكمبوند إلى وحدات وفيلات منفصلة (مثل Villa 1A، Apt 204) مع تسعير وتقويم توفر مستقل لكل وحدة."
+                    : "You can divide this property or compound into individual bookable units (e.g. Villa 1A, Apt 204) with independent pricing and calendar availability."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddUnitModalOpen(true)}
+                className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer inline-flex items-center gap-2"
+              >
+                <span>＋</span>
+                <span>{isAr ? "إضافة أول وحدة الآن" : "Add First Sub-Unit"}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl border border-brand-border overflow-hidden shadow-xs">
+              <div className="overflow-x-auto gounow-scrollbar">
+                <table className="w-full text-start text-xs">
+                  <thead className="bg-brand-sand-light/60 text-brand-brown-muted uppercase tracking-wider font-semibold border-b border-brand-border">
+                    <tr>
+                      <th className="py-3 px-4 text-start">{isAr ? "رقم والرمز" : "Unit # / Ref"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "اسم الوحدة" : "Unit Title"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "الإطلالة" : "View"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "المواصفات" : "Specs"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "سعر الليلة الأساسي" : "Nightly Rate"}</th>
+                      <th className="py-3 px-4 text-start">{isAr ? "حالة العرض" : "Status"}</th>
+                      <th className="py-3 px-4 text-end">{isAr ? "إجراءات" : "Actions"}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-border/60">
+                    {property.units
+                      .filter((u: any) => {
+                        if (!unitSearch.trim()) return true;
+                        const s = unitSearch.toLowerCase();
+                        return (
+                          (u.unit_number && u.unit_number.toLowerCase().includes(s)) ||
+                          (u.title_en && u.title_en.toLowerCase().includes(s)) ||
+                          (u.title_ar && u.title_ar.toLowerCase().includes(s)) ||
+                          (u.view && u.view.toLowerCase().includes(s)) ||
+                          (u.reference_number && u.reference_number.toLowerCase().includes(s))
+                        );
+                      })
+                      .map((unit: any) => {
+                        const unitTitle = isAr && unit.title_ar ? unit.title_ar : unit.title_en;
+                        return (
+                          <tr key={unit.id} className="hover:bg-brand-sand-light/30 transition-colors">
+                            <td className="py-3.5 px-4">
+                              <span className="font-mono font-bold text-brand-brown block">
+                                {unit.unit_number || unit.reference_number}
+                              </span>
+                              <span className="text-[10px] text-brand-brown-muted font-mono">
+                                {unit.reference_number}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              <Link
+                                href={`/admin/properties/${property.id}/units/${unit.id}`}
+                                className="font-bold text-brand-brown hover:text-brand-terracotta line-clamp-1"
+                              >
+                                {unitTitle}
+                              </Link>
+                              <span className="text-[10px] text-brand-brown-muted block">
+                                {unit.category?.name_en || (isAr ? "وحدة سكنية" : "Unit")}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-brand-brown">
+                              {unit.view ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-sand-light text-brand-brown border border-brand-border">
+                                  🌅 {unit.view}
+                                </span>
+                              ) : (
+                                <span className="text-brand-brown-muted">-</span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-brand-brown-muted">
+                              <span>{unit.bedrooms} {isAr ? "غرف" : "Bed"}</span> &bull;{" "}
+                              <span>{unit.bathrooms} {isAr ? "حمام" : "Bath"}</span> &bull;{" "}
+                              <span>{unit.max_guests} {isAr ? "ضيوف" : "Guests"}</span>
+                              {unit.area_sqm ? ` • ${unit.area_sqm} m²` : ""}
+                            </td>
+
+                            <td className="py-3.5 px-4 font-serif font-bold text-brand-brown">
+                              {unit.formatted_price || `${(unit.base_price_cents / 100).toLocaleString()} ${unit.currency || "EGP"}`}
+                              <span className="text-[10px] font-normal text-brand-brown-muted block">
+                                {isAr ? "/ الليلة" : "/ night"}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              {unit.is_published ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                  {isAr ? "معروض للنزلاء" : "Published"}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                                  {isAr ? "مسودة / مخفي" : "Draft"}
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-end">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <Link
+                                  href={`/admin/properties/${property.id}/units/${unit.id}`}
+                                  className="px-2.5 py-1.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-lg text-xs font-bold transition shadow-xs"
+                                >
+                                  {isAr ? "إدارة الوحدة" : "Manage"}
+                                </Link>
+
+                                <Link
+                                  href={`/stays/${unit.slug}`}
+                                  target="_blank"
+                                  className="px-2 py-1.5 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-lg text-xs font-medium border border-brand-border"
+                                  title={isAr ? "معاينة الوحدة على الموقع العام" : "Preview Unit"}
+                                >
+                                  ↗
+                                </Link>
+
+                                <PermissionGuard permission="manage_properties">
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteUnitModal({ isOpen: true, unit, loading: false })}
+                                    className="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold border border-rose-200 cursor-pointer transition"
+                                    title={isAr ? "حذف الوحدة التابعة" : "Delete Unit"}
+                                  >
+                                    🗑️
+                                  </button>
+                                </PermissionGuard>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1083,6 +1432,220 @@ export default function AdminPropertyDetailPage({ params }: PageProps) {
         isLoading={deleteLoading}
         onConfirm={handleDeleteProperty}
         onCancel={() => setDeleteModalOpen(false)}
+      />
+
+      {/* Modal: Add Sub-Unit */}
+      {isAddUnitModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-brand-border space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="border-b border-brand-border pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-serif font-bold text-brand-brown">
+                  {isAr ? "إضافة وحدة جديدة تابعة لهذا العقار" : "Add Sub-Unit to Property"}
+                </h3>
+                <p className="text-[11px] text-brand-brown-muted">
+                  {property.reference_number} • {title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddUnitModalOpen(false)}
+                className="text-brand-brown-muted hover:text-brand-brown text-base cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateUnit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "رقم / اسم الوحدة الداخلي *" : "Unit Number / Name *"}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={unitForm.unit_number}
+                    onChange={(e) => setUnitForm({ ...unitForm, unit_number: e.target.value })}
+                    placeholder="e.g. Villa 102, Apt 3B"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "الإطلالة (View) *" : "View *"}
+                  </label>
+                  <select
+                    value={unitForm.view}
+                    onChange={(e) => setUnitForm({ ...unitForm, view: e.target.value })}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5"
+                  >
+                    <option value="Lagoon View">{isAr ? "إطلالة على اللاجون (Lagoon View)" : "Lagoon View"}</option>
+                    <option value="Sea View">{isAr ? "إطلالة مباشرة على البحر (Sea View)" : "Sea View"}</option>
+                    <option value="Golf Course View">{isAr ? "إطلالة على ملاعب الجولف (Golf View)" : "Golf Course View"}</option>
+                    <option value="Marina View">{isAr ? "إطلالة على المارينا (Marina View)" : "Marina View"}</option>
+                    <option value="Pool View">{isAr ? "إطلالة على المسبح (Pool View)" : "Pool View"}</option>
+                    <option value="Garden View">{isAr ? "إطلالة على الحديقة (Garden View)" : "Garden View"}</option>
+                    <option value="Mountain View">{isAr ? "إطلالة جبلية (Mountain View)" : "Mountain View"}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "عنوان الوحدة بالإنجليزية *" : "Unit Title (English) *"}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={unitForm.title_en}
+                    onChange={(e) => setUnitForm({ ...unitForm, title_en: e.target.value })}
+                    placeholder="e.g. Luxury 2BR Lagoon View Villa"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "عنوان الوحدة بالعربية" : "Unit Title (Arabic)"}
+                  </label>
+                  <input
+                    type="text"
+                    value={unitForm.title_ar}
+                    onChange={(e) => setUnitForm({ ...unitForm, title_ar: e.target.value })}
+                    placeholder="مثال: فيلا فاخرة غرفتين مطلة على اللاجون"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 text-right"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "غرف النوم *" : "Bedrooms *"}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={unitForm.bedrooms}
+                    onChange={(e) => setUnitForm({ ...unitForm, bedrooms: Number(e.target.value) })}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "الحمامات *" : "Baths *"}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={unitForm.bathrooms}
+                    onChange={(e) => setUnitForm({ ...unitForm, bathrooms: Number(e.target.value) })}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "أقصى ضيوف *" : "Max Guests *"}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={unitForm.max_guests}
+                    onChange={(e) => setUnitForm({ ...unitForm, max_guests: Number(e.target.value) })}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "المساحة (م²)" : "Area (m²)"}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={unitForm.area_sqm}
+                    onChange={(e) => setUnitForm({ ...unitForm, area_sqm: e.target.value ? Number(e.target.value) : "" })}
+                    placeholder="150"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "سعر الليلة الأساسي (EGP) *" : "Base Nightly Price (EGP) *"}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={unitForm.base_price}
+                    onChange={(e) => setUnitForm({ ...unitForm, base_price: e.target.value })}
+                    placeholder="8500"
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                    {isAr ? "حالة النشر الأولية" : "Initial Visibility"}
+                  </label>
+                  <select
+                    value={unitForm.status}
+                    onChange={(e) => setUnitForm({ ...unitForm, status: e.target.value as any })}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5"
+                  >
+                    <option value="published">{isAr ? "معروض ونشط للنزلاء (Published)" : "Active / Published"}</option>
+                    <option value="draft">{isAr ? "مسودة غير معروضة (Draft)" : "Draft / Hidden"}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-brand-border">
+                <button
+                  type="button"
+                  onClick={() => setIsAddUnitModalOpen(false)}
+                  className="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl font-bold cursor-pointer"
+                >
+                  {isAr ? "إلغاء" : "Cancel"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={unitSubmitting}
+                  className="px-5 py-2 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl font-bold disabled:opacity-50 cursor-pointer"
+                >
+                  {unitSubmitting ? (isAr ? "جاري الإنشاء..." : "Creating...") : isAr ? "إضافة الوحدة" : "Add Sub-Unit"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Unit Deletion Dialog */}
+      <ConfirmDialog
+        isOpen={deleteUnitModal.isOpen}
+        title={isAr ? "تأكيد حذف الوحدة التابعة" : "Confirm Sub-Unit Deletion"}
+        description={
+          isAr
+            ? `هل أنت متأكد من حذف الوحدة التابعة [${deleteUnitModal.unit?.unit_number || deleteUnitModal.unit?.reference_number}]؟ لا يمكن التراجع عن هذه العملية.`
+            : `Are you sure you want to delete sub-unit [${deleteUnitModal.unit?.unit_number || deleteUnitModal.unit?.reference_number}]? This action cannot be undone.`
+        }
+        confirmText={isAr ? "نعم، حذف الوحدة" : "Yes, Delete Sub-Unit"}
+        cancelText={isAr ? "إلغاء" : "Cancel"}
+        isDestructive={true}
+        isLoading={deleteUnitModal.loading}
+        onConfirm={handleConfirmDeleteUnit}
+        onCancel={() => setDeleteUnitModal({ isOpen: false, unit: null, loading: false })}
       />
     </div>
   );

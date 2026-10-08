@@ -224,7 +224,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               onClick={() => toggleSection("pricing")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <span>{isAr ? "محرك الأسعار" : "Pricing Engine"}</span>
+              <span>{isAr ? "محرك الأسعار الذكي" : "Pricing Engine"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.pricing ? "rotate-90 rtl:rotate-90" : ""
@@ -239,13 +239,31 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/pricing"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "الأسعار الأساسية والقواعد" : "Base Prices & Rules"}
+                  {isAr ? "نظرة عامة والأسعار الأساسية" : "Overview & Base Rates"}
                 </Link>
                 <Link
-                  href="/admin/pricing#seasons"
+                  href="/admin/pricing?tab=seasons"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "قواعد المواسم" : "Seasonal Rules"}
+                  {isAr ? "قواعد المواسم والعطلات" : "Seasonal & Holiday Rules"}
+                </Link>
+                <Link
+                  href="/admin/pricing?tab=calendar"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "تقويم الأسعار الشهري" : "Pricing Calendar Matrix"}
+                </Link>
+                <Link
+                  href="/admin/pricing?tab=preview"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "محاكي التسعير الفوري" : "Quote Simulator"}
+                </Link>
+                <Link
+                  href="/admin/pricing?tab=discounts"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
+                >
+                  {isAr ? "الخصومات وكوبونات الترويج" : "Discounts & Promo Codes"}
                 </Link>
               </div>
             )}

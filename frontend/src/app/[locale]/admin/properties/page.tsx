@@ -399,6 +399,15 @@ export default function AdminPropertiesPage() {
                             <span className="text-[10px] text-brand-brown-muted block">
                               {catName} {prop.compound ? `• ${prop.compound}` : ""}
                             </span>
+                            {typeof prop.units_count === "number" && prop.units_count > 0 && (
+                              <Link
+                                href={`/admin/properties/${prop.id}?tab=units`}
+                                className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-sand-light hover:bg-brand-sand text-brand-brown border border-brand-border transition"
+                                title={isAr ? "عرض وإدارة الوحدات التابعة" : "View and manage sub-units"}
+                              >
+                                <span>🏨 {prop.units_count} {isAr ? "وحدات تابعة" : "Sub-Units"}</span>
+                              </Link>
+                            )}
                           </div>
                         </div>
                       </td>

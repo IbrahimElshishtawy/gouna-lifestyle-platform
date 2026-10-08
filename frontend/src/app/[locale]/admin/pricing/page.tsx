@@ -68,6 +68,11 @@ export default function AdminPricingPage() {
   const [editingRuleId, setEditingRuleId] = useState<number | null>(null);
   const [ruleForm, setRuleForm] = useState({
     property_id: initialPropertyId || 0,
+    is_global: false,
+    rule_type: "season" as "season" | "holiday" | "weekend" | "override",
+    adjustment_type: "fixed" as "fixed" | "percentage",
+    adjustment_percent: 0,
+    days_of_week: ["Friday", "Saturday"] as string[],
     name_en: "",
     name_ar: "",
     start_date: "",
@@ -282,40 +287,38 @@ export default function AdminPricingPage() {
   // Rule Save
   const handleSaveRule = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ruleForm.property_id || !ruleForm.start_date || !ruleForm.end_date) return;
+    if (!ruleForm.is_global && !ruleForm.property_id) return;
+    if (ruleForm.rule_type !== "weekend" && (!ruleForm.start_date || !ruleForm.end_date)) return;
     setRuleSubmitting(true);
     setFeedback(null);
     try {
+      const payload: any = {
+        property_id: ruleForm.is_global ? null : ruleForm.property_id,
+        rule_type: ruleForm.rule_type,
+        adjustment_type: ruleForm.adjustment_type,
+        adjustment_percent: ruleForm.adjustment_type === "percentage" ? Number(ruleForm.adjustment_percent) : null,
+        days_of_week: ruleForm.rule_type === "weekend" ? ruleForm.days_of_week : null,
+        name_en: ruleForm.name_en,
+        name_ar: ruleForm.name_ar || undefined,
+        start_date: ruleForm.start_date || "2026-01-01",
+        end_date: ruleForm.end_date || "2026-12-31",
+        price_cents: ruleForm.adjustment_type === "percentage" ? 0 : ruleForm.price_cents,
+        priority: ruleForm.priority,
+        min_stay_nights: ruleForm.min_stay_nights,
+        notes: ruleForm.notes,
+      };
+
       if (editingRuleId) {
-        await updatePricingRule(editingRuleId, {
-          name_en: ruleForm.name_en,
-          name_ar: ruleForm.name_ar || undefined,
-          start_date: ruleForm.start_date,
-          end_date: ruleForm.end_date,
-          price_cents: ruleForm.price_cents,
-          priority: ruleForm.priority,
-          min_stay_nights: ruleForm.min_stay_nights,
-          notes: ruleForm.notes,
-        });
+        await updatePricingRule(editingRuleId, payload);
         setFeedback({
           type: "success",
-          message: isAr ? "تم تحديث قاعدة السعر بنجاح." : "Seasonal rule updated successfully.",
+          message: isAr ? "تم تحديث قاعدة السعر بنجاح." : "Pricing rule updated successfully.",
         });
       } else {
-        await createPricingRule({
-          property_id: ruleForm.property_id,
-          name_en: ruleForm.name_en,
-          name_ar: ruleForm.name_ar || undefined,
-          start_date: ruleForm.start_date,
-          end_date: ruleForm.end_date,
-          price_cents: ruleForm.price_cents,
-          priority: ruleForm.priority,
-          min_stay_nights: ruleForm.min_stay_nights,
-          notes: ruleForm.notes,
-        });
+        await createPricingRule(payload);
         setFeedback({
           type: "success",
-          message: isAr ? "تم إنشاء قاعدة السعر بنجاح." : "Seasonal rule created successfully.",
+          message: isAr ? "تم إنشاء قاعدة السعر بنجاح." : "Pricing rule created successfully.",
         });
       }
 
@@ -834,7 +837,12 @@ export default function AdminPricingPage() {
                               onClick={() => {
                                 setEditingRuleId(rule.id);
                                 setRuleForm({
-                                  property_id: rule.property_id,
+                                  property_id: rule.property_id || 0,
+                                  is_global: !rule.property_id,
+                                  rule_type: rule.rule_type || "season",
+                                  adjustment_type: rule.adjustment_type || "fixed",
+                                  adjustment_percent: rule.adjustment_percent || 0,
+                                  days_of_week: rule.days_of_week || ["Friday", "Saturday"],
                                   name_en: rule.name_en,
                                   name_ar: rule.name_ar || "",
                                   start_date: rule.start_date,
@@ -1368,26 +1376,124 @@ export default function AdminPricingPage() {
             </h3>
 
             <form onSubmit={handleSaveRule} className="space-y-4 text-xs">
+              {/* Target Inventory Scope */}
               <div>
                 <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                  {isAr ? "العقار المستهدف *" : "Target Inventory *"}
+                  {isAr ? "نطاق التطبيق والمخزون *" : "Target Inventory Scope *"}
                 </label>
-                <select
-                  value={ruleForm.property_id}
-                  onChange={(e) => {
-                    setRuleForm({ ...ruleForm, property_id: Number(e.target.value) });
-                    setTimeout(handleCheckOverlap, 50);
-                  }}
-                  required
-                  className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3"
-                >
-                  {overviewData?.properties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title_en}
-                    </option>
-                  ))}
-                </select>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRuleForm({ ...ruleForm, is_global: true, property_id: 0 });
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                      ruleForm.is_global
+                        ? "bg-brand-sand text-brand-brown border-brand-brown/40 shadow-xs"
+                        : "bg-white text-brand-brown-muted border-brand-border hover:bg-brand-sand-light"
+                    }`}
+                  >
+                    <span>🌐</span>
+                    <span>{isAr ? "عام لجميع العقارات (Global)" : "All Inventory (Global)"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRuleForm({
+                        ...ruleForm,
+                        is_global: false,
+                        property_id: ruleForm.property_id || (overviewData?.properties[0]?.id || 0),
+                      });
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                      !ruleForm.is_global
+                        ? "bg-brand-sand text-brand-brown border-brand-brown/40 shadow-xs"
+                        : "bg-white text-brand-brown-muted border-brand-border hover:bg-brand-sand-light"
+                    }`}
+                  >
+                    <span>🏠</span>
+                    <span>{isAr ? "عقار / وحدة محددة" : "Specific Property"}</span>
+                  </button>
+                </div>
+
+                {!ruleForm.is_global && (
+                  <select
+                    value={ruleForm.property_id}
+                    onChange={(e) => {
+                      setRuleForm({ ...ruleForm, property_id: Number(e.target.value) });
+                      setTimeout(handleCheckOverlap, 50);
+                    }}
+                    required={!ruleForm.is_global}
+                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-3"
+                  >
+                    <option value="">{isAr ? "-- اختر العقار المستهدف --" : "-- Select Property --"}</option>
+                    {overviewData?.properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title_en} ({p.reference_number})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
+
+              {/* Rule Type */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: "season", labelEn: "Seasonal", labelAr: "موسم محدد", icon: "☀️" },
+                  { id: "weekend", labelEn: "Weekend", labelAr: "عطلة نهاية أسبوع", icon: "🏖️" },
+                  { id: "holiday", labelEn: "Holiday / Event", labelAr: "عيد / فعالية", icon: "🎉" },
+                  { id: "override", labelEn: "Override", labelAr: "تجاوز يدوي", icon: "⚡" },
+                ].map((type) => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => setRuleForm({ ...ruleForm, rule_type: type.id as any })}
+                    className={`p-2 rounded-xl border text-[11px] font-bold transition text-center cursor-pointer ${
+                      ruleForm.rule_type === type.id
+                        ? "bg-brand-terracotta text-white border-brand-terracotta shadow-xs"
+                        : "bg-brand-sand-light/50 text-brand-brown border-brand-border hover:bg-brand-sand"
+                    }`}
+                  >
+                    <span className="block text-sm mb-0.5">{type.icon}</span>
+                    <span>{isAr ? type.labelAr : type.labelEn}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Weekend Days Selection (if weekend rule) */}
+              {ruleForm.rule_type === "weekend" && (
+                <div className="p-3 bg-brand-sand-light/40 border border-brand-border rounded-2xl space-y-2">
+                  <label className="block text-[11px] font-bold text-brand-brown">
+                    {isAr ? "أيام عطلة نهاية الأسبوع المستهدفة:" : "Target Weekend Days:"}
+                  </label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {["Thursday", "Friday", "Saturday", "Sunday"].map((day) => {
+                      const isChecked = ruleForm.days_of_week.includes(day);
+                      return (
+                        <label key={day} className="flex items-center gap-1.5 text-xs text-brand-brown cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setRuleForm({ ...ruleForm, days_of_week: [...ruleForm.days_of_week, day] });
+                              } else {
+                                setRuleForm({
+                                  ...ruleForm,
+                                  days_of_week: ruleForm.days_of_week.filter((d) => d !== day),
+                                });
+                              }
+                            }}
+                            className="rounded text-brand-terracotta focus:ring-brand-terracotta"
+                          />
+                          <span>{day}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -1399,7 +1505,7 @@ export default function AdminPricingPage() {
                     required
                     value={ruleForm.name_en}
                     onChange={(e) => setRuleForm({ ...ruleForm, name_en: e.target.value })}
-                    placeholder="e.g. Summer Peak 2026, Eid Holiday"
+                    placeholder="e.g. Summer Peak 2026, Weekend Markup"
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5"
                   />
                 </div>
@@ -1411,12 +1517,13 @@ export default function AdminPricingPage() {
                     type="text"
                     value={ruleForm.name_ar}
                     onChange={(e) => setRuleForm({ ...ruleForm, name_ar: e.target.value })}
-                    placeholder="مثال: ذروة الصيف، إجازة العيد"
+                    placeholder="مثال: ذروة الصيف، عطلة نهاية الأسبوع"
                     className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 text-right"
                   />
                 </div>
               </div>
 
+              {/* Date Range (optional if full year weekend rule) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
@@ -1424,7 +1531,7 @@ export default function AdminPricingPage() {
                   </label>
                   <input
                     type="date"
-                    required
+                    required={ruleForm.rule_type !== "weekend"}
                     value={ruleForm.start_date}
                     onChange={(e) => {
                       setRuleForm({ ...ruleForm, start_date: e.target.value });
@@ -1439,7 +1546,7 @@ export default function AdminPricingPage() {
                   </label>
                   <input
                     type="date"
-                    required
+                    required={ruleForm.rule_type !== "weekend"}
                     value={ruleForm.end_date}
                     onChange={(e) => {
                       setRuleForm({ ...ruleForm, end_date: e.target.value });
@@ -1450,21 +1557,65 @@ export default function AdminPricingPage() {
                 </div>
               </div>
 
+              {/* Adjustment Type: Fixed Price vs Percentage */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRuleForm({ ...ruleForm, adjustment_type: "fixed" })}
+                  className={`p-2 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
+                    ruleForm.adjustment_type === "fixed"
+                      ? "bg-brand-sand text-brand-brown border-brand-brown/40"
+                      : "bg-white text-brand-brown-muted border-brand-border hover:bg-brand-sand-light"
+                  }`}
+                >
+                  💵 {isAr ? "سعر ثابت لليلة (Fixed EGP)" : "Fixed Nightly Rate (EGP)"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRuleForm({ ...ruleForm, adjustment_type: "percentage" })}
+                  className={`p-2 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
+                    ruleForm.adjustment_type === "percentage"
+                      ? "bg-brand-sand text-brand-brown border-brand-brown/40"
+                      : "bg-white text-brand-brown-muted border-brand-border hover:bg-brand-sand-light"
+                  }`}
+                >
+                  📈 {isAr ? "زيادة / خصم نسبي (Percentage %)" : "Percentage Markup (+%)"}
+                </button>
+              </div>
+
               <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
-                    {isAr ? "سعر الليلة (EGP) *" : "Nightly Rate (EGP) *"}
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={ruleForm.price_cents ? ruleForm.price_cents / 100 : ""}
-                    onChange={(e) => setRuleForm({ ...ruleForm, price_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
-                    placeholder="12000"
-                    className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono font-bold"
-                  />
-                </div>
+                {ruleForm.adjustment_type === "percentage" ? (
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                      {isAr ? "نسبة الزيادة (%) *" : "Markup Percentage (%) *"}
+                    </label>
+                    <input
+                      type="number"
+                      min="-50"
+                      max="200"
+                      required
+                      value={ruleForm.adjustment_percent}
+                      onChange={(e) => setRuleForm({ ...ruleForm, adjustment_percent: Number(e.target.value) })}
+                      placeholder="20"
+                      className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono font-bold"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
+                      {isAr ? "سعر الليلة (EGP) *" : "Nightly Rate (EGP) *"}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={ruleForm.price_cents ? ruleForm.price_cents / 100 : ""}
+                      onChange={(e) => setRuleForm({ ...ruleForm, price_cents: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                      placeholder="12000"
+                      className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 font-mono font-bold"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1">
