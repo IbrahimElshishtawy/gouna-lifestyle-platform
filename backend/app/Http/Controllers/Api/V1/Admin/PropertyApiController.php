@@ -369,18 +369,22 @@ class PropertyApiController extends Controller
         $baseSlug = Str::slug($property->slug . '-' . ($validated['unit_number'] ?? $validated['title_en']));
         $slug = $baseSlug;
         $count = 1;
-        while (Property::where('slug', $slug)->exists()) {
+        while (Property::withTrashed()->where('slug', $slug)->exists()) {
             $slug = "{$baseSlug}-{$count}";
             $count++;
         }
 
         $ref = $property->reference_number . '-U' . strtoupper(Str::random(4));
-        while (Property::where('reference_number', $ref)->exists()) {
+        while (Property::withTrashed()->where('reference_number', $ref)->exists()) {
             $ref = $property->reference_number . '-U' . strtoupper(Str::random(4));
         }
 
         $amenityIds = $validated['amenity_ids'] ?? [];
         unset($validated['amenity_ids']);
+
+        if ($request->filled('base_price') && !isset($validated['base_price_cents'])) {
+            $validated['base_price_cents'] = (int) round(((float) $request->input('base_price')) * 100);
+        }
 
         $unit = Property::create(array_merge($validated, [
             'parent_id' => $property->id,
@@ -532,6 +536,10 @@ class PropertyApiController extends Controller
         $amenityIds = $validated['amenity_ids'] ?? null;
         unset($validated['amenity_ids']);
 
+        if ($request->filled('base_price') && !isset($validated['base_price_cents'])) {
+            $validated['base_price_cents'] = (int) round(((float) $request->input('base_price')) * 100);
+        }
+
         $unit->update($validated);
 
         if (is_array($amenityIds)) {
@@ -645,7 +653,7 @@ class PropertyApiController extends Controller
         $baseSlug = Str::slug($validated['title_en'] ?? 'property');
         $slug = $baseSlug;
         $count = 1;
-        while (Property::where('slug', $slug)->exists()) {
+        while (Property::withTrashed()->where('slug', $slug)->exists()) {
             $slug = "{$baseSlug}-{$count}";
             $count++;
         }
@@ -655,7 +663,7 @@ class PropertyApiController extends Controller
             default => 'GON-V-',
         };
         $reference = $refPrefix . strtoupper(Str::random(6));
-        while (Property::where('reference_number', $reference)->exists()) {
+        while (Property::withTrashed()->where('reference_number', $reference)->exists()) {
             $reference = $refPrefix . strtoupper(Str::random(6));
         }
 
@@ -984,7 +992,7 @@ class PropertyApiController extends Controller
             'success' => true,
             'message' => 'Availability block created successfully.',
             'data' => $block,
-        ]);
+        ], 201);
     }
 
     /**

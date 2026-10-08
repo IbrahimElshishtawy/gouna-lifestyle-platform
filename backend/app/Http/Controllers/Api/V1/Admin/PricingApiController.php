@@ -316,12 +316,19 @@ class PricingApiController extends Controller
             'name_ar' => ['nullable', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'price_cents' => ['required', 'integer', 'min:0'],
+            'price_cents' => ['nullable', 'integer', 'min:0'],
+            'price' => ['nullable', 'numeric', 'min:0'],
             'priority' => ['nullable', 'integer', 'min:1'],
             'min_stay_nights' => ['nullable', 'integer', 'min:1'],
             'is_active' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string'],
         ]);
+
+        if ($request->filled('price') && !isset($validated['price_cents'])) {
+            $validated['price_cents'] = (int) round(((float) $request->input('price')) * 100);
+        }
+        $validated['price_cents'] = $validated['price_cents'] ?? 0;
+        unset($validated['price']);
 
         $season = SeasonalPrice::create(array_merge($validated, [
             'rule_type' => $validated['rule_type'] ?? 'season',
