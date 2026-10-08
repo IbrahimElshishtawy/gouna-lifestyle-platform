@@ -248,7 +248,7 @@ export default function AdminEventsPage() {
     try {
       setCheckinLoading(true);
       setCheckinResult(null);
-      const res = await performEventCheckIn(Number(checkinEventId), ticketInputCode.trim());
+      const res = await performEventCheckIn(Number(checkinEventId), { ticket_code: ticketInputCode.trim() });
       setCheckinResult(res);
       setTicketInputCode("");
       loadData(); // reload dashboard stats
@@ -362,7 +362,7 @@ export default function AdminEventsPage() {
           </div>
           <div className="p-4 rounded-2xl bg-white border border-brand-border shadow-xs">
             <span className="text-[10px] uppercase tracking-wider text-amber-600 font-bold block mb-1">
-              Today's Shows
+              Today&apos;s Shows
             </span>
             <span className="text-2xl font-serif font-bold text-amber-700">{dashboard.today_events}</span>
           </div>

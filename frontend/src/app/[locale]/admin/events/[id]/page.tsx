@@ -67,7 +67,11 @@ export default function EventDetailPage({ params }: PageProps) {
         getEventOrders(eventId),
       ]);
 
-      if (evtRes) setEvent(evtRes);
+      if (evtRes && (evtRes as any).data) {
+        setEvent((evtRes as any).data);
+      } else if (evtRes) {
+        setEvent(evtRes as any);
+      }
       if (ticketsRes) setTicketTypes(ticketsRes);
       if (ordersRes && ordersRes.data) setOrders(ordersRes.data);
     } catch (err: any) {
@@ -152,7 +156,7 @@ export default function EventDetailPage({ params }: PageProps) {
     try {
       setCheckinLoading(true);
       setCheckinResult(null);
-      const res = await performEventCheckIn(event.id, ticketInputCode.trim());
+      const res = await performEventCheckIn(event.id, { ticket_code: ticketInputCode.trim() });
       setCheckinResult(res);
       setTicketInputCode("");
       loadAll();
