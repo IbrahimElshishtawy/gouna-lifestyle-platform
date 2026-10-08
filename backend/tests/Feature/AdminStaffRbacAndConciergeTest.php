@@ -158,22 +158,21 @@ class AdminStaffRbacAndConciergeTest extends TestCase
     public function test_concierge_operations_and_booking_conversion(): void
     {
         // Ensure at least one property exists for booking attachment
-        Property::firstOrCreate(
-            ['slug' => 'lagoon-villa'],
-            [
-                'reference_number' => 'PROP-TEST-01',
-                'title_en' => 'Lagoon Villa',
-                'property_category_id' => 1,
-                'location_id' => 1,
-                'base_price_cents' => 100000,
-                'cleaning_fee_cents' => 5000,
-                'security_deposit_cents' => 10000,
-                'bedrooms' => 3,
-                'bathrooms' => 2,
-                'max_guests' => 6,
-                'is_published' => true,
-            ]
-        );
+        Property::first() ?? Property::create([
+            'slug' => 'lagoon-villa',
+            'reference_number' => 'PROP-TEST-01',
+            'title_en' => 'Lagoon Villa',
+            'listing_type' => 'rent',
+            'base_price_cents' => 100000,
+            'cleaning_fee_cents' => 5000,
+            'security_deposit_cents' => 10000,
+            'bedrooms' => 3,
+            'bathrooms' => 2,
+            'max_guests' => 6,
+            'is_published' => true,
+            'is_available' => true,
+            'status' => 'published',
+        ]);
 
         // 1. Create Concierge Request
         $customerEmail = 'lord_' . uniqid() . '@luxurytravel.com';
@@ -373,22 +372,21 @@ class AdminStaffRbacAndConciergeTest extends TestCase
     public function test_customer_concierge_privacy_and_quote_acceptance(): void
     {
         // Ensure property exists for quote booking conversion
-        Property::firstOrCreate(
-            ['slug' => 'lagoon-villa'],
-            [
-                'reference_number' => 'PROP-TEST-01',
-                'title_en' => 'Lagoon Villa',
-                'property_category_id' => 1,
-                'location_id' => 1,
-                'base_price_cents' => 100000,
-                'cleaning_fee_cents' => 5000,
-                'security_deposit_cents' => 10000,
-                'bedrooms' => 3,
-                'bathrooms' => 2,
-                'max_guests' => 6,
-                'is_published' => true,
-            ]
-        );
+        Property::first() ?? Property::create([
+            'slug' => 'lagoon-villa',
+            'reference_number' => 'PROP-TEST-01',
+            'title_en' => 'Lagoon Villa',
+            'listing_type' => 'rent',
+            'base_price_cents' => 100000,
+            'cleaning_fee_cents' => 5000,
+            'security_deposit_cents' => 10000,
+            'bedrooms' => 3,
+            'bathrooms' => 2,
+            'max_guests' => 6,
+            'is_published' => true,
+            'is_available' => true,
+            'status' => 'published',
+        ]);
 
         $customer1 = User::factory()->create([
             'is_admin' => false,
