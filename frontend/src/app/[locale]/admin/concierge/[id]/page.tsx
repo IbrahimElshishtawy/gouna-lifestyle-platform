@@ -322,7 +322,7 @@ export default function ConciergeRequestDetailPage({ params }: { params: Promise
                   : "bg-amber-50 text-amber-800 border-amber-300"
               }`}
             >
-              {request.status.replace(/_/g, " ")}
+              {request.status ? request.status.replace(/_/g, " ") : ""}
             </span>
 
             <span
@@ -396,7 +396,7 @@ export default function ConciergeRequestDetailPage({ params }: { params: Promise
                   onClick={() => handleStatusTransition(st)}
                   className="px-3 py-1 rounded-xl bg-brand-sand-light hover:bg-brand-sand text-brand-brown text-xs font-bold border border-brand-border transition cursor-pointer disabled:opacity-50"
                 >
-                  → {st.replace(/_/g, " ")}
+                  → {st ? st.replace(/_/g, " ") : ""}
                 </button>
               ))}
             </div>

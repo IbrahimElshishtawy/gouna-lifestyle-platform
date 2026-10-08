@@ -508,7 +508,7 @@ export default function AdminConciergePage() {
                               : "bg-amber-50 text-amber-800 border-amber-300"
                           }`}
                         >
-                          {item.status.replace(/_/g, " ")}
+                          {item.status ? item.status.replace(/_/g, " ") : ""}
                         </span>
                       </td>
 
