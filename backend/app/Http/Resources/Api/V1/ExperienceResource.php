@@ -35,6 +35,8 @@ class ExperienceResource extends BaseJsonResource
                 ],
                 'is_featured' => (bool) $this->is_featured,
                 'is_published' => (bool) $this->is_published,
+                'status' => $this->status ?? 'published',
+                'cover_url' => $this->cover_url,
             ],
             'relationships' => [
                 'category' => $this->whenLoaded('category', fn () => [
@@ -42,9 +44,14 @@ class ExperienceResource extends BaseJsonResource
                     'name' => $locale === 'ar' ? $this->category->name_ar : $this->category->name_en,
                     'slug' => $this->category->slug,
                 ]),
+                'location' => $this->whenLoaded('location', fn () => [
+                    'id' => $this->location->id,
+                    'name' => $locale === 'ar' && !empty($this->location->name_ar) ? $this->location->name_ar : $this->location->name_en,
+                    'slug' => $this->location->slug,
+                ]),
                 'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
-                    'url' => asset('storage/'.$item->file_path),
+                    'url' => str_starts_with($item->file_path, 'http') || str_starts_with($item->file_path, '/') ? $item->file_path : asset('storage/'.$item->file_path),
                     'is_primary' => (bool) $item->is_primary,
                 ])),
             ],

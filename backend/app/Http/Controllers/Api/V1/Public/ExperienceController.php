@@ -19,6 +19,7 @@ class ExperienceController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Experience::query()
+            ->with(['category', 'location', 'media'])
             ->where('is_published', true);
 
         if ($search = $request->input('q')) {
@@ -28,12 +29,18 @@ class ExperienceController extends Controller
             });
         }
 
+        if ($categorySlug = $request->input('category')) {
+            $query->whereHas('category', function ($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug);
+            });
+        }
+
         $paginated = $this->paginateWithListingStandard(
             query: $query,
             request: $request,
             allowedSorts: ['id', 'base_price_cents', 'duration', 'created_at'],
             allowedFilters: ['experience_category_id', 'location_id', 'pricing_model'],
-            allowedIncludes: ['category', 'media'],
+            allowedIncludes: ['category', 'media', 'location'],
             defaultSort: '-created_at',
             defaultPerPage: 15,
             maxPerPage: 100
@@ -50,7 +57,7 @@ class ExperienceController extends Controller
         $experience = Experience::where('slug', $slug)
             ->orWhere('id', is_numeric($slug) ? (int) $slug : 0)
             ->where('is_published', true)
-            ->with(['category', 'media'])
+            ->with(['category', 'location', 'media'])
             ->firstOrFail();
 
         return new ExperienceResource($experience);

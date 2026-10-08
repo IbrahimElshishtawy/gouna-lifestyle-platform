@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Admin\BookingApiController;
 use App\Http\Controllers\Api\V1\Admin\ConciergeApiController;
 use App\Http\Controllers\Api\V1\Admin\CustomerApiController;
 use App\Http\Controllers\Api\V1\Admin\DashboardApiController;
+use App\Http\Controllers\Api\V1\Admin\ExperienceApiController;
 use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
 use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
 use App\Http\Controllers\Api\V1\Admin\PricingApiController;
@@ -55,6 +56,17 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::get('/{id}/units/{unitId}', [PropertyApiController::class, 'showUnit'])->name('units.show');
         Route::put('/{id}/units/{unitId}', [PropertyApiController::class, 'updateUnit'])->name('units.update');
         Route::delete('/{id}/units/{unitId}', [PropertyApiController::class, 'deleteUnit'])->name('units.destroy');
+    });
+
+    // 3.05 Experiences & Yacht Charters Management
+    Route::prefix('experiences')->as('experiences.')->group(function () {
+        Route::get('/', [ExperienceApiController::class, 'index'])->name('index');
+        Route::get('/taxonomies', [ExperienceApiController::class, 'taxonomies'])->name('taxonomies');
+        Route::post('/', [ExperienceApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [ExperienceApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [ExperienceApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ExperienceApiController::class, 'destroy'])->name('destroy');
+        Route::match(['put', 'patch'], '/{id}/toggle-status', [ExperienceApiController::class, 'toggleStatus'])->name('toggle-status');
     });
 
     // 3.1 Dedicated Pricing Engine Module

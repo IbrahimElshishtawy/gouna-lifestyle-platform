@@ -35,7 +35,7 @@ export default async function ExperiencesPage({ params, searchParams }: Props) {
   const isAr = locale === "ar";
 
   const { category = "" } = await searchParams;
-  const allExperiences = await getExperiences();
+  const allExperiences = await getExperiences(category || undefined);
 
   const CATEGORIES = [
     { slug: "", label: t.experiencesPage.allAdventures },

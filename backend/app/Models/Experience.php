@@ -88,14 +88,27 @@ class Experience extends Model
     {
         $first = $this->images->first();
         if ($first && ! empty($first->file_path)) {
-            return $first->url;
+            return str_starts_with($first->file_path, 'http') || str_starts_with($first->file_path, '/')
+                ? $first->file_path
+                : asset('storage/'.$first->file_path);
+        }
+
+        $categorySlug = $this->category?->slug ?? '';
+        if ($categorySlug === 'boat-trips' || str_contains(strtolower($this->slug ?? ''), 'yacht')) {
+            return '/assets/images/tawila-yacht.jpg';
+        }
+        if ($categorySlug === 'safari' || str_contains(strtolower($this->slug ?? ''), 'safari')) {
+            return 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80';
+        }
+        if ($categorySlug === 'watersports-kitesurfing' || str_contains(strtolower($this->slug ?? ''), 'kitesurf')) {
+            return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80';
         }
 
         $fallbacks = [
+            '/assets/images/tawila-yacht.jpg',
             'https://images.unsplash.com/photo-1569263979104-865ab7cd8d17?auto=format&fit=crop&w=1200&q=80',
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
             'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80',
         ];
 
         return $fallbacks[abs($this->id) % count($fallbacks)];

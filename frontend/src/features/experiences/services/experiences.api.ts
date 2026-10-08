@@ -66,19 +66,24 @@ export function mapBackendExperienceToFrontend(
     description: attr.description || attr.short_description || "",
     overview: attr.short_description || attr.description || "",
     image:
-      Array.isArray(rel.media) && rel.media.length > 0
+      Array.isArray(rel.media) && rel.media.length > 0 && rel.media[0]?.url
         ? rel.media[0].url
-        : "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
-    images: rel.media || [],
+        : (attr as any).cover_url ||
+          (rel.category?.slug === "boat-trips"
+            ? "/assets/images/tawila-yacht.jpg"
+            : "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80"),
+    images:
+      Array.isArray(rel.media) && rel.media.length > 0
+        ? rel.media
+        : [{ id: 1, url: (attr as any).cover_url || "/assets/images/tawila-yacht.jpg" }],
   };
 }
 
-export async function getExperiences(): Promise<Experience[]> {
+export async function getExperiences(category?: string): Promise<Experience[]> {
   try {
-    const response = await apiClient<{ data: BackendExperienceResource[] }>(
-      "/experiences"
-    );
-    if (response?.data && Array.isArray(response.data)) {
+    const url = category ? `/experiences?category=${encodeURIComponent(category)}` : "/experiences";
+    const response = await apiClient<{ data: BackendExperienceResource[] }>(url);
+    if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
       return response.data.map(mapBackendExperienceToFrontend);
     }
   } catch {
@@ -135,4 +140,77 @@ export async function inquireExperience(
         "Thank you! Your experience request has been received. Our VIP desk will confirm your schedule.",
     };
   }
+}
+
+// ---------------- Admin Management Endpoints ----------------
+
+export interface AdminExperienceItem {
+  id: number;
+  slug: string;
+  title_en: string;
+  title_ar?: string | null;
+  experience_category_id: number;
+  location_id?: number | null;
+  pricing_model: string;
+  base_price_cents: number;
+  duration: string;
+  max_capacity: number;
+  meeting_point_en?: string | null;
+  meeting_point_ar?: string | null;
+  short_description_en?: string | null;
+  short_description_ar?: string | null;
+  description_en?: string | null;
+  description_ar?: string | null;
+  what_to_bring_en?: string | null;
+  what_to_bring_ar?: string | null;
+  status: "published" | "draft" | "archived";
+  is_published: boolean;
+  is_featured: boolean;
+  category?: { id: number; name_en: string; name_ar: string; slug: string };
+  location?: { id: number; name_en: string; name_ar: string; slug: string };
+  media?: Array<{ id: number; file_path: string }>;
+  cover_url?: string;
+}
+
+export async function getAdminExperiences(params?: {
+  q?: string;
+  category_id?: number;
+  status?: string;
+}): Promise<{ data: AdminExperienceItem[]; categories: any[]; locations: any[] }> {
+  const query = new URLSearchParams();
+  if (params?.q) query.set("q", params.q);
+  if (params?.category_id) query.set("category_id", String(params.category_id));
+  if (params?.status) query.set("status", params.status);
+
+  return apiClient(`/admin/experiences?${query.toString()}`);
+}
+
+export async function getExperienceTaxonomies(): Promise<{ categories: any[]; locations: any[] }> {
+  return apiClient("/admin/experiences/taxonomies");
+}
+
+export async function createAdminExperience(payload: any): Promise<{ success: boolean; data: any; message?: string }> {
+  return apiClient("/admin/experiences", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAdminExperience(id: number, payload: any): Promise<{ success: boolean; data: any; message?: string }> {
+  return apiClient(`/admin/experiences/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function toggleAdminExperienceStatus(id: number): Promise<{ success: boolean; data: any; message?: string }> {
+  return apiClient(`/admin/experiences/${id}/toggle-status`, {
+    method: "PUT",
+  });
+}
+
+export async function deleteAdminExperience(id: number): Promise<{ success: boolean; message?: string }> {
+  return apiClient(`/admin/experiences/${id}`, {
+    method: "DELETE",
+  });
 }
