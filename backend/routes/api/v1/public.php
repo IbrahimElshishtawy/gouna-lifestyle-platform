@@ -18,6 +18,10 @@ Route::get('/properties/{slug}', [StayController::class, 'show'])->name('propert
 Route::get('/experiences', [ExperienceController::class, 'index'])->name('experiences.index');
 Route::get('/experiences/{slug}', [ExperienceController::class, 'show'])->name('experiences.show');
 
+// Yachts
+Route::get('/yachts', [\App\Http\Controllers\Api\V1\Public\YachtController::class, 'index'])->name('yachts.index');
+Route::get('/yachts/{slug}', [\App\Http\Controllers\Api\V1\Public\YachtController::class, 'show'])->name('yachts.show');
+
 // Events
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');

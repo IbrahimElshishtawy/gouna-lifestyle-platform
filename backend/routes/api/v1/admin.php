@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\Admin\BookingApiController;
 use App\Http\Controllers\Api\V1\Admin\ConciergeApiController;
 use App\Http\Controllers\Api\V1\Admin\CustomerApiController;
 use App\Http\Controllers\Api\V1\Admin\DashboardApiController;
+use App\Http\Controllers\Api\V1\Admin\EventApiController;
 use App\Http\Controllers\Api\V1\Admin\ExperienceApiController;
 use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
 use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\Api\V1\Admin\PricingApiController;
 use App\Http\Controllers\Api\V1\Admin\PropertyApiController;
 use App\Http\Controllers\Api\V1\Admin\SettingsApiController;
 use App\Http\Controllers\Api\V1\Admin\StaffApiController;
+use App\Http\Controllers\Api\V1\Admin\VenueApiController;
+use App\Http\Controllers\Api\V1\Admin\YachtApiController;
 use Illuminate\Support\Facades\Route;
 
 // Headless Admin API base (Protected by auth:sanctum, account.active, admin gate, and 2FA verification)
@@ -58,7 +61,7 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::delete('/{id}/units/{unitId}', [PropertyApiController::class, 'deleteUnit'])->name('units.destroy');
     });
 
-    // 3.05 Experiences & Yacht Charters Management
+    // 3.05 Experiences Management
     Route::prefix('experiences')->as('experiences.')->group(function () {
         Route::get('/', [ExperienceApiController::class, 'index'])->name('index');
         Route::get('/taxonomies', [ExperienceApiController::class, 'taxonomies'])->name('taxonomies');
@@ -67,6 +70,55 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::put('/{id}', [ExperienceApiController::class, 'update'])->name('update');
         Route::delete('/{id}', [ExperienceApiController::class, 'destroy'])->name('destroy');
         Route::match(['put', 'patch'], '/{id}/toggle-status', [ExperienceApiController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // 3.06 Dedicated Yachts Fleet & Charter Management
+    Route::prefix('yachts')->as('yachts.')->group(function () {
+        Route::get('/', [YachtApiController::class, 'index'])->name('index');
+        Route::get('/dashboard', [YachtApiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/taxonomies', [YachtApiController::class, 'taxonomies'])->name('taxonomies');
+        Route::post('/', [YachtApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [YachtApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [YachtApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [YachtApiController::class, 'destroy'])->name('destroy');
+        Route::match(['put', 'patch'], '/{id}/toggle-status', [YachtApiController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/{id}/availability', [YachtApiController::class, 'availability'])->name('availability');
+        Route::post('/{id}/availability-blocks', [YachtApiController::class, 'addAvailabilityBlock'])->name('add-block');
+        Route::delete('/{id}/availability-blocks/{blockId}', [YachtApiController::class, 'removeAvailabilityBlock'])->name('remove-block');
+        Route::post('/{id}/packages', [YachtApiController::class, 'storePackage'])->name('packages.store');
+        Route::delete('/{id}/packages/{packageId}', [YachtApiController::class, 'deletePackage'])->name('packages.destroy');
+        Route::post('/{id}/addons', [YachtApiController::class, 'storeAddon'])->name('addons.store');
+        Route::delete('/{id}/addons/{addonId}', [YachtApiController::class, 'deleteAddon'])->name('addons.destroy');
+        Route::get('/{id}/bookings', [YachtApiController::class, 'bookings'])->name('bookings');
+    });
+
+    // 3.07 Events, Ticketing & Check-In Station
+    Route::prefix('events')->as('events.')->group(function () {
+        Route::get('/', [EventApiController::class, 'index'])->name('index');
+        Route::get('/dashboard', [EventApiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/taxonomies', [EventApiController::class, 'taxonomies'])->name('taxonomies');
+        Route::post('/', [EventApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [EventApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [EventApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EventApiController::class, 'destroy'])->name('destroy');
+        Route::match(['put', 'patch'], '/{id}/toggle-status', [EventApiController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/{id}/tickets', [EventApiController::class, 'tickets'])->name('tickets');
+        Route::post('/{id}/tickets', [EventApiController::class, 'storeTicketType'])->name('tickets.store');
+        Route::delete('/{id}/tickets/{ticketTypeId}', [EventApiController::class, 'deleteTicketType'])->name('tickets.destroy');
+        Route::get('/{id}/orders', [EventApiController::class, 'orders'])->name('orders');
+        Route::post('/{id}/orders/{orderId}/cancel', [EventApiController::class, 'cancelOrder'])->name('orders.cancel');
+        Route::post('/{id}/orders/{orderId}/refund', [EventApiController::class, 'refundOrder'])->name('orders.refund');
+        Route::post('/{id}/check-in', [EventApiController::class, 'checkIn'])->name('check-in');
+        Route::get('/{id}/check-in/search', [EventApiController::class, 'searchTickets'])->name('check-in.search');
+    });
+
+    // 3.08 Event Venues
+    Route::prefix('venues')->as('venues.')->group(function () {
+        Route::get('/', [VenueApiController::class, 'index'])->name('index');
+        Route::post('/', [VenueApiController::class, 'store'])->name('store');
+        Route::get('/{id}', [VenueApiController::class, 'show'])->name('show');
+        Route::put('/{id}', [VenueApiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [VenueApiController::class, 'destroy'])->name('destroy');
     });
 
     // 3.1 Dedicated Pricing Engine Module
