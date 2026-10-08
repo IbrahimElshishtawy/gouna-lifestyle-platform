@@ -607,4 +607,85 @@ class YachtApiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Authoritative backend price breakdown calculator.
+     */
+    public function calculatePrice(Request $request, $id): JsonResponse
+    {
+        $yacht = Yacht::with(['packages', 'addons'])->findOrFail($id);
+        $validated = $request->validate([
+            'date' => ['required', 'date'],
+            'duration_hours' => ['nullable', 'numeric', 'min:1'],
+            'package_id' => ['nullable', 'exists:yacht_packages,id'],
+            'addon_ids' => ['nullable', 'array'],
+            'addon_ids.*' => ['integer'],
+            'guests' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $date = Carbon::parse($validated['date']);
+        $isWeekend = $date->isFriday() || $date->isSaturday();
+
+        $basePriceCents = $yacht->base_price_cents;
+        $packageName = null;
+        if (!empty($validated['package_id'])) {
+            $pkg = $yacht->packages()->find($validated['package_id']);
+            if ($pkg) {
+                $basePriceCents = $pkg->price_cents;
+                $packageName = $pkg->name_en;
+            }
+        }
+
+        $weekendAdjustmentCents = 0;
+        if ($isWeekend && $yacht->weekend_price_cents) {
+            $weekendAdjustmentCents = max(0, $yacht->weekend_price_cents - $yacht->base_price_cents);
+        }
+
+        $extraHoursCents = 0;
+        $duration = $validated['duration_hours'] ?? $yacht->min_duration_hours;
+        if ($duration > $yacht->min_duration_hours && $yacht->extra_hour_price_cents) {
+            $extraHours = $duration - $yacht->min_duration_hours;
+            $extraHoursCents = (int) round($extraHours * $yacht->extra_hour_price_cents);
+        }
+
+        $addonsCents = 0;
+        $selectedAddons = [];
+        if (!empty($validated['addon_ids'])) {
+            $addons = $yacht->addons()->whereIn('id', $validated['addon_ids'])->get();
+            foreach ($addons as $addon) {
+                $addonsCents += $addon->price_cents;
+                $selectedAddons[] = [
+                    'id' => $addon->id,
+                    'name' => $addon->name_en,
+                    'price' => $addon->price,
+                ];
+            }
+        }
+
+        $totalCents = $basePriceCents + $weekendAdjustmentCents + $extraHoursCents + $addonsCents;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'currency' => $yacht->currency,
+                'base_price' => round($basePriceCents / 100, 2),
+                'package_applied' => $packageName,
+                'is_weekend' => $isWeekend,
+                'weekend_adjustment' => round($weekendAdjustmentCents / 100, 2),
+                'extra_hours' => max(0, $duration - $yacht->min_duration_hours),
+                'extra_hours_cost' => round($extraHoursCents / 100, 2),
+                'addons_cost' => round($addonsCents / 100, 2),
+                'selected_addons' => $selectedAddons,
+                'final_price' => round($totalCents / 100, 2),
+                'breakdown' => [
+                    'base' => round($basePriceCents / 100, 2),
+                    'weekend' => round($weekendAdjustmentCents / 100, 2),
+                    'extra_hours' => round($extraHoursCents / 100, 2),
+                    'addons' => round($addonsCents / 100, 2),
+                    'total' => round($totalCents / 100, 2),
+                ],
+            ],
+        ]);
+    }
 }
+
