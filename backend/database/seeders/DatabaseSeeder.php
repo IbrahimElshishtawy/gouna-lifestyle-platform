@@ -28,7 +28,9 @@ class DatabaseSeeder extends Seeder
             FeeAndDiscountSeeder::class,
             CmsSeeder::class,
             CustomerAndBookingSeeder::class,
+            YachtAndVenueSeeder::class,
             ConciergeSeeder::class,
+            RichDemoMockSeeder::class,
         ]);
     }
 }
