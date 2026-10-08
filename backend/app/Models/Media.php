@@ -36,13 +36,20 @@ class Media extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk($this->disk)->url($this->file_path);
+        if ($this->file_path && (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://'))) {
+            return $this->file_path;
+        }
+
+        return Storage::disk($this->disk ?? 'public')->url($this->file_path);
     }
 
     public function getThumbUrlAttribute(): ?string
     {
         if ($this->thumb_path) {
-            return Storage::disk($this->disk)->url($this->thumb_path);
+            if (str_starts_with($this->thumb_path, 'http://') || str_starts_with($this->thumb_path, 'https://')) {
+                return $this->thumb_path;
+            }
+            return Storage::disk($this->disk ?? 'public')->url($this->thumb_path);
         }
 
         return $this->url;
