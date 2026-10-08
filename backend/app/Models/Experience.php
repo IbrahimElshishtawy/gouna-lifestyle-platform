@@ -45,16 +45,6 @@ class Experience extends Model
         return $this->belongsTo(Location::class);
     }
 
-    public function addons(): MorphMany
-    {
-        return $this->morphMany(Addon::class, 'addonable');
-    }
-
-    public function bookings(): MorphMany
-    {
-        return $this->morphMany(Booking::class, 'bookable');
-    }
-
     public function media(): MorphMany
     {
         return $this->morphMany(Media::class, 'mediable')->orderBy('sort_order');

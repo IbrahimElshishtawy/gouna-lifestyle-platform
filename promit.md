@@ -1510,3 +1510,446 @@ Reuse:
 - inputs
 - dropdowns
 - badg
+alerts
+calendars
+The new modules should look like they belong to the existing GouNow admin dashboard.
+However:
+Do not duplicate components unnecessarily.
+Create reusable components where repetition exists.
+PHASE 22 — FORMS
+Forms must provide:
+validation
+loading states
+server errors
+inline errors
+disabled state during submission
+unsaved changes protection where appropriate
+success feedback
+accessible labels
+keyboard support
+Do not silently fail.
+PHASE 23 — TABLE UX
+Every table must support:
+loading state
+empty state
+error state
+pagination
+search
+filters
+sorting where useful
+row actions
+responsive behavior
+Do not create unusable tables on mobile.
+PHASE 24 — DETAIL PAGES
+Yacht detail:
+Overview
+Bookings
+Availability
+Pricing
+Packages
+Add-ons
+Media
+Location
+Maintenance
+Activity
+Experience detail:
+Overview
+Bookings
+Schedule
+Availability
+Pricing
+Packages
+Add-ons
+Media
+Location
+Activity
+Event detail:
+Overview
+Tickets
+Orders
+Schedule
+Venue
+Add-ons
+Performers
+Check-in
+Media
+Activity
+Only display tabs that are actually supported.
+PHASE 25 — AUDIT LOG
+Every important administrative action must be auditable.
+Examples:
+Created yacht
+Updated yacht
+Changed yacht status
+Changed pricing
+Blocked availability
+Created experience
+Changed experience schedule
+Published event
+Created ticket type
+Changed ticket price
+Refunded order
+Checked in customer
+Audit records should include:
+actor
+action
+entity
+entity ID
+timestamp
+request ID where supported
+relevant metadata
+Never store unnecessary sensitive information.
+PHASE 26 — NOTIFICATIONS
+Reuse the existing notification system.
+Examples:
+Yacht:
+New booking
+Booking cancelled
+Maintenance reminder
+Experience:
+New booking
+Schedule change
+Capacity warning
+Event:
+Ticket sold
+Event capacity warning
+Check-in
+Cancellation
+Refund
+Do not create a second notification infrastructure.
+PHASE 27 — PERFORMANCE
+Do not introduce:
+Kubernetes
+Kafka
+RabbitMQ
+microservices
+unnecessary Redis infrastructure
+unless the existing system demonstrably requires them.
+Optimize first using:
+database indexes
+eager loading
+pagination
+query optimization
+caching where already supported
+queues only for genuinely asynchronous work
+Avoid N+1 queries.
+Avoid loading unnecessary relationships.
+PHASE 28 — CONCURRENCY
+Pay special attention to:
+Yacht availability
+Two users must not book the same unavailable slot.
+Experience capacity
+Two users must not consume more capacity than exists.
+Event tickets
+Two users must not purchase the same remaining inventory simultaneously.
+Pricing
+Final price must be recalculated server-side.
+Use database transactions and appropriate locking/atomic operations.
+PHASE 29 — TESTING
+Add backend tests for:
+Yachts
+create
+update
+authorization
+availability
+pricing
+booking
+capacity
+cancellation
+Experiences
+create
+update
+schedule
+capacity
+pricing
+booking
+authorization
+Events
+create
+publish
+ticket creation
+ticket inventory
+pricing
+order
+cancellation
+refund
+check-in
+Security
+Test:
+unauthorized access
+IDOR
+privilege escalation
+invalid IDs
+invalid status transitions
+price tampering
+quantity tampering
+capacity bypass
+duplicate requests
+double check-in
+PHASE 30 — FRONTEND TESTING
+Test:
+forms
+validation
+loading states
+empty states
+error states
+filters
+pagination
+permissions
+booking flows
+ticket flows
+check-in
+pricing display
+Do not rely only on visual testing.
+PHASE 31 — API INTEGRATION
+The frontend must communicate with the real Laravel backend.
+Do NOT use:
+mock data
+fake API responses
+hardcoded bookings
+fake pricing
+fake availability
+unless specifically required for tests.
+All production UI must consume real APIs.
+Handle:
+401
+403
+404
+409
+422
+429
+500
+according to the existing API error contract.
+PHASE 32 — ERROR HANDLING
+Every screen needs:
+Loading
+Skeleton/spinner appropriate to existing design.
+Empty
+Example:
+No yachts found.
+Add your first yacht to start managing your yacht inventory.
+Error
+Human-readable message.
+Retry
+Where appropriate.
+Do not expose backend exception details.
+PHASE 33 — RESPONSIVE DESIGN
+The admin dashboard must work on:
+desktop
+laptop
+tablet
+mobile
+Do not simply shrink desktop tables.
+For mobile:
+use cards
+horizontal scrolling where necessary
+bottom sheets/drawers
+responsive filters
+readable forms
+PHASE 34 — ACCESSIBILITY
+Ensure:
+labels
+keyboard navigation
+focus states
+semantic buttons
+accessible dialogs
+accessible dropdowns
+readable contrast
+screen-reader-friendly status messages
+Do not rely only on color to communicate status.
+PHASE 35 — IMPLEMENTATION ORDER
+Implement in this order:
+1. Audit
+2. Architecture mapping
+3. Database/domain model
+4. Backend models
+5. Migrations
+6. Validation
+7. Policies
+8. Services
+9. Availability
+10. Pricing
+11. APIs
+12. Tests
+13. Frontend API layer
+14. Yachts UI
+15. Experiences UI
+16. Events UI
+17. Tickets
+18. Orders
+19. Check-in
+20. Permissions
+21. Error handling
+22. Responsive UX
+23. Integration tests
+24. Final audit
+Do not skip directly to frontend UI.
+PHASE 36 — STOP CONDITIONS
+If you discover that an existing abstraction already solves a requirement:
+STOP.
+Reuse it.
+If implementing a feature requires changing an important existing domain:
+STOP.
+Explain the impact before making a destructive architectural change.
+Do not silently:
+rename tables
+delete tables
+change existing booking states
+change payment behavior
+change authorization rules
+break existing APIs
+replace the existing design system
+without first verifying compatibility.
+PHASE 37 — FINAL ACCEPTANCE CRITERIA
+The implementation is complete only when:
+Yachts
+Admin can create yacht
+Admin can edit yacht
+Admin can manage media
+Admin can manage location
+Admin can manage availability
+Admin can manage pricing
+Admin can manage packages
+Admin can manage add-ons
+Admin can view bookings
+Permissions work
+Tests pass
+Experiences
+Admin can create experience
+Admin can edit experience
+Admin can manage media
+Admin can manage location
+Admin can manage schedule
+Admin can manage availability
+Admin can manage pricing
+Admin can manage packages
+Admin can manage add-ons
+Admin can view bookings
+Permissions work
+Tests pass
+Events
+Admin can create event
+Admin can edit event
+Admin can manage venue
+Admin can manage location
+Admin can manage schedule
+Admin can manage capacity
+Admin can create ticket types
+Admin can manage ticket inventory
+Admin can manage ticket pricing
+Admin can manage add-ons
+Admin can manage performers if supported
+Admin can view orders
+Admin can refund/cancel according to permissions
+Admin can perform secure check-in
+Double check-in is prevented
+Permissions work
+Tests pass
+PHASE 38 — FINAL ARCHITECTURE AUDIT
+After implementation:
+Review the entire feature.
+Check for:
+Duplicated logic
+Duplicated components
+Duplicated APIs
+Duplicated booking logic
+N+1 queries
+Missing indexes
+Missing authorization
+Missing validation
+Race conditions
+Price tampering
+Capacity bypass
+Ticket overselling
+Double check-in
+PII leakage
+Unsafe media access
+Broken responsive UI
+Fake data
+Hardcoded business rules
+Dead code
+Unused imports
+Type errors
+Lint errors
+Test failures
+Run all existing project checks.
+Do not consider the task complete if the new implementation passes in isolation but breaks existing functionality.
+FINAL REPORT
+At the end provide:
+1. What was implemented
+2. Files created
+3. Files modified
+4. Database changes
+5. API changes
+6. Permissions added/changed
+7. Tests added
+8. Existing tests status
+9. Security considerations
+10. Known limitations
+11. Any architectural decisions that require approval
+Do not claim something is implemented if it is not.
+Do not hide failures.
+Do not use fake success messages.
+The final system must be:
+maintainable
+secure
+scalable
+understandable
+consistent with the existing GouNow architecture
+integrated with the existing backend
+integrated with the existing frontend
+production-oriented
+resistant to common authorization and concurrency problems
+Most importantly:
+Do not build a collection of CRUD screens.
+Build a real operational admin system where:
+Yacht
+    ↓
+Availability
+    ↓
+Pricing
+    ↓
+Package / Add-ons
+    ↓
+Booking
+    ↓
+Payment
+    ↓
+Confirmation
+    ↓
+Stay / Trip
+    ↓
+Completion
+and:
+Experience
+    ↓
+Schedule
+    ↓
+Capacity
+    ↓
+Pricing
+    ↓
+Booking
+    ↓
+Payment
+    ↓
+Completion
+and:
+Event
+    ↓
+Venue
+    ↓
+Schedule
+    ↓
+Tickets
+    ↓
+Orders
+    ↓
+Payment
+    ↓
+Ticket Validation
+    ↓
+Check-in
+    ↓
+Event Completion
+The backend remains the source of truth for all business-critical operations.

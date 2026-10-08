@@ -14,11 +14,10 @@ class Event extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'venue_id', 'location_id', 'slug', 'title_en', 'title_ar',
+        'location_id', 'slug', 'title_en', 'title_ar',
         'short_description_en', 'short_description_ar',
         'description_en', 'description_ar',
-        'organizer', 'event_date', 'start_time', 'end_time', 'doors_open_time',
-        'age_restriction', 'dress_code', 'rules_en', 'rules_ar',
+        'organizer', 'event_date', 'start_time', 'end_time',
         'venue_name', 'venue_address', 'latitude', 'longitude',
         'category', 'is_ticketed', 'is_featured', 'is_published', 'status',
     ];
@@ -29,7 +28,6 @@ class Event extends Model
             'event_date' => 'date',
             'start_time' => 'datetime:H:i',
             'end_time' => 'datetime:H:i',
-            'doors_open_time' => 'datetime:H:i',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
             'is_ticketed' => 'boolean',
@@ -38,31 +36,9 @@ class Event extends Model
         ];
     }
 
-    public function venue(): BelongsTo
-    {
-        return $this->belongsTo(Venue::class);
-    }
-
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
-    }
-
-    public function schedules(): HasMany
-    {
-        return $this->hasMany(EventSchedule::class)->orderBy('sort_order');
-    }
-
-    public function performers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(EventPerformer::class, 'event_performer')
-            ->withPivot(['performance_time', 'role'])
-            ->withTimestamps();
-    }
-
-    public function addons(): MorphMany
-    {
-        return $this->morphMany(Addon::class, 'addonable');
     }
 
     public function ticketTypes(): HasMany

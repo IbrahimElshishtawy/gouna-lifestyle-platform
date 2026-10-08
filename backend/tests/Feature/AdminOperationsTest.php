@@ -175,7 +175,7 @@ class AdminOperationsTest extends TestCase
                 'reason' => 'Annual pool maintenance',
             ]);
 
-        $blockResponse->assertSuccessful();
+        $blockResponse->assertStatus(200);
         $blockId = $blockResponse->json('data.id');
 
         // Verify in calendar

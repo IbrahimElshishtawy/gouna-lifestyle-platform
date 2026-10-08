@@ -309,46 +309,13 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
             )}
           </div>
 
-          {/* 6. Yachts Fleet & Charters */}
-          <div className="pt-1">
-            <button
-              onClick={() => toggleSection("yachts")}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
-            >
-              <span>{isAr ? "أسطول اليخوت والشارتر" : "Yachts & Charters"}</span>
-              <span
-                className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
-                  openSections.yachts ? "rotate-90 rtl:rotate-90" : ""
-                }`}
-              >
-                ▶
-              </span>
-            </button>
-            {openSections.yachts && (
-              <div className="ps-4 border-s-2 border-brand-sand mt-1 space-y-1">
-                <Link
-                  href="/admin/yachts"
-                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
-                >
-                  {isAr ? "إدارة الأسطول والرحلات" : "Fleet & Charters"}
-                </Link>
-                <Link
-                  href="/admin/yachts?tab=calendar"
-                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
-                >
-                  {isAr ? "تقويم إتاحة اليخوت" : "Availability Calendar"}
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* 6.5 Experiences & Activities */}
+          {/* 6. Experiences & Yacht Charters */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("experiences")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <span>{isAr ? "الأنشطة والتجارب البحرية" : "Experiences & Safari"}</span>
+              <span>{t.admin.experiencesNav}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.experiences ? "rotate-90 rtl:rotate-90" : ""
@@ -363,19 +330,19 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/experiences"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "جميع التجارب والأنشطة" : "All Experiences & Safari"}
+                  {isAr ? "جميع التجارب واليخوت" : "All Experiences & Charters"}
                 </Link>
               </div>
             )}
           </div>
 
-          {/* 7. Events, Ticketing & Venues */}
+          {/* 7. Events & Nightlife */}
           <div className="pt-1">
             <button
               onClick={() => toggleSection("events")}
               className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start cursor-pointer"
             >
-              <span>{isAr ? "الفعاليات والتذاكر والحفلات" : "Events, Tickets & Venues"}</span>
+              <span>{isAr ? "الفعاليات والحفلات" : "Events & Nightlife"}</span>
               <span
                 className={`text-xs text-brand-brown-muted transition-transform rtl:rotate-180 ${
                   openSections.events ? "rotate-90 rtl:rotate-90" : ""
@@ -390,19 +357,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   href="/admin/events"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
-                  {isAr ? "إدارة الفعاليات والتذاكر" : "All Events & Tickets"}
-                </Link>
-                <Link
-                  href="/admin/events?tab=checkin"
-                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta font-medium"
-                >
-                  {isAr ? "محطة التحقق والتسجيل (Check-In)" : "Live Check-in Station"}
-                </Link>
-                <Link
-                  href="/admin/venues"
-                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
-                >
-                  {isAr ? "إدارة المواقع والساحات (Venues)" : "Venues & Locations"}
+                  {isAr ? "جميع الفعاليات والتذاكر" : "All Events & Tickets"}
                 </Link>
               </div>
             )}
