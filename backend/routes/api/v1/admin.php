@@ -48,6 +48,13 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::delete('/{id}/availability-blocks/{blockId}', [PropertyApiController::class, 'removeAvailabilityBlock'])->name('remove-block');
         Route::post('/{id}/seasonal-prices', [PropertyApiController::class, 'addSeasonalPrice'])->name('add-seasonal-price');
         Route::delete('/{id}/seasonal-prices/{seasonId}', [PropertyApiController::class, 'removeSeasonalPrice'])->name('remove-seasonal-price');
+
+        // Sub-Units Management
+        Route::get('/{id}/units', [PropertyApiController::class, 'listUnits'])->name('units.index');
+        Route::post('/{id}/units', [PropertyApiController::class, 'storeUnit'])->name('units.store');
+        Route::get('/{id}/units/{unitId}', [PropertyApiController::class, 'showUnit'])->name('units.show');
+        Route::put('/{id}/units/{unitId}', [PropertyApiController::class, 'updateUnit'])->name('units.update');
+        Route::delete('/{id}/units/{unitId}', [PropertyApiController::class, 'deleteUnit'])->name('units.destroy');
     });
 
     // 3.1 Dedicated Pricing Engine Module

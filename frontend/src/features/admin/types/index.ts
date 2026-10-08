@@ -25,6 +25,7 @@ export interface PaginatedResponse<T> {
 
 export interface SingleResponse<T> {
   data: T;
+  message?: string;
   meta?: {
     request_id?: string;
     timestamp?: string;

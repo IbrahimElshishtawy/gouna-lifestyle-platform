@@ -305,7 +305,7 @@ export default function AdminPropertyUnitDetailPage({ params }: PageProps) {
       <EmptyState
         title={isAr ? "الوحدة غير موجودة" : "Sub-Unit Not Found"}
         description={isAr ? "لم يتم العثور على الوحدة المطلوبة أو قد تكون حذفت." : "The requested unit was not found or has been deleted."}
-        actionLabel={isAr ? "العودة للعقار الرئيسي" : "Back to Main Property"}
+        actionText={isAr ? "العودة للعقار الرئيسي" : "Back to Main Property"}
         actionHref={`/admin/properties/${propertyId}?tab=units`}
       />
     );

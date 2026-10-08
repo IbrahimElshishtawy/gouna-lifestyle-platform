@@ -511,6 +511,11 @@ export default function AdminPricingPage() {
               setEditingRuleId(null);
               setRuleForm({
                 property_id: selectedPropertyId || overviewData?.properties[0]?.id || 0,
+                is_global: false,
+                rule_type: "season",
+                adjustment_type: "fixed",
+                adjustment_percent: 0,
+                days_of_week: ["Friday", "Saturday"],
                 name_en: "",
                 name_ar: "",
                 start_date: "",
@@ -751,6 +756,11 @@ export default function AdminPricingPage() {
                     setEditingRuleId(null);
                     setRuleForm({
                       property_id: selectedPropertyId || overviewData?.properties[0]?.id || 0,
+                      is_global: false,
+                      rule_type: "season",
+                      adjustment_type: "fixed",
+                      adjustment_percent: 0,
+                      days_of_week: ["Friday", "Saturday"],
                       name_en: "",
                       name_ar: "",
                       start_date: "",
