@@ -11,10 +11,16 @@ use Illuminate\Support\Facades\Route;
 // Stays / Properties
 Route::get('/stays', [StayController::class, 'index'])->name('stays.index');
 Route::get('/stays/{slug}', [StayController::class, 'show'])->name('stays.show');
+Route::get('/properties', [StayController::class, 'index'])->name('properties.index');
+Route::get('/properties/{slug}', [StayController::class, 'show'])->name('properties.show');
 
 // Experiences
 Route::get('/experiences', [ExperienceController::class, 'index'])->name('experiences.index');
 Route::get('/experiences/{slug}', [ExperienceController::class, 'show'])->name('experiences.show');
+
+// Yachts
+Route::get('/yachts', [\App\Http\Controllers\Api\V1\Public\YachtController::class, 'index'])->name('yachts.index');
+Route::get('/yachts/{slug}', [\App\Http\Controllers\Api\V1\Public\YachtController::class, 'show'])->name('yachts.show');
 
 // Events
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
