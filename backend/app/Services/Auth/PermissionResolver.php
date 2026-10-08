@@ -81,7 +81,7 @@ class PermissionResolver
         }
 
         // Super admins have universal wildcard permission
-        if ($user->is_admin || $user->hasRole('super_admin')) {
+        if ($user->hasRole('super_admin')) {
             $this->requestCache[$user->id] = ['*' => true];
 
             return $this->requestCache[$user->id];

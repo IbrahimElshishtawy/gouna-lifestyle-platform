@@ -19,10 +19,44 @@ class ConciergeApiController extends Controller
     ) {}
 
     /**
+     * Scope and permission check helper.
+     */
+    private function checkConciergeAccess(Request $request, string $requiredPermission = 'view_concierge'): ?JsonResponse
+    {
+        $actor = $request->user();
+
+        // 1. Scope enforcement: staff with specific scopes outside concierge/all are forbidden
+        if (! $actor?->hasRole('super_admin') && $actor?->scope !== 'all' && $actor?->scope !== 'concierge') {
+            return response()->json([
+                'error' => [
+                    'code' => 'SCOPE_FORBIDDEN',
+                    'message' => 'Your staff operational scope does not permit access to concierge operations.',
+                ],
+            ], 403);
+        }
+
+        // 2. Permission enforcement
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission($requiredPermission) && ! $actor?->hasPermission('manage_concierge')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to perform this concierge operation.',
+                ],
+            ], 403);
+        }
+
+        return null;
+    }
+
+    /**
      * Dashboard KPIs for Concierge Command Center.
      */
     public function dashboard(Request $request): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'view_concierge')) {
+            return $accessError;
+        }
+
         $totalRequests = ConciergeRequest::count();
         $newRequests = ConciergeRequest::where('status', 'new')->count();
         $urgentRequests = ConciergeRequest::where('priority', 'urgent')->whereNotIn('status', ['completed', 'cancelled', 'rejected'])->count();
@@ -67,6 +101,10 @@ class ConciergeApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'view_concierge')) {
+            return $accessError;
+        }
+
         $query = ConciergeRequest::with(['customer', 'assignedTo', 'quotes'])
             ->orderByRaw("CASE WHEN priority = 'urgent' THEN 1 WHEN priority = 'high' THEN 2 WHEN priority = 'normal' THEN 3 ELSE 4 END")
             ->orderByDesc('created_at');
@@ -159,6 +197,10 @@ class ConciergeApiController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'view_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::with([
             'customer',
             'assignedTo',
@@ -186,6 +228,20 @@ class ConciergeApiController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
+        $raw = $request->all();
+        $merged = array_merge($raw, [
+            'request_type' => $raw['request_type'] ?? $raw['type'] ?? 'custom',
+            'description' => $raw['description'] ?? $raw['subject'] ?? '',
+            'guests_count' => $raw['guests_count'] ?? $raw['guest_count'] ?? null,
+            'preferred_date' => $raw['preferred_date'] ?? $raw['requested_date'] ?? null,
+            'assigned_to' => $raw['assigned_to'] ?? $raw['assigned_to_user_id'] ?? null,
+        ]);
+        $request->merge($merged);
+
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_email' => ['required', 'email', 'max:255'],
@@ -215,6 +271,10 @@ class ConciergeApiController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::findOrFail($id);
 
         $validated = $request->validate([
@@ -242,18 +302,39 @@ class ConciergeApiController extends Controller
      */
     public function assign(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::findOrFail($id);
 
-        $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'reason' => ['nullable', 'string'],
-        ]);
+        $targetUserId = $request->input('user_id') ?? $request->input('assigned_to_user_id');
+        $reason = $request->input('reason') ?? $request->input('assignment_notes') ?? $request->input('notes');
+
+        if (! $targetUserId) {
+            return response()->json([
+                'error' => [
+                    'code' => 'VALIDATION_ERROR',
+                    'message' => 'A valid staff user ID is required for assignment.',
+                ],
+            ], 422);
+        }
+
+        $targetUser = User::find($targetUserId);
+        if (! $targetUser || ! $targetUser->is_active) {
+            return response()->json([
+                'error' => [
+                    'code' => 'INVALID_ASSIGNEE',
+                    'message' => 'Cannot assign request to an inactive or suspended staff member.',
+                ],
+            ], 422);
+        }
 
         $updated = $this->conciergeService->assignRequest(
             $conciergeRequest,
-            (int) $request->input('user_id'),
+            (int) $targetUserId,
             $request->user(),
-            $request->input('reason')
+            $reason
         );
 
         return response()->json([
@@ -267,6 +348,10 @@ class ConciergeApiController extends Controller
      */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::findOrFail($id);
 
         $request->validate([
@@ -279,7 +364,7 @@ class ConciergeApiController extends Controller
                 $conciergeRequest,
                 $request->input('status'),
                 $request->user(),
-                $request->input('reason')
+                $request->input('reason') ?? $request->input('notes')
             );
 
             return response()->json([
@@ -301,6 +386,10 @@ class ConciergeApiController extends Controller
      */
     public function addNote(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'view_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::findOrFail($id);
 
         $request->validate([
@@ -327,6 +416,10 @@ class ConciergeApiController extends Controller
      */
     public function createQuote(Request $request, int $id): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
         $conciergeRequest = ConciergeRequest::findOrFail($id);
 
         $request->validate([
@@ -365,6 +458,10 @@ class ConciergeApiController extends Controller
      */
     public function acceptQuote(Request $request, int $id, int $quoteId): JsonResponse
     {
+        if ($accessError = $this->checkConciergeAccess($request, 'manage_concierge')) {
+            return $accessError;
+        }
+
         $quote = ConciergeQuote::where('concierge_request_id', $id)->findOrFail($quoteId);
 
         try {

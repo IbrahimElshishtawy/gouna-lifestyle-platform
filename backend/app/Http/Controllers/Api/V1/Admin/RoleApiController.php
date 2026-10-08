@@ -17,6 +17,16 @@ class RoleApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to manage administrative roles and permissions.',
+                ],
+            ], 403);
+        }
+
         $roles = Role::with(['permissions'])
             ->withCount(['users', 'permissions'])
             ->get()
@@ -47,6 +57,16 @@ class RoleApiController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view administrative role details.',
+                ],
+            ], 403);
+        }
+
         $role = Role::with(['permissions', 'users' => function ($q) {
             $q->select('id', 'name', 'email', 'phone', 'is_active', 'scope');
         }])->findOrFail($id);
@@ -73,6 +93,16 @@ class RoleApiController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to create administrative roles.',
+                ],
+            ], 403);
+        }
+
         $request->validate([
             'display_name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -115,6 +145,16 @@ class RoleApiController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to modify administrative roles.',
+                ],
+            ], 403);
+        }
+
         $role = Role::findOrFail($id);
 
         $request->validate([
@@ -167,6 +207,16 @@ class RoleApiController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to delete administrative roles.',
+                ],
+            ], 403);
+        }
+
         $role = Role::withCount('users')->findOrFail($id);
 
         if ($role->is_system) {
@@ -211,6 +261,16 @@ class RoleApiController extends Controller
      */
     public function permissions(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_roles')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view administrative permissions.',
+                ],
+            ], 403);
+        }
+
         $all = Permission::all();
 
         $grouped = $all->groupBy('group')->map(function ($items, $group) {

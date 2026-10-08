@@ -14,3 +14,10 @@ Route::prefix('bookings')->as('bookings.')->group(function () {
     Route::get('/{reference}', [BookingController::class, 'show'])->name('show');
     Route::post('/{reference}/cancel', [BookingController::class, 'cancel'])->name('cancel');
 });
+
+// Customer VIP Concierge Requests & Quote Acceptance
+Route::prefix('concierge')->as('concierge.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\V1\Customer\CustomerConciergeController::class, 'index'])->name('index');
+    Route::get('/{id}', [\App\Http\Controllers\Api\V1\Customer\CustomerConciergeController::class, 'show'])->name('show');
+    Route::post('/{id}/quotes/{quoteId}/accept', [\App\Http\Controllers\Api\V1\Customer\CustomerConciergeController::class, 'acceptQuote'])->name('quotes.accept');
+});

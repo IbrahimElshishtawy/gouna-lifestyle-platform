@@ -37,6 +37,20 @@ class ConciergeRequest extends Model
         'resolved_at',
     ];
 
+    protected $hidden = [
+        'internal_notes',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (ConciergeRequest $model) {
+            if (empty($model->request_number)) {
+                $countToday = static::whereDate('created_at', today())->count() + 1;
+                $model->request_number = sprintf('CR-%s-%04d', date('Ymd'), $countToday);
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -46,6 +60,13 @@ class ConciergeRequest extends Model
             'assigned_at' => 'datetime',
             'resolved_at' => 'datetime',
         ];
+    }
+
+    public function customerVisibleNotes(): HasMany
+    {
+        return $this->hasMany(ConciergeNote::class)
+            ->where('is_customer_visible', true)
+            ->orderBy('created_at', 'asc');
     }
 
     public function customer(): BelongsTo

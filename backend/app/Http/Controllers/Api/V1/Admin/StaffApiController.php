@@ -17,6 +17,16 @@ class StaffApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view staff members.',
+                ],
+            ], 403);
+        }
+
         $query = User::where('is_admin', true)->with(['roles.permissions'])->orderBy('id', 'asc');
 
         if ($search = $request->query('q')) {
@@ -103,6 +113,16 @@ class StaffApiController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
+        $actor = $request->user();
+        if ($actor?->id !== $id && ! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view this staff member record.',
+                ],
+            ], 403);
+        }
+
         $user = User::where('is_admin', true)->with(['roles.permissions'])->findOrFail($id);
 
         $activityLogs = ActivityLog::where('user_id', $user->id)
@@ -158,6 +178,14 @@ class StaffApiController extends Controller
     public function store(Request $request): JsonResponse
     {
         $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to create staff accounts.',
+                ],
+            ], 403);
+        }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -171,11 +199,21 @@ class StaffApiController extends Controller
         $requestedRole = $request->input('role');
 
         // Privilege Escalation Check: only Super Admin can assign super_admin
-        if ($requestedRole === 'super_admin' && !$actor?->hasRole('super_admin')) {
+        if ($requestedRole === 'super_admin' && ! $actor?->hasRole('super_admin')) {
             return response()->json([
                 'error' => [
                     'code' => 'PRIVILEGE_ESCALATION_FORBIDDEN',
                     'message' => 'Only Super Administrators can create other Super Administrators.',
+                ],
+            ], 403);
+        }
+
+        // Non-super-admins cannot assign roles they do not possess
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasRole($requestedRole)) {
+            return response()->json([
+                'error' => [
+                    'code' => 'PRIVILEGE_ESCALATION_FORBIDDEN',
+                    'message' => 'You cannot assign a role that you do not possess.',
                 ],
             ], 403);
         }
@@ -223,7 +261,27 @@ class StaffApiController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $actor = $request->user();
+        if ($actor?->id !== $id && ! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to update this staff member.',
+                ],
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
+
+        if ($actor?->id === $id && ! $actor?->hasRole('super_admin')) {
+            if ($request->has('role') || $request->has('scope') || $request->has('is_active')) {
+                return response()->json([
+                    'error' => [
+                        'code' => 'SELF_ESCALATION_FORBIDDEN',
+                        'message' => 'You cannot modify your own administrative role, scope, or activation status.',
+                    ],
+                ], 403);
+            }
+        }
 
         $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
@@ -236,11 +294,21 @@ class StaffApiController extends Controller
         if ($request->has('role')) {
             $newRole = $request->input('role');
             // Protect Super Admin assignment
-            if ($newRole === 'super_admin' && !$actor?->hasRole('super_admin')) {
+            if ($newRole === 'super_admin' && ! $actor?->hasRole('super_admin')) {
                 return response()->json([
                     'error' => [
                         'code' => 'PRIVILEGE_ESCALATION_FORBIDDEN',
                         'message' => 'Only Super Administrators can assign the Super Administrator role.',
+                    ],
+                ], 403);
+            }
+
+            // Non-super-admins cannot assign roles they do not possess
+            if (! $actor?->hasRole('super_admin') && ! $actor?->hasRole($newRole)) {
+                return response()->json([
+                    'error' => [
+                        'code' => 'PRIVILEGE_ESCALATION_FORBIDDEN',
+                        'message' => 'You cannot assign a role that you do not possess.',
                     ],
                 ], 403);
             }
@@ -298,6 +366,15 @@ class StaffApiController extends Controller
     public function suspend(Request $request, int $id): JsonResponse
     {
         $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to suspend staff accounts.',
+                ],
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
 
         if ($user->id === $actor?->id) {
@@ -305,6 +382,15 @@ class StaffApiController extends Controller
                 'error' => [
                     'code' => 'SELF_SUSPENSION_FORBIDDEN',
                     'message' => 'You cannot suspend your own administrative account.',
+                ],
+            ], 403);
+        }
+
+        if ($user->hasRole('super_admin') && ! $actor?->hasRole('super_admin')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'PRIVILEGE_ESCALATION_FORBIDDEN',
+                    'message' => 'Only Super Administrators can suspend another Super Administrator.',
                 ],
             ], 403);
         }
@@ -349,6 +435,15 @@ class StaffApiController extends Controller
     public function reactivate(Request $request, int $id): JsonResponse
     {
         $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to reactivate staff accounts.',
+                ],
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
 
         $user->is_active = true;
@@ -376,6 +471,15 @@ class StaffApiController extends Controller
     public function forceLogout(Request $request, int $id): JsonResponse
     {
         $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to force logout staff members.',
+                ],
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
 
         $user->tokens()->delete();
@@ -402,7 +506,14 @@ class StaffApiController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $actor = $request->user();
-        $user = User::findOrFail($id);
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to delete staff members.',
+                ],
+            ], 403);
+        }
 
         if ($user->id === $actor?->id || $user->email === 'superadmin@gounow.com') {
             return response()->json([

@@ -12,6 +12,16 @@ class SettingsApiController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_settings')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view platform settings.',
+                ],
+            ], 403);
+        }
+
         $settings = Setting::all()->pluck('value', 'key');
 
         return response()->json([
@@ -25,6 +35,16 @@ class SettingsApiController extends Controller
 
     public function update(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_settings')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to modify platform settings.',
+                ],
+            ], 403);
+        }
+
         $request->validate([
             'settings' => ['required', 'array'],
         ]);
@@ -55,6 +75,16 @@ class SettingsApiController extends Controller
 
     public function auditLogs(Request $request): JsonResponse
     {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('view_audit_logs')) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view activity and audit logs.',
+                ],
+            ], 403);
+        }
+
         $query = ActivityLog::with('user')->orderByDesc('created_at');
 
         if ($search = $request->query('search')) {

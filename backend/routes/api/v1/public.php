@@ -45,6 +45,11 @@ Route::post('/leads', [LeadController::class, 'store'])
     ->middleware('throttle:inquiries')
     ->name('leads.store');
 
+// Public VIP Concierge Request Intake
+Route::post('/concierge', [\App\Http\Controllers\Api\V1\Public\PublicConciergeController::class, 'store'])
+    ->middleware('throttle:inquiries')
+    ->name('concierge.store');
+
 // Homepage Media Design Config
 Route::get('/settings/media-design', function () {
     return response()->json([

@@ -278,20 +278,32 @@ export async function createConciergeRequest(payload: {
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
-  type: string;
+  type?: string;
+  request_type?: string;
   priority?: string;
-  subject: string;
+  subject?: string;
   description: string;
   guest_count?: number;
+  guests_count?: number;
   requested_date?: string;
+  preferred_date?: string;
   preferred_time?: string;
   location?: string;
   budget?: number;
   assigned_to_user_id?: number | null;
+  assigned_to?: number | null;
 }): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
+  const body = {
+    ...payload,
+    request_type: payload.request_type || payload.type || "custom",
+    description: payload.description || payload.subject || "",
+    guests_count: payload.guests_count !== undefined ? payload.guests_count : payload.guest_count,
+    preferred_date: payload.preferred_date || payload.requested_date,
+    assigned_to: payload.assigned_to !== undefined ? payload.assigned_to : payload.assigned_to_user_id,
+  };
   return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>("/admin/concierge", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -312,7 +324,12 @@ export async function assignConciergeRequest(
 ): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
   return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}/assign`, {
     method: "POST",
-    body: JSON.stringify({ assigned_to_user_id: userId, assignment_notes: notes }),
+    body: JSON.stringify({
+      user_id: userId,
+      assigned_to_user_id: userId,
+      reason: notes,
+      assignment_notes: notes,
+    }),
   });
 }
 
@@ -325,7 +342,7 @@ export async function updateConciergeStatus(
 ): Promise<SingleResponse<import("../types").ConciergeRequestItem>> {
   return apiClient<SingleResponse<import("../types").ConciergeRequestItem>>(`/admin/concierge/${id}/status`, {
     method: "POST",
-    body: JSON.stringify({ status, notes }),
+    body: JSON.stringify({ status, reason: notes, notes }),
   });
 }
 
