@@ -467,25 +467,29 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
                 {isAr ? "الاسم الكامل" : "Full Name"}
               </span>
               <span className="text-sm font-bold text-brand-brown mt-0.5 block">
-                {booking.customer.name}
+                {booking.customer?.name || (isAr ? "نزيل غير محدد" : "Guest")}
               </span>
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">
                 {isAr ? "البريد الإلكتروني" : "Email Address"}
               </span>
-              <a href={`mailto:${booking.customer.email}`} className="text-sm text-brand-terracotta hover:underline mt-0.5 block">
-                {booking.customer.email}
-              </a>
+              {booking.customer?.email ? (
+                <a href={`mailto:${booking.customer.email}`} className="text-sm text-brand-terracotta hover:underline mt-0.5 block">
+                  {booking.customer.email}
+                </a>
+              ) : (
+                <span className="text-sm text-brand-brown-muted mt-0.5 block">N/A</span>
+              )}
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold text-brand-brown-muted block">
                 {isAr ? "رقم الهاتف / واتساب" : "Phone & WhatsApp"}
               </span>
               <span className="text-sm font-mono text-brand-brown mt-0.5 block" dir="ltr">
-                {booking.customer.phone || "N/A"}
+                {booking.customer?.phone || "N/A"}
               </span>
-              {booking.customer.phone && (
+              {booking.customer?.phone && (
                 <a
                   href={`https://wa.me/${booking.customer.phone.replace(/[^0-9]/g, "")}`}
                   target="_blank"
@@ -501,7 +505,7 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
                 {isAr ? "الجنسية / الإقامة" : "Nationality / Country"}
               </span>
               <span className="text-sm text-brand-brown mt-0.5 block">
-                {booking.customer.nationality || "Egypt"} ({booking.customer.country_of_residence || "EG"})
+                {booking.customer?.nationality || "Egypt"} ({booking.customer?.country_of_residence || "EG"})
               </span>
             </div>
             <div>
@@ -509,7 +513,7 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
                 {isAr ? "سجل الحجوزات السابقة" : "Previous Bookings"}
               </span>
               <span className="text-sm font-bold text-brand-brown mt-0.5 block">
-                {booking.customer.bookings_count} {isAr ? "حجوزات مسجلة" : "reservations"}
+                {booking.customer?.bookings_count ?? 0} {isAr ? "حجوزات مسجلة" : "reservations"}
               </span>
             </div>
           </div>

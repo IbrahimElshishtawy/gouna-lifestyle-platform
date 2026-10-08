@@ -426,8 +426,8 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="py-3.5 px-4 font-medium text-brand-brown">
                           <div>
-                            <span>{b.customer.name}</span>
-                            {b.customer.phone && (
+                            <span>{b.customer?.name || (isAr ? "عميل" : "Guest")}</span>
+                            {b.customer?.phone && (
                               <span className="block text-[10px] text-brand-brown-muted font-mono" dir="ltr">
                                 {b.customer.phone}
                               </span>
@@ -436,7 +436,9 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="py-3.5 px-4">
                           <span className="font-semibold text-brand-brown block line-clamp-1">
-                            {isAr ? (b.bookable.title_ar || b.bookable.title) : b.bookable.title}
+                            {b.bookable
+                              ? (isAr ? (b.bookable.title_ar || b.bookable.title) : b.bookable.title)
+                              : (isAr ? "عقار غير محدد" : "Property")}
                           </span>
                           <span className="text-[10px] text-brand-brown-muted block">
                             {b.nights} {isAr ? "ليالٍ" : "nights"} • {b.guests} {isAr ? "ضيوف" : "guests"}
