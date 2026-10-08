@@ -441,6 +441,70 @@ export async function parseLocationCoordinates(
 }
 
 /**
+ * 10.1 Property Units Management
+ */
+export async function getAdminPropertyUnits(
+  propertyId: number,
+  params?: { search?: string; status?: string }
+): Promise<SingleResponse<import("../types").AdminPropertyUnitItem[]>> {
+  const query = new URLSearchParams();
+  if (params?.search) query.set("search", params.search);
+  if (params?.status) query.set("status", params.status);
+  const qs = query.toString();
+  return apiClient<SingleResponse<import("../types").AdminPropertyUnitItem[]>>(
+    `/admin/properties/${propertyId}/units${qs ? `?${qs}` : ""}`
+  );
+}
+
+export async function createAdminPropertyUnit(
+  propertyId: number,
+  payload: Record<string, any>
+): Promise<SingleResponse<import("../types").AdminPropertyUnitItem>> {
+  return apiClient<SingleResponse<import("../types").AdminPropertyUnitItem>>(
+    `/admin/properties/${propertyId}/units`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function getAdminPropertyUnitDetails(
+  propertyId: number,
+  unitId: number
+): Promise<SingleResponse<import("../types").AdminPropertyUnitDetail>> {
+  return apiClient<SingleResponse<import("../types").AdminPropertyUnitDetail>>(
+    `/admin/properties/${propertyId}/units/${unitId}`
+  );
+}
+
+export async function updateAdminPropertyUnit(
+  propertyId: number,
+  unitId: number,
+  payload: Record<string, any>
+): Promise<SingleResponse<import("../types").AdminPropertyUnitDetail>> {
+  return apiClient<SingleResponse<import("../types").AdminPropertyUnitDetail>>(
+    `/admin/properties/${propertyId}/units/${unitId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function deleteAdminPropertyUnit(
+  propertyId: number,
+  unitId: number
+): Promise<{ success: boolean; message: string }> {
+  return apiClient<{ success: boolean; message: string }>(
+    `/admin/properties/${propertyId}/units/${unitId}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+/**
  * 10. Pricing Engine Module
  */
 export async function getPricingOverview(): Promise<import("../types").PricingOverviewResponse> {
@@ -503,7 +567,7 @@ export async function getPricingRules(params?: {
 }
 
 export async function createPricingRule(payload: {
-  property_id: number;
+  property_id?: number | null;
   name_en: string;
   name_ar?: string;
   start_date: string;
@@ -511,6 +575,10 @@ export async function createPricingRule(payload: {
   price_cents: number;
   priority?: number;
   min_stay_nights?: number;
+  rule_type?: "season" | "holiday" | "weekend" | "override";
+  adjustment_type?: "fixed" | "percentage";
+  adjustment_percent?: number | null;
+  days_of_week?: string[] | null;
   is_active?: boolean;
   notes?: string;
 }): Promise<{ success: boolean; message: string; data: import("../types").SeasonalPriceItem }> {
@@ -523,6 +591,7 @@ export async function createPricingRule(payload: {
 export async function updatePricingRule(
   id: number,
   payload: Partial<{
+    property_id?: number | null;
     name_en: string;
     name_ar?: string;
     start_date: string;
@@ -530,6 +599,10 @@ export async function updatePricingRule(
     price_cents: number;
     priority: number;
     min_stay_nights: number;
+    rule_type: "season" | "holiday" | "weekend" | "override";
+    adjustment_type: "fixed" | "percentage";
+    adjustment_percent: number | null;
+    days_of_week: string[] | null;
     is_active: boolean;
     notes: string;
   }>

@@ -224,12 +224,23 @@ class PricingApiController extends Controller
     /**
      * 5. List all seasonal / holiday / weekend pricing rules with pagination.
      */
+    /**
+     * 5. List all seasonal / holiday / weekend pricing rules with pagination.
+     */
     public function rules(Request $request): JsonResponse
     {
         $query = SeasonalPrice::with('property')->orderByDesc('start_date');
 
         if ($propertyId = $request->query('property_id')) {
-            $query->where('property_id', (int) $propertyId);
+            if ($propertyId === 'global') {
+                $query->whereNull('property_id');
+            } else {
+                $query->where('property_id', (int) $propertyId);
+            }
+        }
+
+        if ($ruleType = $request->query('rule_type')) {
+            $query->where('rule_type', $ruleType);
         }
 
         if ($search = $request->query('search')) {
@@ -253,8 +264,12 @@ class PricingApiController extends Controller
             return [
                 'id' => $sp->id,
                 'property_id' => $sp->property_id,
-                'property_title' => $sp->property?->title_en ?? 'Unknown Property',
-                'property_reference' => $sp->property?->reference_number ?? '',
+                'property_title' => $sp->property ? $sp->property->title_en : 'Global (All Inventory)',
+                'property_reference' => $sp->property ? $sp->property->reference_number : 'GLOBAL',
+                'rule_type' => $sp->rule_type ?? 'season',
+                'adjustment_type' => $sp->adjustment_type ?? 'fixed',
+                'adjustment_percent' => $sp->adjustment_percent ? (float) $sp->adjustment_percent : null,
+                'days_of_week' => $sp->days_of_week ?? null,
                 'name_en' => $sp->name_en,
                 'name_ar' => $sp->name_ar,
                 'start_date' => $sp->start_date ? $sp->start_date->toDateString() : '',
@@ -288,7 +303,12 @@ class PricingApiController extends Controller
     public function storeRule(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'property_id' => ['required', 'exists:properties,id'],
+            'property_id' => ['nullable', 'exists:properties,id'],
+            'rule_type' => ['nullable', 'string', 'in:season,holiday,weekend,override'],
+            'adjustment_type' => ['nullable', 'string', 'in:fixed,percentage'],
+            'adjustment_percent' => ['nullable', 'numeric', 'min:-100', 'max:500'],
+            'days_of_week' => ['nullable', 'array'],
+            'days_of_week.*' => ['string'],
             'name_en' => ['required', 'string', 'max:255'],
             'name_ar' => ['nullable', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
@@ -301,18 +321,21 @@ class PricingApiController extends Controller
         ]);
 
         $season = SeasonalPrice::create(array_merge($validated, [
+            'rule_type' => $validated['rule_type'] ?? 'season',
+            'adjustment_type' => $validated['adjustment_type'] ?? 'fixed',
             'is_active' => $validated['is_active'] ?? true,
             'priority' => $validated['priority'] ?? 1,
         ]));
 
-        $property = Property::find($season->property_id);
+        $property = $season->property_id ? Property::find($season->property_id) : null;
+        $targetDesc = $property ? "property [{$property->reference_number}]" : "Global Inventory";
 
         ActivityLog::create([
             'user_id' => $request->user()?->id,
             'action' => 'seasonal_price_added',
             'entity_type' => 'Property',
-            'entity_id' => $season->property_id,
-            'description' => "Seasonal rule [{$season->name_en}] created for property [{$property?->reference_number}]. Rate: " . number_format($season->price_cents / 100, 2) . " EGP.",
+            'entity_id' => $season->property_id ?? 0,
+            'description' => "Pricing rule [{$season->name_en}] ({$season->rule_type}) created for {$targetDesc}. Rate: " . number_format($season->price_cents / 100, 2) . " EGP.",
             'new_values' => $season->toArray(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
@@ -333,6 +356,12 @@ class PricingApiController extends Controller
         $rule = SeasonalPrice::findOrFail($id);
 
         $validated = $request->validate([
+            'property_id' => ['nullable', 'exists:properties,id'],
+            'rule_type' => ['nullable', 'string', 'in:season,holiday,weekend,override'],
+            'adjustment_type' => ['nullable', 'string', 'in:fixed,percentage'],
+            'adjustment_percent' => ['nullable', 'numeric', 'min:-100', 'max:500'],
+            'days_of_week' => ['nullable', 'array'],
+            'days_of_week.*' => ['string'],
             'name_en' => ['nullable', 'string', 'max:255'],
             'name_ar' => ['nullable', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
@@ -350,8 +379,8 @@ class PricingApiController extends Controller
             'user_id' => $request->user()?->id,
             'action' => 'seasonal_price_updated',
             'entity_type' => 'Property',
-            'entity_id' => $rule->property_id,
-            'description' => "Seasonal rule [{$rule->name_en}] updated by admin.",
+            'entity_id' => $rule->property_id ?? 0,
+            'description' => "Pricing rule [{$rule->name_en}] updated by admin.",
             'new_values' => $validated,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),

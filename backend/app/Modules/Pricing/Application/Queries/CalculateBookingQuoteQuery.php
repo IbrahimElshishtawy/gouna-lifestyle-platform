@@ -21,22 +21,44 @@ class CalculateBookingQuoteQuery
     public function getNightlyPriceCents(Property $property, Carbon $date): array
     {
         $dateStr = $date->toDateString();
+        $dayName = $date->format('l');
 
-        $seasons = SeasonalPrice::where('property_id', $property->id)
-            ->where('is_active', true)
+        // Query candidate rules following the Pricing Hierarchy:
+        // Unit-specific rules -> Property-level rules (if unit) -> Global rules (property_id is null)
+        $candidates = SeasonalPrice::where('is_active', true)
+            ->where(function ($q) use ($property) {
+                $q->where('property_id', $property->id);
+                if ($property->parent_id) {
+                    $q->orWhere('property_id', $property->parent_id);
+                }
+                $q->orWhereNull('property_id');
+            })
             ->whereDate('start_date', '<=', $dateStr)
             ->whereDate('end_date', '>=', $dateStr)
             ->orderByDesc('priority')
             ->orderByDesc('id')
             ->get();
 
-        if ($seasons->isNotEmpty()) {
-            $winner = $seasons->first();
+        // Match first candidate that conforms to days_of_week constraint (if weekend/day restricted)
+        $winner = $candidates->first(function (SeasonalPrice $sp) use ($dayName) {
+            if (!empty($sp->days_of_week) && is_array($sp->days_of_week)) {
+                return in_array($dayName, $sp->days_of_week, true);
+            }
+            return true;
+        });
+
+        if ($winner) {
+            $effectivePriceCents = (int) $winner->price_cents;
+            if ($winner->adjustment_type === 'percentage' && $winner->adjustment_percent) {
+                $baseCents = (int) $property->base_price_cents;
+                $effectivePriceCents = (int) round($baseCents * (1 + ((float) $winner->adjustment_percent / 100)));
+            }
 
             return [
-                'price_cents' => (int) $winner->price_cents,
+                'price_cents' => $effectivePriceCents,
                 'seasonal_price_id' => $winner->id,
                 'season_name' => $winner->name_en,
+                'rule_type' => $winner->rule_type ?? 'season',
                 'is_base_price' => false,
                 'priority' => (int) $winner->priority,
                 'min_stay_nights' => $winner->min_stay_nights ? (int) $winner->min_stay_nights : null,
@@ -47,6 +69,7 @@ class CalculateBookingQuoteQuery
             'price_cents' => (int) $property->base_price_cents,
             'seasonal_price_id' => null,
             'season_name' => null,
+            'rule_type' => 'base',
             'is_base_price' => true,
             'priority' => 0,
             'min_stay_nights' => null,

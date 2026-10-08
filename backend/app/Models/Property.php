@@ -15,11 +15,11 @@ class Property extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'reference_number', 'slug', 'property_category_id', 'location_id',
+        'parent_id', 'reference_number', 'unit_number', 'slug', 'property_category_id', 'location_id',
         'title_en', 'title_ar', 'short_description_en', 'short_description_ar',
         'description_en', 'description_ar', 'listing_type',
         'bedrooms', 'bathrooms', 'max_guests', 'area_sqm', 'floor',
-        'building', 'compound', 'address', 'latitude', 'longitude', 'map_url',
+        'building', 'compound', 'view', 'address', 'latitude', 'longitude', 'map_url',
         'min_stay_nights', 'max_stay_nights', 'check_in_time', 'check_out_time',
         'base_price_cents', 'currency', 'cleaning_fee_cents', 'service_fee_cents',
         'tax_percentage', 'sale_price_cents',
@@ -56,6 +56,16 @@ class Property extends Model
     }
 
     // Relationships
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id')->orderBy('title_en');
+    }
 
     public function category(): BelongsTo
     {
@@ -187,6 +197,16 @@ class Property extends Model
     }
 
     // Scopes
+
+    public function scopeTopLevel($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeUnits($query)
+    {
+        return $query->whereNotNull('parent_id');
+    }
 
     public function scopePublished($query)
     {

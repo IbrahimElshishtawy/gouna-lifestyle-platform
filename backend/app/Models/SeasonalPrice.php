@@ -12,8 +12,8 @@ class SeasonalPrice extends Model
     use HasFactory;
 
     protected $fillable = [
-        'property_id', 'name_en', 'name_ar', 'start_date', 'end_date',
-        'price_cents', 'priority', 'min_stay_nights', 'is_active', 'notes',
+        'property_id', 'rule_type', 'adjustment_type', 'name_en', 'name_ar', 'start_date', 'end_date',
+        'days_of_week', 'price_cents', 'adjustment_percent', 'priority', 'min_stay_nights', 'is_active', 'notes',
     ];
 
     protected function casts(): array
@@ -21,7 +21,9 @@ class SeasonalPrice extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'days_of_week' => 'array',
             'price_cents' => 'integer',
+            'adjustment_percent' => 'decimal:2',
             'priority' => 'integer',
             'min_stay_nights' => 'integer',
             'is_active' => 'boolean',

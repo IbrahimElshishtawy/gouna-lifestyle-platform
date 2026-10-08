@@ -259,6 +259,7 @@ export interface AvailabilityBlockItem {
 
 export interface SeasonalPriceItem {
   id: number;
+  property_id?: number | null;
   name_en: string;
   name_ar?: string | null;
   start_date: string;
@@ -267,6 +268,18 @@ export interface SeasonalPriceItem {
   formatted_price: string;
   priority: number;
   min_stay_nights?: number | null;
+  rule_type?: "season" | "holiday" | "weekend" | "override";
+  adjustment_type?: "fixed" | "percentage";
+  adjustment_percent?: number | null;
+  days_of_week?: string[] | null;
+  is_active?: boolean;
+  notes?: string | null;
+  property?: {
+    id: number;
+    title_en: string;
+    title_ar?: string | null;
+    reference_number: string;
+  } | null;
 }
 
 export interface PropertyCalendarResponse {
@@ -293,8 +306,64 @@ export interface AdminTaxonomiesResponse {
   amenities: Array<{ id: number; name_en: string; name_ar: string; group: string; icon: string | null }>;
 }
 
+export interface AdminPropertyUnitItem {
+  id: number;
+  parent_id: number;
+  reference_number: string;
+  slug: string;
+  unit_number: string | null;
+  title_en: string;
+  title_ar: string | null;
+  view: string | null;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  area_sqm: number | null;
+  base_price_cents: number;
+  currency: string;
+  formatted_price: string;
+  is_published: boolean;
+  is_available: boolean;
+  status: "published" | "draft" | "active" | "paused";
+  category?: {
+    id: number;
+    name_en: string;
+    name_ar: string;
+    slug: string;
+  };
+  primary_image?: string | null;
+  created_at: string | null;
+}
+
+export interface AdminPropertyUnitDetail extends AdminPropertyUnitItem {
+  parent?: {
+    id: number;
+    reference_number: string;
+    title_en: string;
+    title_ar?: string | null;
+    slug: string;
+    address?: string | null;
+    compound?: string | null;
+    location?: {
+      id: number;
+      name_en: string;
+      name_ar: string;
+    };
+  };
+  images?: Array<{ id: number; url: string; is_primary: boolean; sort_order: number }>;
+  amenities?: Array<{ id: number; name_en: string; name_ar: string; group?: string }>;
+  availability_blocks?: AvailabilityBlockItem[];
+  seasonal_prices?: SeasonalPriceItem[];
+  bookings?: AdminBookingItem[];
+}
+
 export interface AdminPropertyItem {
   id: number;
+  parent_id?: number | null;
+  unit_number?: string | null;
+  view?: string | null;
+  units_count?: number;
+  units?: AdminPropertyUnitItem[];
   reference_number: string;
   slug: string;
   title_en: string;

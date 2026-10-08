@@ -25,7 +25,18 @@ class PropertyApiController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Property::with(['category', 'location', 'images'])
+            ->withCount('units')
             ->orderByDesc('created_at');
+
+        // Filter top-level inventory vs units under parent
+        if ($request->has('parent_id')) {
+            $parentId = $request->query('parent_id');
+            if ($parentId !== 'all') {
+                $query->where('parent_id', (int) $parentId);
+            }
+        } else {
+            $query->whereNull('parent_id');
+        }
 
         // Type filter: rent or sale
         if ($type = $request->query('type')) {
@@ -52,11 +63,11 @@ class PropertyApiController extends Controller
         }
 
         // Aggregate statistics for admin tabs
-        $totalProperties = Property::count();
-        $publishedCount = Property::where('is_published', true)->count();
-        $pausedCount = Property::where('is_published', false)->count();
-        $rentCount = Property::where('listing_type', 'rent')->count();
-        $saleCount = Property::where('listing_type', 'sale')->count();
+        $totalProperties = Property::whereNull('parent_id')->count();
+        $publishedCount = Property::whereNull('parent_id')->where('is_published', true)->count();
+        $pausedCount = Property::whereNull('parent_id')->where('is_published', false)->count();
+        $rentCount = Property::whereNull('parent_id')->where('listing_type', 'rent')->count();
+        $saleCount = Property::whereNull('parent_id')->where('listing_type', 'sale')->count();
 
         $paginator = $query->paginate(15);
 
@@ -69,7 +80,9 @@ class PropertyApiController extends Controller
 
             return [
                 'id' => $p->id,
+                'parent_id' => $p->parent_id,
                 'reference_number' => $p->reference_number,
+                'unit_number' => $p->unit_number,
                 'slug' => $p->slug,
                 'title_en' => $p->title_en,
                 'title_ar' => $p->title_ar,
@@ -79,6 +92,8 @@ class PropertyApiController extends Controller
                 'max_guests' => $p->max_guests,
                 'area_sqm' => $p->area_sqm,
                 'compound' => $p->compound,
+                'view' => $p->view,
+                'units_count' => (int) ($p->units_count ?? 0),
                 'is_published' => (bool) $p->is_published,
                 'is_available' => (bool) $p->is_available,
                 'is_featured' => (bool) $p->is_featured,
@@ -183,6 +198,10 @@ class PropertyApiController extends Controller
             'location',
             'images',
             'amenities',
+            'parent',
+            'units' => function ($q) {
+                $q->with(['category', 'images', 'availabilityBlocks', 'seasonalPrices'])->orderBy('title_en');
+            },
             'seasonalPrices' => function ($q) {
                 $q->orderBy('start_date');
             },
@@ -232,10 +251,313 @@ class PropertyApiController extends Controller
             'formatted_revenue' => number_format(((int) $totalRevenueCents) / 100, 2) . ' ' . ($property->currency ?? 'EGP'),
             'seasonal_prices_count' => $property->seasonalPrices->count(),
             'availability_blocks_count' => $property->availabilityBlocks->count(),
+            'units_count' => $property->units->count(),
         ];
 
         return response()->json([
             'data' => $data,
+        ]);
+    }
+
+    /**
+     * List all units belonging to a specific parent property.
+     */
+    public function listUnits(int $id): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+
+        $units = Property::with(['category', 'images', 'availabilityBlocks', 'seasonalPrices'])
+            ->where('parent_id', $property->id)
+            ->orderBy('title_en')
+            ->get()
+            ->map(function (Property $u) {
+                return [
+                    'id' => $u->id,
+                    'parent_id' => $u->parent_id,
+                    'reference_number' => $u->reference_number,
+                    'unit_number' => $u->unit_number,
+                    'title_en' => $u->title_en,
+                    'title_ar' => $u->title_ar,
+                    'slug' => $u->slug,
+                    'listing_type' => $u->listing_type,
+                    'view' => $u->view,
+                    'floor' => $u->floor,
+                    'building' => $u->building,
+                    'bedrooms' => $u->bedrooms,
+                    'bathrooms' => $u->bathrooms,
+                    'max_guests' => $u->max_guests,
+                    'area_sqm' => $u->area_sqm,
+                    'base_price_cents' => (int) $u->base_price_cents,
+                    'formatted_base_price' => number_format(((int) $u->base_price_cents) / 100, 2) . ' ' . ($u->currency ?? 'EGP'),
+                    'currency' => $u->currency ?? 'EGP',
+                    'min_stay_nights' => $u->min_stay_nights ?? 1,
+                    'is_published' => (bool) $u->is_published,
+                    'is_available' => (bool) $u->is_available,
+                    'status' => $u->is_published ? 'active' : 'paused',
+                    'category' => [
+                        'id' => $u->category?->id ?? 0,
+                        'name_en' => $u->category?->name_en ?? 'Villa',
+                        'name_ar' => $u->category?->name_ar ?? 'فيلا',
+                    ],
+                    'primary_image' => $u->images->first()?->url ?? '/assets/images/bg-sand-texture.jpg',
+                ];
+            });
+
+        return response()->json([
+            'property' => [
+                'id' => $property->id,
+                'reference_number' => $property->reference_number,
+                'title_en' => $property->title_en,
+                'title_ar' => $property->title_ar,
+            ],
+            'data' => $units,
+        ]);
+    }
+
+    /**
+     * Store a new unit inside a parent property.
+     */
+    public function storeUnit(int $id, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+
+        $validated = $request->validate([
+            'unit_number' => ['nullable', 'string', 'max:100'],
+            'title_en' => ['required', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
+            'property_category_id' => ['nullable', 'exists:property_categories,id'],
+            'listing_type' => ['nullable', 'string', 'in:rent,sale,both'],
+            'bedrooms' => ['required', 'integer', 'min:0'],
+            'bathrooms' => ['required', 'integer', 'min:0'],
+            'max_guests' => ['required', 'integer', 'min:1'],
+            'area_sqm' => ['nullable', 'numeric', 'min:0'],
+            'floor' => ['nullable', 'integer'],
+            'building' => ['nullable', 'string', 'max:100'],
+            'view' => ['nullable', 'string', 'max:150'],
+            'base_price_cents' => ['nullable', 'integer', 'min:0'],
+            'cleaning_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'service_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'max_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'description_en' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
+            'is_published' => ['nullable', 'boolean'],
+            'is_available' => ['nullable', 'boolean'],
+            'status' => ['nullable', 'in:draft,published,archived'],
+            'amenity_ids' => ['nullable', 'array'],
+            'amenity_ids.*' => ['exists:amenities,id'],
+        ]);
+
+        $baseSlug = Str::slug($property->slug . '-' . ($validated['unit_number'] ?? $validated['title_en']));
+        $slug = $baseSlug;
+        $count = 1;
+        while (Property::where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$count}";
+            $count++;
+        }
+
+        $ref = $property->reference_number . '-U' . strtoupper(Str::random(4));
+        while (Property::where('reference_number', $ref)->exists()) {
+            $ref = $property->reference_number . '-U' . strtoupper(Str::random(4));
+        }
+
+        $amenityIds = $validated['amenity_ids'] ?? [];
+        unset($validated['amenity_ids']);
+
+        $unit = Property::create(array_merge($validated, [
+            'parent_id' => $property->id,
+            'slug' => $slug,
+            'reference_number' => $ref,
+            'property_category_id' => $validated['property_category_id'] ?? $property->property_category_id,
+            'location_id' => $property->location_id,
+            'compound' => $property->compound,
+            'address' => $property->address,
+            'latitude' => $property->latitude,
+            'longitude' => $property->longitude,
+            'map_url' => $property->map_url,
+            'currency' => $property->currency ?? 'EGP',
+            'listing_type' => $validated['listing_type'] ?? $property->listing_type ?? 'rent',
+            'base_price_cents' => $validated['base_price_cents'] ?? $property->base_price_cents,
+            'is_published' => $validated['is_published'] ?? true,
+            'is_available' => $validated['is_available'] ?? true,
+            'status' => $validated['status'] ?? 'published',
+        ]));
+
+        if (!empty($amenityIds)) {
+            $unit->amenities()->sync($amenityIds);
+        }
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'unit_created',
+            'entity_type' => 'Property',
+            'entity_id' => $unit->id,
+            'description' => "Unit [{$unit->reference_number}] added to property [{$property->reference_number}].",
+            'new_values' => $unit->toArray(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إنشاء الوحدة بنجاح.',
+            'data' => $unit->load(['category', 'amenities']),
+        ], 201);
+    }
+
+    /**
+     * Show single unit details inside a parent property.
+     */
+    public function showUnit(int $id, int $unitId): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $unit = Property::with([
+            'category',
+            'images',
+            'amenities',
+            'parent',
+            'seasonalPrices' => function ($q) {
+                $q->orderBy('start_date');
+            },
+            'availabilityBlocks' => function ($q) {
+                $q->orderBy('start_date');
+            },
+        ])->where('parent_id', $property->id)->findOrFail($unitId);
+
+        $recentBookings = Booking::with('customer')
+            ->where('bookable_type', Property::class)
+            ->where('bookable_id', $unit->id)
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'reference' => $b->reference,
+                    'customer_name' => $b->customer?->full_name ?? 'Guest User',
+                    'check_in' => $b->check_in ? $b->check_in->toDateString() : '',
+                    'check_out' => $b->check_out ? $b->check_out->toDateString() : '',
+                    'nights' => $b->nights,
+                    'guests' => $b->guests,
+                    'total_cents' => (int) $b->total_cents,
+                    'formatted_total' => number_format(((int) $b->total_cents) / 100, 2) . ' ' . ($b->currency ?? 'EGP'),
+                    'status' => $b->status,
+                    'payment_status' => $b->payment_status,
+                ];
+            });
+
+        $data = $unit->toArray();
+        $data['formatted_base_price'] = number_format(((int) $unit->base_price_cents) / 100, 2) . ' ' . ($unit->currency ?? 'EGP');
+        $data['recent_bookings'] = $recentBookings;
+
+        return response()->json([
+            'data' => $data,
+            'parent_property' => [
+                'id' => $property->id,
+                'title_en' => $property->title_en,
+                'title_ar' => $property->title_ar,
+                'reference_number' => $property->reference_number,
+            ],
+        ]);
+    }
+
+    /**
+     * Update unit details.
+     */
+    public function updateUnit(int $id, int $unitId, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $unit = Property::where('parent_id', $property->id)->findOrFail($unitId);
+
+        $validated = $request->validate([
+            'unit_number' => ['nullable', 'string', 'max:100'],
+            'title_en' => ['nullable', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
+            'property_category_id' => ['nullable', 'exists:property_categories,id'],
+            'bedrooms' => ['nullable', 'integer', 'min:0'],
+            'bathrooms' => ['nullable', 'integer', 'min:0'],
+            'max_guests' => ['nullable', 'integer', 'min:1'],
+            'area_sqm' => ['nullable', 'numeric', 'min:0'],
+            'floor' => ['nullable', 'integer'],
+            'building' => ['nullable', 'string', 'max:100'],
+            'view' => ['nullable', 'string', 'max:150'],
+            'base_price_cents' => ['nullable', 'integer', 'min:0'],
+            'cleaning_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'service_fee_cents' => ['nullable', 'integer', 'min:0'],
+            'min_stay_nights' => ['nullable', 'integer', 'min:1'],
+            'description_en' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
+            'is_published' => ['nullable', 'boolean'],
+            'is_available' => ['nullable', 'boolean'],
+            'status' => ['nullable', 'in:draft,published,archived'],
+            'amenity_ids' => ['nullable', 'array'],
+            'amenity_ids.*' => ['exists:amenities,id'],
+        ]);
+
+        $amenityIds = $validated['amenity_ids'] ?? null;
+        unset($validated['amenity_ids']);
+
+        $unit->update($validated);
+
+        if (is_array($amenityIds)) {
+            $unit->amenities()->sync($amenityIds);
+        }
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'unit_updated',
+            'entity_type' => 'Property',
+            'entity_id' => $unit->id,
+            'description' => "Unit [{$unit->reference_number}] details updated by admin.",
+            'new_values' => $validated,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث بيانات الوحدة بنجاح.',
+            'data' => $unit->fresh(['category', 'amenities']),
+        ]);
+    }
+
+    /**
+     * Delete unit.
+     */
+    public function deleteUnit(int $id, int $unitId, Request $request): JsonResponse
+    {
+        $property = Property::findOrFail($id);
+        $unit = Property::where('parent_id', $property->id)->findOrFail($unitId);
+
+        $hasActiveBookings = Booking::where('bookable_type', Property::class)
+            ->where('bookable_id', $unit->id)
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->whereDate('check_out', '>=', now()->toDateString())
+            ->exists();
+
+        if ($hasActiveBookings) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يمكن حذف هذه الوحدة لوجود حجوزات نشطة عليها.',
+            ], 422);
+        }
+
+        $ref = $unit->reference_number;
+        $unit->delete();
+
+        ActivityLog::create([
+            'user_id' => $request->user()?->id,
+            'action' => 'unit_deleted',
+            'entity_type' => 'Property',
+            'entity_id' => $unitId,
+            'description' => "Unit [{$ref}] deleted from property [{$property->reference_number}].",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف الوحدة بنجاح.',
         ]);
     }
 
