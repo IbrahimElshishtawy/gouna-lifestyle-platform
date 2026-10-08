@@ -239,7 +239,7 @@ export default function AdminVenuesPage() {
                   />
                   <div className="absolute top-3 start-3">
                     <span className="px-2.5 py-1 rounded-lg bg-black/60 text-white text-[10px] font-bold uppercase backdrop-blur-xs">
-                      {v.venue_type.replace("_", " ")}
+                      {v.venue_type ? v.venue_type.replace(/_/g, " ") : ""}
                     </span>
                   </div>
                   <div className="absolute bottom-3 end-3 px-2 py-0.5 rounded-lg bg-white/90 text-brand-brown text-[11px] font-bold backdrop-blur-xs">
