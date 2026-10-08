@@ -614,16 +614,22 @@ export default function AdminCustomersPage() {
 
             {/* Footer Actions */}
             <div className="pt-2 flex justify-between items-center border-t border-brand-border">
-              <a
-                href={`https://wa.me/${selectedClient.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                  `Hello ${selectedClient.name}, GouNow VIP Reservations Desk is checking in.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center shadow-xs cursor-pointer"
-              >
-                <span>{isAr ? "محادثة واتساب مباشرة" : "Direct WhatsApp Contact"}</span>
-              </a>
+              {selectedClient.phone ? (
+                <a
+                  href={`https://wa.me/${selectedClient.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                    `Hello ${selectedClient.name}, GouNow VIP Reservations Desk is checking in.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center shadow-xs cursor-pointer"
+                >
+                  <span>{isAr ? "محادثة واتساب مباشرة" : "Direct WhatsApp Contact"}</span>
+                </a>
+              ) : (
+                <span className="text-xs text-brand-brown-muted italic">
+                  {isAr ? "لا يوجد رقم هاتف مسجل" : "No phone number registered"}
+                </span>
+              )}
 
               <button
                 type="button"

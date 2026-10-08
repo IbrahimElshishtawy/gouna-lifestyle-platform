@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAbilities } from "@/lib/api/auth";
+import { getAbilities, UserAbilitiesResponse } from "@/lib/api/auth";
 
 interface PermissionGuardProps {
   permission?: string;
@@ -10,10 +10,38 @@ interface PermissionGuardProps {
   children: React.ReactNode;
 }
 
+function checkAccess(
+  abilities: UserAbilitiesResponse["data"] | null | undefined,
+  permission?: string,
+  role?: string
+): boolean {
+  if (!abilities) return false;
+
+  // Super admin has universal access
+  if (
+    abilities.is_admin &&
+    (abilities.permissions?.includes("*") || abilities.roles?.includes("super_admin"))
+  ) {
+    return true;
+  }
+
+  let allowed = true;
+
+  if (role && !abilities.roles?.includes(role)) {
+    allowed = false;
+  }
+
+  if (permission && !abilities.permissions?.includes(permission)) {
+    allowed = false;
+  }
+
+  return allowed;
+}
+
 /**
  * PermissionGuard: Checks whether the authenticated administrator possesses
  * the necessary permission or role before rendering sensitive actions.
- * Note: Frontend checks are for UX protection only; backend enforces security authoritatively.
+ * Optimized with in-memory caching for instantaneous zero-latency rendering.
  */
 export default function PermissionGuard({
   permission,
@@ -28,29 +56,7 @@ export default function PermissionGuard({
 
     getAbilities().then((abilities) => {
       if (!mounted) return;
-
-      if (!abilities) {
-        setHasAccess(false);
-        return;
-      }
-
-      // Super admin has universal access
-      if (abilities.is_admin && (abilities.permissions?.includes("*") || abilities.roles?.includes("super_admin"))) {
-        setHasAccess(true);
-        return;
-      }
-
-      let allowed = true;
-
-      if (role && !abilities.roles?.includes(role)) {
-        allowed = false;
-      }
-
-      if (permission && !abilities.permissions?.includes(permission)) {
-        allowed = false;
-      }
-
-      setHasAccess(allowed);
+      setHasAccess(checkAccess(abilities, permission, role));
     });
 
     return () => {
@@ -58,8 +64,9 @@ export default function PermissionGuard({
     };
   }, [permission, role]);
 
+  // If still determining access, render fallback
   if (hasAccess === null) {
-    return null; // Still resolving abilities
+    return <>{fallback}</>;
   }
 
   if (!hasAccess) {

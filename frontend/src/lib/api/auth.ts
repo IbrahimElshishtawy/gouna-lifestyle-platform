@@ -131,19 +131,38 @@ export async function getMe(): Promise<UserProfile | null> {
   }
 }
 
-/**
- * Fetch user abilities & permission scopes
- */
-export async function getAbilities(): Promise<UserAbilitiesResponse["data"] | null> {
-  const token = getStoredAuthToken();
-  if (!token) return null;
+let cachedAbilities: UserAbilitiesResponse["data"] | null = null;
+let pendingAbilitiesPromise: Promise<UserAbilitiesResponse["data"] | null> | null = null;
 
-  try {
-    const res = await apiClient<UserAbilitiesResponse>("/me/abilities");
-    return res.data;
-  } catch {
+/**
+ * Fetch user abilities & permission scopes (cached in-memory)
+ */
+export async function getAbilities(forceRefresh = false): Promise<UserAbilitiesResponse["data"] | null> {
+  const token = getStoredAuthToken();
+  if (!token) {
+    cachedAbilities = null;
     return null;
   }
+
+  if (cachedAbilities && !forceRefresh) {
+    return cachedAbilities;
+  }
+
+  if (pendingAbilitiesPromise && !forceRefresh) {
+    return pendingAbilitiesPromise;
+  }
+
+  pendingAbilitiesPromise = apiClient<UserAbilitiesResponse>("/me/abilities")
+    .then((res) => {
+      cachedAbilities = res.data;
+      return res.data;
+    })
+    .catch(() => null)
+    .finally(() => {
+      pendingAbilitiesPromise = null;
+    });
+
+  return pendingAbilitiesPromise;
 }
 
 /**
@@ -162,6 +181,7 @@ export async function forgotPassword(email: string): Promise<{ message: string }
  */
 export async function logout(): Promise<void> {
   const token = getStoredAuthToken();
+  cachedAbilities = null;
   if (token) {
     try {
       await apiClient("/auth/logout", {
