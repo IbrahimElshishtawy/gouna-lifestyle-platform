@@ -71,7 +71,8 @@ class StaffApiController extends Controller
                 'scope' => $u->scope ?? 'all',
                 'is_active' => (bool) $u->is_active,
                 'status' => $u->is_active ? 'active' : 'suspended',
-                'roles' => $u->roles->map(function ($r) {
+                'roles' => $u->roles->pluck('name')->values()->all(),
+                'role_objects' => $u->roles->map(function ($r) {
                     return [
                         'id' => $r->id,
                         'name' => $r->name,
@@ -151,7 +152,8 @@ class StaffApiController extends Controller
                 'scope' => $user->scope ?? 'all',
                 'is_active' => (bool) $user->is_active,
                 'status' => $user->is_active ? 'active' : 'suspended',
-                'roles' => $user->roles->map(function ($r) {
+                'roles' => $user->roles->pluck('name')->values()->all(),
+                'role_objects' => $user->roles->map(function ($r) {
                     return [
                         'id' => $r->id,
                         'name' => $r->name,

@@ -142,10 +142,13 @@ export default function AdminUsersPage() {
 
   const openEditModal = (u: AdminStaffItem) => {
     setEditingStaff(u);
+    const firstRole = u.roles?.[0];
+    const roleValue = typeof firstRole === "string" ? firstRole : (firstRole as any)?.name || "admin";
+
     setEditForm({
       name: u.name,
       phone: u.phone || "",
-      role: u.roles[0] || "admin",
+      role: roleValue,
       scope: u.scope || "all",
     });
   };
@@ -229,7 +232,7 @@ export default function AdminUsersPage() {
 
   const twoFactorCount = staff.filter((s) => s.two_factor_enabled).length;
   const twoFactorPercent = staff.length > 0 ? Math.round((twoFactorCount / staff.length) * 100) : 0;
-  const superAdminCount = staff.filter((s) => s.roles.includes("super_admin")).length;
+  const superAdminCount = staff.filter((s) => s.roles?.some((r: any) => (typeof r === "string" ? r : r?.name) === "super_admin")).length;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -422,7 +425,7 @@ export default function AdminUsersPage() {
               </thead>
               <tbody className="divide-y divide-brand-border/60">
                 {staff.map((u) => {
-                  const isSuperAdmin = u.roles.includes("super_admin");
+                  const isSuperAdmin = u.roles?.some((r: any) => (typeof r === "string" ? r : r?.name) === "super_admin");
                   const scopeObj = SCOPES.find((s) => s.value === (u.scope || "all"));
 
                   return (
@@ -443,18 +446,23 @@ export default function AdminUsersPage() {
 
                       <td className="py-4 px-4">
                         <div className="flex flex-wrap gap-1">
-                          {u.roles.map((r) => (
-                            <span
-                              key={r}
-                              className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                                r === "super_admin"
-                                  ? "bg-amber-100 text-amber-900 border border-amber-300"
-                                  : "bg-stone-100 text-stone-800 border border-stone-200"
-                              }`}
-                            >
-                              {r.replace(/_/g, " ")}
-                            </span>
-                          ))}
+                          {u.roles?.map((r: any, idx) => {
+                            const roleName = typeof r === "string" ? r : (r?.name || r?.display_name || "");
+                            const roleDisplay = typeof r === "object" && r?.display_name ? r.display_name : roleName.replace(/_/g, " ");
+
+                            return (
+                              <span
+                                key={roleName || idx}
+                                className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                                  roleName === "super_admin"
+                                    ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                    : "bg-stone-100 text-stone-800 border border-stone-200"
+                                }`}
+                              >
+                                {roleDisplay}
+                              </span>
+                            );
+                          })}
                         </div>
                       </td>
 
