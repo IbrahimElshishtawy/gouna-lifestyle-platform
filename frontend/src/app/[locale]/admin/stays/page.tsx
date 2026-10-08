@@ -94,11 +94,12 @@ export default function AdminStaysPage() {
     try {
       if (dialogState.type === "checkin") {
         await checkinBooking(dialogState.stay.id, dialogState.notes);
+        const guestName = dialogState.stay.customer?.name || (isAr ? "النزيل" : "Guest");
         setFeedback({
           type: "success",
           message: isAr
-            ? `تم تسجيل وصول النزيل ${dialogState.stay.customer.name} للحجز ${dialogState.stay.reference}.`
-            : `Guest ${dialogState.stay.customer.name} checked in successfully.`,
+            ? `تم تسجيل وصول النزيل ${guestName} للحجز ${dialogState.stay.reference}.`
+            : `Guest ${guestName} checked in successfully.`,
         });
       } else if (dialogState.type === "checkout") {
         await checkoutBooking(dialogState.stay.id, dialogState.notes);
@@ -304,13 +305,15 @@ export default function AdminStaysPage() {
               </thead>
               <tbody className="divide-y divide-brand-border/60">
                 {currentList.map((stay) => {
-                  const propTitle = isAr && stay.bookable.title_ar ? stay.bookable.title_ar : stay.bookable.title;
+                  const propTitle = stay.bookable
+                    ? (isAr && stay.bookable.title_ar ? stay.bookable.title_ar : stay.bookable.title)
+                    : (isAr ? "عقار غير محدد" : "Property");
                   return (
                     <tr key={stay.id} className="hover:bg-brand-sand/30 transition-colors">
                       {/* Guest */}
                       <td className="py-4 px-4 font-medium text-brand-brown">
-                        <div className="font-semibold text-sm">{stay.customer.name}</div>
-                        {stay.customer.phone && (
+                        <div className="font-semibold text-sm">{stay.customer?.name || (isAr ? "نزيل" : "Guest")}</div>
+                        {stay.customer?.phone && (
                           <a
                             href={`https://wa.me/${stay.customer.phone.replace(/[^0-9]/g, "")}`}
                             target="_blank"
@@ -329,7 +332,7 @@ export default function AdminStaysPage() {
                           {propTitle}
                         </span>
                         <span className="text-[10px] text-brand-brown-muted block font-mono">
-                          {stay.bookable.reference_number || ""}
+                          {stay.bookable?.reference_number || ""}
                         </span>
                       </td>
 

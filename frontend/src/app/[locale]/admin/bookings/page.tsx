@@ -451,7 +451,9 @@ export default function AdminBookingsPage() {
               </thead>
               <tbody className="divide-y divide-brand-border/60">
                 {bookings.map((b) => {
-                  const propTitle = isAr && b.bookable.title_ar ? b.bookable.title_ar : b.bookable.title;
+                  const propTitle = b.bookable
+                    ? (isAr && b.bookable.title_ar ? b.bookable.title_ar : b.bookable.title)
+                    : (isAr ? "عقار غير محدد" : "Property");
                   return (
                     <tr key={b.id} className="hover:bg-brand-sand/30 transition-colors">
                       {/* Booking Reference */}
@@ -470,13 +472,13 @@ export default function AdminBookingsPage() {
                       {/* Guest Details */}
                       <td className="py-4 px-4 font-medium text-brand-brown">
                         <div>
-                          <span className="font-semibold">{b.customer.name}</span>
-                          {b.customer.email && (
+                          <span className="font-semibold">{b.customer?.name || (isAr ? "نزيل" : "Guest")}</span>
+                          {b.customer?.email && (
                             <span className="block text-[10px] text-brand-brown-muted truncate max-w-[150px]">
                               {b.customer.email}
                             </span>
                           )}
-                          {b.customer.phone && (
+                          {b.customer?.phone && (
                             <a
                               href={`https://wa.me/${b.customer.phone.replace(/[^0-9]/g, "")}`}
                               target="_blank"
@@ -493,7 +495,7 @@ export default function AdminBookingsPage() {
                       {/* Bookable Property */}
                       <td className="py-4 px-4">
                         <Link
-                          href={b.bookable.id ? `/admin/properties/${b.bookable.id}` : "#"}
+                          href={b.bookable?.id ? `/admin/properties/${b.bookable.id}` : "#"}
                           className="font-semibold text-brand-brown hover:text-brand-terracotta block line-clamp-1 max-w-[180px]"
                         >
                           {propTitle}
