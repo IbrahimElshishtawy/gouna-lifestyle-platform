@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Property } from "../types/property.types";
 import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 
@@ -52,11 +53,12 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
             onClick={() => openLightbox(0)}
             className="group relative h-[360px] sm:h-[480px] lg:h-[540px] rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900 transition-all duration-500"
           >
-            <Image
+            <SafeImage
               src={images[0].url}
               alt={property.title}
               fill
               priority
+              fallbackSrc="/assets/images/fanadir-villa.jpg"
               sizes="100vw"
               className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
@@ -111,10 +113,11 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                 onClick={() => openLightbox(idx)}
                 className="group relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900"
               >
-                <Image
+                <SafeImage
                   src={img.url}
                   alt={`${property.title} - ${idx + 1}`}
                   fill
+                  fallbackSrc="/assets/images/fanadir-villa.jpg"
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />

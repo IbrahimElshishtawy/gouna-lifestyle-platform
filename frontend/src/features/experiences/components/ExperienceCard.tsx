@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Experience } from "../types/experience.types";
 import { useLanguage } from "@/context/LanguageContext";
@@ -21,10 +22,11 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
         
         {/* Image Container with 3D Depth */}
         <div className="relative h-48 sm:h-60 lg:h-64 overflow-hidden bg-brand-sand shrink-0">
-          <Image
+          <SafeImage
             src={experience.image}
             alt={experience.title}
             fill
+            fallbackSrc="/assets/images/fanadir-villa.jpg"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />

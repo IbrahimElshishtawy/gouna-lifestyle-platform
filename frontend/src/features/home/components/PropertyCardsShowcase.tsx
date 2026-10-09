@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
@@ -226,10 +227,11 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
     <article className="group bg-white rounded-3xl border border-brand-border/70 overflow-hidden shadow-xs hover:shadow-xl hover:border-brand-terracotta/40 transition-all duration-300 flex flex-col justify-between">
       {/* Top Image Carousel Container */}
       <div className="relative aspect-[16/10] overflow-hidden bg-brand-sand-light">
-        <Image
+        <SafeImage
           src={currentImageUrl}
           alt={title}
           fill
+          fallbackSrc="/assets/images/hero-villa-dusk.jpg"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-700"
         />

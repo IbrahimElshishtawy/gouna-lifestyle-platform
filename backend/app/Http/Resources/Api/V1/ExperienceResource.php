@@ -51,8 +51,12 @@ class ExperienceResource extends BaseJsonResource
                 ]),
                 'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
-                    'url' => str_starts_with($item->file_path, 'http') || str_starts_with($item->file_path, '/') ? $item->file_path : asset('storage/'.$item->file_path),
-                    'is_primary' => (bool) $item->is_primary,
+                    'url' => $item->url,
+                    'thumb_url' => $item->thumb_url,
+                    'is_primary' => (bool) ($item->is_featured || $item->is_primary),
+                    'order' => (int) ($item->sort_order ?? 0),
+                    'title' => $item->title,
+                    'alt_text' => $item->alt_text,
                 ])),
             ],
         ];

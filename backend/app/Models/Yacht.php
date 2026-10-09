@@ -79,6 +79,8 @@ class Yacht extends Model
         ];
     }
 
+    protected $appends = ['cover_url', 'base_price', 'weekend_price', 'extra_hour_price'];
+
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
@@ -143,19 +145,20 @@ class Yacht extends Model
     public function getCoverUrlAttribute(): string
     {
         if (! empty($this->cover_image)) {
-            return str_starts_with($this->cover_image, 'http') || str_starts_with($this->cover_image, '/')
-                ? $this->cover_image
-                : asset('storage/'.$this->cover_image);
+            if (str_starts_with($this->cover_image, 'http') || str_starts_with($this->cover_image, '/assets/')) {
+                return $this->cover_image;
+            }
+            if (Storage::disk('public')->exists($this->cover_image)) {
+                return Storage::disk('public')->url($this->cover_image);
+            }
         }
 
         $first = $this->images->first();
         if ($first && ! empty($first->file_path)) {
-            return str_starts_with($first->file_path, 'http') || str_starts_with($first->file_path, '/')
-                ? $first->file_path
-                : asset('storage/'.$first->file_path);
+            return $first->url;
         }
 
-        return '/assets/images/tawila-yacht.jpg';
+        return 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=1200&q=80';
     }
 
     public function scopeActive($query)

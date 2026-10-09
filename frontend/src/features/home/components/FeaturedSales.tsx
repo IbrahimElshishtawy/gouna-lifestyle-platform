@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
@@ -86,11 +87,12 @@ export default function FeaturedSales({ properties }: Props) {
               {/* Left Column: Property Visuals (7 cols) with 3D Spatial Badge */}
               <div className="lg:col-span-7">
                 <div className="relative h-[220px] sm:h-[360px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand group">
-                  <Image
+                  <SafeImage
                     src={activeProperty.images[0]?.url || "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1400&q=85"}
                     alt={activeProperty.title}
                     fill
                     priority
+                    fallbackSrc="/assets/images/fanadir-villa.jpg"
                     sizes="(max-width: 1024px) 100vw, 60vw"
                     className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
                   />

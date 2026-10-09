@@ -7,6 +7,7 @@ import { Property } from "../types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
 import Card3D from "@/components/ui/Card3D";
 import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
+import SafeImage from "@/components/ui/SafeImage";
 
 interface PropertyCardProps {
   property: Property;
@@ -21,7 +22,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const primaryImage =
     property.images?.find((img) => img.is_primary)?.url ||
     property.images?.[0]?.url ||
-    "/assets/images/bg-sand-texture.jpg";
+    "/assets/images/hero-villa-dusk.jpg";
 
   return (
     <>
@@ -30,10 +31,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           
           {/* Image Container with 3D Depth Layer */}
           <div className="relative h-52 sm:h-64 lg:h-72 overflow-hidden bg-brand-sand shrink-0">
-            <Image
+            <SafeImage
               src={primaryImage}
               alt={property.title}
               fill
+              fallbackSrc="/assets/images/hero-villa-dusk.jpg"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />

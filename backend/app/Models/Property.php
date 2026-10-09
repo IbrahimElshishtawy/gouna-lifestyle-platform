@@ -55,6 +55,8 @@ class Property extends Model
         ];
     }
 
+    protected $appends = ['cover_url', 'gallery_urls'];
+
     // Relationships
 
     public function parent(): BelongsTo

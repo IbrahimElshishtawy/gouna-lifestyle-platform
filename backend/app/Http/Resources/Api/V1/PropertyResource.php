@@ -50,6 +50,8 @@ class PropertyResource extends BaseJsonResource
                 'cancellation_policy' => $this->cancellation_policy,
                 'is_featured' => (bool) $this->is_featured,
                 'is_available' => (bool) $this->is_available,
+                'cover_url' => $this->cover_url,
+                'gallery_urls' => $this->gallery_urls,
             ],
             'relationships' => [
                 'category' => $this->whenLoaded('category', fn () => [
@@ -69,9 +71,12 @@ class PropertyResource extends BaseJsonResource
                 ])),
                 'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
-                    'url' => asset('storage/'.$item->file_path),
-                    'is_primary' => (bool) $item->is_primary,
-                    'order' => (int) $item->order,
+                    'url' => $item->url,
+                    'thumb_url' => $item->thumb_url,
+                    'is_primary' => (bool) ($item->is_featured || $item->is_primary),
+                    'order' => (int) ($item->sort_order ?? $item->order ?? 0),
+                    'title' => $item->title,
+                    'alt_text' => $item->alt_text,
                 ])),
             ],
         ];

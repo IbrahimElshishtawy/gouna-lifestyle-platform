@@ -38,6 +38,8 @@ class Event extends Model
         ];
     }
 
+    protected $appends = ['cover_url', 'title'];
+
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
@@ -137,5 +139,15 @@ class Event extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    public function getCoverUrlAttribute(): string
+    {
+        $featured = $this->images->firstWhere('is_featured', true) ?? $this->images->first();
+        if ($featured && ! empty($featured->file_path)) {
+            return $featured->url;
+        }
+
+        return 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80';
     }
 }

@@ -79,13 +79,27 @@ export function mapBackendPropertyToFrontend(
     attr.pricing?.formatted_base_price ||
     `${(basePriceCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency}`;
 
+  const cleanUrl = (u?: string | null): string => {
+    if (!u) return "/assets/images/hero-villa-dusk.jpg";
+    const nested = u.match(/\/storage\/(https?:\/\/.*)/i);
+    return nested ? nested[1] : u;
+  };
+
   const images =
     Array.isArray(rel.media) && rel.media.length > 0
       ? rel.media.map((m) => ({
           id: m.id,
-          url: m.url,
+          url: cleanUrl(m.url),
           is_primary: m.is_primary ?? false,
         }))
+      : attr.cover_url
+      ? [
+          {
+            id: 1,
+            url: cleanUrl(attr.cover_url),
+            is_primary: true,
+          },
+        ]
       : [
           {
             id: 1,

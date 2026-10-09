@@ -33,6 +33,7 @@ class EventResource extends BaseJsonResource
                 'is_ticketed' => (bool) $this->is_ticketed,
                 'is_featured' => (bool) $this->is_featured,
                 'is_published' => (bool) $this->is_published,
+                'cover_url' => $this->cover_url,
             ],
             'relationships' => [
                 'location' => $this->whenLoaded('location', fn () => [
@@ -42,8 +43,12 @@ class EventResource extends BaseJsonResource
                 ]),
                 'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
-                    'url' => asset('storage/'.$item->file_path),
-                    'is_primary' => (bool) $item->is_primary,
+                    'url' => $item->url,
+                    'thumb_url' => $item->thumb_url,
+                    'is_primary' => (bool) ($item->is_featured || $item->is_primary),
+                    'order' => (int) ($item->sort_order ?? 0),
+                    'title' => $item->title,
+                    'alt_text' => $item->alt_text,
                 ])),
             ],
         ];

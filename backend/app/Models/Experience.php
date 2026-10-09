@@ -35,6 +35,8 @@ class Experience extends Model
         ];
     }
 
+    protected $appends = ['cover_url', 'base_price'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExperienceCategory::class, 'experience_category_id');
@@ -98,9 +100,7 @@ class Experience extends Model
     {
         $first = $this->images->first();
         if ($first && ! empty($first->file_path)) {
-            return str_starts_with($first->file_path, 'http') || str_starts_with($first->file_path, '/')
-                ? $first->file_path
-                : asset('storage/'.$first->file_path);
+            return $first->url;
         }
 
         $categorySlug = $this->category?->slug ?? '';

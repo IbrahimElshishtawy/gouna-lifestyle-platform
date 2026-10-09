@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
@@ -114,11 +115,12 @@ export default function FeaturedVacationRentals({ properties }: Props) {
             {/* Left Column: Interactive Image Gallery with 3D Depth Trigger */}
             <div className="lg:col-span-7 flex flex-col gap-2.5 sm:gap-3">
               <div className="relative h-[220px] sm:h-[360px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand shadow-inner group">
-                <Image
+                <SafeImage
                   src={currentImage.url}
                   alt={activeProperty.title}
                   fill
                   priority
+                  fallbackSrc="/assets/images/hero-villa-dusk.jpg"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                   className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
                 />
