@@ -331,7 +331,7 @@ export default function AdminExperiencesPage() {
                 {experiences.map((exp) => {
                   const cover =
                     exp.cover_url ||
-                    (exp.media && exp.media.length > 0 ? (exp.media[0].url || exp.media[0].file_path) : "/assets/images/fanadir-villa.jpg");
+                    (exp.media && exp.media.length > 0 ? ((exp.media[0] as any).url || exp.media[0].file_path) : "/assets/images/fanadir-villa.jpg");
 
                   return (
                     <tr key={exp.id} className="hover:bg-brand-sand-light/30 transition">
