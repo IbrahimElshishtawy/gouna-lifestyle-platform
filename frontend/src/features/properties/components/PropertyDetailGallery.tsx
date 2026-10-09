@@ -159,10 +159,11 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
               onClick={() => openLightbox(0)}
               className="md:col-span-2 group relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900"
             >
-              <Image
+              <SafeImage
                 src={images[0].url}
                 alt={`${property.title} - Main`}
                 fill
+                fallbackSrc="/assets/images/fanadir-villa.jpg"
                 sizes="(max-width: 768px) 100vw, 66vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               />
@@ -197,10 +198,11 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                   onClick={() => openLightbox(idx + 1)}
                   className="group relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900"
                 >
-                  <Image
+                  <SafeImage
                     src={img.url}
                     alt={`${property.title} - ${idx + 2}`}
                     fill
+                    fallbackSrc="/assets/images/fanadir-villa.jpg"
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
@@ -218,11 +220,12 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
               onClick={() => openLightbox(0)}
               className="md:col-span-2 md:row-span-2 group relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900"
             >
-              <Image
+              <SafeImage
                 src={images[0].url}
                 alt={`${property.title} - Hero`}
                 fill
                 priority
+                fallbackSrc="/assets/images/fanadir-villa.jpg"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               />
@@ -261,10 +264,11 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                   onClick={() => openLightbox(idx + 1)}
                   className="group relative rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl border border-brand-border bg-stone-900"
                 >
-                  <Image
+                  <SafeImage
                     src={img.url}
                     alt={`${property.title} - ${idx + 2}`}
                     fill
+                    fallbackSrc="/assets/images/fanadir-villa.jpg"
                     sizes="(max-width: 768px) 100vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
@@ -343,11 +347,12 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
             )}
 
             <div className="relative w-full h-full max-h-[75vh] max-w-5xl rounded-2xl overflow-hidden">
-              <Image
+              <SafeImage
                 src={images[activePhotoIdx].url}
                 alt={`${property.title} full view ${activePhotoIdx + 1}`}
                 fill
                 priority
+                fallbackSrc="/assets/images/fanadir-villa.jpg"
                 sizes="100vw"
                 className="object-contain"
               />
@@ -378,10 +383,11 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                       : "opacity-40 hover:opacity-80"
                   }`}
                 >
-                  <Image
+                  <SafeImage
                     src={img.url}
                     alt={`Thumbnail ${idx + 1}`}
                     fill
+                    fallbackSrc="/assets/images/fanadir-villa.jpg"
                     sizes="64px"
                     className="object-cover"
                   />

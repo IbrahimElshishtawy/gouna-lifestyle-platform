@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { getAdminProperties, togglePropertyStatus, deleteAdminProperty } from "@/features/admin/services/admin.api";
 import type { AdminPropertyItem, AdminPropertySummary } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
@@ -381,10 +382,11 @@ export default function AdminPropertiesPage() {
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
                           <div className="h-12 w-12 rounded-xl overflow-hidden bg-brand-sand relative shrink-0 border border-brand-border">
-                            <Image
+                            <SafeImage
                               src={prop.primary_image}
                               alt={title}
                               fill
+                              fallbackSrc="/assets/images/hero-villa-dusk.jpg"
                               className="object-cover"
                             />
                           </div>

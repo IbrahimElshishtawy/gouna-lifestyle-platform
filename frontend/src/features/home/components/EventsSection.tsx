@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
@@ -30,10 +31,11 @@ export default function EventsSection() {
               <div className="h-full bg-[#FAF8F5] rounded-2xl sm:rounded-3xl overflow-hidden border border-brand-border/80 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between group preserve-3d">
                 <div>
                   <div className="relative h-48 sm:h-56 overflow-hidden bg-brand-sand shrink-0">
-                    <Image
+                    <SafeImage
                       src={event.image}
                       alt={event.title}
                       fill
+                      fallbackSrc="/assets/images/fanadir-villa.jpg"
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />

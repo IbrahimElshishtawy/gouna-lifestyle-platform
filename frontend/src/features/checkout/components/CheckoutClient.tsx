@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { PAYMENT_METHODS, processCheckout } from "../services/checkout.api";
@@ -492,10 +493,11 @@ export default function CheckoutClient({
             {/* Property Header */}
             <div className="p-6 border-b border-brand-border flex items-center gap-4">
               <div className="w-20 h-20 rounded-xl overflow-hidden bg-brand-sand shrink-0 border border-brand-border relative">
-                <Image
+                <SafeImage
                   src={thumbImg}
                   alt={property.title}
                   fill
+                  fallbackSrc="/assets/images/hero-villa-dusk.jpg"
                   className="object-cover"
                 />
               </div>

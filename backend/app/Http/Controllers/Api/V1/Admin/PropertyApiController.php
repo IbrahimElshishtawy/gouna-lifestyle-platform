@@ -76,7 +76,7 @@ class PropertyApiController extends Controller
                 ? ($p->sale_price_cents ?? $p->base_price_cents)
                 : $p->base_price_cents;
             $currency = $p->currency ?? 'EGP';
-            $primaryImg = $p->images->first()?->url ?? '/assets/images/bg-sand-texture.jpg';
+            $primaryImg = $p->cover_url ?: ($p->images->first()?->url ?? 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=80');
 
             return [
                 'id' => $p->id,
@@ -317,7 +317,7 @@ class PropertyApiController extends Controller
                         'name_en' => $u->category?->name_en ?? 'Villa',
                         'name_ar' => $u->category?->name_ar ?? 'فيلا',
                     ],
-                    'primary_image' => $u->images->first()?->url ?? '/assets/images/bg-sand-texture.jpg',
+                    'primary_image' => $u->cover_url ?: ($u->images->first()?->url ?? 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=80'),
                 ];
             });
 

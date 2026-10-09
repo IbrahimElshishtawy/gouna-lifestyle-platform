@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag, FadeIn } from "@/components/ui/MotionPrimitives";
@@ -80,10 +81,11 @@ export default function DivingSection() {
                   <div>
                     {/* Image Container with Ambient Mask */}
                     <div className="relative aspect-[16/11] sm:aspect-[16/10] overflow-hidden">
-                      <Image
+                      <SafeImage
                         src={site.image}
                         alt={site.name}
                         fill
+                        fallbackSrc="/assets/images/fanadir-villa.jpg"
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                       />
