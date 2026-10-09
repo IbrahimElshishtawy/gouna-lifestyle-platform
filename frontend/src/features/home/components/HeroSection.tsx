@@ -130,15 +130,9 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
 
   return (
-    <section className="relative min-h-[900px] lg:min-h-[980px] xl:min-h-[1020px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-14 sm:pb-18 lg:pb-24">
+    <section className="relative min-h-[880px] lg:min-h-[940px] xl:min-h-[980px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
-      <div 
-        className="absolute inset-0 z-0 transition-opacity duration-1000"
-        style={{
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%)",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%)"
-        }}
-      >
+      <div className="absolute inset-0 z-0">
         {isVideo ? (
           <video
             key={currentMediaUrl}
@@ -164,20 +158,20 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         {/* Top Vignette for Transparent Header Contrast */}
         <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
 
-        {/* Asymmetrical Directional Text Shading */}
+        {/* Asymmetrical Directional Text Shading:
+            Provides strong contrast for the editorial text on the left/start without obscuring the villa on the right */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
         <div className="absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
 
         {/* Ambient Dusk Glow */}
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/15 to-black/50 pointer-events-none z-10" />
 
-        {/* Lower Dark Shading */}
-        <div className="absolute inset-x-0 bottom-0 h-72 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/80 via-45% to-transparent pointer-events-none z-10" />
+        {/* Lower Dark Shading to Anchor the Search Panel */}
+        <div className="absolute inset-x-0 bottom-0 h-80 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/75 to-transparent pointer-events-none z-10" />
       </div>
 
-      {/* Multi-tier Smoky Feathered Bottom Transition into White/Page Background (Eliminates Sharp Boundary) */}
-      <div className="absolute inset-x-0 -bottom-1 h-36 sm:h-52 lg:h-64 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-45% via-[#FAF8F5]/25 to-transparent pointer-events-none z-10" />
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[92%] h-28 sm:h-36 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none z-10" />
+      {/* Downward Feathered Transition: Fades smoothly downwards from the dark hero into the #FAF8F5 page background */}
+      <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 lg:h-44 bg-gradient-to-b from-transparent via-[#140E0C]/70 to-[#FAF8F5] pointer-events-none z-10" />
 
       {/* Floating Cinematic Scene Switcher (Desktop) */}
       {configuredScenes.length > 1 && (

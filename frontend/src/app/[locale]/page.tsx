@@ -96,11 +96,6 @@ export default async function HomePage({
           </ScrollReveal>
         )}
 
-        {/* 3.1 Modern Property Cards Showcase (21st Style with Category Tabs & Spatial Tour) */}
-        <ScrollReveal animation="fade-up" duration={800}>
-          <PropertyCardsShowcase properties={displayProperties} />
-        </ScrollReveal>
-
         {/* 4. Curated Experiences Split Showcase (Tawila Island Yacht & Adventures) */}
         {sections?.experiences !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
@@ -108,31 +103,36 @@ export default async function HomePage({
           </ScrollReveal>
         )}
 
-        {/* 5. The Deep: Red Sea Marine Expeditions & Diving */}
-        {sections?.diving !== false && <DivingSection />}
-
-        {/* 6. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
-        {sections?.sales !== false && (
-          <ScrollReveal animation="fade-up" duration={800}>
-            <FeaturedSales properties={displayProperties} />
-          </ScrollReveal>
-        )}
-
-        {/* 6. Guest Testimonials & Social Proof */}
-        {sections?.testimonials !== false && (
-          <ScrollReveal animation="fade-up" duration={800}>
-            <TestimonialsSection />
-          </ScrollReveal>
-        )}
-
-        {/* 7. What's On This Season (Events & Gatherings) */}
+        {/* 5. What's On This Season (Events, Festivals & VIP Gatherings) */}
         {sections?.events !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <EventsSection events={events} />
           </ScrollReveal>
         )}
 
-        {/* 8. Personal Concierge & Tailored Arrangements Lead Form */}
+        {/* 6. The Deep: Red Sea Marine Expeditions & Diving */}
+        {sections?.diving !== false && <DivingSection />}
+
+        {/* 7. Modern Property Cards Showcase (21st Style with Category Tabs & Spatial Tour) */}
+        <ScrollReveal animation="fade-up" duration={800}>
+          <PropertyCardsShowcase properties={displayProperties} />
+        </ScrollReveal>
+
+        {/* 8. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
+        {sections?.sales !== false && (
+          <ScrollReveal animation="fade-up" duration={800}>
+            <FeaturedSales properties={displayProperties} />
+          </ScrollReveal>
+        )}
+
+        {/* 9. Guest Testimonials & Social Proof */}
+        {sections?.testimonials !== false && (
+          <ScrollReveal animation="fade-up" duration={800}>
+            <TestimonialsSection />
+          </ScrollReveal>
+        )}
+
+        {/* 10. Personal Concierge & Tailored Arrangements Lead Form */}
         {sections?.concierge !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <ConciergeInquiry />
