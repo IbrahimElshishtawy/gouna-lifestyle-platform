@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   getAdminExperiences,
   getExperienceTaxonomies,

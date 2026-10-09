@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   getAdminYachts,
   getYachtDashboard,
@@ -627,10 +628,11 @@ export default function AdminYachtsPage() {
               className="bg-white rounded-3xl border border-brand-border overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col group"
             >
               <div className="relative h-48 w-full bg-brand-sand-light overflow-hidden">
-                <Image
-                  src={yacht.cover_image || "/assets/images/tawila-yacht.jpg"}
+                <SafeImage
+                  src={yacht.cover_url || yacht.cover_image || "/assets/images/tawila-yacht.jpg"}
                   alt={yacht.name_en}
                   fill
+                  fallbackSrc="/assets/images/tawila-yacht.jpg"
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 start-3 flex gap-2">
@@ -750,10 +752,11 @@ export default function AdminYachtsPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-brand-sand shrink-0">
-                          <Image
-                            src={yacht.cover_image || "/assets/images/tawila-yacht.jpg"}
+                          <SafeImage
+                            src={yacht.cover_url || yacht.cover_image || "/assets/images/tawila-yacht.jpg"}
                             alt={yacht.name_en}
                             fill
+                            fallbackSrc="/assets/images/tawila-yacht.jpg"
                             className="object-cover"
                           />
                         </div>

@@ -51,6 +51,8 @@ interface BackendPropertyResource {
     cancellation_policy?: string;
     is_featured?: boolean;
     is_available?: boolean;
+    cover_url?: string;
+    gallery_urls?: string[];
   };
   relationships?: {
     category?: { id: number; name: string; slug: string };
