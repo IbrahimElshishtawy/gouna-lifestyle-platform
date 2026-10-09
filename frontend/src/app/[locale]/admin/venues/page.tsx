@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   getAdminVenues,
   createAdminVenue,
@@ -231,10 +232,11 @@ export default function AdminVenuesPage() {
             >
               <div>
                 <div className="relative h-44 w-full bg-brand-sand-light">
-                  <Image
+                  <SafeImage
                     src={v.cover_image || "https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=600&q=80"}
                     alt={v.name_en}
                     fill
+                    fallbackSrc="/assets/images/fanadir-villa.jpg"
                     className="object-cover"
                   />
                   <div className="absolute top-3 start-3">

@@ -331,17 +331,18 @@ export default function AdminExperiencesPage() {
                 {experiences.map((exp) => {
                   const cover =
                     exp.cover_url ||
-                    (exp.media && exp.media.length > 0 ? exp.media[0].file_path : "/assets/images/tawila-yacht.jpg");
+                    (exp.media && exp.media.length > 0 ? (exp.media[0].url || exp.media[0].file_path) : "/assets/images/fanadir-villa.jpg");
 
                   return (
                     <tr key={exp.id} className="hover:bg-brand-sand-light/30 transition">
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
                           <div className="h-12 w-12 rounded-xl overflow-hidden bg-brand-sand relative shrink-0 border border-brand-border">
-                            <Image
+                            <SafeImage
                               src={cover}
                               alt={exp.title_en}
                               fill
+                              fallbackSrc="/assets/images/fanadir-villa.jpg"
                               className="object-cover"
                             />
                           </div>

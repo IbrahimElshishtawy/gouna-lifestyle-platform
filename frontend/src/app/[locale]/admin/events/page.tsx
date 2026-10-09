@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/ui/SafeImage";
 import {
   getAdminEvents,
   getEventDashboard,
@@ -622,10 +623,11 @@ export default function AdminEventsPage() {
                 >
                   <div>
                     <div className="relative h-48 w-full bg-brand-sand-light">
-                      <Image
-                        src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"
+                      <SafeImage
+                        src={(event as any).cover_url || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"}
                         alt={event.title_en}
                         fill
+                        fallbackSrc="/assets/images/fanadir-villa.jpg"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-3 start-3 flex gap-2">
