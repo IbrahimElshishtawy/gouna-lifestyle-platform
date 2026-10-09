@@ -634,6 +634,28 @@ export async function updateMediaDesignConfig(
   });
 }
 
+export async function uploadMediaDesignAsset(file: File): Promise<{
+  success: boolean;
+  url: string;
+  file_name: string;
+  file_type: "image" | "video";
+  mime_type: string;
+}> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiClient<{
+    success: boolean;
+    url: string;
+    file_name: string;
+    file_type: "image" | "video";
+    mime_type: string;
+  }>("/admin/media-design/upload", {
+    method: "POST",
+    body: formData,
+    timeoutMs: 60000,
+  });
+}
+
 /**
  * 10. Properties Management
  */

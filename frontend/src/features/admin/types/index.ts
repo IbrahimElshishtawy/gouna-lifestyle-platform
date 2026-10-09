@@ -432,6 +432,21 @@ export interface AdminPropertySummary {
   sale: number;
 }
 
+export interface HeroScene {
+  id: string;
+  name_ar?: string;
+  name_en?: string;
+  media_type: "image" | "video";
+  image_url: string;
+  video_url?: string;
+  title_line1_ar?: string;
+  title_line2_ar?: string;
+  title_line1_en?: string;
+  title_line2_en?: string;
+  subtitle_ar?: string;
+  subtitle_en?: string;
+}
+
 // 4. Media Design & Homepage CMS Control
 export interface MediaDesignConfig {
   hero: {
@@ -451,6 +466,8 @@ export interface MediaDesignConfig {
     cta2_link: string;
     background_image: string;
     video_url?: string;
+    media_mode?: "image" | "video" | "scenes";
+    scenes?: HeroScene[];
   };
   sections: {
     hero: boolean;

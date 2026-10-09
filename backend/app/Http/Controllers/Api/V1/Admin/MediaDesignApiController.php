@@ -36,6 +36,51 @@ class MediaDesignApiController extends Controller
                 'cta2_link' => '#experiences',
                 'background_image' => '/assets/images/hero-villa-dusk.jpg',
                 'video_url' => '',
+                'media_mode' => 'scenes',
+                'scenes' => [
+                    [
+                        'id' => 'scene-1',
+                        'name_ar' => 'غروب الفلل الذهبي',
+                        'name_en' => 'Lagoon Sunset',
+                        'media_type' => 'image',
+                        'image_url' => '/assets/images/hero-villa-dusk.jpg',
+                        'video_url' => '',
+                        'title_line1_ar' => 'عيشة الرفاهية والجمال',
+                        'title_line2_ar' => 'في الجونة',
+                        'title_line1_en' => 'Live The Unrivaled',
+                        'title_line2_en' => 'El Gouna Lifestyle',
+                        'subtitle_ar' => 'أفخم الفلل والقصور الشاطئية الخاصة، رحلات يخوت حصرية لجزيرة طوّيلة، وخدمات كونسيرج مفصلة.',
+                        'subtitle_en' => 'Exclusive private lagoon villas, luxury yacht charters to Tawila Island, and bespoke concierge arrangements.',
+                    ],
+                    [
+                        'id' => 'scene-2',
+                        'name_ar' => 'مياه الفنار الفيروزية',
+                        'name_en' => 'Turquoise Lagoon',
+                        'media_type' => 'image',
+                        'image_url' => '/assets/images/fanadir-villa.jpg',
+                        'video_url' => '',
+                        'title_line1_ar' => 'إطلالات لا متناهية',
+                        'title_line2_ar' => 'على شواطئ البحر الأحمر',
+                        'title_line1_en' => 'Endless Horizons',
+                        'title_line2_en' => 'On The Red Sea',
+                        'subtitle_ar' => 'مياه فيروزية هادئة وتجارب إقامة مصممة لتناسب أدق تفاصيل راحتك وخصوصيتك.',
+                        'subtitle_en' => 'Calm turquoise waters and curated stays crafted for ultimate peace and privacy.',
+                    ],
+                    [
+                        'id' => 'scene-3',
+                        'name_ar' => 'يخوت مارينا الجونة',
+                        'name_en' => 'Marina Yacht Life',
+                        'media_type' => 'image',
+                        'image_url' => 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85',
+                        'video_url' => '',
+                        'title_line1_ar' => 'إبحار خاص واستكشاف',
+                        'title_line2_ar' => 'إلى جزر الجونة البكر',
+                        'title_line1_en' => 'Private Sailing',
+                        'title_line2_en' => 'To Untouched Islands',
+                        'subtitle_ar' => 'أساطيل يخوت خاصة وعشاء فاخر على متن اليخت وقت الغروب في مياه البحر الأحمر.',
+                        'subtitle_en' => 'Private luxury yacht charters and bespoke sunset dining at sea in the Red Sea.',
+                    ],
+                ],
             ],
             'sections' => [
                 'hero' => true,
@@ -106,6 +151,11 @@ class MediaDesignApiController extends Controller
 
         $mergedConfig = array_replace_recursive($currentConfig, $validated);
 
+        // Explicitly set scenes if provided in hero payload so deletions/reordering are not merged
+        if (isset($validated['hero']['scenes'])) {
+            $mergedConfig['hero']['scenes'] = $validated['hero']['scenes'];
+        }
+
         Setting::updateOrCreate(
             ['key' => self::SETTING_KEY],
             ['value' => json_encode($mergedConfig, JSON_UNESCAPED_UNICODE)]
@@ -132,6 +182,34 @@ class MediaDesignApiController extends Controller
             'success' => true,
             'message' => 'تم حفظ إعدادات ميديا ديزاين وتحديث الصفحة الرئيسية بنجاح.',
             'data' => $mergedConfig,
+        ]);
+    }
+
+    /**
+     * Upload an image or video asset for Media Design.
+     */
+    public function uploadMedia(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:102400', 'mimes:jpeg,jpg,png,webp,gif,mp4,webm,mov,ogg,quicktime'],
+        ]);
+
+        $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
+        $fileName = 'hero_' . time() . '_' . uniqid() . '.' . $extension;
+        
+        $path = $file->storeAs('media_design', $fileName, 'public');
+        $url = asset('storage/' . $path);
+
+        $mimeType = $file->getMimeType();
+        $isVideo = str_starts_with($mimeType, 'video/');
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'file_name' => $fileName,
+            'file_type' => $isVideo ? 'video' : 'image',
+            'mime_type' => $mimeType,
         ]);
     }
 
