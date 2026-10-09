@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getMediaDesignConfig, updateMediaDesignConfig } from "@/features/admin/services/admin.api";
-import type { MediaDesignConfig } from "@/features/admin/types";
+import {
+  getMediaDesignConfig,
+  updateMediaDesignConfig,
+  uploadMediaDesignAsset,
+} from "@/features/admin/services/admin.api";
+import type { MediaDesignConfig, HeroScene } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 
@@ -14,8 +18,12 @@ export default function AdminMediaDesignPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"hero" | "featured_units" | "sections" | "announcement">("hero");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [config, setConfig] = useState<MediaDesignConfig>({
     hero: {
@@ -35,6 +43,8 @@ export default function AdminMediaDesignPage() {
       cta2_link: "",
       background_image: "",
       video_url: "",
+      media_mode: "scenes",
+      scenes: [],
     },
     sections: {
       hero: true,

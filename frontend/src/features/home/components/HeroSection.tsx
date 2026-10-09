@@ -1,30 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
-import type { MediaDesignConfig } from "@/features/admin/types";
+import type { MediaDesignConfig, HeroScene } from "@/features/admin/types";
 
-const CINEMATIC_PRESETS = [
+const CINEMATIC_PRESETS: HeroScene[] = [
   {
     id: "dusk",
     name_ar: "غروب الفلل الذهبي",
     name_en: "Lagoon Sunset",
-    image: "/assets/images/hero-villa-dusk.jpg",
+    media_type: "image",
+    image_url: "/assets/images/hero-villa-dusk.jpg",
   },
   {
     id: "lagoon",
     name_ar: "مياه الفنار الفيروزية",
     name_en: "Turquoise Lagoon",
-    image: "/assets/images/fanadir-villa.jpg",
+    media_type: "image",
+    image_url: "/assets/images/fanadir-villa.jpg",
   },
   {
     id: "marine",
     name_ar: "يخوت مارينا الجونة",
     name_en: "Marina Yacht Life",
-    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85",
+    media_type: "image",
+    image_url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85",
   },
 ];
 
@@ -36,9 +39,34 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
-  const [activeScene, setActiveScene] = useState<"dusk" | "lagoon" | "marine">("dusk");
-  const currentPreset = CINEMATIC_PRESETS.find((p) => p.id === activeScene) || CINEMATIC_PRESETS[0];
-  const activeBgImage = heroConfig?.background_image || currentPreset.image;
+
+  const configuredScenes: HeroScene[] =
+    heroConfig?.scenes && heroConfig.scenes.length > 0
+      ? heroConfig.scenes
+      : CINEMATIC_PRESETS;
+
+  const [activeSceneIndex, setActiveSceneIndex] = useState(0);
+  const currentScene = configuredScenes[activeSceneIndex] || configuredScenes[0];
+
+  // Auto-rotate scenes if more than one scene exists
+  useEffect(() => {
+    if (configuredScenes.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveSceneIndex((prev) => (prev + 1) % configuredScenes.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [configuredScenes.length]);
+
+  const isVideo =
+    heroConfig?.media_mode === "video"
+      ? !!heroConfig?.video_url
+      : currentScene?.media_type === "video"
+      ? !!currentScene?.video_url
+      : !!heroConfig?.video_url && heroConfig?.media_mode !== "image";
+
+  const currentMediaUrl = isVideo
+    ? (currentScene?.video_url || heroConfig?.video_url || "")
+    : (currentScene?.image_url || heroConfig?.background_image || "/assets/images/hero-villa-dusk.jpg");
 
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
@@ -88,19 +116,32 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     router.push(`/stays?${params.toString()}`);
   };
 
+  const titleLine1 = isAr
+    ? (currentScene?.title_line1_ar || heroConfig?.title_line1_ar || t.hero.titleLine1)
+    : (currentScene?.title_line1_en || heroConfig?.title_line1_en || t.hero.titleLine1);
+
+  const titleLine2 = isAr
+    ? (currentScene?.title_line2_ar || heroConfig?.title_line2_ar || t.hero.titleLine2)
+    : (currentScene?.title_line2_en || heroConfig?.title_line2_en || t.hero.titleLine2);
+
+  const subtitle = isAr
+    ? (currentScene?.subtitle_ar || heroConfig?.subtitle_ar || t.hero.subtitle)
+    : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
+
   return (
-    <section className="relative min-h-[760px] lg:min-h-[880px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-36 sm:pt-40 lg:pt-44 pb-20 lg:pb-28">
+    <section className="relative min-h-[720px] lg:min-h-[820px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-14 sm:pb-16 lg:pb-20">
       {/* Background Hero Image/Video with Feathered Dissolve */}
       <div 
         className="absolute inset-0 z-0 transition-opacity duration-1000"
         style={{
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 68%, rgba(0,0,0,0.5) 86%, rgba(0,0,0,0) 100%)"
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0) 100%)",
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0) 100%)"
         }}
       >
-        {heroConfig?.video_url ? (
+        {isVideo ? (
           <video
-            src={heroConfig.video_url}
+            key={currentMediaUrl}
+            src={currentMediaUrl}
             autoPlay
             loop
             muted
@@ -109,7 +150,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           />
         ) : (
           <Image
-            src={activeBgImage}
+            key={currentMediaUrl}
+            src={currentMediaUrl}
             alt="Live the Unrivaled El Gouna Lifestyle"
             fill
             priority
@@ -118,45 +160,64 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           />
         )}
         {/* Top Vignette for Transparent Header Contrast */}
-        <div className="absolute inset-x-0 top-0 h-56 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-10" />
+        <div className="absolute inset-x-0 top-0 h-48 sm:h-56 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-10" />
 
         {/* Cinematic Dusk Ambient Glow */}
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/25 to-black/60 pointer-events-none" />
       </div>
 
       {/* Floating Cinematic Scene Atmosphere Switcher (Desktop) */}
-      <aside
-        aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
-        className="absolute bottom-6 end-6 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
-      >
-        <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]">
-          {isAr ? "مشهد الجونة:" : "SCENE:"}
-        </span>
-        {CINEMATIC_PRESETS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => setActiveScene(p.id as any)}
-            className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-              activeScene === p.id
-                ? "bg-brand-terracotta text-white shadow-md scale-105"
-                : "text-white/70 hover:text-white hover:bg-white/10"
-            }`}
-          >
-            {isAr ? p.name_ar : p.name_en}
-          </button>
-        ))}
-      </aside>
+      {configuredScenes.length > 1 && (
+        <aside
+          aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
+          className="absolute bottom-5 end-6 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
+        >
+          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]">
+            {isAr ? "المشهد:" : "SCENE:"}
+          </span>
+          {configuredScenes.map((p, idx) => (
+            <button
+              key={p.id || idx}
+              type="button"
+              onClick={() => setActiveSceneIndex(idx)}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                activeSceneIndex === idx
+                  ? "bg-brand-terracotta text-white shadow-md scale-105"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
+            </button>
+          ))}
+        </aside>
+      )}
+
+      {/* Mobile Scene Indicator Dots */}
+      {configuredScenes.length > 1 && (
+        <div className="absolute top-28 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
+          {configuredScenes.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveSceneIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                activeSceneIndex === idx ? "w-4 bg-brand-terracotta" : "bg-white/50"
+              }`}
+              aria-label={`Scene ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Multi-tier Smoky Feathered Bottom Transition into Page */}
-      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#1C1412] via-[#1C1412]/70 to-transparent pointer-events-none z-0" />
-      <div className="absolute inset-x-0 -bottom-1 h-40 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-[#FAF8F5]/30 to-transparent pointer-events-none z-10" />
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[88%] h-32 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none rounded-full z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#1C1412] via-[#1C1412]/70 to-transparent pointer-events-none z-0" />
+      <div className="absolute inset-x-0 -bottom-1 h-32 sm:h-40 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-[#FAF8F5]/30 to-transparent pointer-events-none z-10" />
+      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[88%] h-28 sm:h-32 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none rounded-full z-10" />
 
-      {/* Main Content Container with Staggered Entrance Animations */}
+      {/* Main Content Container with Staggered Entrance Animations & Tightened Spacing */}
       <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
         {/* Cinematic Live Red Sea Telemetry Pill */}
-        <div className="inline-flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-[#FAF8F5] text-[10px] sm:text-[11px] font-mono tracking-wider mb-4 shadow-lg animate-fade-in-down">
+        <div className="inline-flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-[#FAF8F5] text-[10px] sm:text-[11px] font-mono tracking-wider mb-2 sm:mb-2.5 shadow-lg animate-fade-in-down">
           <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="font-bold text-[#FAF8F5]">{isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}</span>
           <span className="text-white/40">|</span>
@@ -168,7 +229,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
 
         {/* Curated Luxury Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-4 sm:mb-6 shadow-md animate-fade-in-down animate-float">
+        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-2.5 sm:mb-3 shadow-md animate-fade-in-down animate-float">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
           <span>
             {heroConfig
@@ -178,35 +239,21 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
 
         {/* Hero Title with Dramatic Contrast & Smooth Slide Up */}
-        <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.15] sm:leading-[1.1] mb-4 sm:mb-6 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
-          {heroConfig ? (
-            <>
-              {isAr ? heroConfig.title_line1_ar : heroConfig.title_line1_en}{" "}
-              <br className="hidden sm:inline" />
-              <span className="italic font-normal">
-                {isAr ? heroConfig.title_line2_ar : heroConfig.title_line2_en}
-              </span>
-            </>
-          ) : (
-            <>
-              {t.hero.titleLine1} <br className="hidden sm:inline" />
-              <span className="italic font-normal">{t.hero.titleLine2}</span>
-            </>
-          )}
+        <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.12] sm:leading-[1.08] mb-2.5 sm:mb-3 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
+          {titleLine1} <br className="hidden sm:inline" />
+          <span className="italic font-normal">{titleLine2}</span>
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-relaxed mb-6 sm:mb-8 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
-          {heroConfig
-            ? (isAr ? heroConfig.subtitle_ar : heroConfig.subtitle_en)
-            : t.hero.subtitle}
+        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-normal sm:leading-relaxed mb-3.5 sm:mb-5 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
+          {subtitle}
         </p>
 
         {/* Dual Cinematic Action CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 mb-6 sm:mb-10 w-full sm:w-auto max-w-md sm:max-w-none animate-fade-in-up [animation-delay:350ms]">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 mb-4 sm:mb-6 w-full sm:w-auto max-w-md sm:max-w-none animate-fade-in-up [animation-delay:350ms]">
           <a
             href={heroConfig?.cta1_link || "#stays"}
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
+            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
           >
             <span>
               {heroConfig
@@ -216,7 +263,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           </a>
           <a
             href={heroConfig?.cta2_link || "#experiences"}
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
+            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
           >
             <span>
               {heroConfig
@@ -227,7 +274,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
 
         {/* Master Luxury Search Card */}
-        <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-3 sm:p-6 lg:p-7 rounded-2xl sm:rounded-[2.5rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
+        <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-[2rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
           
           {/* Centered Segmented Tab Capsule */}
           <div className="flex justify-center mb-4 sm:mb-6">
