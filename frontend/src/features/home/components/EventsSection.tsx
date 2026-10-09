@@ -26,7 +26,7 @@ export default function EventsSection({ events = [] }: EventsSectionProps) {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-12 lg:mb-16">
           <div>
             <ChapterTag
-              number="CHAPTER 06"
+              number="CHAPTER 04"
               title={t.events.eyebrow}
               subtitle={t.events.subtitle}
             />
