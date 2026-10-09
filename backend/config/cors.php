@@ -18,7 +18,11 @@ return [
 
     'allowed_origins' => array_filter(explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000'))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https?://.*\.ngrok-free\.app$#',
+        '#^https?://.*\.vercel\.app$#',
+        '#^https?://(192\.168|10\.|172\.(1[6-9]|2[0-9]|3[0-1]))\.\d+\.\d+(:\d+)?$#',
+    ],
 
     'allowed_headers' => [
         'Content-Type',

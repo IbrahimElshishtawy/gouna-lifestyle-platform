@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@/i18n/routing";
 import SafeImage from "@/components/ui/SafeImage";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
 import EventCard from "@/features/events/components/EventCard";
-import type { PublicEventItem } from "@/features/events/services/events.api";
+import { getPublicEvents, type PublicEventItem } from "@/features/events/services/events.api";
 
 interface EventsSectionProps {
   events?: PublicEventItem[];
@@ -18,7 +18,32 @@ export default function EventsSection({ events = [] }: EventsSectionProps) {
   const isAr = locale === "ar";
   const staticEvents = t.events.eventsList;
 
-  const hasDynamicEvents = events && events.length > 0;
+  const [displayEvents, setDisplayEvents] = useState<PublicEventItem[]>(events);
+
+  useEffect(() => {
+    if (events && events.length > 0) {
+      setDisplayEvents(events);
+    }
+  }, [events]);
+
+  useEffect(() => {
+    let isMounted = true;
+    getPublicEvents()
+      .then((res) => {
+        if (isMounted && res.data && res.data.length > 0) {
+          setDisplayEvents(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn("Client live fetch for public events fallback:", err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const hasDynamicEvents = displayEvents && displayEvents.length > 0;
 
   return (
     <section id="events" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-white border-t border-brand-border/80 scroll-mt-24">
@@ -48,7 +73,7 @@ export default function EventsSection({ events = [] }: EventsSectionProps) {
         {hasDynamicEvents ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
-              {events.slice(0, 6).map((event) => (
+              {displayEvents.slice(0, 6).map((event) => (
                 <EventCard key={event.id} event={event} locale={locale} />
               ))}
             </div>

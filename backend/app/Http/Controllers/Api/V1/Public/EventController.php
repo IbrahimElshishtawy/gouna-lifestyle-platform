@@ -19,7 +19,10 @@ class EventController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Event::query()
-            ->where('is_published', true)
+            ->where(function ($q) {
+                $q->where('is_published', true)
+                  ->orWhere('status', 'published');
+            })
             ->with(['location', 'media', 'ticketTypes', 'venue']);
 
         if ($search = $request->input('q')) {
@@ -49,9 +52,14 @@ class EventController extends Controller
      */
     public function show(string $slug): EventResource
     {
-        $event = Event::where('slug', $slug)
-            ->orWhere('id', is_numeric($slug) ? (int) $slug : 0)
-            ->where('is_published', true)
+        $event = Event::where(function ($q) use ($slug) {
+                $q->where('slug', $slug)
+                  ->orWhere('id', is_numeric($slug) ? (int) $slug : 0);
+            })
+            ->where(function ($q) {
+                $q->where('is_published', true)
+                  ->orWhere('status', 'published');
+            })
             ->with(['location', 'media', 'ticketTypes', 'schedules', 'venue'])
             ->firstOrFail();
 

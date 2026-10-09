@@ -130,7 +130,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
 
   return (
-    <section className="relative min-h-[880px] lg:min-h-[940px] xl:min-h-[980px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16 lg:pb-20">
+    <section className="relative min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
       <div className="absolute inset-0 z-0">
         {isVideo ? (
@@ -170,8 +170,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         <div className="absolute inset-x-0 bottom-0 h-80 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/75 to-transparent pointer-events-none z-10" />
       </div>
 
-      {/* Downward Feathered Transition: Fades smoothly downwards from the dark hero into the #FAF8F5 page background */}
-      <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 lg:h-44 bg-gradient-to-b from-transparent via-[#140E0C]/70 to-[#FAF8F5] pointer-events-none z-10" />
+      {/* Ultra-compact, clean edge transition (only 16-24px at the bottom boundary, eliminating any ghostly wash) */}
+      <div className="absolute inset-x-0 bottom-0 h-4 sm:h-6 bg-gradient-to-b from-transparent to-[#FAF8F5] pointer-events-none z-10" />
 
       {/* Floating Cinematic Scene Switcher (Desktop) */}
       {configuredScenes.length > 1 && (
@@ -694,7 +694,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
 
         {/* ==================== 4. RESTRAINED HORIZONTAL STATISTICS STRIP ==================== */}
-        <div className="mt-4 sm:mt-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/45 backdrop-blur-xl border border-white/15 text-white shadow-xl animate-fade-in-up [animation-delay:500ms]">
+        <div className="mt-4 sm:mt-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/70 backdrop-blur-2xl border border-white/20 text-white shadow-2xl animate-fade-in-up [animation-delay:500ms]">
           <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-white/10 gap-3.5 lg:gap-0">
             
             {/* Stat 1 */}
