@@ -94,7 +94,7 @@ export default function BrandPillarsSection() {
                     {isAr ? "الجونة، البحر الأحمر" : "EL GOUNA, RED SEA"}
                   </span>
                   <p className="font-serif text-base sm:text-lg font-bold">
-                    {isAr ? "حيث تلتقي الفخامة بالطبيعة البكر" : "Where Architectural Elegance Meets Untouched Waters"}
+                    {isAr ? "حيث تلتقي الرفاهية والجمال بالطبيعة البكر" : "Where Architectural Elegance Meets Untouched Waters"}
                   </p>
                 </div>
               </div>
