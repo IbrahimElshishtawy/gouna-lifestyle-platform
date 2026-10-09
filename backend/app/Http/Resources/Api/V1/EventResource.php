@@ -26,6 +26,12 @@ class EventResource extends BaseJsonResource
                 'short_description' => $locale === 'ar' && ! empty($this->short_description_ar) ? $this->short_description_ar : $this->short_description_en,
                 'description' => $locale === 'ar' && ! empty($this->description_ar) ? $this->description_ar : $this->description_en,
                 'event_date' => $this->event_date?->format('Y-m-d'),
+                'start_time' => $this->start_time ? \Carbon\Carbon::parse($this->start_time)->format('H:i') : null,
+                'end_time' => $this->end_time ? \Carbon\Carbon::parse($this->end_time)->format('H:i') : null,
+                'doors_open_time' => $this->doors_open_time ? \Carbon\Carbon::parse($this->doors_open_time)->format('H:i') : null,
+                'age_restriction' => $this->age_restriction,
+                'dress_code' => $this->dress_code,
+                'rules' => $locale === 'ar' && ! empty($this->rules_ar) ? $this->rules_ar : $this->rules_en,
                 'venue_name' => $this->venue_name,
                 'venue_address' => $this->venue_address,
                 'organizer' => $this->organizer,
@@ -34,13 +40,40 @@ class EventResource extends BaseJsonResource
                 'is_featured' => (bool) $this->is_featured,
                 'is_published' => (bool) $this->is_published,
                 'cover_url' => $this->cover_url,
+                'min_price' => $this->relationLoaded('ticketTypes') && $this->ticketTypes->isNotEmpty()
+                    ? $this->ticketTypes->where('is_active', true)->min(fn ($t) => $t->price_cents ? $t->price_cents / 100 : ($t->price ?? 0))
+                    : null,
             ],
             'relationships' => [
+                'venue' => $this->whenLoaded('venue', fn () => [
+                    'id' => $this->venue->id,
+                    'name' => $locale === 'ar' && ! empty($this->venue->name_ar) ? $this->venue->name_ar : $this->venue->name_en,
+                    'address' => $this->venue->address,
+                    'capacity' => $this->venue->capacity,
+                ]),
                 'location' => $this->whenLoaded('location', fn () => [
                     'id' => $this->location->id,
                     'name' => $locale === 'ar' ? $this->location->name_ar : $this->location->name_en,
                     'slug' => $this->location->slug,
                 ]),
+                'ticket_types' => $this->whenLoaded('ticketTypes', fn () => $this->ticketTypes->where('is_active', true)->map(fn ($t) => [
+                    'id' => $t->id,
+                    'name' => $locale === 'ar' && ! empty($t->name_ar) ? $t->name_ar : $t->name_en,
+                    'name_en' => $t->name_en,
+                    'name_ar' => $t->name_ar,
+                    'description' => $locale === 'ar' && ! empty($t->description_ar) ? $t->description_ar : $t->description_en,
+                    'price' => $t->price_cents ? $t->price_cents / 100 : ($t->price ?? 0),
+                    'currency' => $t->currency ?? 'EGP',
+                    'available' => $t->available ?? max(0, ($t->capacity ?? 0) - ($t->sold_count ?? 0)),
+                    'max_per_order' => $t->max_per_order ?? 10,
+                ])),
+                'schedules' => $this->whenLoaded('schedules', fn () => $this->schedules->map(fn ($s) => [
+                    'id' => $s->id,
+                    'title' => $locale === 'ar' && ! empty($s->title_ar) ? $s->title_ar : $s->title_en,
+                    'start_time' => $s->start_time,
+                    'end_time' => $s->end_time,
+                    'performer_name' => $s->performer_name,
+                ])),
                 'media' => $this->whenLoaded('media', fn () => $this->media->map(fn ($item) => [
                     'id' => $item->id,
                     'url' => $item->url,

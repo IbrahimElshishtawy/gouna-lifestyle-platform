@@ -2,27 +2,40 @@
 
 import React from "react";
 import Image from "next/image";
+import { Link } from "@/i18n/routing";
 import SafeImage from "@/components/ui/SafeImage";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
 
 export default function EventsSection() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const isAr = locale === "ar";
   const events = t.events.eventsList;
 
   return (
     <section id="events" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-white border-t border-brand-border/80 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 sm:mb-12 lg:mb-16">
-          <ChapterTag
-            number="CHAPTER 06"
-            title={t.events.eyebrow}
-            subtitle={t.events.subtitle}
-          />
-          <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
-            {t.events.title}
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-12 lg:mb-16">
+          <div>
+            <ChapterTag
+              number="CHAPTER 06"
+              title={t.events.eyebrow}
+              subtitle={t.events.subtitle}
+            />
+            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
+              {t.events.title}
+            </h2>
+          </div>
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-brand-border bg-[#FAF8F5] hover:bg-brand-sand text-xs font-bold uppercase tracking-wider text-brand-brown transition-all hover:scale-105 shrink-0"
+          >
+            <span>{isAr ? "استكشف كل الفعاليات" : "Explore All Events"}</span>
+            <svg className="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">

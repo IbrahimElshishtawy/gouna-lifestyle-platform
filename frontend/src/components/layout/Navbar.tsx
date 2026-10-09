@@ -158,8 +158,12 @@ export default function Navbar() {
               {t.nav.experiences}
             </Link>
             <Link
-              href="/#events"
-              className="hover:text-brand-terracotta transition-colors"
+              href="/events"
+              className={`hover:text-brand-terracotta transition-colors ${
+                pathname?.startsWith("/events")
+                  ? "text-brand-terracotta font-bold"
+                  : ""
+              }`}
             >
               {t.nav.whatsOn}
             </Link>
@@ -319,7 +323,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/#events"
+              href="/events"
               onClick={() => setMobileMenuOpen(false)}
               className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors font-medium text-sm ${
                 isTransparent ? "hover:bg-white/10 text-white" : "hover:bg-black/5 text-brand-brown"

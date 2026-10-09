@@ -227,3 +227,144 @@ export const createEventTicketType = saveEventTicketType;
 export const performEventCheckIn = performTicketCheckin;
 export const searchEventTicketsForCheckin = searchCheckinTickets;
 
+// ==========================================
+// PUBLIC CLIENT-FACING EVENT CONTRACTS & API
+// ==========================================
+
+export interface PublicEventItem {
+  id: number;
+  type: string;
+  attributes: {
+    slug: string;
+    title: string;
+    title_en: string;
+    title_ar?: string;
+    short_description?: string;
+    description?: string;
+    event_date: string;
+    start_time?: string;
+    end_time?: string;
+    doors_open_time?: string;
+    age_restriction?: string;
+    dress_code?: string;
+    rules?: string;
+    venue_name: string;
+    venue_address?: string;
+    organizer?: string;
+    category?: string;
+    is_ticketed: boolean;
+    is_featured: boolean;
+    is_published: boolean;
+    cover_url?: string;
+    min_price?: number | null;
+  };
+  relationships?: {
+    venue?: { id: number; name: string; address?: string; capacity?: number };
+    location?: { id: number; name: string; slug: string };
+    ticket_types?: Array<{
+      id: number;
+      name: string;
+      name_en: string;
+      name_ar?: string;
+      description?: string;
+      price: number;
+      currency: string;
+      available: number;
+      max_per_order: number;
+    }>;
+    schedules?: Array<{
+      id: number;
+      title: string;
+      start_time?: string;
+      end_time?: string;
+      performer_name?: string;
+    }>;
+    media?: Array<{
+      id: number;
+      url: string;
+      thumb_url?: string;
+      is_primary: boolean;
+      order: number;
+      title?: string;
+      alt_text?: string;
+    }>;
+  };
+}
+
+export async function getPublicEvents(params?: {
+  q?: string;
+  category?: string;
+  page?: number;
+}): Promise<{ data: PublicEventItem[]; meta?: any }> {
+  try {
+    const query = new URLSearchParams();
+    if (params?.q) query.append("q", params.q);
+    if (params?.category && params.category !== "all") query.append("category", params.category);
+    if (params?.page) query.append("page", String(params.page));
+
+    const res = await apiClient<{ data: PublicEventItem[]; meta?: any }>(`/events?${query.toString()}`);
+    return res;
+  } catch (error) {
+    console.warn("Failed to fetch public events from API, falling back to empty list:", error);
+    return { data: [] };
+  }
+}
+
+export async function getPublicEventBySlug(slug: string): Promise<PublicEventItem | null> {
+  try {
+    const res = await apiClient<{ data: PublicEventItem }>(`/events/${encodeURIComponent(slug)}`);
+    return res.data;
+  } catch (error) {
+    console.warn(`Failed to fetch public event [${slug}]:`, error);
+    return null;
+  }
+}
+
+export async function bookPublicEvent(slug: string, payload: {
+  ticket_type_id: number;
+  quantity: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  payment_method?: "card" | "instapay" | "cash_on_arrival";
+  special_requests?: string;
+}): Promise<{
+  status: string;
+  message: string;
+  data: {
+    order_number: string;
+    event_title: string;
+    event_date: string;
+    venue_name: string;
+    quantity: number;
+    total_amount: number;
+    currency: string;
+    customer_name: string;
+    customer_phone: string;
+    tickets: Array<{
+      ticket_number: string;
+      ticket_type: string;
+      qr_token: string;
+    }>;
+  };
+}> {
+  return apiClient<any>(`/events/${encodeURIComponent(slug)}/book`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function inquirePublicEvent(slug: string, payload: {
+  name: string;
+  email: string;
+  phone: string;
+  guests_count?: number;
+  message: string;
+}): Promise<{ status: string; message: string }> {
+  return apiClient<any>(`/events/${encodeURIComponent(slug)}/inquire`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+

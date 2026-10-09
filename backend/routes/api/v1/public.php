@@ -25,6 +25,8 @@ Route::get('/yachts/{slug}', [\App\Http\Controllers\Api\V1\Public\YachtControlle
 // Events
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::post('/events/{slug}/book', [EventController::class, 'book'])->middleware('throttle:booking')->name('events.book');
+Route::post('/events/{slug}/inquire', [EventController::class, 'inquire'])->middleware('throttle:inquiries')->name('events.inquire');
 
 // Checkout & Booking Engine
 Route::prefix('checkout')->as('checkout.')->group(function () {
