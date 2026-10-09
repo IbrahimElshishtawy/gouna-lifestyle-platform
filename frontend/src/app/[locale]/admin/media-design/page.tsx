@@ -147,6 +147,163 @@ export default function AdminMediaDesignPage() {
     }));
   };
 
+  const handleUploadMainVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMedia("main_video");
+    try {
+      const res = await uploadMediaDesignAsset(file);
+      setConfig((prev) => ({
+        ...prev,
+        hero: {
+          ...prev.hero,
+          video_url: res.url,
+          media_mode: "video",
+        },
+      }));
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم رفع الفيديو بنجاح وتعيينه كخلفية للهيرو." : "Video uploaded and set as hero background.",
+      });
+    } catch {
+      setFeedback({
+        type: "error",
+        message: isAr ? "فشل رفع ملف الفيديو." : "Failed to upload video file.",
+      });
+    } finally {
+      setUploadingMedia(null);
+    }
+  };
+
+  const handleUploadMainImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMedia("main_image");
+    try {
+      const res = await uploadMediaDesignAsset(file);
+      setConfig((prev) => ({
+        ...prev,
+        hero: {
+          ...prev.hero,
+          background_image: res.url,
+          media_mode: "image",
+        },
+      }));
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم رفع الصورة بنجاح وتعيينها كخلفية." : "Image uploaded successfully.",
+      });
+    } catch {
+      setFeedback({
+        type: "error",
+        message: isAr ? "فشل رفع الصورة." : "Failed to upload image.",
+      });
+    } finally {
+      setUploadingMedia(null);
+    }
+  };
+
+  const handleAddScene = () => {
+    const newScene: HeroScene = {
+      id: `scene-${Date.now()}`,
+      name_ar: `مشهد ${(config.hero.scenes?.length || 0) + 1}`,
+      name_en: `Scene ${(config.hero.scenes?.length || 0) + 1}`,
+      media_type: "image",
+      image_url: "/assets/images/hero-villa-dusk.jpg",
+      video_url: "",
+      title_line1_ar: "",
+      title_line2_ar: "",
+      title_line1_en: "",
+      title_line2_en: "",
+      subtitle_ar: "",
+      subtitle_en: "",
+    };
+    setConfig((prev) => ({
+      ...prev,
+      hero: {
+        ...prev.hero,
+        scenes: [...(prev.hero.scenes || []), newScene],
+      },
+    }));
+  };
+
+  const handleRemoveScene = (index: number) => {
+    setConfig((prev) => {
+      const currentScenes = [...(prev.hero.scenes || [])];
+      currentScenes.splice(index, 1);
+      return {
+        ...prev,
+        hero: {
+          ...prev.hero,
+          scenes: currentScenes,
+        },
+      };
+    });
+  };
+
+  const handleMoveScene = (index: number, direction: "up" | "down") => {
+    setConfig((prev) => {
+      const currentScenes = [...(prev.hero.scenes || [])];
+      const targetIndex = direction === "up" ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= currentScenes.length) return prev;
+      const temp = currentScenes[index];
+      currentScenes[index] = currentScenes[targetIndex];
+      currentScenes[targetIndex] = temp;
+      return {
+        ...prev,
+        hero: {
+          ...prev.hero,
+          scenes: currentScenes,
+        },
+      };
+    });
+  };
+
+  const handleUpdateScene = (index: number, fields: Partial<HeroScene>) => {
+    setConfig((prev) => {
+      const currentScenes = [...(prev.hero.scenes || [])];
+      currentScenes[index] = { ...currentScenes[index], ...fields };
+      return {
+        ...prev,
+        hero: {
+          ...prev.hero,
+          scenes: currentScenes,
+        },
+      };
+    });
+  };
+
+  const handleUploadSceneMedia = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMedia(`scene_${index}`);
+    try {
+      const res = await uploadMediaDesignAsset(file);
+      if (res.file_type === "video") {
+        handleUpdateScene(index, {
+          media_type: "video",
+          video_url: res.url,
+        });
+      } else {
+        handleUpdateScene(index, {
+          media_type: "image",
+          image_url: res.url,
+        });
+      }
+      setFeedback({
+        type: "success",
+        message: isAr ? "تم رفع الوسائط وتعيينها للمشهد بنجاح." : "Scene media uploaded successfully.",
+      });
+    } catch {
+      setFeedback({
+        type: "error",
+        message: isAr ? "فشل رفع ملف الوسائط للمشهد." : "Failed to upload scene media.",
+      });
+    } finally {
+      setUploadingMedia(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-12">
@@ -281,11 +438,340 @@ export default function AdminMediaDesignPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Background Image URL */}
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-xs font-bold text-brand-brown block">
-                {isAr ? "رابط صورة خلفية الواجهة (Hero Image URL)" : "Hero Background Image URL"}
+            {/* Hidden File Inputs for Uploads */}
+            <input
+              type="file"
+              ref={videoInputRef}
+              accept="video/mp4,video/webm,video/quicktime,video/*"
+              className="hidden"
+              onChange={handleUploadMainVideo}
+            />
+            <input
+              type="file"
+              ref={imageInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleUploadMainImage}
+            />
+
+            {/* Media Mode Selector */}
+            <div className="md:col-span-2 p-5 rounded-2xl bg-[#FAF8F5] border border-brand-border/80 space-y-3">
+              <label className="text-xs font-bold text-brand-brown block uppercase tracking-wider">
+                {isAr ? "نمط وسائط واجهة الهيرو (Hero Media Mode)" : "Hero Display Mode"}
               </label>
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  {
+                    id: "scenes",
+                    name_ar: "مشاهد متعددة متحركة (Multi-Scene Slider)",
+                    name_en: "Multi-Scene Slider",
+                    desc_ar: "عرض عدة مشاهد بالتبادل (صور أو فيديوهات) مع تحكم الزائر في المشهد",
+                  },
+                  {
+                    id: "video",
+                    name_ar: "فيديو سينمائي بالخلفية (Background Video)",
+                    name_en: "Cinematic Video",
+                    desc_ar: "تشغيل فيديو عالي الجودة متكرر في خلفية الواجهة",
+                  },
+                  {
+                    id: "image",
+                    name_ar: "صورة مفردة كلاسيكية (Single Image)",
+                    name_en: "Single Image",
+                    desc_ar: "عرض صورة ثابتة واحدة فائقة الدقة",
+                  },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        hero: { ...prev.hero, media_mode: mode.id as any },
+                      }))
+                    }
+                    className={`px-4 py-3 rounded-xl border text-start transition-all cursor-pointer flex-1 min-w-[200px] ${
+                      (config.hero.media_mode || "scenes") === mode.id
+                        ? "border-brand-terracotta bg-white shadow-sm ring-1 ring-brand-terracotta"
+                        : "border-brand-border bg-white/70 hover:bg-white text-brand-brown-muted"
+                    }`}
+                  >
+                    <div className="text-xs font-bold text-brand-brown mb-0.5">
+                      {isAr ? mode.name_ar : mode.name_en}
+                    </div>
+                    <div className="text-[11px] text-brand-brown-muted font-light leading-snug">
+                      {mode.desc_ar}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Video Background Configuration */}
+            {((config.hero.media_mode === "video") || config.hero.video_url) && (
+              <div className="md:col-span-2 p-5 rounded-2xl bg-amber-50/40 border border-amber-200/60 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-xs font-bold text-brand-brown uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-brand-terracotta" />
+                      <span>{isAr ? "الفيديو السينمائي للواجهة (Hero Video Background)" : "Hero Background Video"}</span>
+                    </h3>
+                    <p className="text-[11px] text-brand-brown-muted">
+                      {isAr
+                        ? "يمكنك رفع فيديو من جهازك (MP4 / WebM / MOV) أو لصق رابط مباشر للفيديو."
+                        : "Upload a video file from your device or paste a direct video stream URL."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={uploadingMedia === "main_video"}
+                    onClick={() => videoInputRef.current?.click()}
+                    className="px-4 py-2 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0 disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>
+                      {uploadingMedia === "main_video"
+                        ? (isAr ? "جارٍ الرفع..." : "Uploading...")
+                        : (isAr ? "رفع فيديو من جهازك" : "Upload Video File")}
+                    </span>
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={config.hero.video_url || ""}
+                    onChange={(e) =>
+                      setConfig((prev) => ({
+                        ...prev,
+                        hero: { ...prev.hero, video_url: e.target.value },
+                      }))
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-white focus:ring-1 focus:ring-brand-terracotta focus:outline-none"
+                    placeholder="https://... or /storage/media_design/hero_video.mp4"
+                  />
+                  {config.hero.video_url && (
+                    <div className="relative rounded-xl overflow-hidden border border-brand-border max-w-lg mt-2 bg-black aspect-video">
+                      <video
+                        src={config.hero.video_url}
+                        controls
+                        muted
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Multi-Scenes Manager */}
+            {(config.hero.media_mode === "scenes" || !config.hero.media_mode) && (
+              <div className="md:col-span-2 p-5 rounded-2xl bg-[#FAF8F5] border border-brand-border space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-brand-border/60 pb-3">
+                  <div>
+                    <h3 className="text-xs font-bold text-brand-brown uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span>{isAr ? "إدارة مشاهد الهيرو (Hero Scenes Slider)" : "Hero Scenes Manager"}</span>
+                    </h3>
+                    <p className="text-[11px] text-brand-brown-muted">
+                      {isAr
+                        ? "أضف عدة مشاهد (صور أو مقاطع فيديو) لتعرض في الواجهة بالتبادل وتتيح للزائر التنقل بين أجواء الجونة."
+                        : "Configure multiple scenes (photos or clips) to rotate in the hero and let visitors switch atmospheres."}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddScene}
+                    className="px-4 py-2 bg-brand-brown hover:bg-brand-brown-dark text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>{isAr ? "+ إضافة مشهد جديد" : "+ Add New Scene"}</span>
+                  </button>
+                </div>
+
+                {/* Scenes List */}
+                <div className="space-y-4">
+                  {(config.hero.scenes || []).map((scene, index) => (
+                    <div
+                      key={scene.id || index}
+                      className="p-4 sm:p-5 rounded-2xl bg-white border border-brand-border shadow-xs space-y-3 relative group"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-border/40 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-full bg-brand-sand text-brand-brown font-mono text-xs font-bold flex items-center justify-center">
+                            {index + 1}
+                          </span>
+                          <span className="text-xs font-bold text-brand-brown">
+                            {isAr ? (scene.name_ar || `مشهد ${index + 1}`) : (scene.name_en || `Scene ${index + 1}`)}
+                          </span>
+                          <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-brand-sand-light text-brand-brown-muted">
+                            {scene.media_type === "video" ? "Video" : "Image"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => handleMoveScene(index, "up")}
+                            className="p-1.5 rounded-lg border border-brand-border hover:bg-brand-sand-light text-brand-brown disabled:opacity-30 cursor-pointer"
+                            title={isAr ? "تحريك لأعلى" : "Move up"}
+                          >
+                            ▲
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === (config.hero.scenes?.length || 0) - 1}
+                            onClick={() => handleMoveScene(index, "down")}
+                            className="p-1.5 rounded-lg border border-brand-border hover:bg-brand-sand-light text-brand-brown disabled:opacity-30 cursor-pointer"
+                            title={isAr ? "تحريك لأسفل" : "Move down"}
+                          >
+                            ▼
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveScene(index)}
+                            className="px-2.5 py-1 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition cursor-pointer"
+                          >
+                            {isAr ? "حذف" : "Remove"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Scene Name and Media Type */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-[11px] font-bold text-brand-brown block mb-1">
+                            {isAr ? "اسم المشهد (عربي)" : "Scene Name (AR)"}
+                          </label>
+                          <input
+                            type="text"
+                            value={scene.name_ar || ""}
+                            onChange={(e) => handleUpdateScene(index, { name_ar: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg border border-brand-border text-xs"
+                            placeholder="غروب الفلل الذهبي"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-bold text-brand-brown block mb-1">
+                            {isAr ? "اسم المشهد (إنجليزي)" : "Scene Name (EN)"}
+                          </label>
+                          <input
+                            type="text"
+                            value={scene.name_en || ""}
+                            onChange={(e) => handleUpdateScene(index, { name_en: e.target.value })}
+                            className="w-full px-3 py-2 rounded-lg border border-brand-border text-xs"
+                            placeholder="Lagoon Sunset"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-bold text-brand-brown block mb-1">
+                            {isAr ? "نوع الوسائط" : "Media Type"}
+                          </label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateScene(index, { media_type: "image" })}
+                              className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition ${
+                                scene.media_type === "image"
+                                  ? "bg-brand-terracotta text-white border-brand-terracotta"
+                                  : "border-brand-border bg-white text-brand-brown-muted"
+                              }`}
+                            >
+                              {isAr ? "صورة" : "Image"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateScene(index, { media_type: "video" })}
+                              className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition ${
+                                scene.media_type === "video"
+                                  ? "bg-brand-terracotta text-white border-brand-terracotta"
+                                  : "border-brand-border bg-white text-brand-brown-muted"
+                              }`}
+                            >
+                              {isAr ? "فيديو" : "Video"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Scene URL and Upload */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-brand-brown block">
+                            {scene.media_type === "video"
+                              ? (isAr ? "رابط فيديو المشهد" : "Scene Video URL")
+                              : (isAr ? "رابط صورة المشهد" : "Scene Image URL")}
+                          </label>
+                          <label className="cursor-pointer text-xs font-bold text-brand-terracotta hover:underline flex items-center gap-1">
+                            <input
+                              type="file"
+                              accept={scene.media_type === "video" ? "video/*" : "image/*"}
+                              className="hidden"
+                              onChange={(e) => handleUploadSceneMedia(index, e)}
+                            />
+                            <span>
+                              {uploadingMedia === `scene_${index}`
+                                ? (isAr ? "جارٍ الرفع..." : "Uploading...")
+                                : (isAr ? "📤 رفع ملف من جهازك" : "📤 Upload File")}
+                            </span>
+                          </label>
+                        </div>
+                        <input
+                          type="text"
+                          value={scene.media_type === "video" ? (scene.video_url || "") : (scene.image_url || "")}
+                          onChange={(e) =>
+                            handleUpdateScene(
+                              index,
+                              scene.media_type === "video"
+                                ? { video_url: e.target.value }
+                                : { image_url: e.target.value }
+                            )
+                          }
+                          className="w-full px-3 py-2 rounded-lg border border-brand-border text-xs bg-white"
+                          placeholder="https://... or /assets/images/..."
+                        />
+
+                        {/* Scene Media Preview */}
+                        {scene.media_type === "video" && scene.video_url && (
+                          <div className="relative rounded-xl overflow-hidden border border-brand-border max-w-xs mt-2 bg-black aspect-video">
+                            <video src={scene.video_url} controls muted className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        {scene.media_type !== "video" && scene.image_url && (
+                          <div className="relative h-28 rounded-xl overflow-hidden border border-brand-border max-w-xs mt-2 bg-brand-sand">
+                            <Image src={scene.image_url} alt="Scene preview" fill className="object-cover" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Single Background Image URL (Fallback / Mode: image) */}
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-brand-brown block">
+                  {isAr ? "صورة خلفية الواجهة الأساسية (Fallback Background Image)" : "Fallback Background Image"}
+                </label>
+                <button
+                  type="button"
+                  disabled={uploadingMedia === "main_image"}
+                  onClick={() => imageInputRef.current?.click()}
+                  className="text-xs font-bold text-brand-terracotta hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>
+                    {uploadingMedia === "main_image"
+                      ? (isAr ? "جارٍ الرفع..." : "Uploading...")
+                      : (isAr ? "📤 رفع صورة من جهازك" : "📤 Upload Image")}
+                  </span>
+                </button>
+              </div>
               <input
                 type="text"
                 value={config.hero.background_image}
@@ -299,18 +785,13 @@ export default function AdminMediaDesignPage() {
                 placeholder="/assets/images/hero-villa-dusk.jpg or https://..."
               />
               {config.hero.background_image && (
-                <div className="relative h-36 rounded-xl overflow-hidden border border-brand-border max-w-md mt-2">
+                <div className="relative h-32 rounded-xl overflow-hidden border border-brand-border max-w-xs mt-2">
                   <Image
                     src={config.hero.background_image}
                     alt="Hero Preview"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <span className="text-[11px] text-white font-mono bg-black/60 px-3 py-1 rounded-full">
-                      {isAr ? "معاينة الخلفية الحالية" : "Current Background Preview"}
-                    </span>
-                  </div>
                 </div>
               )}
             </div>
