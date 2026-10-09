@@ -145,6 +145,7 @@ Route::middleware(['admin', '2fa'])->group(function () {
     Route::prefix('media-design')->as('media-design.')->group(function () {
         Route::get('/', [MediaDesignApiController::class, 'index'])->name('index');
         Route::put('/', [MediaDesignApiController::class, 'update'])->name('update');
+        Route::post('/upload', [MediaDesignApiController::class, 'uploadMedia'])->name('upload');
     });
 
     // 5. Staff & Administrative Users
