@@ -15,8 +15,10 @@ export default function EventCard({ event, locale }: EventCardProps) {
   const isAr = locale === "ar";
   const { attributes, relationships } = event;
 
-  const title = isAr && attributes.title_ar ? attributes.title_ar : attributes.title_en;
-  const description = isAr && attributes.short_description ? attributes.short_description : (attributes.short_description || attributes.description || "");
+  const title = isAr && attributes.title_ar ? attributes.title_ar : (attributes.title || attributes.title_en);
+  const description = isAr && (attributes.short_description_ar || attributes.short_description)
+    ? (attributes.short_description_ar || attributes.short_description)
+    : (attributes.short_description_en || attributes.short_description || attributes.description || "");
   const coverUrl = attributes.cover_url || "/assets/images/fanadir-villa.jpg";
   const venue = relationships?.venue?.name || attributes.venue_name || (isAr ? "الجونة" : "El Gouna");
 

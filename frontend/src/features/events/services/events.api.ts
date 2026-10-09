@@ -240,7 +240,11 @@ export interface PublicEventItem {
     title_en: string;
     title_ar?: string;
     short_description?: string;
+    short_description_en?: string;
+    short_description_ar?: string;
     description?: string;
+    description_en?: string;
+    description_ar?: string;
     event_date: string;
     start_time?: string;
     end_time?: string;

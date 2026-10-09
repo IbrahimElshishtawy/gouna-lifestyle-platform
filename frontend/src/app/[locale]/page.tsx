@@ -14,6 +14,7 @@ import ConciergeInquiry from "@/features/home/components/ConciergeInquiry";
 import FaqSection from "@/features/home/components/FaqSection";
 import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
+import { getPublicEvents } from "@/features/events/services/events.api";
 import { getPublicMediaDesignConfig } from "@/features/home/services/media-design.public";
 import PropertyCardsShowcase from "@/features/home/components/PropertyCardsShowcase";
 import ScrollReveal from "@/components/ui/ScrollReveal";
@@ -29,11 +30,14 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [properties, experiences, mediaConfig] = await Promise.all([
+  const [properties, experiences, eventsRes, mediaConfig] = await Promise.all([
     getProperties(),
     getExperiences(),
+    getPublicEvents(),
     getPublicMediaDesignConfig(),
   ]);
+
+  const events = eventsRes?.data || [];
 
   // Prioritize properties designated as featured in Media Design
   const featuredIds = new Set(mediaConfig?.featured_property_ids || []);
@@ -124,7 +128,7 @@ export default async function HomePage({
         {/* 7. What's On This Season (Events & Gatherings) */}
         {sections?.events !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
-            <EventsSection />
+            <EventsSection events={events} />
           </ScrollReveal>
         )}
 
