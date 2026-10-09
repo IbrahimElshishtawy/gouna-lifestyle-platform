@@ -53,7 +53,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     if (configuredScenes.length <= 1) return;
     const interval = setInterval(() => {
       setActiveSceneIndex((prev) => (prev + 1) % configuredScenes.length);
-    }, 7000);
+    }, 8000);
     return () => clearInterval(interval);
   }, [configuredScenes.length]);
 
@@ -68,6 +68,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     ? (currentScene?.video_url || heroConfig?.video_url || "")
     : (currentScene?.image_url || heroConfig?.background_image || "/assets/images/hero-villa-dusk.jpg");
 
+  // Booking widget state
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
   const [checkIn, setCheckIn] = useState("2026-10-24");
@@ -129,15 +130,9 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
 
   return (
-    <section className="relative min-h-[720px] lg:min-h-[820px] flex items-center justify-center bg-[#1C1412] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-14 sm:pb-16 lg:pb-20">
-      {/* Background Hero Image/Video with Feathered Dissolve */}
-      <div 
-        className="absolute inset-0 z-0 transition-opacity duration-1000"
-        style={{
-          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0) 100%)",
-          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0.5) 88%, rgba(0,0,0,0) 100%)"
-        }}
-      >
+    <section className="relative min-h-[880px] lg:min-h-[960px] xl:min-h-[1000px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-8 sm:pb-12 lg:pb-14">
+      {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
+      <div className="absolute inset-0 z-0">
         {isVideo ? (
           <video
             key={currentMediaUrl}
@@ -146,7 +141,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
             loop
             muted
             playsInline
-            className="w-full h-full object-cover object-center animate-ken-burns"
+            className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
           />
         ) : (
           <Image
@@ -156,23 +151,33 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
             fill
             priority
             sizes="100vw"
-            className="w-full h-full object-cover object-center animate-ken-burns transition-all duration-1000"
+            className="w-full h-full object-cover object-[center_right] lg:object-center motion-safe:animate-ken-burns transition-all duration-1000"
           />
         )}
-        {/* Top Vignette for Transparent Header Contrast */}
-        <div className="absolute inset-x-0 top-0 h-48 sm:h-56 bg-gradient-to-b from-black/85 via-black/45 to-transparent z-10" />
 
-        {/* Cinematic Dusk Ambient Glow */}
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/25 to-black/60 pointer-events-none" />
+        {/* Top Vignette for Transparent Header Contrast */}
+        <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
+
+        {/* Asymmetrical Directional Text Shading:
+            Concentrates shading behind the left editorial column while keeping the villa architecture,
+            lagoon waters, and sunset sky radiant and prominent on the right. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
+
+        {/* Ambient Dusk Glow */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/15 to-black/50 pointer-events-none z-10" />
+
+        {/* Lower Shade to Anchor the Booking Widget & Stats Strip */}
+        <div className="absolute inset-x-0 bottom-0 h-72 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/80 via-45% to-transparent pointer-events-none z-10" />
       </div>
 
-      {/* Floating Cinematic Scene Atmosphere Switcher (Desktop) */}
+      {/* Floating Cinematic Scene Switcher (Desktop) */}
       {configuredScenes.length > 1 && (
         <aside
           aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
-          className="absolute bottom-5 end-6 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
+          className="absolute top-28 sm:top-32 end-6 sm:end-10 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/55 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
         >
-          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]">
+          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]/80">
             {isAr ? "المشهد:" : "SCENE:"}
           </span>
           {configuredScenes.map((p, idx) => (
@@ -194,7 +199,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
       {/* Mobile Scene Indicator Dots */}
       {configuredScenes.length > 1 && (
-        <div className="absolute top-28 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
+        <div className="absolute top-24 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
           {configuredScenes.map((_, idx) => (
             <button
               key={idx}
@@ -209,127 +214,175 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
       )}
 
-      {/* Multi-tier Smoky Feathered Bottom Transition into Page */}
-      <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#1C1412] via-[#1C1412]/70 to-transparent pointer-events-none z-0" />
-      <div className="absolute inset-x-0 -bottom-1 h-32 sm:h-40 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/85 via-[#FAF8F5]/30 to-transparent pointer-events-none z-10" />
-      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[88%] h-28 sm:h-32 bg-[#FAF8F5] blur-3xl opacity-85 pointer-events-none rounded-full z-10" />
-
-      {/* Main Content Container with Staggered Entrance Animations & Tightened Spacing */}
-      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center">
-        {/* Cinematic Live Red Sea Telemetry Pill */}
-        <div className="inline-flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 text-[#FAF8F5] text-[10px] sm:text-[11px] font-mono tracking-wider mb-2 sm:mb-2.5 shadow-lg animate-fade-in-down">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-bold text-[#FAF8F5]">{isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}</span>
-          <span className="text-white/40">|</span>
-          <span className="text-amber-300 font-semibold">{isAr ? "28°C مشمس صافٍ" : "28°C Clear Sky"}</span>
-          <span className="hidden md:inline text-white/40">|</span>
-          <span className="hidden md:inline text-[#E5DCD3]">{isAr ? "مياه هادئة مثالية للإبحار" : "Calm Waters & Sailing"}</span>
-          <span className="hidden lg:inline text-white/40">|</span>
-          <span className="hidden lg:inline text-emerald-300 font-semibold">{isAr ? "الكونسيرج 24/7" : "Concierge Online"}</span>
-        </div>
-
-        {/* Curated Luxury Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] mb-2.5 sm:mb-3 shadow-md animate-fade-in-down animate-float">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
-          <span>
-            {heroConfig
-              ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
-              : t.hero.badge}
-          </span>
-        </div>
-
-        {/* Hero Title with Dramatic Contrast & Smooth Slide Up */}
-        <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-[#FAF8F5] max-w-4xl leading-[1.12] sm:leading-[1.08] mb-2.5 sm:mb-3 drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:150ms]">
-          {titleLine1} <br className="hidden sm:inline" />
-          <span className="italic font-normal">{titleLine2}</span>
-        </h1>
-
-        {/* Hero Subtitle */}
-        <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-3xl font-light leading-normal sm:leading-relaxed mb-3.5 sm:mb-5 text-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:300ms] px-2 sm:px-0">
-          {subtitle}
-        </p>
-
-        {/* Dual Cinematic Action CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 mb-4 sm:mb-6 w-full sm:w-auto max-w-md sm:max-w-none animate-fade-in-up [animation-delay:350ms]">
-          <a
-            href={heroConfig?.cta1_link || "#stays"}
-            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
-          >
-            <span>
-              {heroConfig
-                ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
-                : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
-            </span>
-          </a>
-          <a
-            href={heroConfig?.cta2_link || "#experiences"}
-            className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] flex items-center justify-center"
-          >
-            <span>
-              {heroConfig
-                ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
-                : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
-            </span>
-          </a>
-        </div>
-
-        {/* Master Luxury Search Card */}
-        <div className="w-full max-w-5xl bg-white/95 backdrop-blur-2xl p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-[2rem] shadow-[0_30px_90px_-20px_rgba(28,20,18,0.5)] border border-white/80 text-brand-brown transition-all duration-500 animate-fade-in-scale [animation-delay:450ms]">
+      {/* ==================== 2. ASYMMETRICAL EDITORIAL HERO GRID ==================== */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
           
-          {/* Centered Segmented Tab Capsule */}
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <div className="inline-flex p-1 sm:p-1.5 bg-[#F5EFEA]/90 backdrop-blur-md rounded-xl sm:rounded-full border border-brand-border/80 shadow-inner max-w-full overflow-x-auto no-scrollbar gap-1">
+          {/* Left Content Area (~7-10% from viewport edge via container padding) */}
+          <div className="lg:col-span-8 xl:col-span-7 flex flex-col items-start text-start">
+            
+            {/* 1. Small Eyebrow Label */}
+            <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.24em] mb-3.5 sm:mb-4 shadow-sm animate-fade-in-down">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
+              <span>
+                {heroConfig
+                  ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
+                  : (isAr ? "تجارب استثنائية منتقاة • ملاذات خاصة" : "CURATED LUXURY EXPERIENCES · PRIVATE ESCAPES")}
+              </span>
+            </div>
+
+            {/* 2. Main Headline: Refined Editorial Serif, Natural 2-3 Line Wrap, Controlled Max Width */}
+            <h1 className="font-serif text-3.5xl sm:text-5xl lg:text-6xl xl:text-6.5xl font-bold tracking-tight text-[#FAF8F5] leading-[1.12] sm:leading-[1.08] mb-4 sm:mb-5 max-w-2xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] animate-fade-in-up [animation-delay:150ms]">
+              {titleLine1} <br />
+              <span className="italic font-normal text-amber-200/90">{titleLine2}</span>
+            </h1>
+
+            {/* 3. Short Supporting Description */}
+            <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-xl font-light leading-relaxed mb-6 sm:mb-8 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:250ms]">
+              {subtitle}
+            </p>
+
+            {/* 4. Dual Clear CTAs: Directly Beneath Description */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up [animation-delay:350ms]">
+              <a
+                href={heroConfig?.cta1_link || "#stays"}
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
+              >
+                <span>
+                  {heroConfig
+                    ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
+                    : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
+                </span>
+                <svg
+                  className="w-4 h-4 ms-2 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+
+              <a
+                href={heroConfig?.cta2_link || "#experiences"}
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <span>
+                  {heroConfig
+                    ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
+                    : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
+                </span>
+              </a>
+            </div>
+
+          </div>
+
+          {/* Right Column: Restrained Editorial Live Status Module */}
+          <div className="lg:col-span-4 xl:col-span-5 hidden lg:flex flex-col items-end justify-end pb-1">
+            <div className="w-full max-w-xs p-4 sm:p-5 rounded-2xl bg-black/45 backdrop-blur-xl border border-white/15 text-start shadow-2xl space-y-3 animate-fade-in-up [animation-delay:300ms]">
+              
+              {/* Status Header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[11px] font-mono font-bold tracking-widest text-[#FAF8F5]">
+                    {isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono text-amber-300 font-semibold">
+                  28°C · {isAr ? "صافٍ ومثالي" : "Clear Sky"}
+                </span>
+              </div>
+
+              {/* Editorial Caption */}
+              <p className="text-xs text-[#E5DCD3] font-serif italic leading-relaxed">
+                {isAr
+                  ? "«ملاذ استثنائي حيث يلتقي أفق البحر الأحمر بخصوصية الفلل الفاخرة»"
+                  : '"A different kind of escape, where Red Sea horizons meet barefoot elegance."'}
+              </p>
+
+              {/* Concierge Availability & Marine Water Indicator */}
+              <div className="pt-1.5 flex items-center justify-between text-[10px] font-mono text-[#E5DCD3]/80 border-t border-white/10">
+                <span className="flex items-center gap-1.5 text-emerald-300 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  {isAr ? "الكونسيرج: متاح 24/7" : "Concierge: 24/7 Online"}
+                </span>
+                <span className="text-white/50">
+                  {isAr ? "مياه هادئة" : "Calm Waters"}
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ==================== 3. LOWER TIER: BOOKING WIDGET & STATISTICS STRIP ==================== */}
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12 lg:mt-14">
+        
+        {/* Master Luxury Search Card (Overlapping lower edge of background, warm off-white surface, 75-88% width) */}
+        <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
+          
+          {/* Mode Selector (Compact Tab Row) */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 mb-3 sm:mb-4 border-b border-brand-border/60 pb-3">
+            <div className="inline-flex p-1 bg-[#F0EAE3] dark:bg-black/30 rounded-xl border border-brand-border/70 shadow-inner gap-1 max-w-full overflow-x-auto no-scrollbar">
               {/* Tab 1: Rent Stays */}
               <button
                 type="button"
                 onClick={() => setActiveTab("rent")}
-                className={`px-4 sm:px-7 py-1.5 sm:py-2.5 rounded-lg sm:rounded-full text-[11px] sm:text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   activeTab === "rent"
-                    ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
+                    ? "bg-brand-terracotta text-white shadow-sm"
+                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
                 }`}
               >
-                <span>{t.hero.tabRent}</span>
+                {t.hero.tabRent}
               </button>
 
               {/* Tab 2: Buy Real Estate */}
               <button
                 type="button"
                 onClick={() => setActiveTab("sale")}
-                className={`px-4 sm:px-7 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   activeTab === "sale"
-                    ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
+                    ? "bg-brand-terracotta text-white shadow-sm"
+                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
                 }`}
               >
-                <span>{t.hero.tabSale}</span>
+                {t.hero.tabSale}
               </button>
 
               {/* Tab 3: Experiences & Yacht Charters */}
               <button
                 type="button"
                 onClick={() => setActiveTab("experiences")}
-                className={`px-4 sm:px-7 py-2 sm:py-2.5 rounded-xl sm:rounded-full text-xs font-bold tracking-wide transition-all duration-300 flex items-center justify-center whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   activeTab === "experiences"
-                    ? "bg-brand-terracotta text-white shadow-md shadow-brand-terracotta/30 scale-[1.02]"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/70"
+                    ? "bg-brand-terracotta text-white shadow-sm"
+                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
                 }`}
               >
-                <span>{t.hero.tabExp}</span>
+                {t.hero.tabExp}
               </button>
             </div>
+
+            {/* Editorial Micro-badge on Desktop */}
+            <span className="hidden sm:inline-block text-[10px] sm:text-[11px] font-mono text-brand-brown-muted tracking-wider">
+              {isAr ? "ضمان أفضل أسعار حصرية ومطابقة تامة" : "BEST RATE & DIRECT ACCESS GUARANTEE"}
+            </span>
           </div>
 
           {/* Unified Architectural Search Bar */}
           <form onSubmit={handleSearch}>
-            <div className="bg-[#FAF8F5]/90 hover:bg-[#FAF8F5] rounded-2xl sm:rounded-[2rem] border border-brand-border/90 shadow-sm p-2 sm:p-2.5 flex flex-col lg:flex-row items-stretch lg:items-center divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-brand-border/70 transition-all">
+            <div className="bg-white dark:bg-[#140E0C]/60 rounded-xl sm:rounded-2xl border border-brand-border/80 shadow-sm p-1.5 sm:p-2 flex flex-col lg:flex-row items-stretch lg:items-center divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-brand-border/60 transition-all">
               
               {/* ===================== TAB 1: RENT FIELDS ===================== */}
               {activeTab === "rent" && (
                 <>
                   {/* Field 1: Location */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.locationLabel}
                       </span>
@@ -338,7 +391,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.locationAll}</option>
                         <option value="fanadir-bay">{t.hero.locationFanadir}</option>
@@ -355,8 +408,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 2: Check-In */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.checkInLabel}
                       </span>
@@ -365,13 +418,13 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
-                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer"
+                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer"
                     />
                   </div>
 
                   {/* Field 3: Check-Out */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.checkOutLabel}
                       </span>
@@ -380,13 +433,13 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       type="date"
                       value={checkOut}
                       onChange={(e) => setCheckOut(e.target.value)}
-                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer"
+                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer"
                     />
                   </div>
 
                   {/* Field 4: Guests */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.guestsLabel}
                       </span>
@@ -395,7 +448,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={guests}
                         onChange={(e) => setGuests(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="2">2 {t.common.guests}</option>
                         <option value="4">4 {t.common.guests}</option>
@@ -414,8 +467,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               {activeTab === "sale" && (
                 <>
                   {/* Field 1: Location */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.locationLabel}
                       </span>
@@ -424,7 +477,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.locationAll}</option>
                         <option value="fanadir-bay">{t.hero.locationFanadir}</option>
@@ -439,8 +492,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 2: Property Type */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.propertyTypeLabel}
                       </span>
@@ -449,7 +502,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={propertyType}
                         onChange={(e) => setPropertyType(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.propertyAll}</option>
                         <option value="villas">{t.hero.propertyVillas}</option>
@@ -463,8 +516,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 3: Budget Range */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.budgetLabel}
                       </span>
@@ -473,7 +526,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.budgetAny}</option>
                         <option value="tier1">{t.hero.budget1}</option>
@@ -487,8 +540,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 4: Bedrooms */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.common.beds}
                       </span>
@@ -497,7 +550,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={bedrooms}
                         onChange={(e) => setBedrooms(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="any">{locale === "ar" ? "أي عدد غرف" : "Any Bedrooms"}</option>
                         <option value="3">3+ {t.common.beds}</option>
@@ -516,8 +569,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               {activeTab === "experiences" && (
                 <>
                   {/* Field 1: Experience Type */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.expTypeLabel}
                       </span>
@@ -526,7 +579,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={expType}
                         onChange={(e) => setExpType(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.expAll}</option>
                         <option value="yachts">{t.hero.expYachts}</option>
@@ -541,8 +594,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 2: Preferred Date */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.dateLabel}
                       </span>
@@ -551,13 +604,13 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       type="date"
                       value={checkIn}
                       onChange={(e) => setCheckIn(e.target.value)}
-                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer"
+                      className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer"
                     />
                   </div>
 
                   {/* Field 3: Schedule / Timing */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.timingLabel}
                       </span>
@@ -566,7 +619,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={expTiming}
                         onChange={(e) => setExpTiming(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="full-day">{t.hero.timingFullDay}</option>
                         <option value="sunset">{t.hero.timingSunset}</option>
@@ -580,8 +633,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                   </div>
 
                   {/* Field 4: Guests */}
-                  <div className="flex-1 px-4 py-3 sm:py-3.5 hover:bg-white rounded-xl transition-all text-left rtl:text-right cursor-pointer group">
-                    <div className="mb-1">
+                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
+                    <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
                         {t.hero.guestsLabel}
                       </span>
@@ -590,7 +643,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                       <select
                         value={guests}
                         onChange={(e) => setGuests(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
+                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="4">4 {t.common.guests}</option>
                         <option value="8">8 {t.common.guests}</option>
@@ -609,7 +662,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               <div className="p-1.5 sm:p-2 flex items-center justify-center shrink-0">
                 <button
                   type="submit"
-                  className="w-full lg:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl sm:rounded-[1.4rem] font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="w-full lg:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl sm:rounded-[1.2rem] font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <svg
                     className="w-4 h-4 shrink-0"
@@ -638,56 +691,57 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           </form>
         </div>
 
-        {/* Cinematic Ecosystem Metrics Bar */}
-        <div className="mt-8 sm:mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 w-full max-w-5xl text-start animate-fade-in-up [animation-delay:550ms]">
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
-            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">120+</span>
-            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
-              {isAr ? "فيلا شاطئية معتمدة" : "Curated Lagoon Villas"}
-            </span>
-            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
-              {isAr ? "إطلالات لاجون وبحر مباشر" : "Private Shoreline & Pools"}
-            </span>
-          </div>
+        {/* ==================== 4. RESTRAINED HORIZONTAL STATISTICS STRIP ==================== */}
+        <div className="mt-4 sm:mt-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/45 backdrop-blur-xl border border-white/15 text-white shadow-xl animate-fade-in-up [animation-delay:500ms]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-white/10 gap-3.5 lg:gap-0">
+            
+            {/* Stat 1 */}
+            <div className="px-2 sm:px-5 py-1 text-start">
+              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">120+</span>
+              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
+                {isAr ? "فيلا شاطئية معتمدة" : "Curated Lagoon Villas"}
+              </span>
+              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
+                {isAr ? "إطلالات لاجون وبحر مباشر" : "Private Shoreline & Pools"}
+              </span>
+            </div>
 
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
-            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">18</span>
-            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
-              {isAr ? "يخت فاخر للإبحار" : "Private Yacht Fleet"}
-            </span>
-            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
-              {isAr ? "رحلات جزيرة طويلة ومحميات الدلافين" : "Tawila Island Expeditions"}
-            </span>
-          </div>
+            {/* Stat 2 */}
+            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
+              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">18</span>
+              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
+                {isAr ? "يخت فاخر للإبحار" : "Private Yacht Fleet"}
+              </span>
+              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
+                {isAr ? "رحلات جزيرة طويلة ومحميات" : "Tawila Island Expeditions"}
+              </span>
+            </div>
 
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
-            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">24/7</span>
-            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
-              {isAr ? "خدمة كونسيرج VIP" : "Dedicated Concierge Desk"}
-            </span>
-            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
-              {isAr ? "شيف خاص وحجوزات حصرية" : "Private Chefs & Island Transfers"}
-            </span>
-          </div>
+            {/* Stat 3 */}
+            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
+              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">24/7</span>
+              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
+                {isAr ? "خدمة كونسيرج VIP" : "Dedicated Concierge Desk"}
+              </span>
+              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
+                {isAr ? "شيف خاص وحجوزات حصرية" : "Private Chefs & Transfers"}
+              </span>
+            </div>
 
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 text-white shadow-lg transition-transform hover:scale-[1.02]">
-            <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">100%</span>
-            <span className="block text-xs sm:text-sm font-semibold text-[#FAF8F5]">
-              {isAr ? "حجز فندقي موثوق" : "Verified Booking Security"}
-            </span>
-            <span className="block text-[10px] text-[#E5DCD3]/75 mt-0.5">
-              {isAr ? "دفع بنكي مشفر وإلغاء مرن" : "Encrypted Bank Checkout"}
-            </span>
+            {/* Stat 4 */}
+            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
+              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">100%</span>
+              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
+                {isAr ? "حجز فندقي موثوق" : "Verified Booking Security"}
+              </span>
+              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
+                {isAr ? "دفع بنكي مشفر وإلغاء مرن" : "Encrypted Bank Checkout"}
+              </span>
+            </div>
+
           </div>
         </div>
 
-        {/* Subtle Cinematic Scroll Down Indicator */}
-        <div className="mt-10 sm:mt-12 flex flex-col items-center gap-2 animate-fade-in-up [animation-delay:600ms]">
-          <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#E5DCD3]/70">
-            {locale === "ar" ? "مرر للاستكشاف" : "SCROLL TO EXPLORE"}
-          </span>
-          <div className="w-[1px] h-8 bg-gradient-to-b from-brand-terracotta via-white/50 to-transparent animate-pulse" />
-        </div>
       </div>
     </section>
   );
