@@ -117,7 +117,7 @@ class EventController extends Controller
             'description_en' => $validated['description_en'] ?? null,
             'description_ar' => $validated['description_ar'] ?? null,
             'is_ticketed' => $request->boolean('is_ticketed', true),
-            'is_published' => $request->boolean('is_published'),
+            'is_published' => $request->has('is_published') ? $request->boolean('is_published') : ($validated['status'] === 'published'),
             'is_featured' => $request->boolean('is_featured'),
             'status' => $validated['status'],
         ]);
@@ -219,7 +219,7 @@ class EventController extends Controller
             'description_en' => $validated['description_en'] ?? null,
             'description_ar' => $validated['description_ar'] ?? null,
             'is_ticketed' => $request->boolean('is_ticketed', true),
-            'is_published' => $request->boolean('is_published'),
+            'is_published' => $request->has('is_published') ? $request->boolean('is_published') : ($validated['status'] === 'published'),
             'is_featured' => $request->boolean('is_featured'),
             'status' => $validated['status'],
         ]);
