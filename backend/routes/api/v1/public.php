@@ -40,6 +40,12 @@ Route::prefix('checkout')->as('checkout.')->group(function () {
 
     Route::get('/bookings/{reference}', [CheckoutController::class, 'show'])
         ->name('bookings.show');
+
+    Route::post('/bookings/{reference}/paymob-complete', [CheckoutController::class, 'completePaymobPayment'])
+        ->name('bookings.paymob-complete');
+
+    Route::post('/bookings/{reference}/paymob-decline', [CheckoutController::class, 'declinePaymobPayment'])
+        ->name('bookings.paymob-decline');
 });
 
 // Leads / Inquiries

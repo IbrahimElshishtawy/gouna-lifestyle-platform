@@ -38,12 +38,19 @@ return [
     'payment' => [
         'webhook_secret' => env('PAYMENT_WEBHOOK_SECRET', env('PAYMOB_HMAC_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder')),
         'paymob' => [
+            'api_key' => env('PAYMOB_API_KEY'),
+            'secret_key' => env('PAYMOB_SECRET_KEY'),
+            'public_key' => env('PAYMOB_PUBLIC_KEY'),
+            'integration_id' => env('PAYMOB_INTEGRATION_ID'),
+            'instapay_integration_id' => env('PAYMOB_INSTAPAY_INTEGRATION_ID'),
+            'iframe_id' => env('PAYMOB_IFRAME_ID'),
             'hmac_secret' => env('PAYMOB_HMAC_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder'),
             'merchant_id' => env('PAYMOB_MERCHANT_ID', null),
         ],
         'stripe' => [
             'webhook_secret' => env('STRIPE_WEBHOOK_SECRET', env('APP_ENV') === 'production' ? null : 'whsec_placeholder'),
         ],
+        'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
     ],
 
 ];

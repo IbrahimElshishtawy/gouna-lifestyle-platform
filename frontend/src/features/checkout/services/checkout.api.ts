@@ -132,3 +132,42 @@ export async function getBookingByReference(
   );
   return response.data;
 }
+
+export async function completePaymobPaymentApi(
+  reference: string,
+  data: {
+    token?: string;
+    session?: string;
+    gateway_reference?: string;
+    card_brand?: string;
+    channel?: string;
+  }
+) {
+  return apiClient<{
+    success: boolean;
+    status: string;
+    booking_reference: string;
+    redirect_url: string;
+    message: string;
+  }>(`/checkout/bookings/${reference}/paymob-complete`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function declinePaymobPaymentApi(
+  reference: string,
+  data?: {
+    reason?: string;
+  }
+) {
+  return apiClient<{
+    success: boolean;
+    status: string;
+    message: string;
+  }>(`/checkout/bookings/${reference}/paymob-decline`, {
+    method: "POST",
+    body: JSON.stringify(data || {}),
+  });
+}
+

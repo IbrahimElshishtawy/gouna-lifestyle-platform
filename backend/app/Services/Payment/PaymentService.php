@@ -18,6 +18,7 @@ use App\Services\Payment\Gateways\CardGateway;
 use App\Services\Payment\Gateways\ManualBankTransferGateway;
 use App\Services\Payment\Gateways\ManualCashGateway;
 use App\Services\Payment\Gateways\PayPalGateway;
+use App\Services\Payment\Gateways\PaymobGateway;
 use DateTimeInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -70,6 +71,8 @@ class PaymentService
 
         return match ($method->code) {
             'card' => new CardGateway(array_merge($config, ['test_mode' => $method->test_mode])),
+            'paymob' => new PaymobGateway(array_merge($config, ['test_mode' => $method->test_mode])),
+            'instapay' => new PaymobGateway(array_merge($config, ['test_mode' => $method->test_mode, 'payment_channel' => 'instapay'])),
             'paypal' => new PayPalGateway(array_merge($config, ['test_mode' => $method->test_mode])),
             'bank_transfer' => new ManualBankTransferGateway($config),
             'cash' => new ManualCashGateway,

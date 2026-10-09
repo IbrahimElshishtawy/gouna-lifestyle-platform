@@ -30,13 +30,35 @@ class CardGateway implements PaymentGatewayInterface
 
     public function createPayment(Booking $booking, int $amountCents, string $currency): array
     {
+        $secretKey = $this->config['secret_key'] ?? config('services.payment.paymob.secret_key');
+        $publicKey = $this->config['public_key'] ?? config('services.payment.paymob.public_key');
+        $hasLiveCredentials = ! empty($secretKey) && ! empty($publicKey) && ! in_array($secretKey, ['pk_test_placeholder_key', 'sk_test_placeholder_secret', 'placeholder'], true);
+
+        if ($hasLiveCredentials) {
+            return (new PaymobGateway($this->config))->createPayment($booking, $amountCents, $currency);
+        }
+
         if ($this->testMode) {
             // Test mode: simulate a checkout session
             $sessionId = 'CARD-'.strtoupper(Str::random(16));
-            $checkoutUrl = route('checkout.card-mock', [
-                'reference' => $booking->reference,
-                'session' => $sessionId,
-            ]);
+            $token = $booking->plain_access_token ?? '';
+
+            if (request()?->is('api/*') || request()?->wantsJson()) {
+                $frontendUrl = rtrim((string) config('services.payment.frontend_url', 'http://localhost:3000'), '/');
+                $checkoutUrl = "{$frontendUrl}/checkout/paymob-gateway?" . http_build_query([
+                    'reference' => $booking->reference,
+                    'session' => $sessionId,
+                    'amount' => $amountCents,
+                    'currency' => $currency ?: 'EGP',
+                    'token' => $token,
+                    'channel' => 'card',
+                ]);
+            } else {
+                $checkoutUrl = route('checkout.card-mock', [
+                    'reference' => $booking->reference,
+                    'session' => $sessionId,
+                ]);
+            }
 
             return [
                 'redirect_url' => $checkoutUrl,

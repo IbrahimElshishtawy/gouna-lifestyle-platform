@@ -253,7 +253,7 @@ class CheckoutController extends Controller
     /**
      * Sandbox: Card 3DS Mock Simulation Page.
      */
-    public function cardMock(Request $request, string $reference): View
+    public function cardMock(Request $request, string $reference): View|\Illuminate\Http\RedirectResponse
     {
         abort_unless(app()->environment('local', 'testing'), 403, 'Sandbox endpoints disabled in production.');
 
@@ -263,6 +263,13 @@ class CheckoutController extends Controller
 
         $transaction = $booking->transactions()->latest()->firstOrFail();
         $sessionId = $request->query('session', $transaction->transaction_id);
+
+        if (! app()->runningUnitTests()) {
+            $frontendUrl = rtrim((string) config('services.payment.frontend_url', 'http://localhost:3000'), '/');
+            $token = $booking->plain_access_token ?? '';
+
+            return redirect("{$frontendUrl}/checkout/paymob-gateway?reference={$booking->reference}&session={$sessionId}&token={$token}&amount={$transaction->amount_cents}&currency={$transaction->currency}&channel=card");
+        }
 
         return view('checkout.card_mock', compact('booking', 'transaction', 'sessionId'));
     }
