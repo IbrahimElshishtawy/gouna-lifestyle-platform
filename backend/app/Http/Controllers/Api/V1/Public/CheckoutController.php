@@ -17,6 +17,7 @@ use App\Modules\Customer\Application\Actions\FindOrCreateCustomerAction;
 use App\Modules\Payment\Application\Actions\InitiatePaymentAction;
 use App\Modules\Pricing\Application\Queries\CalculateBookingQuoteQuery;
 use App\Shared\Domain\Exceptions\BookingUnavailableException as DomainAvailabilityException;
+use App\Services\Payment\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class CheckoutController extends Controller
         private readonly FindOrCreateCustomerAction $findOrCreateCustomerAction,
         private readonly CreateBookingAction $createBookingAction,
         private readonly InitiatePaymentAction $initiatePaymentAction,
+        private readonly PaymentService $paymentService,
     ) {}
 
     /**
@@ -186,5 +188,75 @@ class CheckoutController extends Controller
         }
 
         return new BookingResource($booking);
+    }
+
+    /**
+     * Authorize and confirm payment completed via Paymob hosted gateway or simulator.
+     */
+    public function completePaymobPayment(Request $request, string $reference): JsonResponse
+    {
+        $booking = Booking::where('reference', $reference)
+            ->with(['transactions', 'customer', 'bookable'])
+            ->firstOrFail();
+
+        $token = $request->input('token') ?? $request->query('token');
+        if ($token && ! empty($booking->booking_access_token)) {
+            if (! hash_equals($booking->booking_access_token, hash('sha256', (string) $token))) {
+                return response()->json(['error' => 'Invalid booking security token.'], 403);
+            }
+        }
+
+        $transaction = $booking->transactions()->where('status', 'pending')->latest()->first();
+        if (! $transaction) {
+            $transaction = $booking->transactions()->latest()->first();
+        }
+
+        if (! $transaction) {
+            return response()->json(['error' => 'No transaction record found for this booking.'], 404);
+        }
+
+        if ($transaction->status === 'completed') {
+            return response()->json([
+                'success' => true,
+                'status' => 'completed',
+                'booking_reference' => $booking->reference,
+                'redirect_url' => "/checkout/confirmation/{$booking->reference}?token={$token}",
+                'message' => 'Payment already completed.',
+            ]);
+        }
+
+        $gatewayRef = (string) ($request->input('gateway_reference') ?? ('PAYMOB-' . time() . '-' . rand(1000, 9999)));
+        $confirmedTransaction = $this->paymentService->confirmPayment($transaction->transaction_id, $gatewayRef);
+
+        return response()->json([
+            'success' => true,
+            'status' => 'completed',
+            'booking_reference' => $booking->reference,
+            'transaction_id' => $confirmedTransaction->transaction_id,
+            'gateway_reference' => $gatewayRef,
+            'amount_cents' => $confirmedTransaction->amount_cents,
+            'currency' => $confirmedTransaction->currency,
+            'redirect_url' => "/checkout/confirmation/{$booking->reference}?token={$token}",
+            'message' => 'Payment has been successfully authorized and confirmed by Paymob.',
+        ]);
+    }
+
+    /**
+     * Mark Paymob payment as declined / cancelled.
+     */
+    public function declinePaymobPayment(Request $request, string $reference): JsonResponse
+    {
+        $booking = Booking::where('reference', $reference)->firstOrFail();
+        $transaction = $booking->transactions()->where('status', 'pending')->latest()->first();
+        if ($transaction) {
+            $reason = (string) ($request->input('reason') ?? 'Payment declined or cancelled by customer.');
+            $this->paymentService->failPayment($transaction->transaction_id, $reason);
+        }
+
+        return response()->json([
+            'success' => false,
+            'status' => 'failed',
+            'message' => 'Payment authorization declined.',
+        ], 400);
     }
 }

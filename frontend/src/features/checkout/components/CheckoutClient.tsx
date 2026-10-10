@@ -38,6 +38,7 @@ export default function CheckoutClient({
   const [appliedPromo, setAppliedPromo] = useState(initialPromo ? "VIP10" : "");
   const [openNights, setOpenNights] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
   const [bookingConfirmedRef, setBookingConfirmedRef] = useState<string | null>(null);
 
   // Compute stay duration
@@ -88,6 +89,7 @@ export default function CheckoutClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError("");
 
     try {
       const res = await processCheckout({
@@ -106,17 +108,25 @@ export default function CheckoutClient({
         payment_method_id: paymentMethodId,
       });
 
-      const ref = res.booking_reference || `GON-2026-${Math.floor(100000 + Math.random() * 900000)}`;
-      setBookingConfirmedRef(ref);
+      if (res?.redirect_url) {
+        // Redirect directly to Paymob Hosted Gateway (Live or Hosted Simulator)
+        window.location.href = res.redirect_url;
+        return;
+      }
 
-      const msgHeader = locale === "ar" ? "مرحباً مكتب حجز جوناو كونسيرج،" : "Hello GouNow VIP Reservations,";
-      const text = encodeURIComponent(
-        `${msgHeader}\n\nProperty: ${property.title}\nRef: ${ref}\nCheck-in: ${initialCheckIn}\nCheck-out: ${initialCheckOut} (${nights} Nights)\nGuests: ${initialGuests}\nGuest: ${firstName} ${lastName} (${phone || email})\nTotal: ${formatCurrency(totalAmount)} (Due Today: ${formatCurrency(payableAmount)} - ${paymentType.toUpperCase()})`
+      if (res?.booking_reference) {
+        window.location.href = `/${locale}/checkout/confirmation/${res.booking_reference}`;
+        return;
+      }
+
+      setIsSubmitting(false);
+    } catch (err: any) {
+      setFormError(
+        err?.message ||
+          (locale === "ar"
+            ? "تعذر معالجة الطلب حالياً، يرجى التأكد من ملء كافة البيانات المطلوبة وإعادة المحاولة."
+            : "Could not initiate payment. Please verify your information and try again.")
       );
-      window.open(`https://wa.me/201000000000?text=${text}`, "_blank");
-    } catch {
-      setBookingConfirmedRef(`GON-2026-${Math.floor(100000 + Math.random() * 900000)}`);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -475,14 +485,31 @@ export default function CheckoutClient({
               </p>
             </div>
 
+            {formError && (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{formError}</span>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
               className="w-full py-4 px-6 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white font-bold text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>{isSubmitting ? t.checkout.processing : t.checkout.completeReservation}</span>
-              <span>({formatCurrency(payableAmount)})</span>
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>{locale === "ar" ? "جاري تحويلك لبوابة الدفع الإلكتروني (Paymob)..." : "Redirecting to Paymob Gateway..."}</span>
+                </>
+              ) : (
+                <>
+                  <span>🔒</span>
+                  <span>{t.checkout.completeReservation}</span>
+                  <span>({formatCurrency(payableAmount)})</span>
+                </>
+              )}
             </button>
           </form>
         </div>
