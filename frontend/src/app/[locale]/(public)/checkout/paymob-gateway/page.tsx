@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
@@ -12,11 +12,9 @@ interface Props {
   }>;
 }
 
-export default function PaymobGatewayPage({ params }: Props) {
+function PaymobGatewayContent({ locale }: { locale: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const resolvedParams = use(params);
-  const locale = resolvedParams.locale;
   const isAr = locale === "ar";
 
   const reference = searchParams.get("reference") || "GON-2026-PAYMOB";
@@ -619,5 +617,21 @@ export default function PaymobGatewayPage({ params }: Props) {
         </div>
       )}
     </div>
+  );
+}
+
+export default function PaymobGatewayPage({ params }: Props) {
+  const resolvedParams = use(params);
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-slate-300 space-y-4">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-mono">Loading Paymob Gateway...</p>
+        </div>
+      }
+    >
+      <PaymobGatewayContent locale={resolvedParams.locale} />
+    </Suspense>
   );
 }

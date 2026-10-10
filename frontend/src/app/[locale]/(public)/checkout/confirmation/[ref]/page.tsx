@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
+import React, { useEffect, useState, use, Suspense } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/routing";
@@ -13,10 +13,8 @@ interface Props {
   }>;
 }
 
-export default function CheckoutConfirmationPage({ params }: Props) {
+function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: string }) {
   const searchParams = useSearchParams();
-  const resolvedParams = use(params);
-  const { locale, ref } = resolvedParams;
   const isAr = locale === "ar";
   const token = searchParams.get("token") || "";
 
@@ -281,5 +279,21 @@ export default function CheckoutConfirmationPage({ params }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutConfirmationPage({ params }: Props) {
+  const resolvedParams = use(params);
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
+          <div className="w-12 h-12 border-4 border-brand-terracotta border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-brand-brown-muted font-medium">Loading confirmed booking...</p>
+        </div>
+      }
+    >
+      <CheckoutConfirmationContent locale={resolvedParams.locale} ref={resolvedParams.ref} />
+    </Suspense>
   );
 }
