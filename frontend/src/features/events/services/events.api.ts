@@ -306,7 +306,9 @@ export async function getPublicEvents(params?: {
     if (params?.category && params.category !== "all") query.append("category", params.category);
     if (params?.page) query.append("page", String(params.page));
 
-    const res = await apiClient<{ data: PublicEventItem[]; meta?: any }>(`/events?${query.toString()}`);
+    const queryString = query.toString();
+    const endpoint = queryString ? `/events?${queryString}` : "/events";
+    const res = await apiClient<{ data: PublicEventItem[]; meta?: any }>(endpoint);
     return res;
   } catch (error) {
     console.warn("Failed to fetch public events from API, falling back to empty list:", error);

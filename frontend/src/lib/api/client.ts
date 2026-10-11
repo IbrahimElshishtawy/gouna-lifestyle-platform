@@ -63,9 +63,10 @@ export async function apiClient<T>(
   endpoint: string,
   options: ApiClientOptions = {}
 ): Promise<T> {
-  const url = endpoint.startsWith("http")
-    ? endpoint
-    : `${API_BASE_URL.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+  const normalizedEndpoint = endpoint.replace(/\?$/, "");
+  const url = normalizedEndpoint.startsWith("http")
+    ? normalizedEndpoint
+    : `${API_BASE_URL.replace(/\/$/, "")}/${normalizedEndpoint.replace(/^\//, "")}`;
 
   const headers = new Headers(options.headers || {});
   
