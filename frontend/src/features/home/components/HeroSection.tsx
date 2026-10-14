@@ -15,6 +15,20 @@ const CINEMATIC_PRESETS: HeroScene[] = [
     media_type: "image",
     image_url: "/assets/images/Gounow landscape.png",
   },
+  {
+    id: "gounow_villa",
+    name_ar: "فلل البحيرات الشاطئية",
+    name_en: "Lagoon Waterfront Villas",
+    media_type: "image",
+    image_url: "/assets/images/hero-villa-dusk.jpg",
+  },
+  {
+    id: "gounow_yacht",
+    name_ar: "رحلات اليخوت الخاصة",
+    name_en: "Private Yacht Charters",
+    media_type: "image",
+    image_url: "/assets/images/tawila-yacht.jpg",
+  },
 ];
 
 interface HeroSectionProps {
@@ -105,9 +119,9 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
 
   return (
-    <section className="relative min-h-[560px] sm:min-h-[620px] lg:min-h-[700px] flex flex-col justify-center bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 pb-10 sm:pb-14">
+    <section className="relative min-h-[80vh] sm:min-h-[85vh] lg:min-h-[90vh] flex flex-col justify-end bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-36 pb-6 sm:pb-10 lg:pb-12">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         {isVideo ? (
           <video
             key={currentMediaUrl}
@@ -116,36 +130,31 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
             loop
             muted
             playsInline
-            className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
+            className="w-full h-full object-cover object-center"
           />
         ) : (
           <Image
             key={currentMediaUrl}
             src={currentMediaUrl}
-            alt="El Gouna"
+            alt="El Gouna Lifestyle"
             fill
             priority
             sizes="100vw"
-            className="w-full h-full object-cover object-[center_right] lg:object-center motion-safe:animate-ken-burns transition-all duration-1000"
+            className="w-full h-full object-cover object-center transition-all duration-700"
           />
         )}
 
         {/* Top Vignette for Transparent Header Contrast */}
-        <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-x-0 top-0 h-32 sm:h-44 bg-gradient-to-b from-black/70 via-black/30 to-transparent pointer-events-none z-10" />
 
-        {/* Asymmetrical Directional Text Shading:
-            Provides strong contrast for the editorial text on the left/start without obscuring the villa on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
-        <div className="absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
+        {/* Subtle Ambient Film Glow (retaining vivid image colors) */}
+        <div className="absolute inset-0 bg-black/15 pointer-events-none z-10" />
 
-        {/* Ambient Dusk Glow */}
-        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/15 to-black/50 pointer-events-none z-10" />
-
-        {/* Lower Dark Shading to Anchor the Search Panel */}
-        <div className="absolute inset-x-0 bottom-0 h-80 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/75 to-transparent pointer-events-none z-10" />
+        {/* Soft Lower Shading to Anchor the Search Panel */}
+        <div className="absolute inset-x-0 bottom-0 h-56 sm:h-72 bg-gradient-to-t from-black/75 via-black/30 to-transparent pointer-events-none z-10" />
       </div>
 
-      {/* Ultra-compact, clean edge transition (only 16-24px at the bottom boundary, eliminating any ghostly wash) */}
+      {/* Ultra-compact, clean edge transition */}
       <div className="absolute inset-x-0 bottom-0 h-4 sm:h-6 bg-gradient-to-b from-transparent to-[#FAF8F5] pointer-events-none z-10" />
 
       {/* Floating Cinematic Scene Switcher (Desktop & Laptop) */}
@@ -162,11 +171,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               key={p.id || idx}
               type="button"
               onClick={() => setActiveSceneIndex(idx)}
-              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-                activeSceneIndex === idx
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${activeSceneIndex === idx
                   ? "bg-brand-terracotta text-white shadow-md scale-105"
                   : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
+                }`}
             >
               {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
             </button>
@@ -182,9 +190,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               key={idx}
               type="button"
               onClick={() => setActiveSceneIndex(idx)}
-              className={`h-2 rounded-full transition-all ${
-                activeSceneIndex === idx ? "w-5 bg-brand-terracotta" : "w-2 bg-white/50"
-              }`}
+              className={`h-2 rounded-full transition-all ${activeSceneIndex === idx ? "w-5 bg-brand-terracotta" : "w-2 bg-white/50"
+                }`}
               aria-label={`Scene ${idx + 1}`}
             />
           ))}
@@ -192,7 +199,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
       )}
 
       {/* ==================== LOWER TIER: LUXURY BOOKING SEARCH ==================== */}
-      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 my-auto">
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 mt-auto mb-2 sm:mb-4 lg:mb-6">
 
         {/* Master Luxury Search Card (Overlapping lower edge of background, warm off-white surface, 75-88% width) */}
         <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3.5 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
