@@ -104,20 +104,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   };
 
 
-  const titleLine1 = isAr
-    ? (currentScene?.title_line1_ar || heroConfig?.title_line1_ar || t.hero.titleLine1 || "عِش رفاهية الجونة")
-    : (currentScene?.title_line1_en || heroConfig?.title_line1_en || t.hero.titleLine1 || "Live the Unrivaled");
-
-  const titleLine2 = isAr
-    ? (currentScene?.title_line2_ar || heroConfig?.title_line2_ar || t.hero.titleLine2 || "كما لم تعهدها من قبل")
-    : (currentScene?.title_line2_en || heroConfig?.title_line2_en || t.hero.titleLine2 || "El Gouna Lifestyle");
-
-  const subtitle = isAr
-    ? (currentScene?.subtitle_ar || heroConfig?.subtitle_ar || t.hero.subtitle)
-    : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
-
   return (
-    <section className="relative min-h-[820px] sm:min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
+    <section className="relative min-h-[560px] sm:min-h-[620px] lg:min-h-[700px] flex flex-col justify-center bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 pb-10 sm:pb-14">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
       <div className="absolute inset-0 z-0">
         {isVideo ? (
@@ -203,76 +191,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
       )}
 
-      {/* ==================== 2. ASYMMETRICAL EDITORIAL HERO GRID ==================== */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 my-auto">
-        <div className="max-w-3xl flex flex-col items-start text-start">
-          
-          {/* 1. Small Eyebrow Label */}
-          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.22em] mb-3 sm:mb-4 shadow-sm animate-fade-in-down">
-            <Image
-              src="/assets/images/Gounow Main signature.png"
-              alt="Gounow"
-              width={16}
-              height={16}
-              className="object-contain drop-shadow shrink-0"
-            />
-            <span className="w-1 h-1 rounded-full bg-brand-terracotta shrink-0" />
-            <span className="truncate">
-              {heroConfig
-                ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
-                : (isAr ? "أقم • استكشف • انتمِ — ملاذات الجونة الخاصة" : "STAY · EXPLORE · BELONG — PRIVATE ESCAPES")}
-            </span>
-          </div>
-
-          {/* 2. Main Headline: Refined Editorial Serif, Fluid 2-3 Line Wrap, Controlled Max Width */}
-          <h1 className="font-serif text-3xl sm:text-4.5xl md:text-5xl lg:text-5.5xl xl:text-6.5xl font-bold tracking-tight text-[#FAF8F5] leading-[1.15] sm:leading-[1.1] mb-3 sm:mb-4 max-w-2xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] animate-fade-in-up [animation-delay:150ms]">
-            {titleLine1} <br />
-            <span className="italic font-normal text-amber-200/90">{titleLine2}</span>
-          </h1>
-
-          {/* 3. Short Supporting Description */}
-          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-[#E5DCD3] max-w-xl font-light leading-relaxed mb-5 sm:mb-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:250ms]">
-            {subtitle}
-          </p>
-
-          {/* 4. Dual Clear CTAs: Directly Beneath Description */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up [animation-delay:350ms]">
-            <a
-              href={heroConfig?.cta1_link || "#stays"}
-              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer text-center"
-            >
-              <span>
-                {heroConfig
-                  ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
-                  : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
-              </span>
-              <svg
-                className="w-4 h-4 ms-2 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-
-            <a
-              href={heroConfig?.cta2_link || "#experiences"}
-              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-center"
-            >
-              <span>
-                {heroConfig
-                  ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
-                  : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
-              </span>
-            </a>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ==================== 3. LOWER TIER: BOOKING WIDGET & STATISTICS STRIP ==================== */}
-      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-14">
+      {/* ==================== LOWER TIER: LUXURY BOOKING SEARCH ==================== */}
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 my-auto">
 
         {/* Master Luxury Search Card (Overlapping lower edge of background, warm off-white surface, 75-88% width) */}
         <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3.5 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
