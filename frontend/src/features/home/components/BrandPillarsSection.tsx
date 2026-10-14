@@ -15,6 +15,7 @@ export default function BrandPillarsSection() {
     {
       id: "stays",
       number: "01",
+      icon: "/assets/images/house logo.png",
       title: t.brandPillars.pillar1Title,
       description: t.brandPillars.pillar1Desc,
       tag: isAr ? "فلل وبحيرات مائية" : "Lagoon & Beachfront Stays",
@@ -23,6 +24,7 @@ export default function BrandPillarsSection() {
     {
       id: "charters",
       number: "02",
+      icon: "/assets/images/Trips highlights logo.png",
       title: t.brandPillars.pillar2Title,
       description: t.brandPillars.pillar2Desc,
       tag: isAr ? "يخوت وجزر خاصة" : "Private Yacht Expeditions",
@@ -31,6 +33,7 @@ export default function BrandPillarsSection() {
     {
       id: "concierge",
       number: "03",
+      icon: "/assets/images/About logo.png",
       title: t.brandPillars.pillar3Title,
       description: t.brandPillars.pillar3Desc,
       tag: isAr ? "خدمات فندقية خاصة" : "Dedicated Lifestyle Desk",
@@ -116,9 +119,20 @@ export default function BrandPillarsSection() {
                       className="flex items-center justify-between mb-5 sm:mb-8 transition-transform duration-300"
                       style={{ transform: "translateZ(24px)" }}
                     >
-                      <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
-                        {pillar.number}
-                      </span>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
+                          {pillar.number}
+                        </span>
+                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-brand-sand-light/60 p-1 border border-brand-border/60">
+                          <Image
+                            src={pillar.icon}
+                            alt={pillar.title}
+                            width={28}
+                            height={28}
+                            className="object-contain w-full h-full"
+                          />
+                        </div>
+                      </div>
                       <span className="text-[10px] uppercase font-bold tracking-widest text-brand-brown-muted">
                         {pillar.tag}
                       </span>

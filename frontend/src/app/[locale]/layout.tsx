@@ -67,10 +67,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "any" },
-        { url: "/favicon.png", type: "image/png", sizes: "32x32" },
-        { url: "/assets/images/official-elgouna-icon.png", type: "image/png", sizes: "192x192" },
+        { url: "/assets/images/Gounow Main signature.png", type: "image/png", sizes: "192x192" },
       ],
-      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      apple: [{ url: "/assets/images/Gounow Main signature.png", sizes: "180x180", type: "image/png" }],
       shortcut: "/favicon.ico",
     },
   };
@@ -126,7 +125,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Tajawal:wght@300;400;500;700&display=swap"
           rel="stylesheet"
         />
         <script

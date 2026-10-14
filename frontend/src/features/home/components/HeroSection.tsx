@@ -9,6 +9,13 @@ import type { MediaDesignConfig, HeroScene } from "@/features/admin/types";
 
 const CINEMATIC_PRESETS: HeroScene[] = [
   {
+    id: "gounow_horizon",
+    name_ar: "أفق جونو الساحلي",
+    name_en: "Gounow Coastal Horizon",
+    media_type: "image",
+    image_url: "/assets/images/Gounow landscape.png",
+  },
+  {
     id: "dusk",
     name_ar: "غروب الفلل الذهبي",
     name_en: "Lagoon Sunset",
@@ -23,11 +30,18 @@ const CINEMATIC_PRESETS: HeroScene[] = [
     image_url: "/assets/images/fanadir-villa.jpg",
   },
   {
-    id: "marine",
-    name_ar: "يخوت مارينا الجونة",
-    name_en: "Marina Yacht Life",
+    id: "tawila",
+    name_ar: "يخوت جزيرة طويلة",
+    name_en: "Tawila Island Yacht",
     media_type: "image",
-    image_url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85",
+    image_url: "/assets/images/tawila-yacht.jpg",
+  },
+  {
+    id: "sandy",
+    name_ar: "رمال الجونة الساحلية",
+    name_en: "Pristine Sands",
+    media_type: "image",
+    image_url: "/assets/images/Sandy background.png",
   },
 ];
 
@@ -224,12 +238,19 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
           <div className="lg:col-span-8 xl:col-span-7 flex flex-col items-start text-start">
             
             {/* 1. Small Eyebrow Label */}
-            <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.24em] mb-3.5 sm:mb-4 shadow-sm animate-fade-in-down">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
+            <div className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.24em] mb-3.5 sm:mb-4 shadow-sm animate-fade-in-down">
+              <Image
+                src="/assets/images/Gounow Main signature.png"
+                alt="Gounow"
+                width={16}
+                height={16}
+                className="object-contain drop-shadow"
+              />
+              <span className="w-1 h-1 rounded-full bg-brand-terracotta" />
               <span>
                 {heroConfig
                   ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
-                  : (isAr ? "تجارب استثنائية منتقاة • ملاذات خاصة" : "CURATED LUXURY EXPERIENCES · PRIVATE ESCAPES")}
+                  : (isAr ? "أقم • استكشف • انتمِ — ملاذات الجونة الخاصة" : "STAY · EXPLORE · BELONG — PRIVATE ESCAPES")}
               </span>
             </div>
 

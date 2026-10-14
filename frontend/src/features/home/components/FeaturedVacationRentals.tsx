@@ -66,15 +66,26 @@ export default function FeaturedVacationRentals({ properties }: Props) {
       <section id="stays" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto scroll-mt-24 border-b border-brand-border/60">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 lg:mb-12">
-          <div>
-            <ChapterTag
-              number="CHAPTER 02"
-              title={t.vacationRentals.eyebrow}
-              subtitle={t.vacationRentals.subtitle}
-            />
-            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
-              {t.vacationRentals.title}
-            </h2>
+          <div className="flex items-start gap-4">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-white shadow-md border border-brand-sand/60 p-1.5 hidden sm:flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/images/Rental highlights logo.png"
+                alt="Rental Highlights"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <ChapterTag
+                number="CHAPTER 02"
+                title={t.vacationRentals.eyebrow}
+                subtitle={t.vacationRentals.subtitle}
+              />
+              <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
+                {t.vacationRentals.title}
+              </h2>
+            </div>
           </div>
 
           {/* Carousel & View All Controls */}
@@ -206,7 +217,18 @@ export default function FeaturedVacationRentals({ properties }: Props) {
               <div>
                 {/* Location & Rating Header */}
                 <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
-                  <span>{activeProperty.location?.name || t.common.elGouna}</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative w-4 h-4 rounded-full overflow-hidden inline-block shrink-0 border border-brand-terracotta/40">
+                      <Image
+                        src="/assets/images/icon-villa.jpg"
+                        alt="Villa Icon"
+                        width={16}
+                        height={16}
+                        className="object-cover"
+                      />
+                    </span>
+                    <span>{activeProperty.location?.name || t.common.elGouna}</span>
+                  </span>
                   <span className="flex items-center gap-1.5 text-brand-brown text-xs font-semibold">
                     <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold">4.98</span>
                     <span className="text-brand-brown-muted font-normal">(24 {t.common.readReviews})</span>

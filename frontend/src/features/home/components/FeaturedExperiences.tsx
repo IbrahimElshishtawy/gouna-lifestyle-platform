@@ -32,15 +32,26 @@ export default function FeaturedExperiences({ experiences }: Props) {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 lg:mb-12">
-          <div>
-            <ChapterTag
-              number="CHAPTER 03"
-              title={t.experiences.eyebrow}
-              subtitle={t.experiences.subtitle}
-            />
-            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
-              {t.experiences.title}
-            </h2>
+          <div className="flex items-start gap-4">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-brand-sand-light shadow-md border border-brand-sand/60 p-1.5 hidden sm:flex items-center justify-center shrink-0">
+              <Image
+                src="/assets/images/Trips highlights logo.png"
+                alt="Trips Highlights"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <ChapterTag
+                number="CHAPTER 03"
+                title={t.experiences.eyebrow}
+                subtitle={t.experiences.subtitle}
+              />
+              <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-tight">
+                {t.experiences.title}
+              </h2>
+            </div>
           </div>
 
           <div className="mt-4 sm:mt-6 md:mt-0 flex items-center justify-between sm:justify-start gap-4">

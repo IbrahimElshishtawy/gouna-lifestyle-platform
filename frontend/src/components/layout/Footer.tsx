@@ -15,12 +15,12 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-brand-terracotta/25 to-brand-brown/40 border border-brand-terracotta/40 shadow-sm group-hover:scale-105 transition-all duration-300 p-1.5 backdrop-blur-md">
+              <div className="relative h-11 w-11 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#A55332]/25 via-[#DBC0A0]/20 to-[#5B4635]/60 border border-[#A55332]/40 shadow-sm group-hover:scale-105 transition-all duration-300 p-1.5 backdrop-blur-md">
                 <Image
-                  src="/assets/images/official-elgouna-icon.png"
-                  alt="El Gouna"
-                  width={26}
-                  height={26}
+                  src="/assets/images/Gounow Main signature.png"
+                  alt="GouNow"
+                  width={34}
+                  height={34}
                   className="object-contain drop-shadow"
                 />
               </div>
@@ -28,16 +28,32 @@ export default function Footer() {
                 <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
                   {t.common.elGouna}
                 </span>
-                <span className="block text-base font-serif font-bold text-white tracking-wider">
-                  GOUNOW LIFESTYLE
+                <span className="block text-lg font-serif font-bold text-white tracking-wider">
+                  GOUNOW
                 </span>
               </div>
             </Link>
+
+            <p className="text-xs text-[#DBC0A0] font-serif italic text-sm">
+              &ldquo;Stay. Explore. Belong.&rdquo;
+            </p>
+
             <p className="text-xs text-[#C7BCB3] leading-relaxed max-w-sm font-light">
               {t.footer.tagline}
             </p>
-            <div className="pt-2 flex items-center gap-2 text-xs text-[#E5DCD3] font-medium">
-              <span>📍 {t.footer.location}</span>
+
+            {/* Official El Gouna Destination Partnership */}
+            <div className="pt-2 flex items-center gap-4">
+              <Image
+                src="/assets/images/official-elgouna-logo-white.webp"
+                alt="Official Destination Partner - El Gouna"
+                width={110}
+                height={34}
+                className="object-contain h-7 w-auto opacity-75 hover:opacity-100 transition-opacity"
+              />
+              <span className="text-[11px] text-[#E5DCD3]/70 font-mono">
+                EL GOUNA, RED SEA
+              </span>
             </div>
           </div>
 
