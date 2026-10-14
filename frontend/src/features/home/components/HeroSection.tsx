@@ -205,103 +205,67 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
       {/* ==================== 2. ASYMMETRICAL EDITORIAL HERO GRID ==================== */}
       <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-end">
+        <div className="max-w-3xl flex flex-col items-start text-start">
           
-          {/* Left Content Area (~7-10% from viewport edge via container padding) */}
-          <div className="lg:col-span-8 xl:col-span-7 flex flex-col items-start text-start">
-            
-            {/* 1. Small Eyebrow Label */}
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.22em] mb-3 sm:mb-4 shadow-sm animate-fade-in-down">
-              <Image
-                src="/assets/images/Gounow Main signature.png"
-                alt="Gounow"
-                width={16}
-                height={16}
-                className="object-contain drop-shadow shrink-0"
-              />
-              <span className="w-1 h-1 rounded-full bg-brand-terracotta shrink-0" />
-              <span className="truncate">
-                {heroConfig
-                  ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
-                  : (isAr ? "أقم • استكشف • انتمِ — ملاذات الجونة الخاصة" : "STAY · EXPLORE · BELONG — PRIVATE ESCAPES")}
-              </span>
-            </div>
-
-            {/* 2. Main Headline: Refined Editorial Serif, Fluid 2-3 Line Wrap, Controlled Max Width */}
-            <h1 className="font-serif text-3xl sm:text-4.5xl md:text-5xl lg:text-5.5xl xl:text-6.5xl font-bold tracking-tight text-[#FAF8F5] leading-[1.15] sm:leading-[1.1] mb-3 sm:mb-4 max-w-2xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] animate-fade-in-up [animation-delay:150ms]">
-              {titleLine1} <br />
-              <span className="italic font-normal text-amber-200/90">{titleLine2}</span>
-            </h1>
-
-            {/* 3. Short Supporting Description */}
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-[#E5DCD3] max-w-xl font-light leading-relaxed mb-5 sm:mb-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:250ms]">
-              {subtitle}
-            </p>
-
-            {/* 4. Dual Clear CTAs: Directly Beneath Description */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up [animation-delay:350ms]">
-              <a
-                href={heroConfig?.cta1_link || "#stays"}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer text-center"
-              >
-                <span>
-                  {heroConfig
-                    ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
-                    : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
-                </span>
-                <svg
-                  className="w-4 h-4 ms-2 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-
-              <a
-                href={heroConfig?.cta2_link || "#experiences"}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-center"
-              >
-                <span>
-                  {heroConfig
-                    ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
-                    : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
-                </span>
-              </a>
-            </div>
-
+          {/* 1. Small Eyebrow Label */}
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.16em] sm:tracking-[0.22em] mb-3 sm:mb-4 shadow-sm animate-fade-in-down">
+            <Image
+              src="/assets/images/Gounow Main signature.png"
+              alt="Gounow"
+              width={16}
+              height={16}
+              className="object-contain drop-shadow shrink-0"
+            />
+            <span className="w-1 h-1 rounded-full bg-brand-terracotta shrink-0" />
+            <span className="truncate">
+              {heroConfig
+                ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
+                : (isAr ? "أقم • استكشف • انتمِ — ملاذات الجونة الخاصة" : "STAY · EXPLORE · BELONG — PRIVATE ESCAPES")}
+            </span>
           </div>
 
-          {/* Right Column: Restrained Editorial Live Status Module (Laptops & Desktops) */}
-          <div className="lg:col-span-4 xl:col-span-5 hidden lg:flex flex-col items-end justify-end pb-1">
-            <div className="w-full max-w-xs p-4 sm:p-5 rounded-2xl bg-black/55 backdrop-blur-xl border border-white/15 text-start shadow-2xl space-y-3 animate-fade-in-up [animation-delay:300ms]">
-              
-              {/* Status Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] font-mono font-bold tracking-widest text-[#FAF8F5]">
-                    {isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-amber-300 font-semibold">
-                  28°C · {isAr ? "صافٍ ومثالي" : "Clear Sky"}
-                </span>
-              </div>
+          {/* 2. Main Headline: Refined Editorial Serif, Fluid 2-3 Line Wrap, Controlled Max Width */}
+          <h1 className="font-serif text-3xl sm:text-4.5xl md:text-5xl lg:text-5.5xl xl:text-6.5xl font-bold tracking-tight text-[#FAF8F5] leading-[1.15] sm:leading-[1.1] mb-3 sm:mb-4 max-w-2xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] animate-fade-in-up [animation-delay:150ms]">
+            {titleLine1} <br />
+            <span className="italic font-normal text-amber-200/90">{titleLine2}</span>
+          </h1>
 
-              {/* Editorial Caption */}
-              <p className="text-[11px] text-[#E5DCD3]/85 leading-relaxed">
-                {isAr
-                  ? "موسم مثالي للإبحار في مياه البحر الأحمر الصافية والإقامة في أرقى الفلل الشاطئية."
-                  : "Perfect season for yacht cruising in pristine Red Sea waters & curated lagoon living."}
-              </p>
+          {/* 3. Short Supporting Description */}
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg text-[#E5DCD3] max-w-xl font-light leading-relaxed mb-5 sm:mb-7 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:250ms]">
+            {subtitle}
+          </p>
 
-              <div className="flex items-center justify-between pt-1 text-[10px] font-mono text-[#DBC0A0]">
-                <span>{isAr ? "رياح هادئة ٨ عقدة" : "Wind: 8 knots Calm"}</span>
-                <span>{isAr ? "بحر مستقر" : "Sea: Gentle"}</span>
-              </div>
-            </div>
+          {/* 4. Dual Clear CTAs: Directly Beneath Description */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up [animation-delay:350ms]">
+            <a
+              href={heroConfig?.cta1_link || "#stays"}
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer text-center"
+            >
+              <span>
+                {heroConfig
+                  ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
+                  : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
+              </span>
+              <svg
+                className="w-4 h-4 ms-2 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+
+            <a
+              href={heroConfig?.cta2_link || "#experiences"}
+              className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-center"
+            >
+              <span>
+                {heroConfig
+                  ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
+                  : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
+              </span>
+            </a>
           </div>
 
         </div>
