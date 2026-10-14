@@ -11,7 +11,6 @@ import FeaturedSales from "@/features/home/components/FeaturedSales";
 import TestimonialsSection from "@/features/home/components/TestimonialsSection";
 import EventsSection from "@/features/home/components/EventsSection";
 import ConciergeInquiry from "@/features/home/components/ConciergeInquiry";
-import BrandIdentityShowcase from "@/features/home/components/BrandIdentityShowcase";
 import FaqSection from "@/features/home/components/FaqSection";
 import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
@@ -133,10 +132,6 @@ export default async function HomePage({
           </ScrollReveal>
         )}
 
-        {/* 10. Brand Philosophy & Design Ethos Showcase */}
-        <ScrollReveal animation="fade-up" duration={800}>
-          <BrandIdentityShowcase />
-        </ScrollReveal>
 
         {/* 11. Personal Concierge & Tailored Arrangements Lead Form */}
         {sections?.concierge !== false && (
