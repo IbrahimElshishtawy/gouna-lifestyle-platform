@@ -42,7 +42,10 @@ export default function BrandPillarsSection() {
   ];
 
   return (
-    <section className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60">
+    <section
+      id="pillars"
+      className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60 scroll-mt-24"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Chapter Header & Narrative Split */}
         <FadeIn direction="up">

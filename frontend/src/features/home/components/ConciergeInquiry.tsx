@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { submitConciergeInquiry } from "../services/home.api";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
@@ -46,16 +47,37 @@ export default function ConciergeInquiry() {
   };
 
   return (
-    <section id="concierge" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24">
-      <div className="max-w-7xl mx-auto">
+    <section id="concierge" className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] border-t border-brand-border/80 scroll-mt-24 relative overflow-hidden">
+      {/* Background Sand Texture */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply">
+        <Image
+          src="/assets/images/bg-sand-texture.jpg"
+          alt="Texture"
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Left Column: Narrative & Direct VIP Channels (6 cols) */}
           <div className="lg:col-span-6">
-            <ChapterTag
-              number="CHAPTER 07"
-              title={t.concierge.eyebrow}
-              subtitle={t.concierge.subtitle}
-            />
+            <div className="flex items-center gap-3 mb-2">
+              <ChapterTag
+                number="CHAPTER 07"
+                title={t.concierge.eyebrow}
+                subtitle={t.concierge.subtitle}
+              />
+              <div className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 border border-brand-terracotta/40">
+                <Image
+                  src="/assets/images/icon-question.jpg"
+                  alt="Inquiry"
+                  width={20}
+                  height={20}
+                  className="object-cover"
+                />
+              </div>
+            </div>
             <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl font-semibold text-brand-brown leading-[1.15]">
               {t.concierge.title}
             </h2>

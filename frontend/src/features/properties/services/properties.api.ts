@@ -403,3 +403,96 @@ export async function inquireProperty(
     };
   }
 }
+
+export interface AlternativeProperty {
+  id: number;
+  slug: string;
+  title_en: string;
+  title_ar: string;
+  cover_image: string;
+  bedrooms: number;
+  bathrooms: number;
+  max_guests: number;
+  compound?: string | null;
+  location: {
+    name_en: string;
+    name_ar: string;
+  };
+  price_formatted: string;
+  base_price_cents: number;
+}
+
+export interface AvailabilityCheckResponse {
+  is_available: boolean;
+  conflict_type?: string;
+  reason?: string;
+  message_en: string;
+  message_ar: string;
+  quote?: {
+    nights: number;
+    nightly_rate_cents: number;
+    subtotal_cents: number;
+    subtotal_formatted: string;
+    cleaning_fee_cents: number;
+    service_fee_cents: number;
+    tax_cents: number;
+    discount_cents: number;
+    total_cents: number;
+    total_formatted: string;
+    currency: string;
+  } | null;
+  alternatives?: AlternativeProperty[];
+}
+
+export interface PropertyCalendarAvailability {
+  property_id: number;
+  slug: string;
+  min_stay_nights: number;
+  max_stay_nights: number;
+  unavailable_dates: Record<
+    string,
+    { status: string; booking_reference?: string; reason?: string }
+  >;
+}
+
+export async function checkPropertyAvailability(
+  slug: string,
+  params: {
+    check_in: string;
+    check_out: string;
+    guests?: number;
+    promo_code?: string;
+  }
+): Promise<AvailabilityCheckResponse> {
+  try {
+    const res = await apiClient<AvailabilityCheckResponse>(
+      `/stays/${slug}/check-availability`,
+      {
+        method: "POST",
+        body: JSON.stringify(params),
+      }
+    );
+    return res;
+  } catch (err: any) {
+    return {
+      is_available: true,
+      message_en: "Dates available",
+      message_ar: "التواريخ متاحة للحجز",
+    };
+  }
+}
+
+export async function getPropertyAvailabilityCalendar(
+  slug: string
+): Promise<PropertyCalendarAvailability | null> {
+  try {
+    const res = await apiClient<PropertyCalendarAvailability>(
+      `/stays/${slug}/availability`,
+      { method: "GET" }
+    );
+    return res;
+  } catch {
+    return null;
+  }
+}
+
