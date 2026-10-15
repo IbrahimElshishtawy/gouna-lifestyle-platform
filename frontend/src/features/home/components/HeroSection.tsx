@@ -1,21 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
-import type { MediaDesignConfig, HeroScene } from "@/features/admin/types";
-
-const CINEMATIC_PRESETS: HeroScene[] = [
-  {
-    id: "gounow_horizon",
-    name_ar: "أفق جونو الساحلي",
-    name_en: "Gounow Coastal Horizon",
-    media_type: "image",
-    image_url: "/assets/images/Gounow landscape.png",
-  },
-];
+import type { MediaDesignConfig } from "@/features/admin/types";
 
 interface HeroSectionProps {
   heroConfig?: MediaDesignConfig["hero"];
@@ -25,34 +15,6 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
-
-  const configuredScenes: HeroScene[] =
-    heroConfig?.scenes && heroConfig.scenes.length > 0
-      ? heroConfig.scenes
-      : CINEMATIC_PRESETS;
-
-  const [activeSceneIndex, setActiveSceneIndex] = useState(0);
-  const currentScene = configuredScenes[activeSceneIndex] || configuredScenes[0];
-
-  // Auto-rotate scenes if more than one scene exists
-  useEffect(() => {
-    if (configuredScenes.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveSceneIndex((prev) => (prev + 1) % configuredScenes.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [configuredScenes.length]);
-
-  const isVideo =
-    heroConfig?.media_mode === "video"
-      ? !!heroConfig?.video_url
-      : currentScene?.media_type === "video"
-        ? !!currentScene?.video_url
-        : !!heroConfig?.video_url && heroConfig?.media_mode !== "image";
-
-  const currentMediaUrl = isVideo
-    ? (currentScene?.video_url || heroConfig?.video_url || "")
-    : (currentScene?.image_url || heroConfig?.background_image || "/assets/images/Gounow landscape.png");
 
   // Booking widget state
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
@@ -108,44 +70,14 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     <section className="relative min-h-[820px] sm:min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
       <div className="absolute inset-0 z-0">
-        {isVideo ? (
-          <video
-            key={currentMediaUrl}
-            src={currentMediaUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
-          />
-        ) : (
-          <>
-            {/* Mobile View (< md): logo.jpg for phone screen aspect ratios */}
-            <div className="block md:hidden absolute inset-0 w-full h-full">
-              <Image
-                src="/assets/images/logo.jpg"
-                alt="El Gouna"
-                fill
-                priority
-                sizes="100vw"
-                className="w-full h-full object-cover object-center motion-safe:animate-ken-burns transition-all duration-700"
-              />
-            </div>
-
-            {/* Tablet & Desktop View (>= md): landscape cinematic visual */}
-            <div className="hidden md:block absolute inset-0 w-full h-full">
-              <Image
-                key={currentMediaUrl}
-                src={currentMediaUrl}
-                alt="El Gouna"
-                fill
-                priority
-                sizes="100vw"
-                className="w-full h-full object-cover object-[center_right] lg:object-center motion-safe:animate-ken-burns transition-all duration-1000"
-              />
-            </div>
-          </>
-        )}
+        <Image
+          src="/assets/images/logo.jpg"
+          alt="GouNow Lifestyle - El Gouna"
+          fill
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
+        />
 
         {/* Top Vignette for Transparent Header Contrast */}
         <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
@@ -163,49 +95,6 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
       {/* Ultra-compact, clean edge transition (only 16-24px at the bottom boundary, eliminating any ghostly wash) */}
       <div className="absolute inset-x-0 bottom-0 h-4 sm:h-6 bg-gradient-to-b from-transparent to-[#FAF8F5] pointer-events-none z-10" />
-
-      {/* Floating Cinematic Scene Switcher (Desktop & Laptop) */}
-      {configuredScenes.length > 1 && (
-        <aside
-          aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
-          className="absolute top-28 sm:top-32 end-6 sm:end-10 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
-        >
-          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]/80">
-            {isAr ? "المشهد:" : "SCENE:"}
-          </span>
-          {configuredScenes.map((p, idx) => (
-            <button
-              key={p.id || idx}
-              type="button"
-              onClick={() => setActiveSceneIndex(idx)}
-              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-                activeSceneIndex === idx
-                  ? "bg-brand-terracotta text-white shadow-md scale-105"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
-            </button>
-          ))}
-        </aside>
-      )}
-
-      {/* Mobile & Tablet Scene Indicator Dots */}
-      {configuredScenes.length > 1 && (
-        <div className="absolute top-24 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
-          {configuredScenes.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setActiveSceneIndex(idx)}
-              className={`h-2 rounded-full transition-all ${
-                activeSceneIndex === idx ? "w-5 bg-brand-terracotta" : "w-2 bg-white/50"
-              }`}
-              aria-label={`Scene ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
 
       {/* ==================== 2. SPATIAL CANVAS SPACER ==================== */}
       {/* Preserves the exact hero dimensions and visual breathing room for the background */}
