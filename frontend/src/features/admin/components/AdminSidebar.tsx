@@ -58,7 +58,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           <Link href="/admin" className="flex items-center gap-3">
             <div className="h-10 w-10 relative rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/15 to-brand-terracotta/20 border border-brand-terracotta/30 shrink-0 p-1.5 shadow-sm">
               <Image
-                src="/assets/images/official-elgouna-icon.png"
+                src="/assets/images/Gounow Main signature.png"
                 alt="El Gouna"
                 width={26}
                 height={26}

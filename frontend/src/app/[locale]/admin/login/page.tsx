@@ -110,7 +110,7 @@ export default function AdminLoginPage() {
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="relative h-9 w-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-brand-terracotta/25 to-brand-brown/40 border border-brand-terracotta/40 shadow-xs group-hover:scale-105 transition-all duration-200 p-1">
             <Image
-              src="/assets/images/official-elgouna-icon.png"
+              src="/assets/images/Gounow Main signature.png"
               alt="El Gouna"
               width={22}
               height={22}
@@ -158,7 +158,7 @@ export default function AdminLoginPage() {
           <div className="mb-6 flex flex-col items-center text-center">
             <div className="mb-3 relative h-12 w-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/15 via-brand-terracotta/20 to-brand-brown/10 border border-brand-terracotta/30 p-2 shadow-xs">
               <Image
-                src="/assets/images/official-elgouna-icon.png"
+                src="/assets/images/Gounow Main signature.png"
                 alt="El Gouna"
                 width={30}
                 height={30}
