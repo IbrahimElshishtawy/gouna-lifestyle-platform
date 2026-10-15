@@ -28,7 +28,7 @@ class HomeController extends Controller
     /**
      * Display the editorial Gounow Homepage (Sections 7 & 126).
      */
-    public function index(): View
+    public function index(): View|JsonResponse
     {
         // Featured Vacation Rentals
         $featuredRentals = Property::published()
@@ -80,6 +80,20 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->get()
             ->keyBy('section_key');
+
+        if (request()->wantsJson() || request()->is('api/*')) {
+            return response()->json([
+                'status' => 'success',
+                'service' => 'GouNow Platform API',
+                'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+                'data' => [
+                    'featured_rentals_count' => count($featuredRentals),
+                    'featured_sales_count' => count($featuredSales),
+                    'featured_experiences_count' => count($featuredExperiences),
+                    'upcoming_events_count' => count($upcomingEvents),
+                ],
+            ]);
+        }
 
         return view('home', compact(
             'featuredRentals',
