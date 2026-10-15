@@ -105,85 +105,114 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
 
   return (
-    <div className="relative w-full bg-[#140E0C]">
-      {/* ==================== 1. FULL IMMERSIVE HERO VISUAL ==================== */}
-      <section className="relative w-full aspect-[4/3] min-h-[360px] sm:aspect-[16/10] sm:min-h-[480px] lg:aspect-[16/8] lg:min-h-[600px] xl:min-h-[680px] overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          {isVideo ? (
-            <video
-              key={currentMediaUrl}
-              src={currentMediaUrl}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
-            />
-          ) : (
-            <Image
-              key={currentMediaUrl}
-              src={currentMediaUrl}
-              alt="El Gouna"
-              fill
-              priority
-              sizes="100vw"
-              className="w-full h-full object-cover object-center transition-all duration-700"
-            />
-          )}
-
-          {/* Gentle top gradient only for header navigation contrast */}
-          <div className="absolute inset-x-0 top-0 h-28 sm:h-36 bg-gradient-to-b from-black/80 via-black/35 to-transparent pointer-events-none z-10" />
-
-          {/* Soft bottom edge fade */}
-          <div className="absolute inset-x-0 bottom-0 h-24 sm:h-36 bg-gradient-to-t from-[#140E0C] to-transparent pointer-events-none z-10" />
-        </div>
-
-        {/* Floating Cinematic Scene Switcher (Desktop & Laptop) */}
-        {configuredScenes.length > 1 && (
-          <aside
-            aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
-            className="absolute top-28 sm:top-32 end-6 sm:end-10 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
-          >
-            <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]/80">
-              {isAr ? "المشهد:" : "SCENE:"}
-            </span>
-            {configuredScenes.map((p, idx) => (
-              <button
-                key={p.id || idx}
-                type="button"
-                onClick={() => setActiveSceneIndex(idx)}
-                className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-                  activeSceneIndex === idx
-                    ? "bg-brand-terracotta text-white shadow-md scale-105"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
-              </button>
-            ))}
-          </aside>
-        )}
-
-        {/* Mobile & Tablet Scene Indicator Dots */}
-        {configuredScenes.length > 1 && (
-          <div className="absolute top-24 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
-            {configuredScenes.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActiveSceneIndex(idx)}
-                className={`h-2 rounded-full transition-all ${
-                  activeSceneIndex === idx ? "w-5 bg-brand-terracotta" : "w-2 bg-white/50"
-                }`}
-                aria-label={`Scene ${idx + 1}`}
+    <section className="relative min-h-[820px] sm:min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
+      {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
+      <div className="absolute inset-0 z-0">
+        {isVideo ? (
+          <video
+            key={currentMediaUrl}
+            src={currentMediaUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
+          />
+        ) : (
+          <>
+            {/* Mobile View (< md): logo.jpg for phone screen aspect ratios */}
+            <div className="block md:hidden absolute inset-0 w-full h-full">
+              <Image
+                src="/assets/images/logo.jpg"
+                alt="El Gouna"
+                fill
+                priority
+                sizes="100vw"
+                className="w-full h-full object-cover object-center motion-safe:animate-ken-burns transition-all duration-700"
               />
-            ))}
-          </div>
-        )}
-      </section>
+            </div>
 
-      {/* ==================== 2. SEAMLESS FLOATING LUXURY SEARCH CARD ==================== */}
-      <div className="relative z-30 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 -mt-12 sm:-mt-16 lg:-mt-24 mb-10 sm:mb-14">
+            {/* Tablet & Desktop View (>= md): landscape cinematic visual */}
+            <div className="hidden md:block absolute inset-0 w-full h-full">
+              <Image
+                key={currentMediaUrl}
+                src={currentMediaUrl}
+                alt="El Gouna"
+                fill
+                priority
+                sizes="100vw"
+                className="w-full h-full object-cover object-[center_right] lg:object-center motion-safe:animate-ken-burns transition-all duration-1000"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Top Vignette for Transparent Header Contrast */}
+        <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
+
+        {/* Asymmetrical Directional Text Shading: Desktop/Tablet only */}
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
+
+        {/* Ambient Dusk Glow */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/15 to-black/50 pointer-events-none z-10" />
+
+        {/* Lower Dark Shading to Anchor the Search Panel */}
+        <div className="absolute inset-x-0 bottom-0 h-80 sm:h-96 bg-gradient-to-t from-[#140E0C] via-[#140E0C]/75 to-transparent pointer-events-none z-10" />
+      </div>
+
+      {/* Ultra-compact, clean edge transition (only 16-24px at the bottom boundary, eliminating any ghostly wash) */}
+      <div className="absolute inset-x-0 bottom-0 h-4 sm:h-6 bg-gradient-to-b from-transparent to-[#FAF8F5] pointer-events-none z-10" />
+
+      {/* Floating Cinematic Scene Switcher (Desktop & Laptop) */}
+      {configuredScenes.length > 1 && (
+        <aside
+          aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
+          className="absolute top-28 sm:top-32 end-6 sm:end-10 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
+        >
+          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]/80">
+            {isAr ? "المشهد:" : "SCENE:"}
+          </span>
+          {configuredScenes.map((p, idx) => (
+            <button
+              key={p.id || idx}
+              type="button"
+              onClick={() => setActiveSceneIndex(idx)}
+              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                activeSceneIndex === idx
+                  ? "bg-brand-terracotta text-white shadow-md scale-105"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
+            </button>
+          ))}
+        </aside>
+      )}
+
+      {/* Mobile & Tablet Scene Indicator Dots */}
+      {configuredScenes.length > 1 && (
+        <div className="absolute top-24 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
+          {configuredScenes.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setActiveSceneIndex(idx)}
+              className={`h-2 rounded-full transition-all ${
+                activeSceneIndex === idx ? "w-5 bg-brand-terracotta" : "w-2 bg-white/50"
+              }`}
+              aria-label={`Scene ${idx + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ==================== 2. SPATIAL CANVAS SPACER ==================== */}
+      {/* Preserves the exact hero dimensions and visual breathing room for the background */}
+      <div className="relative z-20 flex-1 w-full min-h-[280px] sm:min-h-[340px] lg:min-h-[400px]" />
+
+      {/* ==================== 3. LOWER TIER: BOOKING WIDGET & STATISTICS STRIP ==================== */}
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-14">
 
         {/* Master Luxury Search Card (Overlapping lower edge of background, warm off-white surface, 75-88% width) */}
         <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3.5 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
@@ -553,6 +582,6 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
         </div>
 
       </div>
-    </div>
+    </section>
   );
 }
