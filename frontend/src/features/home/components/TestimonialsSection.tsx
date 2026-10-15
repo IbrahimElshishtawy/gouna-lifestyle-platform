@@ -24,13 +24,13 @@ export default function TestimonialsSection() {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-brand-sand-light/80 border border-brand-sand/80 shadow-xs mb-3">
-            <div className="relative w-5 h-5 flex items-center justify-center">
+            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-[#E2CEBC] flex items-center justify-center shadow-inner shrink-0">
               <Image
                 src="/assets/images/Feedbacks highlight logo.png"
                 alt="Feedbacks"
-                width={20}
-                height={20}
-                className="object-contain"
+                fill
+                sizes="24px"
+                className="object-cover"
               />
             </div>
             <span className="text-xs uppercase font-bold tracking-[0.2em] text-brand-terracotta">

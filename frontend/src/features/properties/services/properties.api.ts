@@ -27,7 +27,7 @@ interface BackendPropertyResource {
     title_ar?: string | null;
     short_description?: string | null;
     description?: string | null;
-    listing_type: "rent" | "sale";
+    listing_type: "rent" | "sale" | "both";
     bedrooms: number;
     bathrooms: number;
     max_guests: number;

@@ -67,14 +67,17 @@ export default function FeaturedVacationRentals({ properties }: Props) {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 lg:mb-12">
           <div className="flex items-start gap-4">
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden bg-white shadow-md border border-brand-sand/60 p-1.5 hidden sm:flex items-center justify-center shrink-0">
-              <Image
-                src="/assets/images/Rental highlights logo.png"
-                alt="Rental Highlights"
-                width={48}
-                height={48}
-                className="object-contain"
-              />
+            <div className="relative w-13 h-13 sm:w-15 sm:h-15 rounded-2xl p-[2.5px] bg-gradient-to-br from-[#E5C39C]/80 via-[#B35438]/35 to-[#3D2C24]/30 shadow-lg shadow-[#140E0C]/10 border border-brand-border/60 hidden sm:flex items-center justify-center shrink-0 group">
+              <div className="relative w-full h-full rounded-[13px] overflow-hidden bg-[#E2CEBC] flex items-center justify-center shadow-inner">
+                <Image
+                  src="/assets/images/Rental highlights logo.png"
+                  alt="Rental Highlights"
+                  fill
+                  sizes="60px"
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent pointer-events-none z-10" />
+              </div>
             </div>
             <div>
               <ChapterTag

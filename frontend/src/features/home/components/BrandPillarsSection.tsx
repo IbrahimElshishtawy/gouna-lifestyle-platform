@@ -126,14 +126,17 @@ export default function BrandPillarsSection() {
                         <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
                           {pillar.number}
                         </span>
-                        <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-brand-sand-light/60 p-1 border border-brand-border/60">
-                          <Image
-                            src={pillar.icon}
-                            alt={pillar.title}
-                            width={28}
-                            height={28}
-                            className="object-contain w-full h-full"
-                          />
+                        <div className="relative w-9 h-9 rounded-xl p-[1.5px] bg-gradient-to-br from-[#E5C39C]/70 via-[#B35438]/30 to-[#3D2C24]/30 shadow-sm border border-brand-border/60 flex items-center justify-center shrink-0">
+                          <div className="relative w-full h-full rounded-[10px] overflow-hidden bg-[#E2CEBC] flex items-center justify-center shadow-inner">
+                            <Image
+                              src={pillar.icon}
+                              alt={pillar.title}
+                              fill
+                              sizes="36px"
+                              className="object-cover group-hover:scale-115 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent pointer-events-none z-10" />
+                          </div>
                         </div>
                       </div>
                       <span className="text-[10px] uppercase font-bold tracking-widest text-brand-brown-muted">
