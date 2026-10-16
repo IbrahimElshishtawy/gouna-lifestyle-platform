@@ -58,6 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             EnsureAccountActive::class,
+            \App\Http\Middleware\TrackAdminSession::class,
         ]);
 
         $middleware->alias([
@@ -68,6 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '2fa' => EnsureTwoFactorVerified::class,
             'webhook.signature' => VerifyWebhookSignature::class,
             'admin' => EnsureAdmin::class,
+            'admin.session' => \App\Http\Middleware\TrackAdminSession::class,
             'permission' => CheckPermission::class,
             'locale' => SetLocale::class,
         ]);

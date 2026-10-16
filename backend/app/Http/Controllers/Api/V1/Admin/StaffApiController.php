@@ -59,7 +59,26 @@ class StaffApiController extends Controller
             }
         }
 
-        $staff = $query->get()->map(function ($u) {
+        $staff = $query->with(['roles', 'latestAdminSession'])->get()->map(function ($u) {
+            $latest = $u->latestAdminSession;
+            $sessionInfo = null;
+
+            if ($latest) {
+                $sessionInfo = [
+                    'id' => $latest->id,
+                    'status' => $latest->status,
+                    'is_active' => $latest->status === 'active',
+                    'device' => $latest->device ?: \App\Models\AdminSession::detectDevice($latest->user_agent),
+                    'ip_address' => $latest->ip_address,
+                    'started_at' => $latest->started_at?->toIso8601String(),
+                    'last_activity_at' => $latest->last_activity_at?->toIso8601String(),
+                    'ended_at' => $latest->ended_at?->toIso8601String(),
+                    'duration_seconds' => $latest->calculated_duration_seconds,
+                    'duration_formatted_ar' => $latest->duration_formatted_ar,
+                    'duration_formatted_en' => $latest->duration_formatted_en,
+                ];
+            }
+
             return [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -83,6 +102,7 @@ class StaffApiController extends Controller
                 'last_login_at' => $u->last_login_at ? $u->last_login_at->toIso8601String() : null,
                 'last_login_ip' => $u->last_login_ip,
                 'created_at' => $u->created_at ? $u->created_at->toIso8601String() : '',
+                'latest_session' => $sessionInfo,
             ];
         });
 
@@ -484,6 +504,14 @@ class StaffApiController extends Controller
 
         $user = User::findOrFail($id);
 
+        $activeSessions = \App\Models\AdminSession::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->get();
+
+        foreach ($activeSessions as $s) {
+            $s->terminate('force_logout_by_superadmin', $actor?->id);
+        }
+
         $user->tokens()->delete();
 
         ActivityLog::create([
@@ -491,7 +519,7 @@ class StaffApiController extends Controller
             'action' => 'staff_force_logout',
             'entity_type' => 'User',
             'entity_id' => $user->id,
-            'description' => "Active tokens revoked for {$user->name}.",
+            'description' => "Active tokens and sessions revoked for {$user->name}.",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
@@ -554,6 +582,134 @@ class StaffApiController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Staff member deleted successfully.',
+        ]);
+    }
+
+    /**
+     * List all admin staff sessions with calculated duration (Super Admin).
+     */
+    public function sessions(Request $request): JsonResponse
+    {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users') && ! $actor?->is_admin) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to view staff sessions.',
+                ],
+            ], 403);
+        }
+
+        $query = \App\Models\AdminSession::with('user');
+
+        if ($userId = $request->query('user_id')) {
+            $query->where('user_id', $userId);
+        }
+
+        if ($status = $request->query('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($sub) use ($search) {
+                $sub->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('ip_address', 'like', "%{$search}%")
+                  ->orWhere('device', 'like', "%{$search}%");
+            });
+        }
+
+        $sessions = $query->orderByDesc('id')->paginate(30);
+
+        $mapped = $sessions->getCollection()->map(function ($s) use ($actor) {
+            return [
+                'id' => $s->id,
+                'user_id' => $s->user_id,
+                'user_name' => $s->user?->name ?? 'Unknown Staff',
+                'user_email' => $s->user?->email ?? '',
+                'user_avatar' => $s->user?->avatar,
+                'user_scope' => $s->user?->scope ?? 'all',
+                'token_id' => $s->token_id,
+                'ip_address' => $s->ip_address,
+                'device' => $s->device ?: \App\Models\AdminSession::detectDevice($s->user_agent),
+                'started_at' => $s->started_at?->toIso8601String(),
+                'last_activity_at' => $s->last_activity_at?->toIso8601String(),
+                'ended_at' => $s->ended_at?->toIso8601String(),
+                'duration_seconds' => $s->calculated_duration_seconds,
+                'duration_formatted_ar' => $s->duration_formatted_ar,
+                'duration_formatted_en' => $s->duration_formatted_en,
+                'status' => $s->status,
+                'is_active' => $s->status === 'active',
+                'is_current' => $s->user_id === $actor?->id && $s->status === 'active',
+                'termination_reason' => $s->termination_reason,
+            ];
+        });
+
+        $activeCount = \App\Models\AdminSession::where('status', 'active')->count();
+        $todayTotalSeconds = (int) \App\Models\AdminSession::whereDate('started_at', today())->sum('duration_seconds');
+
+        return response()->json([
+            'data' => $mapped,
+            'summary' => [
+                'active_sessions_count' => $activeCount,
+                'total_sessions_count' => \App\Models\AdminSession::count(),
+                'today_total_seconds' => $todayTotalSeconds,
+                'today_total_formatted_ar' => \App\Models\AdminSession::formatSeconds($todayTotalSeconds, 'ar'),
+                'today_total_formatted_en' => \App\Models\AdminSession::formatSeconds($todayTotalSeconds, 'en'),
+            ],
+            'meta' => [
+                'current_page' => $sessions->currentPage(),
+                'last_page' => $sessions->lastPage(),
+                'total' => $sessions->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Terminate a specific live admin session (Super Admin action).
+     */
+    public function terminateSession(Request $request, int $sessionId): JsonResponse
+    {
+        $actor = $request->user();
+        if (! $actor?->hasRole('super_admin') && ! $actor?->hasPermission('manage_users') && ! $actor?->is_admin) {
+            return response()->json([
+                'error' => [
+                    'code' => 'UNAUTHORIZED_ACCESS',
+                    'message' => 'You do not have permission to terminate staff sessions.',
+                ],
+            ], 403);
+        }
+
+        $session = \App\Models\AdminSession::with('user')->findOrFail($sessionId);
+
+        $session->terminate('force_logout_by_superadmin', $actor?->id);
+
+        if ($session->token_id && $session->user) {
+            $session->user->tokens()->where('id', $session->token_id)->delete();
+        }
+
+        ActivityLog::create([
+            'user_id' => $actor?->id,
+            'action' => 'staff_session_terminated',
+            'entity_type' => 'AdminSession',
+            'entity_id' => $session->id,
+            'description' => "Super Admin {$actor?->name} terminated session #{$session->id} for {$session->user?->name}. Session lasted {$session->duration_formatted_en}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم إنهاء الجلسة بنجاح. مدة الجلسة المسجلة: {$session->duration_formatted_ar}.",
+            'data' => [
+                'session_id' => $session->id,
+                'duration_seconds' => $session->duration_seconds,
+                'duration_formatted_ar' => $session->duration_formatted_ar,
+                'duration_formatted_en' => $session->duration_formatted_en,
+            ],
         ]);
     }
 }

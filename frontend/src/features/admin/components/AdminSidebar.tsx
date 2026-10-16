@@ -439,6 +439,15 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   {isAr ? "فريق الإدارة والمشرفين" : "Admin Staff & Scopes"}
                 </Link>
                 <Link
+                  href="/admin/users?tab=sessions"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta flex items-center justify-between"
+                >
+                  <span>{isAr ? "جلسات العمل ومدة النشاط" : "Live Sessions & Duration"}</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-bold">
+                    ⏱️ Live
+                  </span>
+                </Link>
+                <Link
                   href="/admin/roles"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >

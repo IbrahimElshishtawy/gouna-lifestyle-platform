@@ -152,6 +152,8 @@ Route::middleware(['admin', '2fa'])->group(function () {
     // 5. Staff & Administrative Users
     Route::prefix('users')->as('users.')->group(function () {
         Route::get('/', [StaffApiController::class, 'index'])->name('index');
+        Route::get('/sessions', [StaffApiController::class, 'sessions'])->name('sessions');
+        Route::post('/sessions/{sessionId}/terminate', [StaffApiController::class, 'terminateSession'])->name('sessions.terminate');
         Route::post('/', [StaffApiController::class, 'store'])->name('store');
         Route::get('/{id}', [StaffApiController::class, 'show'])->name('show');
         Route::put('/{id}', [StaffApiController::class, 'update'])->name('update');
