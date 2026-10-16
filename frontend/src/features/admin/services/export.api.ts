@@ -3,11 +3,15 @@ import { apiClient } from "@/lib/api/client";
 export interface ExportOverviewData {
   properties_count: number;
   bookings_count: number;
+  pricing_count: number;
+  yachts_count: number;
   experiences_count: number;
   events_count: number;
-  yachts_count: number;
+  users_count: number;
   leads_count: number;
+  finances_count: number;
   customers_count: number;
+  settings_count: number;
   generated_at: string;
   supported_formats: string[];
   supported_types: string[];

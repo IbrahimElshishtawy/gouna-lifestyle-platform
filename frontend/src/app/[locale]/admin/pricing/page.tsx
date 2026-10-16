@@ -32,6 +32,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 type PricingTab = "overview" | "seasons" | "calendar" | "preview" | "discounts";
 
@@ -523,7 +524,8 @@ export default function AdminPricingPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <SectionExportButtons sectionType="pricing" />
           <button
             type="button"
             onClick={() => {

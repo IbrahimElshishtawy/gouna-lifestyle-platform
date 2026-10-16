@@ -76,6 +76,11 @@ class Booking extends Model
         return $this->morphTo();
     }
 
+    public function property(): BelongsTo
+    {
+        return $this->belongsTo(Property::class, 'bookable_id');
+    }
+
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);

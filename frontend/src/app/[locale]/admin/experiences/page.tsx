@@ -15,6 +15,7 @@ import {
 } from "@/features/experiences/services/experiences.api";
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 interface FormDataState {
   id?: number;
@@ -230,7 +231,8 @@ export default function AdminExperiencesPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="experiences" />
           <button
             onClick={handleOpenCreate}
             className="px-4 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-xs flex items-center justify-center cursor-pointer"

@@ -15,6 +15,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PermissionGuard from "@/components/ui/PermissionGuard";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 const SCOPES = [
   { value: "all", labelEn: "All Domains (Global)", labelAr: "كافة القطاعات (شامل)" },
@@ -255,16 +256,19 @@ export default function AdminUsersPage() {
           </p>
         </div>
 
-        <PermissionGuard permission="admins.create">
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer shrink-0"
-          >
-            <span>+</span>
-            <span>{isAr ? "إضافة مشرف جديد" : "Add Administrator"}</span>
-          </button>
-        </PermissionGuard>
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="users" />
+          <PermissionGuard permission="admins.create">
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer shrink-0"
+            >
+              <span>+</span>
+              <span>{isAr ? "إضافة مشرف جديد" : "Add Administrator"}</span>
+            </button>
+          </PermissionGuard>
+        </div>
       </div>
 
       {/* Feedback banner */}

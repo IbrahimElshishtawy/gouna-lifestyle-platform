@@ -25,6 +25,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 interface YachtFormState {
   id?: number;
@@ -462,13 +463,16 @@ export default function AdminYachtsPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer shrink-0"
-        >
-          <span>+</span>
-          <span>{isAr ? "إضافة يخت للأسطول" : "Register Yacht"}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="yachts" />
+          <button
+            onClick={handleOpenCreate}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs font-bold uppercase tracking-wider shadow-sm transition-all cursor-pointer shrink-0"
+          >
+            <span>+</span>
+            <span>{isAr ? "إضافة يخت للأسطول" : "Register Yacht"}</span>
+          </button>
+        </div>
       </div>
 
       {feedback && (

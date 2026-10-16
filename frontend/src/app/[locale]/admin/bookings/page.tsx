@@ -16,6 +16,7 @@ import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PermissionGuard from "@/components/ui/PermissionGuard";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 export default function AdminBookingsPage() {
   const searchParams = useSearchParams();
@@ -194,7 +195,9 @@ export default function AdminBookingsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="bookings" />
+
           <Link
             href="/admin/stays"
             className="px-4 py-2 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold transition flex items-center gap-2 border border-brand-border"

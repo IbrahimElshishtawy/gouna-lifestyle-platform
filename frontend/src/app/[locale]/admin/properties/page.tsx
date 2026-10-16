@@ -10,6 +10,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 export default function AdminPropertiesPage() {
   const { locale } = useLanguage();
@@ -189,7 +190,9 @@ export default function AdminPropertiesPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="properties" />
+
           <Link
             href="/admin/properties/create"
             className="px-4 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-xs flex items-center justify-center cursor-pointer"

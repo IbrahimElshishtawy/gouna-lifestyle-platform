@@ -61,12 +61,17 @@ export default function DataExportModal({ isOpen, onClose }: DataExportModalProp
 
   const typeOptions = [
     { id: "all", label_ar: "تصدير شامل (كافة بيانات المنصة)", label_en: "All Platform Data (Combined)", count: null, icon: "📦" },
-    { id: "properties", label_ar: "الفلل والعقارات", label_en: "Properties & Luxury Stays", count: overview?.properties_count, icon: "🏡" },
-    { id: "bookings", label_ar: "الحجوزات والعمليات التشغيلية", label_en: "Bookings & Reservations", count: overview?.bookings_count, icon: "📅" },
-    { id: "experiences", label_ar: "التجارب واليخوت البحرية", label_en: "Experiences & Yacht Charters", count: overview?.experiences_count, icon: "🛥️" },
-    { id: "events", label_ar: "الفعاليات والحفلات", label_en: "Events & Festivals", count: overview?.events_count, icon: "🎟️" },
-    { id: "leads", label_ar: "طلبات واستفسارات الكونسيرج", label_en: "Concierge Inquiries & Leads", count: overview?.leads_count, icon: "🛎️" },
-    { id: "customers", label_ar: "قاعدة بيانات العملاء والضيوف", label_en: "Registered Customers & Guests", count: overview?.customers_count, icon: "👤" },
+    { id: "properties", label_ar: "العقارات والفلل", label_en: "Properties & Luxury Stays", count: overview?.properties_count, icon: "🏡" },
+    { id: "bookings", label_ar: "الحجوزات والعمليات", label_en: "Bookings & Reservations", count: overview?.bookings_count, icon: "📅" },
+    { id: "pricing", label_ar: "محرك الأسعار الذكي", label_en: "Pricing & Seasons", count: overview?.pricing_count, icon: "🏷️" },
+    { id: "yachts", label_ar: "أسطول اليخوت والشارتر", label_en: "Yacht Fleet & Charters", count: overview?.yachts_count, icon: "🛥️" },
+    { id: "experiences", label_ar: "الأنشطة والتجارب البحرية", label_en: "Activities & Experiences", count: overview?.experiences_count, icon: "🌊" },
+    { id: "events", label_ar: "الفعاليات والتذاكر والحفلات", label_en: "Events & Tickets", count: overview?.events_count, icon: "🎟️" },
+    { id: "users", label_ar: "المشرفون والصلاحيات", label_en: "Administrators & Staff", count: overview?.users_count, icon: "🛡️" },
+    { id: "leads", label_ar: "عمليات الكونسيرج والاستفسارات", label_en: "Concierge Operations & Leads", count: overview?.leads_count, icon: "🛎️" },
+    { id: "finances", label_ar: "المالية والمدفوعات", label_en: "Finances & Transactions", count: overview?.finances_count, icon: "💳" },
+    { id: "customers", label_ar: "العملاء والمستثمرون", label_en: "Customers & Investors", count: overview?.customers_count, icon: "👥" },
+    { id: "settings", label_ar: "إعدادات المنصة", label_en: "Platform Settings", count: overview?.settings_count, icon: "⚙️" },
   ];
 
   return (

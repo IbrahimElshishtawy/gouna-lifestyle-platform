@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 export type ClientTag = "First Time" | "New Client" | "VIP" | "VVIP";
 
@@ -293,7 +294,8 @@ export default function AdminCustomersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="customers" />
           <a
             href="https://wa.me/201000000000"
             target="_blank"
