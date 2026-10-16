@@ -6,6 +6,7 @@ import type { ActivityLogItem, PlatformSettingsMap } from "@/features/admin/type
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import PermissionGuard from "@/components/ui/PermissionGuard";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 export default function AdminSettingsPage() {
   const { locale } = useLanguage();
@@ -76,6 +77,10 @@ export default function AdminSettingsPage() {
               ? "ضبط إعدادات المنصة، وسجلات التدقيق الأمني، وسياسات الدفع وإلغاء الحجوزات."
               : "Configure global commission rates, booking cancellation rules, currency conversion, and audit logs."}
           </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="settings" />
         </div>
       </div>
 

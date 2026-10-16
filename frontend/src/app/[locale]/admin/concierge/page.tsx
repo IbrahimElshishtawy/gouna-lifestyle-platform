@@ -22,6 +22,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import PermissionGuard from "@/components/ui/PermissionGuard";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 const REQUEST_TYPES: Array<{ value: ConciergeType; labelEn: string; labelAr: string; icon: string }> = [
   { value: "yacht", labelEn: "Private Yacht & Charter", labelAr: "يخوت ورحلات بحرية", icon: "🛥️" },
@@ -240,7 +241,8 @@ export default function AdminConciergePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="leads" />
           <PermissionGuard permission="concierge.create">
             <button
               onClick={() => setIsCreateModalOpen(true)}

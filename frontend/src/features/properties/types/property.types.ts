@@ -29,7 +29,7 @@ export interface Property {
   title_ar?: string;
   slug: string;
   reference_code: string;
-  listing_type: "rent" | "sale";
+  listing_type: "rent" | "sale" | "both";
   price_cents: number;
   price_formatted: string;
   currency: string;

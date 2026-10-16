@@ -1,0 +1,212 @@
+{
+  "title": "GouNow Booking Architecture: Race Condition Prevention & End-to-End Data Flow",
+  "version": "1.0.0",
+  "author": "Antigravity Architecture Team",
+  "generated_at": "2026-10-16T02:15:00+03:00",
+  "concepts": {
+    "race_condition": {
+      "definition_ar": "حالة تسابق وتضارب تقع عندما يحاول أكثر من مستخدم في نفس اللحظة والمللي ثانية حجز نفس العقار أو التجربة لنفس التواريخ أو تواريخ متداخلة (Overlapping Dates).",
+      "definition_en": "A concurrency concurrency hazard where two or more clients attempt to reserve the exact same resource/property for overlapping dates simultaneously.",
+      "risk": {
+        "problem": "Double Booking (الحجز المزدوج)",
+        "impact": "تأكيد حجزين لنفس العقار لنفس الفترة، مما يسبب خسارة ثقة العملاء وغرامات إلغاء ومشاكل تشغيلية كارثية."
+      },
+      "naive_vulnerable_flow": [
+        "1. المستخدم (أ) والمستخدم (ب) يطلبان فحص التوفر في نفس اللحظة.",
+        "2. الباك إند يستعلم من قاعدة البيانات: SELECT count(*) FROM bookings WHERE property_id=5 AND dates_overlap -> الناتج 0 (متاح لكلا المستخدمين!).",
+        "3. الباك إند ينشئ حجز للمستخدم (أ).",
+        "4. الباك إند ينشئ حجز للمستخدم (ب) لنفس العقار والتواريخ، لأنه قرأ الحالة السابقة قبل أن يكتمل حفظ الحجز الأول!"
+      ]
+    },
+    "concurrency_solutions_comparison": [
+      {
+        "method": "Pessimistic Locking (SELECT ... FOR UPDATE)",
+        "name_ar": "القفل التشاؤمي على مستوى قاعدة البيانات",
+        "current_status_in_gounow": "مطبق حالياً في CreateBookingAction & LockAndValidateAvailabilityAction",
+        "how_it_works": "قفل صف العقار أو سجلات التوفر حصرياً داخل DB Transaction، بحيث ينتظر أي طلب متزامن آخر انتهاء المعاملة (Commit / Rollback).",
+        "pros": [
+          "ضمانة 100% لعدم وقوع Double Booking على مستوى ACID Transactions.",
+          "سهل التنفيذ والصيانة داخل كود Laravel دون الحاجة لخدمات إضافية.",
+          "آمن ومثالي للأنظمة المتوسطة والكبيرة ذات السيرفر الواحد أو Cluster."
+        ],
+        "cons": [
+          "قد يُسبب بطء في الاستجابة (Contention) إذا كان الضغط هائلاً جداً على نفس العقار في نفس الثانية.",
+          "إمكانية حدوث Deadlocks إذا لم يتم ترتيب أقفال الجداول بحذر."
+        ],
+        "best_use_case": "منصات العقارات والفنادق وحجوزات اليخوت الفاخرة مثل GouNow."
+      },
+      {
+        "method": "Optimistic Locking (Versioning / CAS)",
+        "name_ar": "القفل التفاؤلي عبر أرقام الإصدارات",
+        "current_status_in_gounow": "مستخدم في تحديثات المحفظة والأرصدة (Balance & State Transitions)",
+        "how_it_works": "إضافة عمود version في الجدول، وعند التحديث يتم فحص WHERE id = ? AND version = current_version ثم زيادة version بواحد. إذا تغيرت النسخة يُلغى التحديث فوراً.",
+        "pros": [
+          "أداء فائق السرعة للقراءة (No DB row locks).",
+          "لا يسبب Deadlocks على الإطلاق."
+        ],
+        "cons": [
+          "صعب التطبيق على نطاقات التواريخ (Date Ranges) المتداخلة لأن التضارب لا يقع على حقل واحد بل على فترات زمنية.",
+          "يؤدي لرفض مباشر للمستخدم الثاني مما يضطره لإعادة المحاولة من البداية."
+        ],
+        "best_use_case": "تحديث الأرصدة المالية، تعديل بيانات الملف الشخصي، والمخزون العددي البسيط (E-commerce Stock)."
+      },
+      {
+        "method": "Distributed Redis Locks (Redlock / Mutex Key)",
+        "name_ar": "القفل الموزع باستخدام ذاكرة Redis",
+        "current_status_in_gounow": "جاهز للتفعيل مع Redis Cluster",
+        "how_it_works": "حجز مفتاح مؤقت ذري في الذاكرة: SET lock:property:5:2026-11-01:2026-11-05 unique_token NX EX 10. إذا نجح العميل يأخذ القفل ويدخل الحجز، وإذا فشل يتم رفضه أو إدخاله في صف انتظار.",
+        "pros": [
+          "فائق السرعة (أجزاء من المللي ثانية في الذاكرة In-Memory).",
+          "يحمي قاعدة البيانات الرئيسية من الإجهاد (DB Offloading).",
+          "يعمل بكفاءة عبر الخوادم الموزعة (Multi-Server / Microservices)."
+        ],
+        "cons": [
+          "يتطلب بنية تحتية لـ Redis مع High Availability.",
+          "يجب معالجة سيناريوهات انقطاع الاتصال قبل فك القفل."
+        ],
+        "best_use_case": "الأنظمة الموزعة والتطبيقات ذات الملايين من المستخدمين المتزامنين."
+      },
+      {
+        "method": "Temporary Hold with Countdown Timer (Inventory Reservation)",
+        "name_ar": "نظام الحجز المؤقت مع المؤقت التنازلي (The Industry Gold Standard)",
+        "current_status_in_gounow": "الطريقة الاحترافية الأفضل عالمياً (تستخدمها Airbnb, Booking.com, Ticketmaster)",
+        "how_it_works": "عند بدء العميل لخطوة الدفع (Checkout)، يقوم النظام بحجز التواريخ مؤقتاً بحالة 'held' لمدة 10-15 دقيقة مع مؤقت تنازلي. خلال هذه الفترة لا يستطيع أي شخص آخر الدخول للدفع. إذا أتم الدفع يتحول الحجز إلى 'confirmed'. إذا انتهى الوقت أو تراجع المستخدم، ينتهي القفل تلقائياً.",
+        "pros": [
+          "أفضل تجربة مستخدم (UX): العميل لا يتفاجأ بفشل الدفع في اللحظة الأخيرة.",
+          "تمنع تضارب بوابات الدفع وسحب أموال من عميلين في نفس الوقت.",
+          "عزل تام بين عملية حجز التوفر وعملية إتمام المعاملة المالية."
+        ],
+        "cons": [
+          "تتطلب إدارة Background Jobs أو Redis Keyspace Notifications لفك الحجز المنتهي.",
+          "قد يتم تجميد عقار لمدة 15 دقيقة دون إتمام الشراء إذا تراجع العميل."
+        ],
+        "best_use_case": "المنصات العالمية وتذاكر الطيران والفعاليات والعقارات الفاخرة."
+      }
+    ],
+    "recommendation": {
+      "best_overall_architecture": "الدمج الذكي (Hybrid Approach): استخدام نظام الـ Temporary Hold (10-15 دقيقة) مدعوماً بـ Pessimistic DB Lock + Idempotency Key عند الحفظ النهائي. هذا يضمن أعلى درجات الموثوقية وتجربة مستخدم عالمية."
+    }
+  },
+  "frontend_data_flow": {
+    "layer": "Next.js (App Router) + React + TypeScript",
+    "steps": [
+      {
+        "step": 1,
+        "name": "Date & Guest Selection (اختيار التواريخ والضيوف)",
+        "component": "BookingQuoteWidget.tsx",
+        "action": "المستخدم يختار تاريخ الوصول والمغادرة وعدد الضيوف.",
+        "api_call": "POST /api/v1/checkout/quote",
+        "result": "حساب السعر في السيرفر مع تفاصيل الضرائب والرسوم وعرض زر (احجز الآن)."
+      },
+      {
+        "step": 2,
+        "name": "Navigate to Checkout (الانتقال لصفحة الدفع)",
+        "route": "/[locale]/checkout/[slug]?check_in=...&check_out=...&guests=...",
+        "component": "CheckoutClient.tsx",
+        "action": "تحميل نموذج بيانات العميل واختيار طريقة الدفع (بطاقة بنكية، إنستاباي، إلخ)."
+      },
+      {
+        "step": 3,
+        "name": "Idempotency Generation (توليد مفتاح عدم التكرار)",
+        "service": "checkout.api.ts",
+        "action": "توليد مفتاح فريد Idempotency-Key في المتصفح مثل: chk-{property_id}-{email}-{timestamp} وإرفاقه في ترويسة الطلب لمنع تكرار الحجز عند الضغط المزدوج أو إعادة المحاولة."
+      },
+      {
+        "step": 4,
+        "name": "Submit Booking Request (إرسال طلب الحجز)",
+        "service": "processCheckout()",
+        "api_call": "POST /api/v1/checkout/bookings",
+        "headers": {
+          "Content-Type": "application/json",
+          "Idempotency-Key": "chk-14-client@example.com-1792100000"
+        },
+        "payload": {
+          "property_id": 14,
+          "check_in": "2026-11-01",
+          "check_out": "2026-11-05",
+          "guests": 2,
+          "first_name": "Karim",
+          "last_name": "Hassan",
+          "email": "karim@example.com",
+          "phone": "+201012345678",
+          "payment_method": "card"
+        }
+      },
+      {
+        "step": 5,
+        "name": "Response Handling & Navigation (معالجة الاستجابة والتوجيه)",
+        "scenarios": {
+          "success_201": "استلام مرجع الحجز (GON-2026-XXXXXX) ورابط بوابة الدفع (Paymob / Confirmation)، والتوجيه فوراً لصفحة تأكيد الحجز.",
+          "conflict_409_or_422": "التقاط خطأ التعارض (Availability Conflict) وعرض رسالة تنبيه حمراء: 'نأسف، تم حجز هذه التواريخ للتو من قبل ضيف آخر! يرجى اختيار تواريخ أخرى.' دون خصم أي مبالغ."
+        }
+      }
+    ]
+  },
+  "backend_data_flow": {
+    "layer": "Laravel 11 Modular Architecture + MySQL InnoDB ACID",
+    "steps": [
+      {
+        "step": 1,
+        "name": "Route & Rate Limiting (التوجيه ومكافحة الإغراق)",
+        "file": "routes/api/v1/public.php",
+        "details": "الطلب يمر عبر Route::prefix('checkout')->middleware('throttle:checkout') لمنع هجمات الـ Brute-Force أو الإرسال الآلي المكثف."
+      },
+      {
+        "step": 2,
+        "name": "Request Validation (التحقق من صحة المدخلات)",
+        "file": "app/Http/Requests/CreateBookingRequest.php",
+        "details": "التأكد من سلامة التواريخ (check_out بعد check_in)، صحة البريد الإلكتروني والهاتف، وأن عدد الضيوف لا يتجاوز الحدود القصوى."
+      },
+      {
+        "step": 3,
+        "name": "Controller & Idempotency Check (فحص عدم التكرار)",
+        "file": "app/Http/Controllers/Api/V1/Public/CheckoutController.php",
+        "details": "إذا كان الـ Idempotency-Key موجوداً ومحفوظاً مسبقاً لنفس العميل، يُعاد الحجز السابق فوراً بنفس النتيجة دون إجراء أي عملية جديدة على قاعدة البيانات."
+      },
+      {
+        "step": 4,
+        "name": "Atomic Database Transaction (بدء المعاملة الذرية)",
+        "file": "DB::transaction()",
+        "details": "كافة الخطوات التالية تنفذ داخل DB Transaction معزولة تماماً (Isolation Level). إذا حدث أي خطأ يتم عمل Rollback تلقائي."
+      },
+      {
+        "step": 5,
+        "name": "Pessimistic Concurrency Lock (القفل التشاؤمي لمنع الـ Race Condition)",
+        "file": "app/Modules/Availability/Application/Actions/LockAndValidateAvailabilityAction.php",
+        "sql": "SELECT * FROM properties WHERE id = :id FOR UPDATE;",
+        "details": "محرك قاعدة البيانات InnoDB يقفل هذا الصف حصرياً. أي طلب آخر يصل لنفس العقار في نفس التوقيت يتم تعليقه (Blocks) في طابور الانتظار بالمللي ثانية حتى تنتهي المعاملة الحالية."
+      },
+      {
+        "step": 6,
+        "name": "Overlap Availability Verification (التحقق الحصري من عدم وجود تضارب)",
+        "file": "app/Modules/Availability/Application/Queries/CheckPropertyAvailabilityQuery.php",
+        "sql": "SELECT COUNT(*) FROM bookings WHERE property_id = :prop_id AND status IN ('confirmed', 'pending') AND (check_in < :new_checkout AND check_out > :new_checkin);",
+        "details": "إذا كان الناتج > 0، يتم إطلاق استثناء BookingUnavailableException مما يؤدي لإلغاء المعاملة فوراً وتحرير القفل وإرجاع 409 Conflict."
+      },
+      {
+        "step": 7,
+        "name": "Server-side Pricing & Financial Calculation (حساب التسعير الموثوق)",
+        "file": "app/Modules/Pricing/Application/Queries/CalculateBookingQuoteQuery.php",
+        "details": "حساب سعر الليلة، الخصومات الترويجية، رسوم النظافة والخدمة، والضرائب اعتماداً على بيانات السيرفر وليس المدخلات القادمة من المتصفح لمنع التلاعب بالأسعار."
+      },
+      {
+        "step": 8,
+        "name": "Persist Booking & Ledger Records (حفظ الحجز والحركات المالية)",
+        "file": "app/Modules/Booking/Application/Actions/CreateBookingAction.php",
+        "details": "إنشاء سجل Booking برقم مرجعي مميز (BookingReference)، وسجل الأسعار التفصيلي لكل ليلة (BookingNightlyPrice)، وسجل الحركات المالية (PaymentTransaction)."
+      },
+      {
+        "step": 9,
+        "name": "Transaction Commit & Lock Release (اعتماد المعاملة وفك القفل)",
+        "file": "DB::commit()",
+        "details": "يتم حفظ السجلات نهائياً في قاعدة البيانات وفك القفل FOR UPDATE. الآن إذا دخل الطلب الثاني المتزامن من المستخدم الآخر، سيجد أن العقار أصبح محجوزاً ويتم رفضه فوراً وبشكل حاسم."
+      },
+      {
+        "step": 10,
+        "name": "HTTP 201 Response & Payment Initiation (تجهيز الرد وبوابة الدفع)",
+        "file": "app/Http/Resources/BookingResource.php",
+        "details": "إرجاع كائن الحجز مع مرجع فريد ورابط بوابة الدفع المشفر لتبدأ عملية سداد الأموال بأمان."
+      }
+    ]
+  }
+}

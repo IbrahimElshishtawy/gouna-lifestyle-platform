@@ -519,6 +519,54 @@ export interface AdminStaffItem {
   last_login_at: string | null;
   last_login_ip: string | null;
   created_at: string;
+  latest_session?: {
+    id: number;
+    status: string;
+    is_active: boolean;
+    device: string | null;
+    ip_address: string | null;
+    started_at: string | null;
+    last_activity_at: string | null;
+    ended_at: string | null;
+    duration_seconds: number;
+    duration_formatted_ar: string;
+    duration_formatted_en: string;
+  } | null;
+}
+
+export interface AdminSessionItem {
+  id: number;
+  user_id: number;
+  user_name: string;
+  user_email: string;
+  user_avatar?: string | null;
+  user_scope: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  token_id?: number | null;
+  ip_address: string | null;
+  device: string | null;
+  started_at: string | null;
+  last_activity_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number;
+  duration_formatted_ar: string;
+  duration_formatted_en: string;
+  status: "active" | "completed" | "terminated" | "expired";
+  is_active: boolean;
+  is_current: boolean;
+  termination_reason?: string | null;
+}
+
+export interface AdminSessionSummary {
+  active_sessions_count: number;
+  total_sessions_count: number;
+  today_total_seconds: number;
+  today_total_formatted_ar: string;
+  today_total_formatted_en: string;
 }
 
 export interface AdminRoleItem {

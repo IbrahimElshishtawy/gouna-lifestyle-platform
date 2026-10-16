@@ -15,6 +15,7 @@ export default function BrandPillarsSection() {
     {
       id: "stays",
       number: "01",
+      icon: "/assets/images/house logo.png",
       title: t.brandPillars.pillar1Title,
       description: t.brandPillars.pillar1Desc,
       tag: isAr ? "فلل وبحيرات مائية" : "Lagoon & Beachfront Stays",
@@ -23,6 +24,7 @@ export default function BrandPillarsSection() {
     {
       id: "charters",
       number: "02",
+      icon: "/assets/images/Trips highlights logo.png",
       title: t.brandPillars.pillar2Title,
       description: t.brandPillars.pillar2Desc,
       tag: isAr ? "يخوت وجزر خاصة" : "Private Yacht Expeditions",
@@ -31,6 +33,7 @@ export default function BrandPillarsSection() {
     {
       id: "concierge",
       number: "03",
+      icon: "/assets/images/About logo.png",
       title: t.brandPillars.pillar3Title,
       description: t.brandPillars.pillar3Desc,
       tag: isAr ? "خدمات فندقية خاصة" : "Dedicated Lifestyle Desk",
@@ -39,7 +42,10 @@ export default function BrandPillarsSection() {
   ];
 
   return (
-    <section className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60">
+    <section
+      id="pillars"
+      className="py-14 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-12 bg-[#FAF8F5] relative overflow-hidden border-b border-brand-border/60 scroll-mt-24"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Chapter Header & Narrative Split */}
         <FadeIn direction="up">
@@ -116,9 +122,23 @@ export default function BrandPillarsSection() {
                       className="flex items-center justify-between mb-5 sm:mb-8 transition-transform duration-300"
                       style={{ transform: "translateZ(24px)" }}
                     >
-                      <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
-                        {pillar.number}
-                      </span>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xs font-mono font-bold text-brand-terracotta/80 bg-brand-sand-light px-3 py-1 rounded-full border border-brand-border">
+                          {pillar.number}
+                        </span>
+                        <div className="relative w-9 h-9 rounded-xl p-[1.5px] bg-gradient-to-br from-[#E5C39C]/70 via-[#B35438]/30 to-[#3D2C24]/30 shadow-sm border border-brand-border/60 flex items-center justify-center shrink-0">
+                          <div className="relative w-full h-full rounded-[10px] overflow-hidden bg-[#E2CEBC] flex items-center justify-center shadow-inner">
+                            <Image
+                              src={pillar.icon}
+                              alt={pillar.title}
+                              fill
+                              sizes="36px"
+                              className="object-cover group-hover:scale-115 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/25 to-transparent pointer-events-none z-10" />
+                          </div>
+                        </div>
+                      </div>
                       <span className="text-[10px] uppercase font-bold tracking-widest text-brand-brown-muted">
                         {pillar.tag}
                       </span>

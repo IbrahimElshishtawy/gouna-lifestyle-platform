@@ -190,6 +190,20 @@ class AuthController extends Controller
             'last_login_ip' => $ip,
         ]);
 
+        if ($user->is_admin || $user->roles()->exists()) {
+            \App\Models\AdminSession::create([
+                'user_id' => $user->id,
+                'token_id' => $user->tokens()->latest('id')->value('id'),
+                'ip_address' => $ip,
+                'user_agent' => $request->userAgent(),
+                'device' => \App\Models\AdminSession::detectDevice($request->userAgent()),
+                'started_at' => now(),
+                'last_activity_at' => now(),
+                'duration_seconds' => 1,
+                'status' => 'active',
+            ]);
+        }
+
         ActivityLog::create([
             'user_id' => $user->id,
             'action' => 'api_login',
@@ -281,6 +295,20 @@ class AuthController extends Controller
 
         $deviceName = $request->input('device_name', 'NextJs-Client-2FA');
         $token = $user->createToken($deviceName, ['*'])->plainTextToken;
+
+        if ($user->is_admin || $user->roles()->exists()) {
+            \App\Models\AdminSession::create([
+                'user_id' => $user->id,
+                'token_id' => $user->tokens()->latest('id')->value('id'),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'device' => \App\Models\AdminSession::detectDevice($request->userAgent()),
+                'started_at' => now(),
+                'last_activity_at' => now(),
+                'duration_seconds' => 1,
+                'status' => 'active',
+            ]);
+        }
 
         ActivityLog::create([
             'user_id' => $user->id,
@@ -792,6 +820,15 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user) {
+            $activeSession = \App\Models\AdminSession::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->latest('id')
+                ->first();
+
+            if ($activeSession) {
+                $activeSession->terminate('logout');
+            }
+
             if ($user->currentAccessToken()) {
                 $user->currentAccessToken()->delete();
             }

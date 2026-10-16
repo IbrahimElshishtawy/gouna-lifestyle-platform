@@ -76,6 +76,16 @@ class User extends Authenticatable
         return $this->hasMany(Favorite::class);
     }
 
+    public function adminSessions(): HasMany
+    {
+        return $this->hasMany(AdminSession::class)->orderByDesc('id');
+    }
+
+    public function latestAdminSession()
+    {
+        return $this->hasOne(AdminSession::class)->latestOfMany();
+    }
+
     // Helper methods
     public function hasRole(string $roleName): bool
     {

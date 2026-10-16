@@ -58,7 +58,7 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
           <Link href="/admin" className="flex items-center gap-3">
             <div className="h-10 w-10 relative rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-500/15 to-brand-terracotta/20 border border-brand-terracotta/30 shrink-0 p-1.5 shadow-sm">
               <Image
-                src="/assets/images/official-elgouna-icon.png"
+                src="/assets/images/Gounow Main signature.png"
                 alt="El Gouna"
                 width={26}
                 height={26}
@@ -439,6 +439,15 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
                   {isAr ? "فريق الإدارة والمشرفين" : "Admin Staff & Scopes"}
                 </Link>
                 <Link
+                  href="/admin/users?tab=sessions"
+                  className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta flex items-center justify-between"
+                >
+                  <span>{isAr ? "جلسات العمل ومدة النشاط" : "Live Sessions & Duration"}</span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-bold">
+                    ⏱️ Live
+                  </span>
+                </Link>
+                <Link
                   href="/admin/roles"
                   className="block py-1.5 px-2 text-xs rounded-lg text-brand-brown-muted hover:text-brand-terracotta"
                 >
@@ -554,6 +563,28 @@ export default function AdminSidebar({ open, onClose }: AdminSidebarProps) {
               className="flex items-center px-3 py-2.5 rounded-xl text-brand-brown hover:bg-brand-sand/50 transition-all text-start"
             >
               <span>{isAr ? "العملاء والمستثمرون" : "Clients & Investors"}</span>
+            </Link>
+          </div>
+
+          {/* 13. Data Export Center (Excel & Word) */}
+          <div className="pt-2">
+            <Link
+              href="/admin/exports"
+              className={`flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${
+                isActive("/admin/exports")
+                  ? "bg-emerald-600 text-white border-emerald-600 shadow-xs font-semibold"
+                  : "bg-emerald-50/60 text-emerald-900 border-emerald-200/80 hover:bg-emerald-100/70"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm">📥</span>
+                <span className="font-semibold text-xs">
+                  {isAr ? "مركز تصدير التقارير (Excel / Word)" : "Export Hub (Excel / Word)"}
+                </span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-700/15 text-emerald-800 font-bold">
+                11 {isAr ? "قسم" : "Sec"}
+              </span>
             </Link>
           </div>
         </nav>

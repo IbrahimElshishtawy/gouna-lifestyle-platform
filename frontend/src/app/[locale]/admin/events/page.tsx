@@ -22,6 +22,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 interface EventFormState {
   id?: number;
@@ -313,7 +314,8 @@ export default function AdminEventsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <SectionExportButtons sectionType="events" />
           <button
             onClick={() => setActiveTab(activeTab === "catalog" ? "checkin" : "catalog")}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer ${

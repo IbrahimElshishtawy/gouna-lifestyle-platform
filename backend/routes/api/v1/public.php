@@ -11,8 +11,12 @@ use Illuminate\Support\Facades\Route;
 // Stays / Properties
 Route::get('/stays', [StayController::class, 'index'])->name('stays.index');
 Route::get('/stays/{slug}', [StayController::class, 'show'])->name('stays.show');
+Route::get('/stays/{slug}/availability', [StayController::class, 'availability'])->name('stays.availability');
+Route::post('/stays/{slug}/check-availability', [StayController::class, 'checkAvailability'])->name('stays.check-availability');
 Route::get('/properties', [StayController::class, 'index'])->name('properties.index');
 Route::get('/properties/{slug}', [StayController::class, 'show'])->name('properties.show');
+Route::get('/properties/{slug}/availability', [StayController::class, 'availability'])->name('properties.availability');
+Route::post('/properties/{slug}/check-availability', [StayController::class, 'checkAvailability'])->name('properties.check-availability');
 
 // Experiences
 Route::get('/experiences', [ExperienceController::class, 'index'])->name('experiences.index');

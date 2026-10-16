@@ -6,6 +6,7 @@ import type { AdminTransactionItem, FinanceSummary } from "@/features/admin/type
 import { useLanguage } from "@/context/LanguageContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
+import SectionExportButtons from "@/features/admin/components/SectionExportButtons";
 
 export default function AdminFinancesPage() {
   const { locale } = useLanguage();
@@ -46,6 +47,10 @@ export default function AdminFinancesPage() {
               ? "متابعة عمليات الدفع الإلكتروني، وحركات الاسترداد، وتوزيع العمولات وحسابات البنوك."
               : "Track gateway transactions, automated refunds, commissions, and merchant settlements."}
           </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <SectionExportButtons sectionType="finances" />
         </div>
       </div>
 

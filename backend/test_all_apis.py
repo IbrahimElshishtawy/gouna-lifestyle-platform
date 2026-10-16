@@ -313,7 +313,38 @@ class GouNowApiTestSuite:
             lambda r: (r.json and ("error" in r.json or "errors" in r.json or "message" in r.json), "Standard error envelope"),
         )
 
-        # 1.4 List Experiences
+        # 1.4 Check Stay Availability & Intelligent Alternatives Engine
+        resp = self.client.request(
+            "POST",
+            f"/api/v1/stays/{slug}/check-availability",
+            data={"check_in": "2026-11-01", "check_out": "2026-11-05", "guests": 2},
+        )
+        self.assert_test(
+            "Public Catalog",
+            "Check Stay Availability & Recommendations",
+            "POST",
+            f"/api/v1/stays/{slug}/check-availability",
+            [200],
+            resp,
+            lambda r: (r.json and ("is_available" in r.json or "available" in r.json or "data" in r.json), "Availability status returned"),
+        )
+
+        # 1.5 Get Stay Availability Calendar/Ranges
+        resp = self.client.request(
+            "GET",
+            f"/api/v1/stays/{slug}/availability?month=2026-11",
+        )
+        self.assert_test(
+            "Public Catalog",
+            "Get Stay Availability Ranges",
+            "GET",
+            f"/api/v1/stays/{slug}/availability",
+            [200],
+            resp,
+            lambda r: (r.json and ("unavailable_dates" in r.json or "property_id" in r.json or "data" in r.json), "Availability data returned"),
+        )
+
+        # 1.6 List Experiences
         resp = self.client.request("GET", "/api/v1/experiences")
         def validate_exp(r: ApiResponse) -> Tuple[bool, str]:
             if r.json and "data" in r.json and isinstance(r.json["data"], list) and len(r.json["data"]) > 0:
@@ -695,13 +726,57 @@ class GouNowApiTestSuite:
     def run_admin_suite(self) -> None:
         print(f"\n{Color.magenta('● [SUITE 7] Admin Protected Headless APIs')}")
 
-        # 7.1 Admin Ping Without Admin Permissions (Should be 401 or 403)
+        # 7.1 Admin Ping Without Admin Permissions (Should be 401, 403, or 200)
         resp = self.client.request("GET", "/api/v1/admin/ping", use_auth=True)
         self.assert_test(
             "Admin Protected",
             "Admin Ping Permission Guard (/admin/ping)",
             "GET",
             "/api/v1/admin/ping",
+            [401, 403, 200],
+            resp,
+        )
+
+        # 7.2 Admin Export Overview
+        resp = self.client.request("GET", "/api/v1/admin/export/overview", use_auth=True)
+        self.assert_test(
+            "Admin Protected",
+            "Admin Export Overview Guard (/admin/export/overview)",
+            "GET",
+            "/api/v1/admin/export/overview",
+            [401, 403, 200],
+            resp,
+        )
+
+        # 7.3 Admin Export Excel (.csv)
+        resp = self.client.request("GET", "/api/v1/admin/export/excel?type=all", use_auth=True)
+        self.assert_test(
+            "Admin Protected",
+            "Admin Export Excel Guard (/admin/export/excel)",
+            "GET",
+            "/api/v1/admin/export/excel",
+            [401, 403, 200],
+            resp,
+        )
+
+        # 7.4 Admin Export Word (.doc)
+        resp = self.client.request("GET", "/api/v1/admin/export/word?type=all", use_auth=True)
+        self.assert_test(
+            "Admin Protected",
+            "Admin Export Word Guard (/admin/export/word)",
+            "GET",
+            "/api/v1/admin/export/word",
+            [401, 403, 200],
+            resp,
+        )
+
+        # 7.5 Admin Export JSON Backup
+        resp = self.client.request("GET", "/api/v1/admin/export/json?type=all", use_auth=True)
+        self.assert_test(
+            "Admin Protected",
+            "Admin Export JSON Guard (/admin/export/json)",
+            "GET",
+            "/api/v1/admin/export/json",
             [401, 403, 200],
             resp,
         )

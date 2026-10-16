@@ -132,7 +132,8 @@ export default async function HomePage({
           </ScrollReveal>
         )}
 
-        {/* 10. Personal Concierge & Tailored Arrangements Lead Form */}
+
+        {/* 11. Personal Concierge & Tailored Arrangements Lead Form */}
         {sections?.concierge !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <ConciergeInquiry />

@@ -922,4 +922,43 @@ export async function deleteAdminDiscount(id: number): Promise<{ success: boolea
   });
 }
 
+export async function getAdminSessions(params?: {
+  user_id?: number;
+  status?: string;
+  search?: string;
+  page?: number;
+}): Promise<{
+  data: import("../types").AdminSessionItem[];
+  summary: import("../types").AdminSessionSummary;
+  meta: {
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+}> {
+  const query = new URLSearchParams();
+  if (params?.user_id) query.set("user_id", params.user_id.toString());
+  if (params?.status) query.set("status", params.status);
+  if (params?.search) query.set("search", params.search);
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  return apiClient(`/admin/users/sessions${qs ? `?${qs}` : ""}`);
+}
+
+export async function terminateAdminSession(sessionId: number): Promise<{
+  success: boolean;
+  message: string;
+  data: {
+    session_id: number;
+    duration_seconds: number;
+    duration_formatted_ar: string;
+    duration_formatted_en: string;
+  };
+}> {
+  return apiClient(`/admin/users/sessions/${sessionId}/terminate`, {
+    method: "POST",
+  });
+}
+
 

@@ -8,6 +8,7 @@ import type { DashboardData } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { TableSkeleton } from "@/components/ui/LoadingState";
 import UserActionsHistory from "@/features/admin/components/UserActionsHistory";
+import DataExportModal from "@/features/admin/components/DataExportModal";
 
 export default function AdminDashboardPage() {
   const { locale } = useLanguage();
@@ -16,6 +17,7 @@ export default function AdminDashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [propertiesCount, setPropertiesCount] = useState<{ rent: number; sale: number }>({ rent: 0, sale: 0 });
   const [loading, setLoading] = useState(true);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -96,6 +98,14 @@ export default function AdminDashboardPage() {
             <span className="mr-1.5 rtl:ml-1.5 rtl:mr-0">🛎️</span>
             <span>{isAr ? "طلبات الكونسيرج" : "VIP Inquiries"}</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold transition-all shadow-sm shadow-amber-600/20 cursor-pointer gap-1.5"
+          >
+            <span>📥</span>
+            <span>{isAr ? "تصدير البيانات (Excel / Word)" : "Export Data (Excel / Word)"}</span>
+          </button>
         </div>
       </div>
 
@@ -476,6 +486,12 @@ export default function AdminDashboardPage() {
 
       {/* 5. User Activity Trail */}
       <UserActionsHistory />
+
+      {/* 6. Executive Data Export Modal */}
+      <DataExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+      />
     </div>
   );
 }

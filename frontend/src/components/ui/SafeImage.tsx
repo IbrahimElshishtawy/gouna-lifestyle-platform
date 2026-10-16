@@ -88,17 +88,22 @@ export default function SafeImage({
             fallbackIcon
           ) : (
             <div className="flex flex-col items-center gap-2.5">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <Image
-                  src="/assets/images/official-elgouna-icon.png"
-                  alt="El Gouna Emblem"
-                  width={40}
-                  height={40}
-                  className="object-contain drop-shadow"
-                />
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 p-2.5 flex items-center justify-center shadow-lg">
+                <svg
+                  className="w-7 h-7 text-[#DBC0A0]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
               </div>
-              <span className="text-[11px] font-serif tracking-widest uppercase text-amber-200/90 font-semibold drop-shadow-sm">
-                EL GOUNA
+              <span className="text-[10px] sm:text-[11px] font-serif tracking-[0.2em] uppercase text-[#DBC0A0] font-semibold drop-shadow-sm">
+                GOUNOW · EL GOUNA
               </span>
             </div>
           )}

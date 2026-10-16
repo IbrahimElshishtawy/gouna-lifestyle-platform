@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\CustomerApiController;
 use App\Http\Controllers\Api\V1\Admin\DashboardApiController;
 use App\Http\Controllers\Api\V1\Admin\EventApiController;
 use App\Http\Controllers\Api\V1\Admin\ExperienceApiController;
+use App\Http\Controllers\Api\V1\Admin\ExportApiController;
 use App\Http\Controllers\Api\V1\Admin\FinanceApiController;
 use App\Http\Controllers\Api\V1\Admin\MediaDesignApiController;
 use App\Http\Controllers\Api\V1\Admin\PricingApiController;
@@ -151,6 +152,8 @@ Route::middleware(['admin', '2fa'])->group(function () {
     // 5. Staff & Administrative Users
     Route::prefix('users')->as('users.')->group(function () {
         Route::get('/', [StaffApiController::class, 'index'])->name('index');
+        Route::get('/sessions', [StaffApiController::class, 'sessions'])->name('sessions');
+        Route::post('/sessions/{sessionId}/terminate', [StaffApiController::class, 'terminateSession'])->name('sessions.terminate');
         Route::post('/', [StaffApiController::class, 'store'])->name('store');
         Route::get('/{id}', [StaffApiController::class, 'show'])->name('show');
         Route::put('/{id}', [StaffApiController::class, 'update'])->name('update');
@@ -202,4 +205,12 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::put('/', [SettingsApiController::class, 'update'])->name('update');
     });
     Route::get('/audit-logs', [SettingsApiController::class, 'auditLogs'])->name('audit-logs');
+
+    // 10. Data Export & Reports Center (Excel, Word, JSON)
+    Route::prefix('export')->as('export.')->group(function () {
+        Route::get('/overview', [ExportApiController::class, 'overview'])->name('overview');
+        Route::get('/excel', [ExportApiController::class, 'exportExcel'])->name('excel');
+        Route::get('/word', [ExportApiController::class, 'exportWord'])->name('word');
+        Route::get('/json', [ExportApiController::class, 'exportJson'])->name('json');
+    });
 });

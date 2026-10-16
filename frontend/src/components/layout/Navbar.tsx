@@ -99,31 +99,48 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative h-10 w-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 via-brand-terracotta/25 to-brand-brown/40 border border-brand-terracotta/40 shadow-md group-hover:scale-105 transition-all duration-300 p-1.5 backdrop-blur-md">
+          {/* Brand Logo & Destination Endorsement */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative h-11 w-11 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#A55332]/20 via-[#DBC0A0]/30 to-[#5B4635]/40 border border-[#A55332]/40 shadow-md group-hover:scale-105 transition-all duration-300 p-1.5 backdrop-blur-md">
+                <Image
+                  src="/assets/images/Gounow Main signature.png"
+                  alt="GouNow"
+                  width={34}
+                  height={34}
+                  className="object-contain drop-shadow"
+                  priority
+                />
+              </div>
+              <div className="text-start">
+                <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
+                  {t.common.elGouna}
+                </span>
+                <span
+                  className={`block text-lg font-serif font-bold tracking-wider transition-colors duration-300 ${
+                    isTransparent ? "text-white" : "text-brand-brown"
+                  }`}
+                >
+                  GOUNOW
+                </span>
+              </div>
+            </Link>
+
+            {/* Official El Gouna Destination Partner Seal */}
+            <div className="hidden lg:flex items-center ps-3.5 border-s border-current/20 opacity-80 hover:opacity-100 transition-opacity">
               <Image
-                src="/assets/images/official-elgouna-icon.png"
-                alt="El Gouna"
-                width={26}
+                src={
+                  isTransparent
+                    ? "/assets/images/official-elgouna-logo-white.webp"
+                    : "/assets/images/official-elgouna-logo.webp"
+                }
+                alt="Official El Gouna Destination"
+                width={82}
                 height={26}
-                className="object-contain drop-shadow"
-                priority
+                className="object-contain h-6 w-auto"
               />
             </div>
-            <div className="text-start">
-              <span className="block text-[10px] uppercase font-bold tracking-[0.25em] text-brand-terracotta">
-                {t.common.elGouna}
-              </span>
-              <span
-                className={`block text-base font-serif font-bold tracking-wider transition-colors duration-300 ${
-                  isTransparent ? "text-white" : "text-brand-brown"
-                }`}
-              >
-                {t.common.brandName}
-              </span>
-            </div>
-          </Link>
+          </div>
 
           {/* Desktop Nav Links */}
           <nav
@@ -221,7 +238,7 @@ export default function Navbar() {
 
             <Link
               href="/stays?listing_type=rent"
-              className="px-5 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+              className="px-6 py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             >
               {t.common.bookAStay}
             </Link>

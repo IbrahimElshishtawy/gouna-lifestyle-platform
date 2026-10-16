@@ -1,35 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
 
-import type { MediaDesignConfig, HeroScene } from "@/features/admin/types";
-
-const CINEMATIC_PRESETS: HeroScene[] = [
-  {
-    id: "dusk",
-    name_ar: "غروب الفلل الذهبي",
-    name_en: "Lagoon Sunset",
-    media_type: "image",
-    image_url: "/assets/images/hero-villa-dusk.jpg",
-  },
-  {
-    id: "lagoon",
-    name_ar: "مياه الفنار الفيروزية",
-    name_en: "Turquoise Lagoon",
-    media_type: "image",
-    image_url: "/assets/images/fanadir-villa.jpg",
-  },
-  {
-    id: "marine",
-    name_ar: "يخوت مارينا الجونة",
-    name_en: "Marina Yacht Life",
-    media_type: "image",
-    image_url: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=2000&q=85",
-  },
-];
+import type { MediaDesignConfig } from "@/features/admin/types";
 
 interface HeroSectionProps {
   heroConfig?: MediaDesignConfig["hero"];
@@ -40,46 +16,18 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
 
-  const configuredScenes: HeroScene[] =
-    heroConfig?.scenes && heroConfig.scenes.length > 0
-      ? heroConfig.scenes
-      : CINEMATIC_PRESETS;
-
-  const [activeSceneIndex, setActiveSceneIndex] = useState(0);
-  const currentScene = configuredScenes[activeSceneIndex] || configuredScenes[0];
-
-  // Auto-rotate scenes if more than one scene exists
-  useEffect(() => {
-    if (configuredScenes.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveSceneIndex((prev) => (prev + 1) % configuredScenes.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [configuredScenes.length]);
-
-  const isVideo =
-    heroConfig?.media_mode === "video"
-      ? !!heroConfig?.video_url
-      : currentScene?.media_type === "video"
-      ? !!currentScene?.video_url
-      : !!heroConfig?.video_url && heroConfig?.media_mode !== "image";
-
-  const currentMediaUrl = isVideo
-    ? (currentScene?.video_url || heroConfig?.video_url || "")
-    : (currentScene?.image_url || heroConfig?.background_image || "/assets/images/hero-villa-dusk.jpg");
-
   // Booking widget state
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
   const [checkIn, setCheckIn] = useState("2026-10-24");
   const [checkOut, setCheckOut] = useState("2026-10-31");
   const [guests, setGuests] = useState("4");
-  
+
   // Real Estate specific states
   const [propertyType, setPropertyType] = useState("all");
   const [budget, setBudget] = useState("all");
   const [bedrooms, setBedrooms] = useState("any");
-  
+
   // Experiences specific states
   const [expType, setExpType] = useState("all");
   const [expTiming, setExpTiming] = useState("all");
@@ -117,51 +65,26 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
     router.push(`/stays?${params.toString()}`);
   };
 
-  const titleLine1 = isAr
-    ? (currentScene?.title_line1_ar || heroConfig?.title_line1_ar || t.hero.titleLine1)
-    : (currentScene?.title_line1_en || heroConfig?.title_line1_en || t.hero.titleLine1);
-
-  const titleLine2 = isAr
-    ? (currentScene?.title_line2_ar || heroConfig?.title_line2_ar || t.hero.titleLine2)
-    : (currentScene?.title_line2_en || heroConfig?.title_line2_en || t.hero.titleLine2);
-
-  const subtitle = isAr
-    ? (currentScene?.subtitle_ar || heroConfig?.subtitle_ar || t.hero.subtitle)
-    : (currentScene?.subtitle_en || heroConfig?.subtitle_en || t.hero.subtitle);
 
   return (
-    <section className="relative min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-28 sm:pt-32 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
+    <section className="relative min-h-[820px] sm:min-h-[860px] lg:min-h-[920px] xl:min-h-[960px] flex flex-col justify-between bg-[#140E0C] text-white overflow-hidden pt-24 sm:pt-28 lg:pt-36 pb-8 sm:pb-10 lg:pb-12">
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
       <div className="absolute inset-0 z-0">
-        {isVideo ? (
-          <video
-            key={currentMediaUrl}
-            src={currentMediaUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
-          />
-        ) : (
-          <Image
-            key={currentMediaUrl}
-            src={currentMediaUrl}
-            alt="Live the Unrivaled El Gouna Lifestyle"
-            fill
-            priority
-            sizes="100vw"
-            className="w-full h-full object-cover object-[center_right] lg:object-center motion-safe:animate-ken-burns transition-all duration-1000"
-          />
-        )}
+        <Image
+          src="/assets/images/logo.jpg"
+          alt="GouNow Lifestyle - El Gouna"
+          fill
+          priority
+          sizes="100vw"
+          className="w-full h-full object-cover object-center motion-safe:animate-ken-burns"
+        />
 
         {/* Top Vignette for Transparent Header Contrast */}
         <div className="absolute inset-x-0 top-0 h-44 sm:h-56 bg-gradient-to-b from-black/85 via-black/40 to-transparent pointer-events-none z-10" />
 
-        {/* Asymmetrical Directional Text Shading:
-            Provides strong contrast for the editorial text on the left/start without obscuring the villa on the right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
-        <div className="absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
+        {/* Asymmetrical Directional Text Shading: Desktop/Tablet only */}
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 rtl:hidden" />
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-l from-[#140E0C]/90 via-[#140E0C]/65 via-45% to-transparent pointer-events-none z-10 ltr:hidden" />
 
         {/* Ambient Dusk Glow */}
         <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/15 to-black/50 pointer-events-none z-10" />
@@ -173,159 +96,16 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
       {/* Ultra-compact, clean edge transition (only 16-24px at the bottom boundary, eliminating any ghostly wash) */}
       <div className="absolute inset-x-0 bottom-0 h-4 sm:h-6 bg-gradient-to-b from-transparent to-[#FAF8F5] pointer-events-none z-10" />
 
-      {/* Floating Cinematic Scene Switcher (Desktop) */}
-      {configuredScenes.length > 1 && (
-        <aside
-          aria-label={isAr ? "التحكم في المشهد السينمائي" : "Cinematic Scene Switcher"}
-          className="absolute top-28 sm:top-32 end-6 sm:end-10 z-30 hidden lg:flex items-center gap-1.5 p-1.5 bg-black/55 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl"
-        >
-          <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-[#E5DCD3]/80">
-            {isAr ? "المشهد:" : "SCENE:"}
-          </span>
-          {configuredScenes.map((p, idx) => (
-            <button
-              key={p.id || idx}
-              type="button"
-              onClick={() => setActiveSceneIndex(idx)}
-              className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
-                activeSceneIndex === idx
-                  ? "bg-brand-terracotta text-white shadow-md scale-105"
-                  : "text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {isAr ? (p.name_ar || `مشهد ${idx + 1}`) : (p.name_en || `Scene ${idx + 1}`)}
-            </button>
-          ))}
-        </aside>
-      )}
-
-      {/* Mobile Scene Indicator Dots */}
-      {configuredScenes.length > 1 && (
-        <div className="absolute top-24 end-4 z-30 flex lg:hidden items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/15">
-          {configuredScenes.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setActiveSceneIndex(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                activeSceneIndex === idx ? "w-4 bg-brand-terracotta" : "bg-white/50"
-              }`}
-              aria-label={`Scene ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* ==================== 2. ASYMMETRICAL EDITORIAL HERO GRID ==================== */}
-      <div className="relative z-20 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
-          
-          {/* Left Content Area (~7-10% from viewport edge via container padding) */}
-          <div className="lg:col-span-8 xl:col-span-7 flex flex-col items-start text-start">
-            
-            {/* 1. Small Eyebrow Label */}
-            <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#E5DCD3] text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.24em] mb-3.5 sm:mb-4 shadow-sm animate-fade-in-down">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta animate-pulse" />
-              <span>
-                {heroConfig
-                  ? (isAr ? heroConfig.badge_ar : heroConfig.badge_en)
-                  : (isAr ? "تجارب استثنائية منتقاة • ملاذات خاصة" : "CURATED LUXURY EXPERIENCES · PRIVATE ESCAPES")}
-              </span>
-            </div>
-
-            {/* 2. Main Headline: Refined Editorial Serif, Natural 2-3 Line Wrap, Controlled Max Width */}
-            <h1 className="font-serif text-3.5xl sm:text-5xl lg:text-6xl xl:text-6.5xl font-bold tracking-tight text-[#FAF8F5] leading-[1.12] sm:leading-[1.08] mb-4 sm:mb-5 max-w-2xl drop-shadow-[0_4px_24px_rgba(0,0,0,0.7)] animate-fade-in-up [animation-delay:150ms]">
-              {titleLine1} <br />
-              <span className="italic font-normal text-amber-200/90">{titleLine2}</span>
-            </h1>
-
-            {/* 3. Short Supporting Description */}
-            <p className="text-xs sm:text-base lg:text-lg text-[#E5DCD3] max-w-xl font-light leading-relaxed mb-6 sm:mb-8 drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] animate-fade-in-up [animation-delay:250ms]">
-              {subtitle}
-            </p>
-
-            {/* 4. Dual Clear CTAs: Directly Beneath Description */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto animate-fade-in-up [animation-delay:350ms]">
-              <a
-                href={heroConfig?.cta1_link || "#stays"}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/30 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
-              >
-                <span>
-                  {heroConfig
-                    ? (isAr ? heroConfig.cta1_text_ar : heroConfig.cta1_text_en)
-                    : (isAr ? "استكشف الفلل والإقامات" : "Explore Curated Stays")}
-                </span>
-                <svg
-                  className="w-4 h-4 ms-2 transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
-
-              <a
-                href={heroConfig?.cta2_link || "#experiences"}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF8F5] border border-white/25 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              >
-                <span>
-                  {heroConfig
-                    ? (isAr ? heroConfig.cta2_text_ar : heroConfig.cta2_text_en)
-                    : (isAr ? "اليخوت والأنشطة البحرية" : "Private Charters & Diving")}
-                </span>
-              </a>
-            </div>
-
-          </div>
-
-          {/* Right Column: Restrained Editorial Live Status Module */}
-          <div className="lg:col-span-4 xl:col-span-5 hidden lg:flex flex-col items-end justify-end pb-1">
-            <div className="w-full max-w-xs p-4 sm:p-5 rounded-2xl bg-black/45 backdrop-blur-xl border border-white/15 text-start shadow-2xl space-y-3 animate-fade-in-up [animation-delay:300ms]">
-              
-              {/* Status Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[11px] font-mono font-bold tracking-widest text-[#FAF8F5]">
-                    {isAr ? "الجونة مباشرة" : "EL GOUNA LIVE"}
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-amber-300 font-semibold">
-                  28°C · {isAr ? "صافٍ ومثالي" : "Clear Sky"}
-                </span>
-              </div>
-
-              {/* Editorial Caption */}
-              <p className="text-xs text-[#E5DCD3] font-serif italic leading-relaxed">
-                {isAr
-                  ? "«ملاذ استثنائي حيث يلتقي أفق البحر الأحمر بخصوصية الفلل الفاخرة»"
-                  : '"A different kind of escape, where Red Sea horizons meet barefoot elegance."'}
-              </p>
-
-              {/* Concierge Availability & Marine Water Indicator */}
-              <div className="pt-1.5 flex items-center justify-between text-[10px] font-mono text-[#E5DCD3]/80 border-t border-white/10">
-                <span className="flex items-center gap-1.5 text-emerald-300 font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  {isAr ? "الكونسيرج: متاح 24/7" : "Concierge: 24/7 Online"}
-                </span>
-                <span className="text-white/50">
-                  {isAr ? "مياه هادئة" : "Calm Waters"}
-                </span>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </div>
+      {/* ==================== 2. SPATIAL CANVAS SPACER ==================== */}
+      {/* Preserves the exact hero dimensions and visual breathing room for the background */}
+      <div className="relative z-20 flex-1 w-full min-h-[280px] sm:min-h-[340px] lg:min-h-[400px]" />
 
       {/* ==================== 3. LOWER TIER: BOOKING WIDGET & STATISTICS STRIP ==================== */}
-      <div className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-12 lg:mt-14">
-        
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-14">
+
         {/* Master Luxury Search Card (Overlapping lower edge of background, warm off-white surface, 75-88% width) */}
-        <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
-          
+        <div className="w-full bg-[#FAF8F5]/98 dark:bg-[#1E1715]/98 backdrop-blur-2xl p-3.5 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl shadow-[0_24px_70px_-15px_rgba(14,10,9,0.55)] border border-white/90 dark:border-white/10 text-brand-brown transition-all duration-300 animate-fade-in-scale [animation-delay:400ms]">
+
           {/* Mode Selector (Compact Tab Row) */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 mb-3 sm:mb-4 border-b border-brand-border/60 pb-3">
             <div className="inline-flex p-1 bg-[#F0EAE3] dark:bg-black/30 rounded-xl border border-brand-border/70 shadow-inner gap-1 max-w-full overflow-x-auto no-scrollbar">
@@ -333,11 +113,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               <button
                 type="button"
                 onClick={() => setActiveTab("rent")}
-                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
-                  activeTab === "rent"
-                    ? "bg-brand-terracotta text-white shadow-sm"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
-                }`}
+                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${activeTab === "rent"
+                  ? "bg-brand-terracotta text-white shadow-sm"
+                  : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
+                  }`}
               >
                 {t.hero.tabRent}
               </button>
@@ -346,11 +125,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               <button
                 type="button"
                 onClick={() => setActiveTab("sale")}
-                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
-                  activeTab === "sale"
-                    ? "bg-brand-terracotta text-white shadow-sm"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
-                }`}
+                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${activeTab === "sale"
+                  ? "bg-brand-terracotta text-white shadow-sm"
+                  : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
+                  }`}
               >
                 {t.hero.tabSale}
               </button>
@@ -359,11 +137,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               <button
                 type="button"
                 onClick={() => setActiveTab("experiences")}
-                className={`px-3.5 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${
-                  activeTab === "experiences"
-                    ? "bg-brand-terracotta text-white shadow-sm"
-                    : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
-                }`}
+                className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg text-xs font-bold tracking-wide transition-all duration-200 whitespace-nowrap cursor-pointer ${activeTab === "experiences"
+                  ? "bg-brand-terracotta text-white shadow-sm"
+                  : "text-brand-brown hover:text-brand-terracotta hover:bg-white/60"
+                  }`}
               >
                 {t.hero.tabExp}
               </button>
@@ -377,8 +154,8 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
           {/* Unified Architectural Search Bar */}
           <form onSubmit={handleSearch}>
-            <div className="bg-white dark:bg-[#140E0C]/60 rounded-xl sm:rounded-2xl border border-brand-border/80 shadow-sm p-1.5 sm:p-2 flex flex-col lg:flex-row items-stretch lg:items-center divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-brand-border/60 transition-all">
-              
+            <div className="bg-white dark:bg-[#140E0C]/60 rounded-xl sm:rounded-2xl border border-brand-border/80 shadow-sm p-1.5 sm:p-2 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row items-stretch lg:items-center divide-y sm:divide-y-0 lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-brand-border/60 transition-all gap-1.5 sm:gap-2 lg:gap-0">
+
               {/* ===================== TAB 1: RENT FIELDS ===================== */}
               {activeTab === "rent" && (
                 <>
@@ -661,7 +438,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
               )}
 
               {/* Action CTA Button */}
-              <div className="p-1.5 sm:p-2 flex items-center justify-center shrink-0">
+              <div className="p-1.5 sm:p-2 flex items-center justify-center shrink-0 sm:col-span-2 lg:col-span-1 w-full lg:w-auto">
                 <button
                   type="submit"
                   className="w-full lg:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl sm:rounded-[1.2rem] font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
@@ -683,65 +460,14 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                     {activeTab === "rent"
                       ? t.hero.searchRentButton
                       : activeTab === "sale"
-                      ? t.hero.searchSaleButton
-                      : t.hero.searchExpButton}
+                        ? t.hero.searchSaleButton
+                        : t.hero.searchExpButton}
                   </span>
                 </button>
               </div>
 
             </div>
           </form>
-        </div>
-
-        {/* ==================== 4. RESTRAINED HORIZONTAL STATISTICS STRIP ==================== */}
-        <div className="mt-4 sm:mt-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/70 backdrop-blur-2xl border border-white/20 text-white shadow-2xl animate-fade-in-up [animation-delay:500ms]">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x rtl:lg:divide-x-reverse divide-white/10 gap-3.5 lg:gap-0">
-            
-            {/* Stat 1 */}
-            <div className="px-2 sm:px-5 py-1 text-start">
-              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">120+</span>
-              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
-                {isAr ? "فيلا شاطئية معتمدة" : "Curated Lagoon Villas"}
-              </span>
-              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
-                {isAr ? "إطلالات لاجون وبحر مباشر" : "Private Shoreline & Pools"}
-              </span>
-            </div>
-
-            {/* Stat 2 */}
-            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
-              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">18</span>
-              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
-                {isAr ? "يخت فاخر للإبحار" : "Private Yacht Fleet"}
-              </span>
-              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
-                {isAr ? "رحلات جزيرة طويلة ومحميات" : "Tawila Island Expeditions"}
-              </span>
-            </div>
-
-            {/* Stat 3 */}
-            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
-              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">24/7</span>
-              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
-                {isAr ? "خدمة كونسيرج VIP" : "Dedicated Concierge Desk"}
-              </span>
-              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
-                {isAr ? "شيف خاص وحجوزات حصرية" : "Private Chefs & Transfers"}
-              </span>
-            </div>
-
-            {/* Stat 4 */}
-            <div className="px-2 sm:px-5 py-1 text-start pt-2 lg:pt-1">
-              <span className="block text-xl sm:text-2xl font-serif font-bold text-amber-300">100%</span>
-              <span className="block text-xs font-semibold text-[#FAF8F5] mt-0.5">
-                {isAr ? "حجز فندقي موثوق" : "Verified Booking Security"}
-              </span>
-              <span className="block text-[10px] text-[#E5DCD3]/70 truncate">
-                {isAr ? "دفع بنكي مشفر وإلغاء مرن" : "Encrypted Bank Checkout"}
-              </span>
-            </div>
-
-          </div>
         </div>
 
       </div>
