@@ -40,6 +40,7 @@ return [
         'Retry-After',
         'X-Idempotent',
         'X-Cache-Lookup',
+        'Content-Disposition',
     ],
 
     'max_age' => 86400,

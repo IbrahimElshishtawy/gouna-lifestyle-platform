@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api/client";
+import { apiClient, getStoredAuthToken } from "@/lib/api/client";
 
 export interface ExportOverviewData {
   properties_count: number;
@@ -29,16 +29,23 @@ export async function downloadExportFile(
   format: "excel" | "word" | "json",
   type: string = "all"
 ): Promise<void> {
-  const endpoint = `/api/v1/admin/export/${format}?type=${encodeURIComponent(type)}`;
+  // Determine base API url safely without duplicating /api/v1
+  const rawApiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const cleanBase = rawApiBase.replace(/\/+$/, "");
 
-  // Determine base API url
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-  const fullUrl = `${apiBase.replace(/\/+$/, "")}${endpoint}`;
+  const endpointPath = cleanBase.endsWith("/api/v1")
+    ? `/admin/export/${format}?type=${encodeURIComponent(type)}`
+    : `/api/v1/admin/export/${format}?type=${encodeURIComponent(type)}`;
 
-  // Get auth token if stored
-  let token: string | null = null;
-  if (typeof window !== "undefined") {
-    token = localStorage.getItem("auth_token") || localStorage.getItem("sanctum_token");
+  const fullUrl = `${cleanBase}${endpointPath}`;
+
+  // Get auth token from central helper and all storage fallback keys
+  let token: string | null = getStoredAuthToken();
+  if (!token && typeof window !== "undefined") {
+    token =
+      localStorage.getItem("gounow_auth_token") ||
+      localStorage.getItem("auth_token") ||
+      localStorage.getItem("sanctum_token");
   }
 
   const headers: HeadersInit = {
@@ -51,11 +58,22 @@ export async function downloadExportFile(
   const response = await fetch(fullUrl, {
     method: "GET",
     headers,
-    credentials: "omit",
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error(`Export request failed with status: ${response.status}`);
+    let errorDetail = `status ${response.status}`;
+    try {
+      const errJson = await response.json();
+      if (errJson?.message) {
+        errorDetail = errJson.message;
+      } else if (errJson?.error?.message) {
+        errorDetail = errJson.error.message;
+      }
+    } catch {
+      // Non-JSON error body
+    }
+    throw new Error(`Export request failed: ${errorDetail}`);
   }
 
   const blob = await response.blob();
@@ -64,13 +82,23 @@ export async function downloadExportFile(
   a.style.display = "none";
   a.href = url;
 
-  // Determine file extension
+  // Determine file extension and filename from header if present
   let ext = "csv";
   if (format === "word") ext = "doc";
   if (format === "json") ext = "json";
 
   const dateStr = new Date().toISOString().slice(0, 10);
-  a.download = `gounow_${type}_${dateStr}.${ext}`;
+  let filename = `gounow_${type}_${dateStr}.${ext}`;
+
+  const disposition = response.headers.get("content-disposition");
+  if (disposition && disposition.includes("filename=")) {
+    const match = disposition.match(/filename=["']?([^"';]+)["']?/i);
+    if (match && match[1]) {
+      filename = match[1].trim();
+    }
+  }
+
+  a.download = filename;
 
   document.body.appendChild(a);
   a.click();

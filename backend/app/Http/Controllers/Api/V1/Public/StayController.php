@@ -19,6 +19,7 @@ class StayController extends Controller
     public function index(Request $request): PropertyCollection
     {
         $query = Property::query()
+            ->with(['images', 'category', 'location'])
             ->where('is_published', true)
             ->where('is_available', true);
 
