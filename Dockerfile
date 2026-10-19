@@ -24,6 +24,9 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     curl \
+    bash \
+    openssl \
+    postgresql-client \
     git \
     zip \
     unzip \
@@ -65,13 +68,15 @@ COPY --from=frontend /app/public/build /var/www/html/public/build
 # Install PHP dependencies for production
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-# Copy configuration files
+# Copy configuration files and operational scripts
 COPY docker/production/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/production/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY docker/scripts/backup_database.sh /usr/local/bin/backup_database.sh
+COPY docker/scripts/restore_database.sh /usr/local/bin/restore_database.sh
 COPY backend/docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
-RUN chmod +x /usr/local/bin/entrypoint.sh \
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/backup_database.sh /usr/local/bin/restore_database.sh \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose default HTTP port

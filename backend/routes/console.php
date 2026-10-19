@@ -11,4 +11,30 @@ Artisan::command('inspire', function () {
 
 Schedule::command('bookings:expire-pending')
     ->everyFiveMinutes()
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Artisan::command('db:backup', function () {
+    $script = base_path('../docker/scripts/backup_database.sh');
+    if (! file_exists($script)) {
+        $script = '/usr/local/bin/backup_database.sh';
+    }
+    if (! file_exists($script)) {
+        $script = base_path('docker/scripts/backup_database.sh');
+    }
+
+    if (! file_exists($script)) {
+        $this->error('Backup script not found.');
+        return 1;
+    }
+
+    $this->info('Executing encrypted database backup routine...');
+    passthru("bash " . escapeshellarg($script), $status);
+    return $status;
+})->purpose('Execute encrypted database backup and retention purge');
+
+Schedule::command('db:backup')
+    ->everySixHours()
+    ->withoutOverlapping()
+    ->onOneServer();
+

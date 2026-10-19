@@ -1,7 +1,7 @@
 export const CONFIG = {
     baseUrl: __ENV.TARGET_URL || 'http://127.0.0.1:8001',
-    adminEmail: 'admin@gounow.com',
-    adminPassword: 'Admin@2026!',
+    adminEmail: __ENV.ADMIN_EMAIL || '',
+    adminPassword: __ENV.ADMIN_PASSWORD || '',
     headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
