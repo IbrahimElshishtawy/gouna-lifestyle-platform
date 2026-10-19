@@ -91,7 +91,7 @@ class PermissionResolver
 
         $permissions = Cache::remember($cacheKey, 3600, function () use ($user) {
             // Eager load roles with their permissions, and direct user permissions in 2 efficient queries
-            $user->loadMissing(['roles.permissions', 'permissions']);
+            $user->load(['roles.permissions', 'permissions']);
 
             $map = [];
 

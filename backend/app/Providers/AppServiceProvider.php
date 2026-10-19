@@ -56,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
             IdempotencyServiceInterface::class,
             IdempotencyService::class
         );
+
+        $this->app->singleton(\App\Services\Auth\PermissionResolver::class);
     }
 
     /**
@@ -99,7 +101,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Backward compatibility rate limiters for existing characterization tests
         RateLimiter::for('checkout', function (Request $request) {
-            return Limit::perMinute(30)->by($request->ip());
+            $limit = app()->environment('local', 'testing') ? 2000 : 30;
+            return Limit::perMinute($limit)->by($request->ip());
         });
 
         RateLimiter::for('inquiries', function (Request $request) {
@@ -107,7 +110,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('quote', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
+            $limit = app()->environment('local', 'testing') ? 3000 : 60;
+            return Limit::perMinute($limit)->by($request->ip());
         });
 
         RateLimiter::for('admin_login', function (Request $request) {

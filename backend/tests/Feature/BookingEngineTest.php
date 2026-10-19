@@ -35,6 +35,7 @@ class BookingEngineTest extends TestCase
         Property::where('reference_number', 'like', 'GON-PROP-BOOK%')->forceDelete();
         Discount::where('code', 'TESTSUMMER20')->forceDelete();
         Customer::where('email', 'like', '%@test-booking.com')->forceDelete();
+        \App\Models\SeasonalPrice::truncate();
 
         $category = PropertyCategory::firstOrCreate(
             ['slug' => 'test-checkout-category'],

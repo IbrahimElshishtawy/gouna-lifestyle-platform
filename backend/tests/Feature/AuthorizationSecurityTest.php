@@ -37,6 +37,7 @@ class AuthorizationSecurityTest extends TestCase
         $role = Role::where('name', $roleName)->first();
         if ($role) {
             $user->roles()->attach($role->id);
+            $user->unsetRelation('roles');
         }
 
         return $user;

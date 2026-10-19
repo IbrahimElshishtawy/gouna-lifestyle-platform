@@ -13,7 +13,8 @@
 </head>
 <body>
     <div class="card">
-        <h2>Paymob 3DS Payment Authorization</h2>
+        <h2>Verified by 3D Secure</h2>
+        <p>Paymob 3DS Payment Authorization</p>
         <p>Reference: <strong>{{ $booking->reference }}</strong></p>
         <p>Amount: <strong>{{ number_format(($transaction->amount_cents ?? 0) / 100, 2) }} {{ $transaction->currency ?? 'EGP' }}</strong></p>
         <form method="POST" action="{{ route('checkout.card-mock.complete', $booking->reference) }}">

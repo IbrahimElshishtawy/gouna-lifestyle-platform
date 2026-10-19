@@ -12,40 +12,52 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Add parent_id and unit attributes to properties table
-        Schema::table('properties', function (Blueprint $table) {
-            if (!Schema::hasColumn('properties', 'parent_id')) {
+        if (!Schema::hasColumn('properties', 'parent_id')) {
+            Schema::table('properties', function (Blueprint $table) {
                 $table->foreignId('parent_id')
                     ->nullable()
                     ->after('id')
                     ->constrained('properties')
                     ->onDelete('cascade');
-            }
-            if (!Schema::hasColumn('properties', 'unit_number')) {
+            });
+        }
+        if (!Schema::hasColumn('properties', 'unit_number')) {
+            Schema::table('properties', function (Blueprint $table) {
                 $table->string('unit_number', 100)->nullable()->after('reference_number');
-            }
-            if (!Schema::hasColumn('properties', 'view')) {
+            });
+        }
+        if (!Schema::hasColumn('properties', 'view')) {
+            Schema::table('properties', function (Blueprint $table) {
                 $table->string('view', 150)->nullable()->after('compound');
-            }
-        });
+            });
+        }
 
         // 2. Extend seasonal_prices for global rules, weekend rules, and holiday rules
-        Schema::table('seasonal_prices', function (Blueprint $table) {
-            if (Schema::hasColumn('seasonal_prices', 'property_id')) {
+        if (Schema::hasColumn('seasonal_prices', 'property_id')) {
+            Schema::table('seasonal_prices', function (Blueprint $table) {
                 $table->unsignedBigInteger('property_id')->nullable()->change();
-            }
-            if (!Schema::hasColumn('seasonal_prices', 'rule_type')) {
+            });
+        }
+        if (!Schema::hasColumn('seasonal_prices', 'rule_type')) {
+            Schema::table('seasonal_prices', function (Blueprint $table) {
                 $table->string('rule_type', 50)->default('season')->after('property_id');
-            }
-            if (!Schema::hasColumn('seasonal_prices', 'adjustment_type')) {
+            });
+        }
+        if (!Schema::hasColumn('seasonal_prices', 'adjustment_type')) {
+            Schema::table('seasonal_prices', function (Blueprint $table) {
                 $table->string('adjustment_type', 30)->default('fixed')->after('rule_type');
-            }
-            if (!Schema::hasColumn('seasonal_prices', 'adjustment_percent')) {
+            });
+        }
+        if (!Schema::hasColumn('seasonal_prices', 'adjustment_percent')) {
+            Schema::table('seasonal_prices', function (Blueprint $table) {
                 $table->decimal('adjustment_percent', 5, 2)->nullable()->after('price_cents');
-            }
-            if (!Schema::hasColumn('seasonal_prices', 'days_of_week')) {
+            });
+        }
+        if (!Schema::hasColumn('seasonal_prices', 'days_of_week')) {
+            Schema::table('seasonal_prices', function (Blueprint $table) {
                 $table->json('days_of_week')->nullable()->after('end_date');
-            }
-        });
+            });
+        }
     }
 
     /**

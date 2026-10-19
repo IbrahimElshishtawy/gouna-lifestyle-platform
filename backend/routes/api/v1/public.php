@@ -35,7 +35,7 @@ Route::post('/events/{slug}/inquire', [EventController::class, 'inquire'])->midd
 // Checkout & Booking Engine
 Route::prefix('checkout')->as('checkout.')->group(function () {
     Route::post('/quote', [CheckoutController::class, 'quote'])
-        ->middleware('throttle:booking')
+        ->middleware('throttle:quote')
         ->name('quote');
 
     Route::post('/bookings', [CheckoutController::class, 'createBooking'])

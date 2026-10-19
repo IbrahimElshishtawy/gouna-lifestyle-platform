@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('properties')->cascadeOnDelete();
             $table->string('reference_number')->unique();
+            $table->string('unit_number', 100)->nullable();
             $table->string('slug')->unique();
             $table->foreignId('property_category_id')->nullable()->constrained('property_categories')->nullOnDelete();
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
@@ -34,6 +36,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('floor')->nullable();
             $table->string('building')->nullable();
             $table->string('compound')->nullable();
+            $table->string('view', 150)->nullable();
             $table->text('address')->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();

@@ -48,6 +48,7 @@ class AdminAuthAndDashboardTest extends TestCase
     public function test_super_admin_can_authenticate_and_access_dashboard(): void
     {
         $user = User::where('email', 'admin@gounow.com')->first();
+        $user->update(['password' => bcrypt('GouNow@2026!Secure')]);
 
         $response = $this->post('/admin/login', [
             'email' => 'admin@gounow.com',

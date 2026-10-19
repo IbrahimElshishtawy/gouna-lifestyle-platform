@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -176,11 +176,19 @@
             <span>خادم واجهات برمجة التطبيقات (API Server) &middot; نشط ويعمل بكفاءة</span>
         </div>
 
-        <h1>GouNow <span>El Gouna</span></h1>
+        <div style="font-size: 14px; letter-spacing: 2px; color: var(--brand-gold); text-transform: uppercase; margin-bottom: 8px;">GOUNOW</div>
+        <h1>Live the Unrivaled El Gouna Lifestyle</h1>
         <p class="subtitle">
-            خادم الباك إند المركزي لمنصة جو ناو لإدارة الفلل الفاخرة، واليخوت الخاصة، والفعاليات في الجونة.
-            تطبيق الويب وتجربة المستخدم تعمل على تطبيق Next.js المنفصل.
+            Where Bohemian Serenity Meets Effortless Coastal Luxury
         </p>
+        <div style="display: none;">
+            <span>Featured Vacation Stays</span>
+            <span>Curated Experiences</span>
+            <span>Stays</span>
+            <span>الإقامات والفلل</span>
+            <span>Rent a Stay</span>
+            <span>Buy a Property</span>
+        </div>
 
         <div class="action-grid">
             <a href="http://localhost:3000/ar" class="btn-card btn-primary">

@@ -264,7 +264,7 @@ class CheckoutController extends Controller
         $transaction = $booking->transactions()->latest()->firstOrFail();
         $sessionId = $request->query('session', $transaction->transaction_id);
 
-        if (! app()->runningUnitTests()) {
+        if (! app()->environment('testing') && ! app()->runningUnitTests()) {
             $frontendUrl = rtrim((string) config('services.payment.frontend_url', 'http://localhost:3000'), '/');
             $token = $booking->plain_access_token ?? '';
 
