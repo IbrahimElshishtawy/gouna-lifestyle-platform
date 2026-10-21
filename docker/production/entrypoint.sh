@@ -56,7 +56,7 @@ if [ "$SUPERVISOR_START_CRON" = "true" ]; then
 fi
 
 # Ensure storage link exists
-php /var/www/html/artisan storage:link --force || true
+php /var/www/html/artisan storage:link --force || echo "Notice: Storage link already established."
 
 # Run database migrations if requested (migration failures MUST halt deployment)
 if [ "$RUN_MIGRATIONS" = "true" ] || [ "$RUN_MIGRATIONS" = "1" ]; then
@@ -64,11 +64,12 @@ if [ "$RUN_MIGRATIONS" = "true" ] || [ "$RUN_MIGRATIONS" = "1" ]; then
     php /var/www/html/artisan migrate --force
 fi
 
-# Cache configuration, routes, and views in production
+# Cache configuration, routes, and views in production (Fail-fast: halts if syntax or route errors exist)
 if [ "$APP_ENV" = "production" ]; then
-    php /var/www/html/artisan config:cache || true
-    php /var/www/html/artisan route:cache || true
-    php /var/www/html/artisan view:cache || true
+    echo "Optimizing and caching Laravel configuration, routes, and views for production..."
+    php /var/www/html/artisan config:cache
+    php /var/www/html/artisan route:cache
+    php /var/www/html/artisan view:cache
 fi
 
 exec "$@"

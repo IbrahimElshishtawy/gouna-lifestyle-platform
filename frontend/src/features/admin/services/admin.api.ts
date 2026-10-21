@@ -961,4 +961,51 @@ export async function terminateAdminSession(sessionId: number): Promise<{
   });
 }
 
+/**
+ * 22. Manual Payment Proofs & Offline Settlement
+ */
+export async function getAdminPaymentProofs(params?: {
+  status?: string;
+  booking_reference?: string;
+  search?: string;
+  page?: number;
+}): Promise<PaginatedResponse<import("../types").AdminPaymentProofItem>> {
+  const query = new URLSearchParams();
+  if (params?.status) query.set("status", params.status);
+  if (params?.booking_reference) query.set("booking_reference", params.booking_reference);
+  if (params?.search) query.set("search", params.search);
+  if (params?.page) query.set("page", params.page.toString());
+
+  const qs = query.toString();
+  return apiClient<PaginatedResponse<import("../types").AdminPaymentProofItem>>(
+    `/admin/payment-proofs${qs ? `?${qs}` : ""}`
+  );
+}
+
+export async function getAdminPaymentProofDetail(
+  id: number
+): Promise<SingleResponse<import("../types").AdminPaymentProofItem>> {
+  return apiClient<SingleResponse<import("../types").AdminPaymentProofItem>>(`/admin/payment-proofs/${id}`);
+}
+
+export async function verifyPaymentProof(
+  id: number,
+  payload?: { admin_notes?: string }
+): Promise<SingleResponse<import("../types").AdminPaymentProofItem>> {
+  return apiClient<SingleResponse<import("../types").AdminPaymentProofItem>>(`/admin/payment-proofs/${id}/verify`, {
+    method: "POST",
+    body: JSON.stringify(payload || {}),
+  });
+}
+
+export async function rejectPaymentProof(
+  id: number,
+  payload: { rejection_reason: string; admin_notes?: string }
+): Promise<SingleResponse<import("../types").AdminPaymentProofItem>> {
+  return apiClient<SingleResponse<import("../types").AdminPaymentProofItem>>(`/admin/payment-proofs/${id}/reject`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 

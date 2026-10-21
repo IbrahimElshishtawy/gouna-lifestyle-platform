@@ -187,10 +187,23 @@ Route::middleware(['admin', '2fa'])->group(function () {
         Route::post('/{id}/quotes/{quoteId}/accept', [ConciergeApiController::class, 'acceptQuote'])->name('quotes.accept');
     });
 
-    // 7. Finances & Payment Transactions
+    // 7. Finances & Payment Transactions & Manual Verification
     Route::prefix('finances')->as('finances.')->group(function () {
         Route::get('/', [FinanceApiController::class, 'index'])->name('index');
         Route::get('/summary', [FinanceApiController::class, 'summary'])->name('summary');
+
+        // Manual Payment Proofs Review Queue
+        Route::get('/payment-proofs', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentProofController::class, 'index'])->name('proofs.index');
+        Route::get('/payment-proofs/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentProofController::class, 'show'])->name('proofs.show');
+        Route::post('/payment-proofs/{id}/verify', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentProofController::class, 'verify'])->name('proofs.verify');
+        Route::post('/payment-proofs/{id}/reject', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentProofController::class, 'reject'])->name('proofs.reject');
+        Route::get('/payment-proofs/{id}/receipt', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentProofController::class, 'receipt'])->name('proofs.receipt');
+    });
+
+    // Payment Methods Management
+    Route::prefix('payment-methods')->as('payment-methods.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentMethodController::class, 'index'])->name('index');
+        Route::put('/{id}', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentMethodController::class, 'update'])->name('update');
     });
 
     // 8. Customers / CRM

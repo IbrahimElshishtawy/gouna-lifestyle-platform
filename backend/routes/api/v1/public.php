@@ -45,12 +45,32 @@ Route::prefix('checkout')->as('checkout.')->group(function () {
     Route::get('/bookings/{reference}', [CheckoutController::class, 'show'])
         ->name('bookings.show');
 
+    // Manual / Offline Payment Proof Submission & Status
+    Route::post('/bookings/{reference}/payment-proof', [\App\Http\Controllers\Api\V1\Public\CustomerPaymentProofController::class, 'submit'])
+        ->middleware('throttle:payment')
+        ->name('bookings.payment-proof.submit');
+
+    Route::get('/bookings/{reference}/payment-proof', [\App\Http\Controllers\Api\V1\Public\CustomerPaymentProofController::class, 'show'])
+        ->name('bookings.payment-proof.show');
+
+    Route::get('/bookings/{reference}/receipt/{proofId}', [\App\Http\Controllers\Api\V1\Public\CustomerPaymentProofController::class, 'downloadReceipt'])
+        ->name('bookings.payment-proof.receipt');
+
     Route::post('/bookings/{reference}/paymob-complete', [CheckoutController::class, 'completePaymobPayment'])
         ->name('bookings.paymob-complete');
 
     Route::post('/bookings/{reference}/paymob-decline', [CheckoutController::class, 'declinePaymobPayment'])
         ->name('bookings.paymob-decline');
 });
+
+// System Health Check (Database, Cache, Private Storage)
+Route::get('/health', [\App\Http\Controllers\Api\V1\Public\HealthCheckController::class, 'check'])
+    ->name('health');
+
+// Active Payment Methods (With Manual Transfer Details)
+Route::get('/payment-methods', [\App\Http\Controllers\Api\V1\Admin\AdminPaymentMethodController::class, 'publicList'])
+    ->name('payment-methods.public');
+
 
 // Leads / Inquiries
 Route::post('/leads', [LeadController::class, 'store'])

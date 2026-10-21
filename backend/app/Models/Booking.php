@@ -111,6 +111,16 @@ class Booking extends Model
         return $this->hasMany(PaymentTransaction::class);
     }
 
+    public function paymentProofs(): HasMany
+    {
+        return $this->hasMany(PaymentProof::class)->orderByDesc('created_at');
+    }
+
+    public function latestPaymentProof()
+    {
+        return $this->hasOne(PaymentProof::class)->latestOfMany();
+    }
+
     // Accessors
     public function getTotalAttribute(): float
     {

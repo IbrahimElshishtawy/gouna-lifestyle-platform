@@ -8,19 +8,27 @@ import {
 export const PAYMENT_METHODS: PaymentMethod[] = [
   {
     id: 1,
-    name: "Credit / Debit Cards",
-    type: "card",
-    description: "Instant secure online payment via Visa or Mastercard with 3D Secure verification.",
+    name: "Instapay / Mobile Wallet Transfer",
+    type: "bank_transfer",
+    description: "تحويل مباشر عبر تطبيق إنستاباي أو المحافظ الإلكترونية المصرية مع مراجعة الإيصال.",
     is_enabled: true,
   },
   {
     id: 2,
-    name: "Instapay (Instant Egypt Payment)",
-    type: "instapay",
-    description: "Instant bank-to-bank transfer via Instapay (IPA / Mobile) with instant verification.",
+    name: "Bank Wire Transfer (CIB Egypt)",
+    type: "bank_transfer",
+    description: "تحويل بنكي مباشر لحساب الشركة بالبنك التجاري الدولي (CIB).",
+    is_enabled: true,
+  },
+  {
+    id: 3,
+    name: "Cash at Abu Tig Marina Office",
+    type: "cash",
+    description: "سداد نقدي بمقر مكتب الشركة بمارينا أبو تيج بالجونة عند الوصول.",
     is_enabled: true,
   },
 ];
+
 
 interface BackendBookingResponse {
   data: {
@@ -58,10 +66,11 @@ export async function processCheckout(
   formData: CheckoutFormData
 ): Promise<CheckoutProcessResponse> {
   const methodMap: Record<number, string> = {
-    1: "card",
-    2: "instapay",
+    1: "bank_transfer",
+    2: "bank_transfer",
+    3: "cash",
   };
-  const paymentMethodCode = methodMap[formData.payment_method_id] || "card";
+  const paymentMethodCode = methodMap[formData.payment_method_id] || "bank_transfer";
 
   const idempotencyKey = `chk-${formData.property_id}-${formData.email}-${Date.now()}`;
 
@@ -91,12 +100,11 @@ export async function processCheckout(
 
     if (response?.data?.attributes?.reference) {
       const ref = response.data.attributes.reference;
+      const token = response.meta?.access_token;
       return {
         success: true,
         booking_reference: ref,
-        redirect_url:
-          response.meta?.redirect_url ||
-          `/checkout/confirmation/${ref}`,
+        redirect_url: `/checkout/confirmation/${ref}${token ? `?token=${encodeURIComponent(token)}` : ""}`,
         message: "Your reservation has been created!",
       };
     }
@@ -170,4 +178,74 @@ export async function declinePaymobPaymentApi(
     body: JSON.stringify(data || {}),
   });
 }
+
+export interface PaymentProofData {
+  id: number;
+  status: "pending_verification" | "verified" | "rejected" | "cancelled";
+  amount_cents: number;
+  currency: string;
+  payment_method_code: string;
+  reference_number?: string;
+  sender_name?: string;
+  sender_account?: string;
+  transfer_date?: string;
+  rejection_reason?: string;
+  reviewed_at?: string;
+  created_at: string;
+}
+
+export interface PaymentProofStatusResponse {
+  booking_reference: string;
+  booking_status: string;
+  payment_status: string;
+  proofs: PaymentProofData[];
+}
+
+export async function submitPaymentProofApi(
+  reference: string,
+  formData: FormData,
+  token?: string
+) {
+  const url = `/checkout/bookings/${reference}/payment-proof${
+    token ? `?token=${encodeURIComponent(token)}` : ""
+  }`;
+
+  return apiClient<{
+    success: boolean;
+    message: string;
+    message_en: string;
+    data: PaymentProofData;
+  }>(url, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export async function getPaymentProofStatusApi(
+  reference: string,
+  token?: string
+): Promise<PaymentProofStatusResponse> {
+  const url = `/checkout/bookings/${reference}/payment-proof${
+    token ? `?token=${encodeURIComponent(token)}` : ""
+  }`;
+
+  return apiClient<PaymentProofStatusResponse>(url);
+}
+
+export async function fetchPaymentMethodsApi() {
+  return apiClient<{
+    data: Array<{
+      id: number;
+      code: string;
+      name: string;
+      description: string;
+      is_online: boolean;
+      instructions: string;
+      instructions_en?: string;
+      instructions_ar?: string;
+      configuration?: Record<string, string>;
+    }>;
+  }>("/payment-methods");
+}
+
 

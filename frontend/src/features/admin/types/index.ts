@@ -954,3 +954,37 @@ export interface LocationParseResult {
   message?: string;
 }
 
+export interface AdminPaymentProofItem {
+  id: number;
+  booking_id: number;
+  booking_reference: string;
+  customer?: {
+    name: string;
+    email: string;
+    phone?: string;
+  } | null;
+  payment_method?: {
+    id: number;
+    code: string;
+    name: string;
+  } | null;
+  amount_paid_cents: number;
+  currency: string;
+  formatted_amount: string;
+  reference_number: string;
+  sender_name?: string | null;
+  sender_account?: string | null;
+  receipt_url: string;
+  status: "pending" | "verified" | "rejected";
+  customer_notes?: string | null;
+  rejection_reason?: string | null;
+  admin_notes?: string | null;
+  reviewed_by?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
+  reviewed_at?: string | null;
+  created_at: string;
+}
+
