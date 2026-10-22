@@ -103,11 +103,16 @@ export async function getAdminStays(): Promise<import("../types").AdminStaysResp
 export async function refundBooking(
   id: number,
   amountCents?: number,
-  reason?: string
-): Promise<{ success: boolean; message: string }> {
-  return apiClient<{ success: boolean; message: string }>(`/admin/bookings/${id}/refund`, {
+  reason?: string,
+  cancelBooking?: boolean
+): Promise<{ success: boolean; message: string; data?: unknown }> {
+  return apiClient<{ success: boolean; message: string; data?: unknown }>(`/admin/bookings/${id}/refund`, {
     method: "POST",
-    body: JSON.stringify({ amount_cents: amountCents, reason }),
+    body: JSON.stringify({
+      amount_cents: amountCents,
+      reason,
+      cancel_booking: cancelBooking,
+    }),
   });
 }
 

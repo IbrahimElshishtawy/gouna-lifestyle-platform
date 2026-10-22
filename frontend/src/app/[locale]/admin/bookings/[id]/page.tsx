@@ -45,10 +45,16 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
     type: "confirm" | "cancel" | "refund" | "checkin" | "checkout";
     loading: boolean;
     notes?: string;
+    refundAmount?: string;
+    refundReason?: string;
+    cancelBooking?: boolean;
   }>({
     isOpen: false,
     type: "confirm",
     loading: false,
+    refundAmount: "",
+    refundReason: "",
+    cancelBooking: true,
   });
 
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -103,7 +109,15 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
           message: isAr ? "تم إلغاء الحجز." : "Booking cancelled.",
         });
       } else if (dialogState.type === "refund") {
-        await refundBooking(booking.id);
+        const amountCents = dialogState.refundAmount
+          ? Math.round(parseFloat(dialogState.refundAmount) * 100)
+          : undefined;
+        await refundBooking(
+          booking.id,
+          amountCents,
+          dialogState.refundReason,
+          dialogState.cancelBooking
+        );
         setFeedback({
           type: "success",
           message: isAr ? "تمت معالجة استرداد المبلغ بنجاح." : "Refund processed successfully.",
@@ -254,10 +268,20 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
             </PermissionGuard>
           )}
 
-          {(booking.status === "confirmed" || booking.status === "completed") && booking.financials.amount_paid_cents > 0 && (
+          {booking.payment_status !== "refunded" && (booking.financials.amount_paid_cents - (booking.financials.refund_amount_cents || 0)) > 0 && (
             <PermissionGuard permission="manage_payments">
               <button
-                onClick={() => setDialogState({ isOpen: true, type: "refund", loading: false })}
+                onClick={() => {
+                  const maxRef = Math.max(0, booking.financials.amount_paid_cents - (booking.financials.refund_amount_cents || 0));
+                  setDialogState({
+                    isOpen: true,
+                    type: "refund",
+                    loading: false,
+                    refundAmount: (maxRef / 100).toFixed(2),
+                    refundReason: isAr ? "طلب العميل إلغاء الحجز" : "Customer cancellation request",
+                    cancelBooking: true,
+                  });
+                }}
                 className="px-3 py-2 bg-white border border-brand-border hover:bg-amber-50 text-amber-800 rounded-xl text-xs font-bold transition cursor-pointer"
               >
                 {isAr ? "استرداد مالي" : "Refund"}
@@ -808,6 +832,7 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
       {/* Operational Confirm Dialog */}
       <ConfirmDialog
         isOpen={dialogState.isOpen}
+        maxWidth={dialogState.type === "refund" ? "max-w-lg" : "max-w-md"}
         title={
           dialogState.type === "confirm"
             ? isAr ? "تأكيد الحجز النهائي" : "Confirm Reservation"
@@ -826,7 +851,7 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
               : `Confirm reservation ${booking.reference}? The guest will be notified.`
             : dialogState.type === "checkin"
             ? isAr
-              ? `تأكيد تسجيل وصول النزيل ${booking.customer.name} للوحدة وتغيير الحالة التشغيلية إلى مقيم حالياً؟`
+              ? `تأكيد تسجيل وصول النزيل ${booking.customer.name} للوحدة وتغيير الحالة التشغيلية إلى مقيم حالياً.`
               : `Confirm guest check-in for ${booking.customer.name}? Operational stay state will become in-house.`
             : dialogState.type === "checkout"
             ? isAr
@@ -837,16 +862,320 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
               ? `تحذير: إلغاء الحجز سيؤدي إلى تحرير الليالي المحجوزة في جدول التوفر.`
               : `Warning: Cancelling will release all blocked dates on the calendar.`
             : isAr
-              ? `تنبيه مالي: سيتم إرجاع المبلغ المسدد بالكامل لحساب النزيل.`
-              : `Financial Alert: This will initiate a full payment refund to the customer.`
+              ? `حدد قيمة الاسترداد والسبب المالي للحجز ${booking.reference}. سيتم تسجيل الحركة في سجل المعاملات المالية.`
+              : `Specify the refund amount and reason for ${booking.reference}. The transaction will be recorded in the ledger.`
         }
-        confirmText={isAr ? "تأكيد الإجراء" : "Confirm"}
+        confirmText={
+          dialogState.type === "refund"
+            ? isAr ? "تنفيذ الاسترداد" : "Execute Refund"
+            : isAr ? "تأكيد الإجراء" : "Confirm"
+        }
         cancelText={isAr ? "تراجع" : "Dismiss"}
         isDestructive={dialogState.type === "cancel" || dialogState.type === "refund"}
         isLoading={dialogState.loading}
+        confirmDisabled={
+          dialogState.type === "refund" &&
+          (() => {
+            const maxRefundableCents = Math.max(
+              0,
+              (booking.financials.amount_paid_cents || 0) - (booking.financials.refund_amount_cents || 0)
+            );
+            const amount = parseFloat(dialogState.refundAmount || "0");
+            const amountCents = Math.round(amount * 100);
+            return isNaN(amount) || amountCents <= 0 || amountCents > maxRefundableCents;
+          })()
+        }
         onConfirm={handleAction}
         onCancel={() => setDialogState({ isOpen: false, type: "confirm", loading: false })}
-      />
+      >
+        {dialogState.type === "refund" && (() => {
+          const paidCents = booking.financials.amount_paid_cents || 0;
+          const refundedCents = booking.financials.refund_amount_cents || 0;
+          const maxRefundableCents = Math.max(0, paidCents - refundedCents);
+          const enteredAmount = parseFloat(dialogState.refundAmount || "0");
+          const enteredCents = isNaN(enteredAmount) ? 0 : Math.round(enteredAmount * 100);
+          const isFull = enteredCents >= maxRefundableCents && maxRefundableCents > 0;
+          const currency = booking.currency || "EGP";
+
+          return (
+            <div className="space-y-4 text-xs">
+              {/* Financial Snapshot Card */}
+              <div className="bg-brand-sand-light/50 border border-brand-border/60 rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "إجمالي الحجز:" : "Booking Total:"}</span>
+                  <span className="font-mono font-bold text-brand-brown">{booking.financials.formatted_total}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "المسدد حتى الآن:" : "Paid so far:"}</span>
+                  <span className="font-mono font-bold text-emerald-700">{booking.financials.formatted_paid}</span>
+                </div>
+                {refundedCents > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-brand-brown-muted font-medium">{isAr ? "مسترد سابقاً:" : "Previously refunded:"}</span>
+                    <span className="font-mono font-bold text-amber-700">{booking.financials.formatted_refund}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between border-t border-brand-border/50 pt-2 text-brand-terracotta">
+                  <span className="font-bold">{isAr ? "الحد الأقصى المتاح للاسترداد:" : "Max Refundable Balance:"}</span>
+                  <span className="font-mono font-bold text-sm bg-white px-2 py-0.5 rounded-md border border-brand-border">
+                    {currency} {(maxRefundableCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? "خيارات الاسترداد السريعة:" : "Quick Refund Options:"}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDialogState((prev) => ({
+                        ...prev,
+                        refundAmount: (maxRefundableCents / 100).toFixed(2),
+                        cancelBooking: true,
+                      }))
+                    }
+                    className={`py-1.5 px-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                      isFull
+                        ? "bg-rose-600 text-white border-rose-600 shadow-xs"
+                        : "bg-white hover:bg-brand-sand-light text-brand-brown border-brand-border"
+                    }`}
+                  >
+                    {isAr ? "استرداد كامل (100%)" : "Full Refund (100%)"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDialogState((prev) => ({
+                        ...prev,
+                        refundAmount: ((maxRefundableCents * 0.5) / 100).toFixed(2),
+                        cancelBooking: false,
+                      }))
+                    }
+                    className="py-1.5 px-2 rounded-xl text-xs font-bold transition border bg-white hover:bg-brand-sand-light text-brand-brown border-brand-border cursor-pointer"
+                  >
+                    {isAr ? "استرداد 50%" : "Refund 50%"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDialogState((prev) => ({
+                        ...prev,
+                        refundAmount: ((maxRefundableCents * 0.25) / 100).toFixed(2),
+                        cancelBooking: false,
+                      }))
+                    }
+                    className="py-1.5 px-2 rounded-xl text-xs font-bold transition border bg-white hover:bg-brand-sand-light text-brand-brown border-brand-border cursor-pointer"
+                  >
+                    {isAr ? "تعويض 25%" : "Refund 25%"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Refund Amount Input */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? `قيمة المبلغ المسترد (${currency}) *` : `Refund Amount (${currency}) *`}
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    max={(maxRefundableCents / 100).toFixed(2)}
+                    value={dialogState.refundAmount || ""}
+                    onChange={(e) => setDialogState((prev) => ({ ...prev, refundAmount: e.target.value }))}
+                    placeholder="0.00"
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-2 focus:ring-rose-500/40 font-mono font-bold"
+                  />
+                  <span className="absolute end-3 top-2.5 text-xs text-brand-brown-muted font-bold">
+                    {currency}
+                  </span>
+                </div>
+                {enteredCents > maxRefundableCents && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">
+                    {isAr
+                      ? `القيمة المدخلة تتجاوز الرصيد القابل للاسترداد (${(maxRefundableCents / 100).toFixed(2)} ${currency}).`
+                      : `Amount exceeds maximum refundable balance (${(maxRefundableCents / 100).toFixed(2)} ${currency}).`}
+                  </p>
+                )}
+              </div>
+
+              {/* Refund Reason */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? "سبب الاسترداد *" : "Refund Reason *"}
+                </label>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {[
+                    isAr ? "طلب العميل إلغاء الحجز" : "Customer cancellation request",
+                    isAr ? "تعويض عن ملاحظة في الخدمة" : "Service compensation",
+                    isAr ? "تعديل إداري متفق عليه" : "Agreed administrative adjustment",
+                    isAr ? "ظروف جوية أو طارئة" : "Weather / Force majeure",
+                  ].map((presetReason) => (
+                    <button
+                      key={presetReason}
+                      type="button"
+                      onClick={() => setDialogState((prev) => ({ ...prev, refundReason: presetReason }))}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition cursor-pointer ${
+                        dialogState.refundReason === presetReason
+                          ? "bg-stone-800 text-white border-stone-800"
+                          : "bg-white text-brand-brown-muted border-brand-border hover:bg-brand-sand-light"
+                      }`}
+                    >
+                      {presetReason}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={dialogState.refundReason || ""}
+                  onChange={(e) => setDialogState((prev) => ({ ...prev, refundReason: e.target.value }))}
+                  placeholder={isAr ? "اكتب سبب الاسترداد المالي..." : "Enter reason for refund..."}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
+                />
+              </div>
+
+              {/* Cancellation Toggle */}
+              <div className="bg-stone-50 border border-brand-border/60 rounded-xl p-3">
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={dialogState.cancelBooking ?? isFull}
+                    onChange={(e) => setDialogState((prev) => ({ ...prev, cancelBooking: e.target.checked }))}
+                    className="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-brand-border"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-brand-brown block">
+                      {isAr ? "إلغاء الحجز أيضاً وتحرير الليالي في جدول التوفر" : "Also cancel booking and release calendar dates"}
+                    </span>
+                    <span className="text-[10px] text-brand-brown-muted">
+                      {isAr
+                        ? "عند تفعيل هذا الخيار، سيتم نقل الحجز إلى حالة 'ملغي' وإتاحة الوحدة لحجوزات جديدة."
+                        : "When checked, booking transitions to cancelled and dates become available for new guests."}
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Check-in Interactive Details Card */}
+        {dialogState.type === "checkin" && booking && (() => {
+          const isEarly = booking.check_in > new Date().toISOString().split("T")[0];
+          const hasRemaining = (booking.financials.amount_remaining_cents || 0) > 0;
+
+          return (
+            <div className="space-y-3.5 text-xs">
+              <div className="bg-brand-sand-light/50 border border-brand-border/60 rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "النزيل:" : "Guest:"}</span>
+                  <span className="font-bold text-brand-brown">
+                    {booking.customer.name} {booking.customer.phone && `(${booking.customer.phone})`}
+                  </span>
+                </div>
+                {booking.property && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-brand-brown-muted font-medium">{isAr ? "الوحدة:" : "Unit:"}</span>
+                    <span className="font-semibold text-brand-brown">{isAr ? booking.property.title_ar || booking.property.title_en : booking.property.title_en}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "فترة الإقامة:" : "Stay Period:"}</span>
+                  <span className="font-mono text-brand-brown" dir="ltr">
+                    {booking.check_in} → {booking.check_out} ({booking.nights} {isAr ? "ليالٍ" : "nights"})
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-brand-border/40">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "حالة الدفع:" : "Payment Status:"}</span>
+                  <span className={`font-bold ${hasRemaining ? "text-amber-700" : "text-emerald-700"}`}>
+                    {hasRemaining
+                      ? `${isAr ? "متبقي" : "Due:"} ${booking.financials.formatted_remaining}`
+                      : isAr ? "مدفوع بالكامل ✓" : "Fully Paid ✓"}
+                  </span>
+                </div>
+              </div>
+
+              {isEarly && (
+                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-[11px] flex items-center gap-2">
+                  <span>ℹ️</span>
+                  <span>
+                    {isAr
+                      ? `وصول مبكر: موعد الحجز المجدول يبدأ في ${booking.check_in}. سيتم تفعيل الإقامة فوراً كمقيم بالوحدة.`
+                      : `Early Check-in: Scheduled arrival is ${booking.check_in}. Status will transition immediately to in-house.`}
+                  </span>
+                </div>
+              )}
+
+              {hasRemaining && (
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>
+                    {isAr
+                      ? `تنبيه: يوجد رصيد متبقي ${booking.financials.formatted_remaining}، يُرجى التأكد من تحصيله أو التنسيق مع النزيل.`
+                      : `Notice: Remaining balance ${booking.financials.formatted_remaining} is still due.`}
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1">
+                  {isAr ? "ملاحظات الاستقبال والتسليم (اختياري):" : "Front-desk Check-in Notes (optional):"}
+                </label>
+                <textarea
+                  value={dialogState.notes || ""}
+                  onChange={(e) => setDialogState((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder={isAr ? "أية ملاحظات خاصة بتسليم المفاتيح أو حالة الوحدة أو طلبات النزيل..." : "Notes regarding key handover, unit condition, or guest requests..."}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-1 focus:ring-brand-terracotta resize-none"
+                />
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Check-out Interactive Details Card */}
+        {dialogState.type === "checkout" && booking && (() => {
+          return (
+            <div className="space-y-3.5 text-xs">
+              <div className="bg-brand-sand-light/50 border border-brand-border/60 rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "النزيل المغادر:" : "Departing Guest:"}</span>
+                  <span className="font-bold text-brand-brown">{booking.customer.name}</span>
+                </div>
+                {booking.property && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-brand-brown-muted font-medium">{isAr ? "الوحدة:" : "Unit:"}</span>
+                    <span className="font-semibold text-brand-brown">{isAr ? booking.property.title_ar || booking.property.title_en : booking.property.title_en}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "موعد المغادرة المجدول:" : "Scheduled Departure:"}</span>
+                  <span className="font-mono text-brand-brown" dir="ltr">{booking.check_out}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1">
+                  {isAr ? "ملاحظات فحص الوحدة والمغادرة (اختياري):" : "Checkout & Inspection Notes (optional):"}
+                </label>
+                <textarea
+                  value={dialogState.notes || ""}
+                  onChange={(e) => setDialogState((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder={isAr ? "تسجيل استلام المفاتيح، حالة الوحدة، أو أية متعلقات..." : "Key return confirmation, unit inspection condition, belongings..."}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-1 focus:ring-brand-terracotta resize-none"
+                />
+              </div>
+            </div>
+          );
+        })()}
+      </ConfirmDialog>
     </div>
   );
 }

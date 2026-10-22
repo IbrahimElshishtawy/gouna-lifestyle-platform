@@ -29,10 +29,14 @@ class AdminOperationsTest extends TestCase
                 'password' => bcrypt('GouNow@2026!Secure'),
                 'is_admin' => true,
                 'is_active' => true,
-                'two_factor_secret' => 'SECRET',
-                'two_factor_confirmed_at' => now(),
             ]
         );
+        $this->admin->update([
+            'is_admin' => true,
+            'is_active' => true,
+            'two_factor_confirmed_at' => null,
+            'two_factor_secret' => null,
+        ]);
 
         $this->property = Property::first() ?? Property::create([
             'reference_number' => 'GON-P-TEST01',
@@ -76,6 +80,19 @@ class AdminOperationsTest extends TestCase
                 'payment_status' => 'paid',
             ]
         );
+
+        $this->booking->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'check_in' => now()->toDateString(),
+            'check_out' => now()->addDays(3)->toDateString(),
+            'nights' => 3,
+            'subtotal_cents' => 1500000,
+            'total_cents' => 1500000,
+            'amount_paid_cents' => 1500000,
+            'amount_remaining_cents' => 0,
+            'refund_amount_cents' => 0,
+        ]);
     }
 
     public function test_admin_can_view_booking_details(): void
@@ -110,7 +127,13 @@ class AdminOperationsTest extends TestCase
             ]);
 
         $checkinResponse->assertStatus(200);
-        $checkinResponse->assertJson(['success' => true]);
+        $checkinResponse->assertJson([
+            'success' => true,
+            'data' => [
+                'stay_status' => 'in_house',
+            ],
+        ]);
+        $this->assertNotNull($this->booking->fresh()->checked_in_at);
 
         // 2. Checkout
         $checkoutResponse = $this->actingAs($this->admin, 'sanctum')
@@ -123,8 +146,11 @@ class AdminOperationsTest extends TestCase
             'success' => true,
             'data' => [
                 'status' => 'completed',
+                'stay_status' => 'checked_out',
             ],
         ]);
+        $this->assertNotNull($this->booking->fresh()->checked_out_at);
+        $this->assertEquals('completed', $this->booking->fresh()->status);
     }
 
     public function test_admin_can_extend_stay_with_availability_check(): void
@@ -139,6 +165,69 @@ class AdminOperationsTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson(['success' => true]);
         $this->assertEquals($newCheckOut, $this->booking->fresh()->check_out->toDateString());
+    }
+
+    public function test_admin_can_refund_booking_partially_and_fully(): void
+    {
+        // Set booking with paid amount
+        $this->booking->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'amount_paid_cents' => 10000,
+            'refund_amount_cents' => 0,
+        ]);
+
+        // 1. Partial Refund (e.g. 4000 cents) without cancellation
+        $partialResponse = $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/v1/admin/bookings/{$this->booking->id}/refund", [
+                'amount_cents' => 4000,
+                'reason' => 'Guest compensation discount',
+                'cancel_booking' => false,
+            ]);
+
+        $partialResponse->assertStatus(200);
+        $partialResponse->assertJson([
+            'success' => true,
+            'data' => [
+                'refund_amount_cents' => 4000,
+                'payment_status' => 'partially_refunded',
+                'status' => 'confirmed',
+            ],
+        ]);
+
+        $this->assertEquals(4000, $this->booking->fresh()->refund_amount_cents);
+        $this->assertEquals('partially_refunded', $this->booking->fresh()->payment_status);
+        $this->assertEquals('confirmed', $this->booking->fresh()->status);
+
+        // 2. Full remaining refund (6000 cents) with cancellation
+        $fullResponse = $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/v1/admin/bookings/{$this->booking->id}/refund", [
+                'amount_cents' => 6000,
+                'reason' => 'Full cancellation requested',
+                'cancel_booking' => true,
+            ]);
+
+        $fullResponse->assertStatus(200);
+        $fullResponse->assertJson([
+            'success' => true,
+            'data' => [
+                'refund_amount_cents' => 10000,
+                'payment_status' => 'refunded',
+                'status' => 'cancelled',
+            ],
+        ]);
+
+        $this->assertEquals(10000, $this->booking->fresh()->refund_amount_cents);
+        $this->assertEquals('refunded', $this->booking->fresh()->payment_status);
+        $this->assertEquals('cancelled', $this->booking->fresh()->status);
+
+        // 3. Trying to refund again should fail with 422
+        $excessResponse = $this->actingAs($this->admin, 'sanctum')
+            ->postJson("/api/v1/admin/bookings/{$this->booking->id}/refund", [
+                'amount_cents' => 1000,
+            ]);
+
+        $excessResponse->assertStatus(422);
     }
 
     public function test_admin_can_view_stay_management_dashboard(): void

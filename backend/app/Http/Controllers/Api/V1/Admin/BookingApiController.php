@@ -11,6 +11,9 @@ use App\Models\Property;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class BookingApiController extends Controller
 {
@@ -81,8 +84,16 @@ class BookingApiController extends Controller
         $pendingCount = Booking::whereIn('status', ['pending', 'awaiting_payment', 'payment_processing'])->count();
         $confirmedCount = Booking::whereIn('status', ['confirmed', 'paid'])->count();
         $activeStaysCount = Booking::whereIn('status', ['confirmed', 'paid', 'completed'])
-            ->where('check_in', '<=', $today)
-            ->where('check_out', '>=', $today)
+            ->where(function ($q) use ($today) {
+                $q->where(function ($sub) use ($today) {
+                    $sub->where('check_in', '<=', $today)
+                        ->where('check_out', '>=', $today);
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('checked_in_at')
+                        ->whereNull('checked_out_at')
+                        ->whereNotIn('status', ['cancelled', 'refunded', 'completed']);
+                });
+            })
             ->count();
         $completedCount = Booking::where('status', 'completed')->count();
         $cancelledCount = Booking::whereIn('status', ['cancelled', 'refunded'])->count();
@@ -98,9 +109,9 @@ class BookingApiController extends Controller
             $stayStatus = 'expected';
             if ($b->status === 'cancelled' || $b->status === 'refunded') {
                 $stayStatus = 'cancelled';
-            } elseif ($b->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
+            } elseif ($b->checked_out_at || $b->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
                 $stayStatus = 'checked_out';
-            } elseif ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today) {
+            } elseif ($b->checked_in_at || ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today)) {
                 $stayStatus = 'in_house';
             }
 
@@ -131,10 +142,14 @@ class BookingApiController extends Controller
                 'formatted_paid' => number_format(((int) $b->amount_paid_cents) / 100, 2).' '.($b->currency ?? 'EGP'),
                 'amount_remaining_cents' => (int) $b->amount_remaining_cents,
                 'formatted_remaining' => number_format(((int) $b->amount_remaining_cents) / 100, 2).' '.($b->currency ?? 'EGP'),
+                'refund_amount_cents' => (int) ($b->refund_amount_cents ?? 0),
+                'formatted_refund' => number_format(((int) ($b->refund_amount_cents ?? 0)) / 100, 2).' '.($b->currency ?? 'EGP'),
                 'currency' => $b->currency ?? 'EGP',
                 'status' => $b->status ?? 'pending',
                 'payment_status' => $b->payment_status ?? 'pending',
                 'stay_status' => $stayStatus,
+                'checked_in_at' => $b->checked_in_at ? $b->checked_in_at->toIso8601String() : null,
+                'checked_out_at' => $b->checked_out_at ? $b->checked_out_at->toIso8601String() : null,
                 'created_at' => $b->created_at ? $b->created_at->toIso8601String() : '',
             ];
         });
@@ -206,9 +221,9 @@ class BookingApiController extends Controller
         $stayStatus = 'expected';
         if ($booking->status === 'cancelled' || $booking->status === 'refunded') {
             $stayStatus = 'cancelled';
-        } elseif ($booking->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
+        } elseif ($booking->checked_out_at || $booking->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
             $stayStatus = 'checked_out';
-        } elseif ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today) {
+        } elseif ($booking->checked_in_at || ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today)) {
             $stayStatus = 'in_house';
         }
 
@@ -282,6 +297,8 @@ class BookingApiController extends Controller
             'promo_code' => $booking->promo_code,
             'cancellation_reason' => $booking->cancellation_reason,
             'cancelled_at' => $booking->cancelled_at ? $booking->cancelled_at->toIso8601String() : null,
+            'checked_in_at' => $booking->checked_in_at ? $booking->checked_in_at->toIso8601String() : null,
+            'checked_out_at' => $booking->checked_out_at ? $booking->checked_out_at->toIso8601String() : null,
             'created_at' => $booking->created_at ? $booking->created_at->toIso8601String() : '',
             'transactions' => $booking->paymentTransactions->map(function ($tx) {
                 return [
@@ -349,43 +366,70 @@ class BookingApiController extends Controller
      */
     public function checkin(Request $request, int $id): JsonResponse
     {
-        $booking = Booking::findOrFail($id);
-
-        if ($booking->status === 'cancelled' || $booking->status === 'refunded') {
+        $admin = $request->user();
+        if ($admin && ! ($admin->is_admin || $admin->can('manage_bookings') || $admin->hasRole('super-admin'))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot check in a cancelled booking.',
-            ], 422);
+                'message' => 'Unauthorized. Insufficient permissions to perform check-in.',
+            ], 403);
         }
 
-        $notes = $request->input('notes', '');
-        $currentNotes = $booking->internal_notes ? $booking->internal_notes . "\n" : '';
-        $newNotes = $currentNotes . "[" . now()->toDateTimeString() . "] Guest Checked-in by Admin. " . $notes;
+        return DB::transaction(function () use ($request, $id) {
+            $booking = Booking::where('id', $id)->lockForUpdate()->firstOrFail();
 
-        $booking->update([
-            'internal_notes' => trim($newNotes),
-            'status' => in_array($booking->status, ['confirmed', 'paid']) ? $booking->status : 'confirmed',
-        ]);
+            if ($booking->status === 'cancelled' || $booking->status === 'refunded') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot check in a cancelled booking.',
+                ], 422);
+            }
 
-        ActivityLog::create([
-            'user_id' => $request->user()?->id,
-            'action' => 'guest_checked_in',
-            'entity_type' => 'Booking',
-            'entity_id' => $booking->id,
-            'description' => "Guest checked-in for booking {$booking->reference} on " . now()->toDateTimeString(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            if ($booking->checked_in_at && ! $booking->checked_out_at) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Guest is already checked in for booking {$booking->reference}.",
+                    'data' => [
+                        'id' => $booking->id,
+                        'reference' => $booking->reference,
+                        'stay_status' => 'in_house',
+                        'checked_in_at' => $booking->checked_in_at->toIso8601String(),
+                    ],
+                ]);
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => "Guest checked in successfully for booking {$booking->reference}.",
-            'data' => [
-                'id' => $booking->id,
-                'reference' => $booking->reference,
-                'stay_status' => 'in_house',
-            ],
-        ]);
+            $notes = $request->input('notes', '');
+            $adminName = $request->user()?->name ?? 'Admin';
+            $currentNotes = $booking->internal_notes ? $booking->internal_notes . "\n" : '';
+            $newNotes = $currentNotes . "[" . now()->toDateTimeString() . "] Guest Checked-in by Admin ({$adminName}). " . $notes;
+
+            $now = now();
+            $booking->update([
+                'checked_in_at' => $now,
+                'internal_notes' => trim($newNotes),
+                'status' => in_array($booking->status, ['confirmed', 'paid']) ? $booking->status : 'confirmed',
+            ]);
+
+            ActivityLog::create([
+                'user_id' => $request->user()?->id,
+                'action' => 'guest_checked_in',
+                'entity_type' => 'Booking',
+                'entity_id' => $booking->id,
+                'description' => "Guest checked-in for booking {$booking->reference} by {$adminName} on " . $now->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Guest checked in successfully for booking {$booking->reference}.",
+                'data' => [
+                    'id' => $booking->id,
+                    'reference' => $booking->reference,
+                    'stay_status' => 'in_house',
+                    'checked_in_at' => $now->toIso8601String(),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -393,44 +437,58 @@ class BookingApiController extends Controller
      */
     public function checkout(Request $request, int $id): JsonResponse
     {
-        $booking = Booking::findOrFail($id);
-
-        if ($booking->status === 'cancelled' || $booking->status === 'refunded') {
+        $admin = $request->user();
+        if ($admin && ! ($admin->is_admin || $admin->can('manage_bookings') || $admin->hasRole('super-admin'))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cannot check out a cancelled booking.',
-            ], 422);
+                'message' => 'Unauthorized. Insufficient permissions to perform check-out.',
+            ], 403);
         }
 
-        $notes = $request->input('notes', '');
-        $currentNotes = $booking->internal_notes ? $booking->internal_notes . "\n" : '';
-        $newNotes = $currentNotes . "[" . now()->toDateTimeString() . "] Guest Checked-out by Admin. " . $notes;
+        return DB::transaction(function () use ($request, $id) {
+            $booking = Booking::where('id', $id)->lockForUpdate()->firstOrFail();
 
-        $booking->update([
-            'status' => 'completed',
-            'internal_notes' => trim($newNotes),
-        ]);
+            if ($booking->status === 'cancelled' || $booking->status === 'refunded') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot check out a cancelled booking.',
+                ], 422);
+            }
 
-        ActivityLog::create([
-            'user_id' => $request->user()?->id,
-            'action' => 'guest_checked_out',
-            'entity_type' => 'Booking',
-            'entity_id' => $booking->id,
-            'description' => "Guest checked-out and booking {$booking->reference} marked as completed on " . now()->toDateTimeString(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            $notes = $request->input('notes', '');
+            $adminName = $request->user()?->name ?? 'Admin';
+            $currentNotes = $booking->internal_notes ? $booking->internal_notes . "\n" : '';
+            $newNotes = $currentNotes . "[" . now()->toDateTimeString() . "] Guest Checked-out by Admin ({$adminName}). " . $notes;
 
-        return response()->json([
-            'success' => true,
-            'message' => "Guest checked out successfully for booking {$booking->reference}.",
-            'data' => [
-                'id' => $booking->id,
-                'reference' => $booking->reference,
+            $now = now();
+            $booking->update([
                 'status' => 'completed',
-                'stay_status' => 'checked_out',
-            ],
-        ]);
+                'checked_out_at' => $now,
+                'internal_notes' => trim($newNotes),
+            ]);
+
+            ActivityLog::create([
+                'user_id' => $request->user()?->id,
+                'action' => 'guest_checked_out',
+                'entity_type' => 'Booking',
+                'entity_id' => $booking->id,
+                'description' => "Guest checked-out and booking {$booking->reference} marked as completed by {$adminName} on " . $now->toDateTimeString(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Guest checked out successfully for booking {$booking->reference}.",
+                'data' => [
+                    'id' => $booking->id,
+                    'reference' => $booking->reference,
+                    'status' => 'completed',
+                    'stay_status' => 'checked_out',
+                    'checked_out_at' => $now->toIso8601String(),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -547,8 +605,16 @@ class BookingApiController extends Controller
 
         $activeStays = Booking::with(['customer', 'bookable'])
             ->whereIn('status', ['confirmed', 'paid', 'completed'])
-            ->whereDate('check_in', '<=', $today)
-            ->whereDate('check_out', '>=', $today)
+            ->where(function ($q) use ($today) {
+                $q->where(function ($sub) use ($today) {
+                    $sub->whereDate('check_in', '<=', $today)
+                        ->whereDate('check_out', '>=', $today);
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('checked_in_at')
+                        ->whereNull('checked_out_at')
+                        ->whereNotIn('status', ['cancelled', 'refunded', 'completed']);
+                });
+            })
             ->orderBy('check_out')
             ->get();
 
@@ -583,9 +649,9 @@ class BookingApiController extends Controller
             $checkOutStr = $b->check_out ? $b->check_out->toDateString() : '';
 
             $stayStatus = 'expected';
-            if ($b->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
+            if ($b->checked_out_at || $b->status === 'completed' || ($checkOutStr && $checkOutStr < $today)) {
                 $stayStatus = 'checked_out';
-            } elseif ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today) {
+            } elseif ($b->checked_in_at || ($checkInStr && $checkOutStr && $checkInStr <= $today && $checkOutStr >= $today)) {
                 $stayStatus = 'in_house';
             }
 
@@ -612,6 +678,8 @@ class BookingApiController extends Controller
                 'status' => $b->status,
                 'payment_status' => $b->payment_status,
                 'stay_status' => $stayStatus,
+                'checked_in_at' => $b->checked_in_at ? $b->checked_in_at->toIso8601String() : null,
+                'checked_out_at' => $b->checked_out_at ? $b->checked_out_at->toIso8601String() : null,
                 'total_cents' => (int) $b->total_cents,
                 'formatted_total' => number_format(((int) $b->total_cents) / 100, 2).' '.($b->currency ?? 'EGP'),
                 'amount_paid_cents' => (int) $b->amount_paid_cents,
@@ -640,46 +708,115 @@ class BookingApiController extends Controller
     }
 
     /**
-     * Process Booking Refund.
+     * Process Booking Refund (Partial or Full).
      */
     public function refund(Request $request, int $id): JsonResponse
     {
-        $booking = Booking::findOrFail($id);
-        $refundAmountCents = $request->input('amount_cents', $booking->amount_paid_cents);
+        $user = $request->user();
+        if ($user) {
+            $canRefund = $user->is_admin
+                || $user->hasRole('super_admin')
+                || $user->hasPermission('payments.refund');
 
-        $booking->update([
-            'payment_status' => 'refunded',
-            'status' => 'cancelled',
-            'refund_amount_cents' => $refundAmountCents,
-            'cancelled_at' => now(),
-            'cancellation_reason' => $request->input('reason', 'Administrative refund processed'),
-        ]);
+            if (!$canRefund) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Insufficient permissions to issue refunds.',
+                ], 403);
+            }
+        }
 
-        PaymentTransaction::create([
-            'booking_id' => $booking->id,
-            'customer_id' => $booking->customer_id,
-            'payment_method_id' => $booking->payment_method_id,
-            'transaction_type' => 'refund',
-            'amount_cents' => $refundAmountCents,
-            'currency' => $booking->currency ?? 'EGP',
-            'status' => 'successful',
-            'gateway' => 'manual_admin',
-            'gateway_reference' => 'REF-'.strtoupper(uniqid()),
-        ]);
+        return DB::transaction(function () use ($request, $id, $user) {
+            /** @var Booking $booking */
+            $booking = Booking::where('id', $id)->lockForUpdate()->firstOrFail();
 
-        ActivityLog::create([
-            'user_id' => $request->user()?->id,
-            'action' => 'booking_refund_issued',
-            'entity_type' => 'Booking',
-            'entity_id' => $booking->id,
-            'description' => "Refund of {$refundAmountCents} cents processed for booking {$booking->reference}.",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+            $paidCents = (int) $booking->amount_paid_cents;
+            $previousRefundCents = (int) ($booking->refund_amount_cents ?? 0);
+            $maxRefundable = max(0, $paidCents - $previousRefundCents);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Refund processed successfully.',
-        ]);
+            if ($maxRefundable <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This booking has no remaining refundable balance.',
+                ], 422);
+            }
+
+            $validated = $request->validate([
+                'amount_cents' => ['nullable', 'integer', 'min:1', "max:{$maxRefundable}"],
+                'reason' => ['nullable', 'string', 'max:500'],
+                'cancel_booking' => ['nullable', 'boolean'],
+            ]);
+
+            $refundAmountCents = isset($validated['amount_cents']) && $validated['amount_cents'] !== null
+                ? (int) $validated['amount_cents']
+                : $maxRefundable;
+
+            if ($refundAmountCents <= 0 || $refundAmountCents > $maxRefundable) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Refund amount must be between 1 and {$maxRefundable} cents.",
+                ], 422);
+            }
+
+            $reason = (string) ($validated['reason'] ?? 'Administrative refund processed');
+            $newTotalRefundCents = $previousRefundCents + $refundAmountCents;
+            $isFullyRefunded = $newTotalRefundCents >= $paidCents;
+            $newPaymentStatus = $isFullyRefunded ? 'refunded' : 'partially_refunded';
+
+            $shouldCancel = $request->boolean('cancel_booking', $isFullyRefunded);
+            $newStatus = $shouldCancel ? 'cancelled' : $booking->status;
+
+            $booking->update([
+                'payment_status' => $newPaymentStatus,
+                'status' => $newStatus,
+                'refund_amount_cents' => $newTotalRefundCents,
+                'cancelled_at' => ($shouldCancel && !$booking->cancelled_at) ? now() : $booking->cancelled_at,
+                'cancellation_reason' => $shouldCancel ? $reason : $booking->cancellation_reason,
+            ]);
+
+            $tx = PaymentTransaction::create([
+                'transaction_id' => 'TXN-REF-'.strtoupper(Str::random(12)),
+                'booking_id' => $booking->id,
+                'customer_id' => $booking->customer_id,
+                'payment_method_id' => $booking->payment_method_id,
+                'type' => 'refund',
+                'amount_cents' => $refundAmountCents,
+                'currency' => $booking->currency ?? 'EGP',
+                'status' => 'completed',
+                'gateway_provider' => 'manual_admin',
+                'gateway_reference' => 'REF-'.strtoupper(uniqid()),
+                'refund_reason' => $reason,
+                'refunded_at' => now(),
+                'recorded_by' => $user?->id,
+                'completed_at' => now(),
+            ]);
+
+            ActivityLog::create([
+                'user_id' => $user?->id,
+                'action' => 'booking_refund_issued',
+                'entity_type' => Booking::class,
+                'entity_id' => $booking->id,
+                'description' => "Refund of ".number_format($refundAmountCents / 100, 2)." {$booking->currency} processed for booking {$booking->reference}. Reason: {$reason}",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $isFullyRefunded
+                    ? 'Full refund processed successfully.'
+                    : 'Partial refund processed successfully.',
+                'data' => [
+                    'id' => $booking->id,
+                    'refund_amount_cents' => $newTotalRefundCents,
+                    'amount_paid_cents' => $paidCents,
+                    'remaining_refundable_cents' => max(0, $paidCents - $newTotalRefundCents),
+                    'payment_status' => $newPaymentStatus,
+                    'status' => $newStatus,
+                    'formatted_refund' => number_format($newTotalRefundCents / 100, 2).' '.($booking->currency ?? 'EGP'),
+                    'transaction_id' => $tx->id,
+                ],
+            ]);
+        });
     }
 }

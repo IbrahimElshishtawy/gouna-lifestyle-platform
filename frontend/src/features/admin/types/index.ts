@@ -105,10 +105,14 @@ export interface AdminBookingItem {
   formatted_paid: string;
   amount_remaining_cents?: number;
   formatted_remaining?: string;
+  refund_amount_cents?: number;
+  formatted_refund?: string;
   currency: string;
   status: BookingStatus;
   payment_status: PaymentStatus;
   stay_status?: StayStatus;
+  checked_in_at?: string | null;
+  checked_out_at?: string | null;
   created_at: string;
 }
 
@@ -118,6 +122,8 @@ export interface AdminBookingDetail {
   status: BookingStatus;
   payment_status: PaymentStatus;
   stay_status: StayStatus;
+  checked_in_at?: string | null;
+  checked_out_at?: string | null;
   check_in: string;
   check_out: string;
   nights: number;
@@ -224,6 +230,8 @@ export interface AdminStayItem {
   status: BookingStatus;
   payment_status: PaymentStatus;
   stay_status: StayStatus;
+  checked_in_at?: string | null;
+  checked_out_at?: string | null;
   total_cents: number;
   formatted_total: string;
   amount_paid_cents: number;

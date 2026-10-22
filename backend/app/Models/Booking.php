@@ -27,6 +27,7 @@ class Booking extends Model
         'discount_id', 'promo_code', 'balance_due_date',
         'internal_notes', 'source', 'assigned_to',
         'cancelled_at', 'cancellation_reason', 'refund_amount_cents',
+        'checked_in_at', 'checked_out_at',
     ];
 
     public ?string $plain_access_token = null;
@@ -43,6 +44,8 @@ class Booking extends Model
             'check_out' => 'date',
             'balance_due_date' => 'date',
             'cancelled_at' => 'datetime',
+            'checked_in_at' => 'datetime',
+            'checked_out_at' => 'datetime',
             'expires_at' => 'datetime',
             'pricing_snapshot' => 'array',
             'cancellation_policy_snapshot' => 'array',
