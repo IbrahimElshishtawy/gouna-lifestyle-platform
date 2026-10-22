@@ -76,13 +76,45 @@ export default function AdminStaysPage() {
     });
   };
 
+function getNextDayString(dateStr?: string) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const d = new Date(year, month - 1, day);
+  d.setDate(d.getDate() + 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dt = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dt}`;
+}
+
+function addDaysToDateString(dateStr: string, days: number) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const d = new Date(year, month - 1, day);
+  d.setDate(d.getDate() + days);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dt = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dt}`;
+}
+
+function calculateDiffDays(fromStr?: string, toStr?: string) {
+  if (!fromStr || !toStr) return 0;
+  const [y1, m1, d1] = fromStr.split("-").map(Number);
+  const [y2, m2, d2] = toStr.split("-").map(Number);
+  const t1 = new Date(y1, m1 - 1, d1).getTime();
+  const t2 = new Date(y2, m2 - 1, d2).getTime();
+  return Math.max(0, Math.round((t2 - t1) / (1000 * 60 * 60 * 24)));
+}
+
   const handleOpenExtend = (stay: AdminStayItem) => {
+    const defaultNextDay = getNextDayString(stay.check_out);
     setDialogState({
       isOpen: true,
       type: "extend",
       stay,
       loading: false,
-      newCheckOut: "",
+      newCheckOut: defaultNextDay,
+      notes: "",
     });
   };
 
@@ -441,6 +473,7 @@ export default function AdminStaysPage() {
       {/* Action Flow Dialog */}
       <ConfirmDialog
         isOpen={dialogState.isOpen}
+        maxWidth={dialogState.type === "extend" ? "max-w-lg" : "max-w-md"}
         title={
           dialogState.type === "checkin"
             ? isAr ? "تأكيد تسجيل وصول النزيل" : "Confirm Guest Check-in"
@@ -451,15 +484,15 @@ export default function AdminStaysPage() {
         description={
           dialogState.type === "checkin"
             ? isAr
-              ? `تأكيد وصول النزيل ${dialogState.stay?.customer.name} للحجز ${dialogState.stay?.reference} وتسليمه المفاتيح؟`
-              : `Confirm physical arrival of ${dialogState.stay?.customer.name} for booking ${dialogState.stay?.reference}?`
+              ? `تأكيد وصول النزيل ${dialogState.stay?.customer.name} للحجز ${dialogState.stay?.reference} وتسليمه المفاتيح.`
+              : `Confirm physical arrival of ${dialogState.stay?.customer.name} for booking ${dialogState.stay?.reference}.`
             : dialogState.type === "checkout"
             ? isAr
-              ? `تأكيد مغادرة النزيل ${dialogState.stay?.customer.name} وإخلاء الوحدة؟`
-              : `Confirm check-out of ${dialogState.stay?.customer.name} and release unit for housekeeping?`
+              ? `تأكيد مغادرة النزيل ${dialogState.stay?.customer.name} للحجز ${dialogState.stay?.reference} وتسليم الوحدة للتجهيز.`
+              : `Confirm check-out of ${dialogState.stay?.customer.name} and release unit for housekeeping.`
             : isAr
-              ? `حدد تاريخ المغادرة الجديد لتمديد الإقامة للحجز ${dialogState.stay?.reference}.`
-              : `Select the new check-out date for booking ${dialogState.stay?.reference}.`
+              ? `حدد تاريخ المغادرة الجديد للحجز ${dialogState.stay?.reference}. سيتم التحقق من التوافر وتحديث الحساب المالي آلياً.`
+              : `Select the new check-out date for booking ${dialogState.stay?.reference}. Availability and balance will update automatically.`
         }
         confirmText={
           dialogState.type === "checkin"
@@ -470,9 +503,154 @@ export default function AdminStaysPage() {
         }
         cancelText={isAr ? "إلغاء" : "Cancel"}
         isLoading={dialogState.loading}
+        confirmDisabled={
+          dialogState.type === "extend" &&
+          (!dialogState.newCheckOut ||
+            (dialogState.stay?.check_out ? dialogState.newCheckOut <= dialogState.stay.check_out : false))
+        }
         onConfirm={handleDialogConfirm}
         onCancel={() => setDialogState((prev) => ({ ...prev, isOpen: false }))}
-      />
+      >
+        {dialogState.stay && dialogState.type === "extend" && (() => {
+          const minDate = getNextDayString(dialogState.stay.check_out);
+          const addedNights = calculateDiffDays(dialogState.stay.check_out, dialogState.newCheckOut);
+          const currentNights = dialogState.stay.nights || 1;
+          const avgNightlyCents = Math.round(dialogState.stay.total_cents / currentNights);
+          const estimatedExtraCents = avgNightlyCents * addedNights;
+          const estimatedNewTotalCents = dialogState.stay.total_cents + estimatedExtraCents;
+
+          return (
+            <div className="space-y-4 text-xs">
+              {/* Unit & Stay Snapshot Card */}
+              <div className="bg-brand-sand-light/50 border border-brand-border/60 rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "الوحدة / العقار:" : "Property / Unit:"}</span>
+                  <span className="font-bold text-brand-brown truncate max-w-[220px]">
+                    {dialogState.stay.bookable.title}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "النزيل:" : "Guest:"}</span>
+                  <span className="font-bold text-brand-brown">
+                    {dialogState.stay.customer.name}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-t border-brand-border/40 pt-2">
+                  <span className="text-brand-brown-muted font-medium">{isAr ? "المغادرة الحالية:" : "Current Check-out:"}</span>
+                  <span className="font-mono font-bold text-brand-terracotta bg-white px-2 py-0.5 rounded-md border border-brand-border">
+                    {dialogState.stay.check_out}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Presets */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? "خيارات سريعة للتمديد:" : "Quick Extension Presets:"}
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[1, 2, 3, 7].map((days) => {
+                    const presetDate = addDaysToDateString(dialogState.stay!.check_out, days);
+                    const isSelected = dialogState.newCheckOut === presetDate;
+                    return (
+                      <button
+                        key={days}
+                        type="button"
+                        onClick={() => setDialogState((prev) => ({ ...prev, newCheckOut: presetDate }))}
+                        className={`py-1.5 px-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                          isSelected
+                            ? "bg-brand-terracotta text-white border-brand-terracotta shadow-xs"
+                            : "bg-white hover:bg-brand-sand-light text-brand-brown border-brand-border"
+                        }`}
+                      >
+                        {days === 7
+                          ? isAr ? "+ أسبوع" : "+1 Week"
+                          : isAr
+                          ? `+${days} ${days === 1 ? "ليلة" : days === 2 ? "ليلتين" : "ليالٍ"}`
+                          : `+${days} ${days === 1 ? "Night" : "Nights"}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Date Input */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? "تاريخ المغادرة الجديد *" : "New Check-out Date *"}
+                </label>
+                <input
+                  type="date"
+                  min={minDate}
+                  value={dialogState.newCheckOut || ""}
+                  onChange={(e) => setDialogState((prev) => ({ ...prev, newCheckOut: e.target.value }))}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-2 focus:ring-brand-terracotta/40 font-mono"
+                />
+                {dialogState.newCheckOut && dialogState.newCheckOut <= dialogState.stay.check_out && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">
+                    {isAr ? "يجب أن يكون تاريخ المغادرة الجديد بعد تاريخ المغادرة الحالي." : "New check-out must be after the current check-out date."}
+                  </p>
+                )}
+              </div>
+
+              {/* Financial & Nights Calculation */}
+              {addedNights > 0 && (
+                <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3.5 text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-emerald-900 font-medium">
+                    <span>{isAr ? "الليالي الإضافية:" : "Additional Nights:"}</span>
+                    <span className="font-bold font-mono">
+                      +{addedNights} {isAr ? (addedNights === 1 ? "ليلة" : addedNights === 2 ? "ليلتين" : "ليالٍ") : (addedNights === 1 ? "night" : "nights")}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-emerald-900 font-medium">
+                    <span>{isAr ? "إجمالي الليالي بعد التمديد:" : "New Total Nights:"}</span>
+                    <span className="font-bold font-mono">{dialogState.stay.nights + addedNights} {isAr ? "ليلة" : "nights"}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-emerald-200/60 pt-1.5 text-emerald-950 font-bold">
+                    <span>{isAr ? "الإجمالي الجديد التقديري:" : "Estimated New Total:"}</span>
+                    <span className="font-mono text-sm">
+                      EGP {(estimatedNewTotalCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="text-[10px] text-emerald-700/90 pt-0.5">
+                    {isAr
+                      ? `* تشمل إضافة تقريبية قدرها EGP ${(estimatedExtraCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} بناءً على متوسط سعر الليلة للحجز.`
+                      : `* Includes approx. EGP ${(estimatedExtraCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} based on average nightly rate.`}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {dialogState.stay && (dialogState.type === "checkin" || dialogState.type === "checkout") && (
+          <div className="space-y-3 text-xs">
+            <div className="bg-brand-sand-light/50 border border-brand-border/60 rounded-2xl p-3 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-brand-brown-muted">{isAr ? "الوحدة:" : "Unit:"}</span>
+                <span className="font-bold text-brand-brown">{dialogState.stay.bookable.title}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-brand-brown-muted">{isAr ? "النزيل:" : "Guest:"}</span>
+                <span className="font-bold text-brand-brown">{dialogState.stay.customer.name}</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-brand-brown mb-1">
+                {isAr ? "ملاحظات الاستقبال (اختياري):" : "Front-desk Notes (optional):"}
+              </label>
+              <textarea
+                value={dialogState.notes || ""}
+                onChange={(e) => setDialogState((prev) => ({ ...prev, notes: e.target.value }))}
+                placeholder={isAr ? "أية ملاحظات خاصة بحالة الوحدة أو النزيل..." : "Any notes regarding unit status or guest..."}
+                rows={2}
+                className="w-full px-3 py-2 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/30 focus:outline-none focus:ring-1 focus:ring-brand-terracotta resize-none"
+              />
+            </div>
+          </div>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }

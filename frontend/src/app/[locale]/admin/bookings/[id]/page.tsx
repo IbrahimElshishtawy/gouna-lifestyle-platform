@@ -570,23 +570,93 @@ export default function AdminBookingDetailPage({ params }: PageProps) {
             </p>
 
             <form onSubmit={handleExtendStaySubmit} className="space-y-4">
+              {/* Quick Presets */}
+              <div>
+                <label className="block text-[11px] font-bold text-brand-brown mb-1.5">
+                  {isAr ? "خيارات سريعة للتمديد:" : "Quick Extension Presets:"}
+                </label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[1, 2, 3, 7].map((days) => {
+                    const [y, m, d] = booking.check_out.split("-").map(Number);
+                    const dt = new Date(y, m - 1, d);
+                    dt.setDate(dt.getDate() + days);
+                    const presetDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+                    const isSelected = newCheckOutDate === presetDate;
+                    return (
+                      <button
+                        key={days}
+                        type="button"
+                        onClick={() => setNewCheckOutDate(presetDate)}
+                        className={`py-1.5 px-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
+                          isSelected
+                            ? "bg-brand-terracotta text-white border-brand-terracotta shadow-xs"
+                            : "bg-white hover:bg-brand-sand-light text-brand-brown border-brand-border"
+                        }`}
+                      >
+                        {days === 7
+                          ? isAr ? "+ أسبوع" : "+1 Week"
+                          : isAr
+                          ? `+${days} ${days === 1 ? "ليلة" : days === 2 ? "ليلتين" : "ليالٍ"}`
+                          : `+${days} ${days === 1 ? "Night" : "Nights"}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[11px] font-bold uppercase text-brand-brown-muted mb-1.5">
                   {isAr ? "تاريخ المغادرة الجديد *" : "New Check-out Date *"}
                 </label>
-                <input
-                  type="date"
-                  min={booking.check_out}
-                  value={newCheckOutDate}
-                  onChange={(e) => setNewCheckOutDate(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/40 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
-                />
+                {(() => {
+                  const [y, m, d] = booking.check_out.split("-").map(Number);
+                  const dt = new Date(y, m - 1, d);
+                  dt.setDate(dt.getDate() + 1);
+                  const minDate = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+                  return (
+                    <input
+                      type="date"
+                      min={minDate}
+                      value={newCheckOutDate}
+                      onChange={(e) => setNewCheckOutDate(e.target.value)}
+                      required
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs text-brand-brown bg-brand-sand-light/40 focus:outline-none focus:ring-1 focus:ring-brand-terracotta font-mono"
+                    />
+                  );
+                })()}
               </div>
+
+              {/* Extra nights preview */}
+              {newCheckOutDate && newCheckOutDate > booking.check_out && (() => {
+                const [y1, m1, d1] = booking.check_out.split("-").map(Number);
+                const [y2, m2, d2] = newCheckOutDate.split("-").map(Number);
+                const addedNights = Math.max(0, Math.round((new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime()) / (1000 * 60 * 60 * 24)));
+                const totalCents = booking.financials?.total_cents ?? 0;
+                const avgNightly = booking.nights > 0 ? Math.round(totalCents / booking.nights) : 0;
+                const estExtra = avgNightly * addedNights;
+                return (
+                  <div className="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-xs space-y-1 text-emerald-950">
+                    <div className="flex justify-between font-medium">
+                      <span>{isAr ? "الليالي الإضافية:" : "Additional Nights:"}</span>
+                      <span className="font-mono font-bold">+{addedNights} {isAr ? "ليلة" : "nights"}</span>
+                    </div>
+                    <div className="flex justify-between font-medium">
+                      <span>{isAr ? "إجمالي الليالي الجديد:" : "New Total Nights:"}</span>
+                      <span className="font-mono font-bold">{booking.nights + addedNights} {isAr ? "ليلة" : "nights"}</span>
+                    </div>
+                    <div className="flex justify-between font-bold border-t border-emerald-200/60 pt-1">
+                      <span>{isAr ? "التكلفة التقديرية المضافة:" : "Estimated Added Amount:"}</span>
+                      <span className="font-mono">
+                        EGP {(estExtra / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <button
                 type="submit"
-                disabled={extendLoading || !newCheckOutDate}
+                disabled={extendLoading || !newCheckOutDate || newCheckOutDate <= booking.check_out}
                 className="w-full py-2.5 bg-brand-terracotta hover:bg-brand-terracotta-dark disabled:opacity-50 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
               >
                 {extendLoading
