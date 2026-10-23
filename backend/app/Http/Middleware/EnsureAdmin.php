@@ -13,15 +13,15 @@ class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! auth()->check()) {
+        $user = $request->user('sanctum') ?? $request->user() ?? auth()->user();
+
+        if (! $user) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 abort(401, 'Unauthenticated.');
             }
 
             return redirect()->guest(route('admin.login'));
         }
-
-        $user = auth()->user();
 
         // Check if user is marked as admin or has any assigned role
         if (! $user->is_admin && ! $user->roles()->exists()) {

@@ -545,6 +545,8 @@ class StaffApiController extends Controller
             ], 403);
         }
 
+        $user = User::findOrFail($id);
+
         if ($user->id === $actor?->id || $user->email === 'superadmin@gounow.com') {
             return response()->json([
                 'error' => [

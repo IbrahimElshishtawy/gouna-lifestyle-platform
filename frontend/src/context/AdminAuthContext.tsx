@@ -47,6 +47,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         if (!pathname.endsWith("/admin/login")) {
           router.push("/admin/login");
         }
+      } else if (!userProfile.is_admin && !userAbilities?.is_admin) {
+        // Authenticated customer/guest attempting to access admin dashboard
+        setUser(null);
+        setAbilities(null);
+        if (!pathname.endsWith("/admin/login")) {
+          router.push("/admin/login");
+        }
       } else {
         setUser(userProfile);
         setAbilities(userAbilities);

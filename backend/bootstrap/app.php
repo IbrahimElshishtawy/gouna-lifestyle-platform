@@ -59,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             EnsureAccountActive::class,
             \App\Http\Middleware\TrackAdminSession::class,
+            'throttle:api',
         ]);
 
         $middleware->alias([

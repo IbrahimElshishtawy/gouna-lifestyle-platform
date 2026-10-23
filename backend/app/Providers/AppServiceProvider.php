@@ -74,7 +74,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Named Rate Limiters (Standard S1, P4-T02)
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            $limit = app()->environment('local', 'testing') ? 2000 : 120;
+            return Limit::perMinute($limit)->by($request->user()?->id ?: $request->ip());
         });
 
         RateLimiter::for('auth', function (Request $request) {

@@ -134,7 +134,8 @@ class CustomerPaymentProofController extends Controller
             abort(404, 'Reservation not found.');
         }
 
-        $this->authorizeCustomerAccess($request, $booking);
+        // Strict authorization: private financial documents must never use email-only fallback
+        $this->authorizeCustomerAccess($request, $booking, allowEmailFallback: false);
 
         $proof = PaymentProof::where('id', $proofId)
             ->where('booking_id', $booking->id)
@@ -157,7 +158,7 @@ class CustomerPaymentProofController extends Controller
     /**
      * Multi-tier customer authorization check with IDOR defense.
      */
-    private function authorizeCustomerAccess(Request $request, Booking $booking): void
+    private function authorizeCustomerAccess(Request $request, Booking $booking, bool $allowEmailFallback = false): void
     {
         $user = $request->user('sanctum') ?? auth()->user();
 
@@ -182,10 +183,12 @@ class CustomerPaymentProofController extends Controller
             }
         }
 
-        // Guest email fallback
-        $email = $request->input('email') ?? $request->query('email') ?? $request->header('X-Customer-Email');
-        if ($email && $booking->customer && Str::lower((string) $email) === Str::lower((string) $booking->customer->email)) {
-            return;
+        // Guest email fallback (permitted only when explicitly authorized, e.g. public status checking without tokens)
+        if ($allowEmailFallback) {
+            $email = $request->input('email') ?? $request->query('email') ?? $request->header('X-Customer-Email');
+            if ($email && $booking->customer && Str::lower((string) $email) === Str::lower((string) $booking->customer->email)) {
+                return;
+            }
         }
 
         abort(403, 'Unauthorized access to this booking payment verification.');

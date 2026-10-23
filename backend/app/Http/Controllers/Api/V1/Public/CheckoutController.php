@@ -199,11 +199,18 @@ class CheckoutController extends Controller
             ->with(['transactions', 'customer', 'bookable'])
             ->firstOrFail();
 
-        $token = $request->input('token') ?? $request->query('token');
-        if ($token && ! empty($booking->booking_access_token)) {
-            if (! hash_equals($booking->booking_access_token, hash('sha256', (string) $token))) {
-                return response()->json(['error' => 'Invalid booking security token.'], 403);
+        $token = (string) ($request->input('token') ?? $request->query('token') ?? '');
+        if (! empty($booking->booking_access_token)) {
+            if (empty($token) || ! hash_equals($booking->booking_access_token, hash('sha256', $token))) {
+                return response()->json(['error' => 'Invalid or missing booking security token.'], 403);
             }
+        } elseif (auth('sanctum')->check()) {
+            $user = auth('sanctum')->user();
+            if ($booking->customer_id && $user->customer && $booking->customer_id !== $user->customer->id && ! $user->is_admin) {
+                return response()->json(['error' => 'Unauthorized access to booking.'], 403);
+            }
+        } else {
+            return response()->json(['error' => 'Authentication or valid booking security token is required.'], 403);
         }
 
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->first();
@@ -223,6 +230,15 @@ class CheckoutController extends Controller
                 'redirect_url' => "/checkout/confirmation/{$booking->reference}?token={$token}",
                 'message' => 'Payment already completed.',
             ]);
+        }
+
+        // In production with live payment methods, direct client self-confirmation is strictly forbidden.
+        // Live payments must be verified via authentic payment gateway webhooks.
+        $paymentMethod = $transaction->paymentMethod;
+        if (app()->environment('production') && $paymentMethod && ! $paymentMethod->test_mode) {
+            return response()->json([
+                'error' => 'Direct client payment confirmation is disabled in production. Payments must be verified via authentic payment gateway webhooks.',
+            ], 403);
         }
 
         $gatewayRef = (string) ($request->input('gateway_reference') ?? ('PAYMOB-' . time() . '-' . rand(1000, 9999)));
@@ -247,6 +263,21 @@ class CheckoutController extends Controller
     public function declinePaymobPayment(Request $request, string $reference): JsonResponse
     {
         $booking = Booking::where('reference', $reference)->firstOrFail();
+
+        $token = (string) ($request->input('token') ?? $request->query('token') ?? '');
+        if (! empty($booking->booking_access_token)) {
+            if (empty($token) || ! hash_equals($booking->booking_access_token, hash('sha256', $token))) {
+                return response()->json(['error' => 'Invalid or missing booking security token.'], 403);
+            }
+        } elseif (auth('sanctum')->check()) {
+            $user = auth('sanctum')->user();
+            if ($booking->customer_id && $user->customer && $booking->customer_id !== $user->customer->id && ! $user->is_admin) {
+                return response()->json(['error' => 'Unauthorized access to booking.'], 403);
+            }
+        } else {
+            return response()->json(['error' => 'Authentication or valid booking security token is required.'], 403);
+        }
+
         $transaction = $booking->transactions()->where('status', 'pending')->latest()->first();
         if ($transaction) {
             $reason = (string) ($request->input('reason') ?? 'Payment declined or cancelled by customer.');

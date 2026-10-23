@@ -23,7 +23,7 @@ Route::prefix('v1')->as('api.v1.')->group(function () {
     Route::prefix('admin')->as('admin.')->middleware(['auth:sanctum', 'account.active'])->group(base_path('routes/api/v1/admin.php'));
 
     // Graceful alias to absorb any accidental double-prefix from cached frontend bundles
-    Route::prefix('api/v1/admin/export')->middleware(['auth:sanctum', 'account.active'])->group(function () {
+    Route::prefix('api/v1/admin/export')->middleware(['auth:sanctum', 'account.active', 'admin', '2fa'])->group(function () {
         Route::get('/overview', [\App\Http\Controllers\Api\V1\Admin\ExportApiController::class, 'overview']);
         Route::get('/excel', [\App\Http\Controllers\Api\V1\Admin\ExportApiController::class, 'exportExcel']);
         Route::get('/word', [\App\Http\Controllers\Api\V1\Admin\ExportApiController::class, 'exportWord']);

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Property;
 use App\Models\Setting;
+use App\Services\MediaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MediaDesignApiController extends Controller
 {
@@ -148,17 +150,24 @@ class MediaDesignApiController extends Controller
     public function uploadMedia(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file', 'max:102400', 'mimes:jpeg,jpg,png,webp,gif,mp4,webm,mov,ogg,quicktime'],
+            'file' => ['required', 'file', 'max:51200'],
         ]);
 
         $file = $request->file('file');
-        $extension = $file->getClientOriginalExtension();
-        $fileName = 'hero_' . time() . '_' . uniqid() . '.' . $extension;
-        
+        try {
+            $safeExtension = app(MediaService::class)->validateFile($file);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 422);
+        }
+
+        $fileName = 'hero_' . time() . '_' . Str::uuid()->toString() . '.' . $safeExtension;
         $path = $file->storeAs('media_design', $fileName, 'public');
         $url = asset('storage/' . $path);
 
-        $mimeType = $file->getMimeType();
+        $mimeType = (string) $file->getMimeType();
         $isVideo = str_starts_with($mimeType, 'video/');
 
         return response()->json([
