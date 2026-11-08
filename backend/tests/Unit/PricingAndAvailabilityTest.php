@@ -65,8 +65,10 @@ class PricingAndAvailabilityTest extends TestCase
             ]
         );
 
-        // Clean up test property's seasons and blocks before each test
-        SeasonalPrice::where('property_id', $this->testProperty->id)->forceDelete();
+        // Clean up test property's seasons, global seasons, and blocks before each test
+        SeasonalPrice::where('property_id', $this->testProperty->id)
+            ->orWhereNull('property_id')
+            ->forceDelete();
         AvailabilityBlock::where('property_id', $this->testProperty->id)->forceDelete();
         Booking::where('bookable_id', $this->testProperty->id)->forceDelete();
         Booking::whereIn('reference', ['GON-TEST-CONF-01', 'GON-TEST-CANCELLED'])->forceDelete();
