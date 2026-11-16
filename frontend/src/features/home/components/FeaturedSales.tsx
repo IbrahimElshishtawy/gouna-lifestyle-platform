@@ -9,7 +9,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
-import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 
 interface Props {
   properties: Property[];
@@ -24,7 +23,6 @@ export default function FeaturedSales({ properties }: Props) {
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [showSpatialModal, setShowSpatialModal] = useState(false);
   const activeProperty = saleProperties[selectedIndex] || saleProperties[0];
 
   const handlePrev = () => {
@@ -125,19 +123,6 @@ export default function FeaturedSales({ properties }: Props) {
                       {t.sales.lagoonFrontage}
                     </span>
                   </div>
-
-                  {/* 3D Model Trigger Badge */}
-                  <button
-                    type="button"
-                    onClick={() => setShowSpatialModal(true)}
-                    aria-label="Explore 3D Architectural Model"
-                    className="absolute bottom-3 start-3 sm:bottom-4 sm:start-4 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
-                  >
-                    <svg className="w-3.5 h-3.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                    </svg>
-                    <span>{isAr ? "المجسم المعماري 3D" : "Interactive 3D Model"}</span>
-                  </button>
 
                   <div className="absolute bottom-3 end-3 sm:bottom-4 sm:end-4 z-10 px-2.5 sm:px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium rounded-xl flex items-center gap-1.5">
                     <svg className="w-3.5 h-3.5 text-white/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -242,16 +227,12 @@ export default function FeaturedSales({ properties }: Props) {
                     >
                       {t.sales.requestViewing}
                     </a>
-                    <button
-                      type="button"
-                      onClick={() => setShowSpatialModal(true)}
-                      className="py-2.5 sm:py-3 px-4 bg-white hover:bg-brand-sand-light text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+                    <Link
+                      href={`/stays/${activeProperty.slug}`}
+                      className="py-2.5 sm:py-3 px-4 bg-white hover:bg-brand-sand-light text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98]"
                     >
-                      <svg className="w-3.5 h-3.5 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                      </svg>
-                      <span>{isAr ? "المجسم المعماري 3D" : "3D Architecture"}</span>
-                    </button>
+                      <span>{t.common.viewDetails}</span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -342,13 +323,6 @@ export default function FeaturedSales({ properties }: Props) {
           </div>
         </div>
       </section>
-
-      {/* 3D Unit Spatial Modal */}
-      <UnitSpatialModal
-        property={activeProperty}
-        isOpen={showSpatialModal}
-        onClose={() => setShowSpatialModal(false)}
-      />
     </>
   );
 }

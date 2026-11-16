@@ -6,7 +6,6 @@ import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
-import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 
 interface PropertyCardsShowcaseProps {
   properties: Property[];
@@ -28,7 +27,6 @@ export default function PropertyCardsShowcase({
 
   const [activeListingType, setActiveListingType] = useState<"all" | "rent" | "sale">("all");
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [selectedSpatialProperty, setSelectedSpatialProperty] = useState<Property | null>(null);
 
   // Extract unique categories
   const categories = useMemo(() => {
@@ -176,21 +174,11 @@ export default function PropertyCardsShowcase({
                 key={property.id}
                 property={property}
                 isAr={isAr}
-                onOpenSpatial={() => setSelectedSpatialProperty(property)}
               />
             ))}
           </div>
         )}
       </div>
-
-      {/* Spatial Tour Modal if activated */}
-      {selectedSpatialProperty && (
-        <UnitSpatialModal
-          property={selectedSpatialProperty}
-          isOpen={Boolean(selectedSpatialProperty)}
-          onClose={() => setSelectedSpatialProperty(null)}
-        />
-      )}
     </section>
   );
 }
@@ -198,10 +186,9 @@ export default function PropertyCardsShowcase({
 interface ShowcaseCardProps {
   property: Property;
   isAr: boolean;
-  onOpenSpatial: () => void;
 }
 
-function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
+function ShowcaseCard({ property, isAr }: ShowcaseCardProps) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const images = property.images?.length
     ? property.images
@@ -276,17 +263,9 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
           </div>
         )}
 
-        {/* Bottom Carousel Indicator Dots & Spatial Tour Button */}
-        <div className="absolute bottom-3 inset-x-3.5 flex items-center justify-between z-10">
-          <button
-            type="button"
-            onClick={onOpenSpatial}
-            className="px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] font-medium tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-          >
-            <span>{isAr ? "جولة مكانية 3D" : "3D Spatial Tour"}</span>
-          </button>
-
-          {images.length > 1 && (
+        {/* Bottom Carousel Indicator Dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 end-3.5 flex items-center justify-end z-10">
             <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full">
               {images.slice(0, 5).map((_, idx) => (
                 <span
@@ -297,8 +276,8 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
                 />
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Body Details */}

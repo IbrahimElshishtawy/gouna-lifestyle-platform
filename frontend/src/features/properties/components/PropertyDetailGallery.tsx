@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import SafeImage from "@/components/ui/SafeImage";
 import { Property } from "../types/property.types";
-import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 
 interface Props {
   property: Property;
@@ -18,7 +17,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activePhotoIdx, setActivePhotoIdx] = useState(0);
-  const [showSpatialModal, setShowSpatialModal] = useState(false);
 
   // Keyboard navigation for Lightbox
   useEffect(() => {
@@ -75,21 +73,7 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
             </div>
 
             {/* Bottom Controls */}
-            <div className="absolute bottom-4 start-4 end-4 sm:bottom-6 sm:start-6 sm:end-6 flex items-center justify-between z-10">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSpatialModal(true);
-                }}
-                className="px-4 py-2 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-xs font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
-              >
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                </svg>
-                <span>{isAr ? "المجسم المعماري 3D" : "3D Spatial Tour"}</span>
-              </button>
-
+            <div className="absolute bottom-4 start-4 end-4 sm:bottom-6 sm:start-6 sm:end-6 flex items-center justify-end z-10">
               <button
                 type="button"
                 onClick={() => openLightbox(0)}
@@ -129,23 +113,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                     </span>
                   </div>
                 )}
-                {idx === 1 && (
-                  <div className="absolute bottom-4 end-4 z-10">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowSpatialModal(true);
-                      }}
-                      className="px-3.5 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-                    >
-                      <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                      </svg>
-                      <span>{isAr ? "3D Tour" : "3D Tour"}</span>
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -172,21 +139,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                 <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-semibold">
                   {property.category?.name || (isAr ? "إقامة فاخرة" : "Signature Residence")}
                 </span>
-              </div>
-              <div className="absolute bottom-4 start-4 z-10">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowSpatialModal(true);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-                >
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                  </svg>
-                  <span>{isAr ? "المجسم المعماري 3D" : "3D Spatial Tour"}</span>
-                </button>
               </div>
             </div>
 
@@ -234,21 +186,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
                 <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-semibold">
                   {property.category?.name || (isAr ? "إقامة فاخرة" : "Signature Residence")}
                 </span>
-              </div>
-              <div className="absolute bottom-4 start-4 z-10">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowSpatialModal(true);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-                >
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                  </svg>
-                  <span>{isAr ? "المجسم المعماري 3D" : "3D Spatial Tour"}</span>
-                </button>
               </div>
             </div>
 
@@ -306,20 +243,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setLightboxOpen(false);
-                  setShowSpatialModal(true);
-                }}
-                className="px-3 py-1.5 rounded-full bg-brand-terracotta text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:brightness-110 cursor-pointer"
-              >
-                <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                </svg>
-                <span>{isAr ? "المجسم 3D" : "3D Tour"}</span>
-              </button>
-
               <button
                 type="button"
                 onClick={() => setLightboxOpen(false)}
@@ -397,13 +320,6 @@ export default function PropertyDetailGallery({ property, isAr }: Props) {
           )}
         </div>
       )}
-
-      {/* 3D Unit Spatial Modal Integration */}
-      <UnitSpatialModal
-        property={property}
-        isOpen={showSpatialModal}
-        onClose={() => setShowSpatialModal(false)}
-      />
     </>
   );
 }

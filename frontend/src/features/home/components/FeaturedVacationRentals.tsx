@@ -8,7 +8,6 @@ import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
-import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 
 interface Props {
   properties: Property[];
@@ -23,7 +22,6 @@ export default function FeaturedVacationRentals({ properties }: Props) {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [showSpatialModal, setShowSpatialModal] = useState(false);
 
   const activeProperty = rentalProperties[selectedIndex] || rentalProperties[0];
   const images = activeProperty?.images?.length
@@ -151,19 +149,6 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                     {t.common.lagoonAccess}
                   </span>
                 </div>
-
-                {/* 3D Spatial Interactive Badge */}
-                <button
-                  type="button"
-                  onClick={() => setShowSpatialModal(true)}
-                  aria-label="View 3D Spatial Layout"
-                  className="absolute bottom-3 start-3 sm:bottom-4 sm:start-4 z-10 px-3 py-1.5 rounded-full bg-black/70 hover:bg-brand-terracotta backdrop-blur-md border border-white/25 text-white text-[11px] font-semibold flex items-center gap-2 transition-all duration-300 shadow-lg hover:scale-105 cursor-pointer"
-                >
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                  </svg>
-                  <span>{isAr ? "استكشف المخطط ثلاثي الأبعاد" : "Interactive 3D Model"}</span>
-                </button>
 
                 {/* Photo Counter */}
                 <div className="absolute top-3 end-3 sm:top-4 sm:end-4 z-10 px-2.5 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold rounded-full">
@@ -328,16 +313,12 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                   >
                     {t.vacationRentals.bookThisVilla}
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => setShowSpatialModal(true)}
-                    className="py-2.5 sm:py-3 px-4 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
+                  <Link
+                    href={`/stays/${activeProperty.slug}`}
+                    className="py-2.5 sm:py-3 px-4 bg-brand-sand-light hover:bg-brand-sand text-brand-brown rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-colors border border-brand-border flex items-center justify-center gap-1.5 active:scale-[0.98]"
                   >
-                    <svg className="w-3.5 h-3.5 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                    </svg>
-                    <span>{isAr ? "المجسم المعماري 3D" : "3D Architecture"}</span>
-                  </button>
+                    <span>{t.common.viewDetails}</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -423,13 +404,6 @@ export default function FeaturedVacationRentals({ properties }: Props) {
           ))}
         </div>
       </section>
-
-      {/* 3D Unit Spatial Modal */}
-      <UnitSpatialModal
-        property={activeProperty}
-        isOpen={showSpatialModal}
-        onClose={() => setShowSpatialModal(false)}
-      />
     </>
   );
 }

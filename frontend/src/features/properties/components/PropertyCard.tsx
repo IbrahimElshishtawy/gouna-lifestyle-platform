@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Property } from "../types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
 import Card3D from "@/components/ui/Card3D";
-import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
 import SafeImage from "@/components/ui/SafeImage";
 
 interface PropertyCardProps {
@@ -17,7 +16,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
   const isRent = property.listing_type === "rent";
-  const [showSpatialModal, setShowSpatialModal] = useState(false);
 
   const displayTitle = isAr && property.title_ar ? property.title_ar : property.title;
   const displayDesc = isAr && property.description_ar ? property.description_ar : property.description;
@@ -67,22 +65,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 </span>
               )}
             </div>
-
-            {/* 3D Model Interactive Trigger Badge */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowSpatialModal(true);
-              }}
-              aria-label="Open 3D Spatial Layout"
-              className="absolute bottom-3 start-3 sm:bottom-3.5 sm:start-3.5 z-10 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-black/65 hover:bg-brand-terracotta backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-[11px] font-semibold flex items-center gap-1.5 transition-all duration-300 shadow-md group-hover:scale-105 cursor-pointer"
-              style={{ transform: "translateZ(30px)" }}
-            >
-              <span className="text-xs">📐</span>
-              <span>{isAr ? "مجسم 3D" : "3D Spatial"}</span>
-            </button>
           </div>
 
           {/* Content Body with 3D Depth Elevation */}
@@ -169,13 +151,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
         </div>
       </Card3D>
-
-      {/* 3D Unit Spatial Modal */}
-      <UnitSpatialModal
-        property={property}
-        isOpen={showSpatialModal}
-        onClose={() => setShowSpatialModal(false)}
-      />
     </>
   );
 }
