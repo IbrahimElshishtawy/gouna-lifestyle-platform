@@ -139,15 +139,23 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                   className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
                 />
 
-                {/* Badges Overlay */}
+                {/* Badges Overlay (Real Backend Data Only) */}
                 <div className="absolute top-3 start-3 sm:top-4 sm:start-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                  <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                    <span>{t.common.topRated}</span>
-                  </span>
-                  <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                    {t.common.lagoonAccess}
-                  </span>
+                  {activeProperty.category && (
+                    <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta shrink-0" />
+                      <span>
+                        {isAr && activeProperty.category.name_ar
+                          ? activeProperty.category.name_ar
+                          : activeProperty.category.name}
+                      </span>
+                    </span>
+                  )}
+                  {activeProperty.location?.name && (
+                    <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                      {isAr && activeProperty.location.name_ar ? activeProperty.location.name_ar : activeProperty.location.name}
+                    </span>
+                  )}
                 </div>
 
                 {/* Photo Counter */}
@@ -301,9 +309,13 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                       </span>
                     </div>
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200/50">
-                    {t.common.instantConfirmation}
-                  </span>
+                  {activeProperty.payment_requirement && (
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200/50">
+                      {activeProperty.payment_requirement === "deposit" && activeProperty.deposit_percentage
+                        ? (isAr ? `عربون ${activeProperty.deposit_percentage}%` : `${activeProperty.deposit_percentage}% Deposit`)
+                        : (isAr ? "دفع إلكتروني أو تحويل" : "Online & Transfer")}
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">

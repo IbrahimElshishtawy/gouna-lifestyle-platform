@@ -104,24 +104,38 @@ export default function FeaturedExperiences({ experiences }: Props) {
                   className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
                 />
 
-                {/* Badges Overlay */}
+                {/* Badges Overlay (Real Backend Data Only) */}
                 <div className="absolute top-3 start-3 sm:top-4 sm:start-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                  <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
-                    <span>{t.experiences.vipCharter}</span>
-                  </span>
-                  <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                    {t.experiences.allInclusive}
-                  </span>
+                  {activeExperience.category && (
+                    <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
+                      <span>
+                        {isAr && activeExperience.category.name_ar
+                          ? activeExperience.category.name_ar
+                          : activeExperience.category.name}
+                      </span>
+                    </span>
+                  )}
+                  {activeExperience.duration && (
+                    <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                      {activeExperience.duration}
+                    </span>
+                  )}
                 </div>
 
-                <div className="absolute bottom-3 end-3 sm:bottom-4 sm:end-4 z-10 px-2.5 sm:px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium rounded-xl flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 text-white/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{activeExperience.location?.name || t.common.elGouna}</span>
-                </div>
+                {activeExperience.location && (
+                  <div className="absolute bottom-3 end-3 sm:bottom-4 sm:end-4 z-10 px-2.5 sm:px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium rounded-xl flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-white/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>
+                      {isAr && activeExperience.location.name_ar
+                        ? activeExperience.location.name_ar
+                        : activeExperience.location.name}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -129,24 +143,22 @@ export default function FeaturedExperiences({ experiences }: Props) {
             <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4 sm:space-y-6">
               <div>
                 <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
-                  <span>{activeExperience.category?.name || t.experiences.vipCharter}</span>
-                  <span className="flex items-center gap-1.5 text-brand-brown">
-                    <svg className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span>5.0 (38 {t.common.readReviews})</span>
+                  <span>
+                    {(isAr && activeExperience.category?.name_ar
+                      ? activeExperience.category.name_ar
+                      : activeExperience.category?.name) || ""}
                   </span>
                 </div>
 
                 <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-brand-brown leading-tight mb-2 sm:mb-3">
-                  {activeExperience.title}
+                  {isAr && activeExperience.title_ar ? activeExperience.title_ar : activeExperience.title}
                 </h3>
 
                 <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed mb-4 sm:mb-6 line-clamp-3">
-                  {activeExperience.description}
+                  {isAr && activeExperience.description_ar ? activeExperience.description_ar : activeExperience.description}
                 </p>
 
-                {/* Specs Grid */}
+                {/* Specs Grid (Real Backend Fields Only) */}
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center py-2.5 sm:py-4 px-2 sm:px-3 bg-white rounded-xl sm:rounded-2xl border border-brand-border/70 mb-4 sm:mb-6 shadow-xs">
                   <div>
                     <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
@@ -158,42 +170,56 @@ export default function FeaturedExperiences({ experiences }: Props) {
                   </div>
                   <div>
                     <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
-                      {activeExperience.duration}
+                      {activeExperience.duration || "—"}
                     </span>
                     <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-brown-muted">
                       {t.common.duration}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
-                      {t.experiences.fullCrew}
+                    <span className="block text-xs sm:text-sm font-bold text-brand-brown truncate px-1">
+                      {(isAr && activeExperience.location?.name_ar
+                        ? activeExperience.location.name_ar
+                        : activeExperience.location?.name) || t.common.elGouna}
                     </span>
                     <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-brown-muted">
-                      {t.experiences.crewDesc}
+                      {isAr ? "الموقع" : "Location"}
                     </span>
                   </div>
                 </div>
 
-                {/* Perks Checklist */}
+                {/* Experience Details from Backend */}
                 <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.experiences.feature1}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.experiences.feature2}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.experiences.feature3}</span>
-                  </div>
+                  {(isAr ? activeExperience.meeting_point_ar || activeExperience.meeting_point : activeExperience.meeting_point) && (
+                    <div className="flex items-start gap-2">
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="line-clamp-1">
+                        {isAr ? activeExperience.meeting_point_ar || activeExperience.meeting_point : activeExperience.meeting_point}
+                      </span>
+                    </div>
+                  )}
+                  {(isAr ? activeExperience.what_to_bring_ar || activeExperience.what_to_bring : activeExperience.what_to_bring) && (
+                    <div className="flex items-start gap-2">
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="line-clamp-1">
+                        {isAr ? activeExperience.what_to_bring_ar || activeExperience.what_to_bring : activeExperience.what_to_bring}
+                      </span>
+                    </div>
+                  )}
+                  {(isAr ? activeExperience.cancellation_policy_ar || activeExperience.cancellation_policy : activeExperience.cancellation_policy) && (
+                    <div className="flex items-start gap-2">
+                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="line-clamp-1">
+                        {isAr ? activeExperience.cancellation_policy_ar || activeExperience.cancellation_policy : activeExperience.cancellation_policy}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -213,9 +239,6 @@ export default function FeaturedExperiences({ experiences }: Props) {
                       </span>
                     </div>
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-200/50">
-                    {t.experiences.vipFastTrack}
-                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
@@ -264,7 +287,7 @@ export default function FeaturedExperiences({ experiences }: Props) {
                       style={{ transform: "translateZ(24px)" }}
                     >
                       <span className="px-2.5 py-0.5 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                        {exp.category?.name || t.experiences.title}
+                        {(isAr && exp.category?.name_ar ? exp.category.name_ar : exp.category?.name) || t.experiences.title}
                       </span>
                     </div>
                   </div>
@@ -274,7 +297,7 @@ export default function FeaturedExperiences({ experiences }: Props) {
                       className="font-serif text-sm font-bold text-brand-brown line-clamp-1 group-hover:text-brand-terracotta transition-colors mb-1"
                       style={{ transform: "translateZ(16px)" }}
                     >
-                      {exp.title}
+                      {isAr && exp.title_ar ? exp.title_ar : exp.title}
                     </h4>
                     <div
                       className="flex items-center gap-2 text-[11px] text-brand-brown-muted mb-2 font-light"

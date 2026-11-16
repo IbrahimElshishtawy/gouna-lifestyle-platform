@@ -121,9 +121,9 @@ export default function FeaturedSales({ properties }: Props) {
                         <span>{t.sales.exclusiveListing}</span>
                       </span>
                     )}
-                    {(activeProperty.compound || activeProperty.location?.name) && (
+                    {activeProperty.location?.name && (
                       <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                        {activeProperty.compound || (isAr && activeProperty.location?.name_ar ? activeProperty.location.name_ar : activeProperty.location?.name)}
+                        {isAr && activeProperty.location.name_ar ? activeProperty.location.name_ar : activeProperty.location.name}
                       </span>
                     )}
                   </div>
