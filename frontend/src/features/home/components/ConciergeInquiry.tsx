@@ -10,6 +10,7 @@ import { ChapterTag } from "@/components/ui/MotionPrimitives";
 export default function ConciergeInquiry() {
   const { t, locale } = useLanguage();
   const { settings, buildWhatsAppUrl, whatsappDigits } = useSiteSettings();
+  const isAr = locale === "ar";
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");

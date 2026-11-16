@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
               {isAr ? "الجونة" : "EL GOUNA"}
             </span>
             <span className="block text-sm font-serif font-bold tracking-wider text-brand-brown">
-              {settings.site_name || "GOUNOW"}
+              {settings?.site_name || "GOUNOW"}
             </span>
           </div>
         </Link>
@@ -268,7 +268,7 @@ export default function AdminLoginPage() {
                     </span>
                   </label>
 
-                  {settings.whatsapp_number && (
+                  {settings?.whatsapp_number && (
                     <a
                       href={buildWhatsAppUrl("Hello GouNow IT, I need password assistance")}
                       target="_blank"
@@ -308,7 +308,7 @@ export default function AdminLoginPage() {
 
       {/* Minimal Footer */}
       <footer className="w-full max-w-sm sm:max-w-md text-center py-2 text-[11px] text-brand-brown-muted">
-        © 2026 {settings.site_name || "GouNow"} Management
+        © 2026 {settings?.site_name || "GouNow"} Management
       </footer>
     </div>
   );

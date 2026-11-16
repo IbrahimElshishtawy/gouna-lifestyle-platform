@@ -255,7 +255,7 @@ export default function AdminConciergePage() {
             </button>
           </PermissionGuard>
 
-          {settings.whatsapp_number && (
+          {settings?.whatsapp_number && (
             <a
               href={buildWhatsAppUrl()}
               target="_blank"

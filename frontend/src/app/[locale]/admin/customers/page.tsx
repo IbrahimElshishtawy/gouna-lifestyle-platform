@@ -179,7 +179,7 @@ export default function AdminCustomersPage() {
 
         <div className="flex flex-wrap items-center gap-3">
           <SectionExportButtons sectionType="customers" />
-          {settings.whatsapp_number && (
+          {settings?.whatsapp_number && (
             <a
               href={buildWhatsAppUrl()}
               target="_blank"
@@ -419,7 +419,7 @@ export default function AdminCustomersPage() {
                         <div className="text-[10px]">{lead.customer?.email || "—"}</div>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-brand-brown">{lead.subject || lead.request_type}</div>
+                        <div className="font-semibold text-brand-brown">{lead.subject || lead.type}</div>
                         <div className="text-[11px] text-brand-brown-muted line-clamp-2">{lead.description}</div>
                       </td>
                       <td className="py-3.5 px-4 text-brand-brown-muted text-[11px]">

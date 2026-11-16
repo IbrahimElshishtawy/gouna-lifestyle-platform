@@ -30,7 +30,7 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
   const paramCurrency = searchParams.get("currency") || (isAr ? "ج.م" : "EGP");
   const initialChannel = (searchParams.get("channel") as "card" | "instapay") || "card";
 
-  const [initialAmount, setInitialAmount] = useState<number>(paramAmount);
+  const [amountDue, setAmountDue] = useState<number>(paramAmount);
   const [currency, setCurrency] = useState<string>(paramCurrency);
   const [activeTab, setActiveTab] = useState<"card" | "instapay">(initialChannel);
 
@@ -60,7 +60,7 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
         const pricing = booking?.attributes?.pricing;
         if (pricing) {
           if (paramAmount === 0 && pricing.total_cents) {
-            setInitialAmount(pricing.total_cents / 100);
+            setAmountDue(pricing.total_cents / 100);
           }
           if (pricing.currency) {
             setCurrency(pricing.currency);
