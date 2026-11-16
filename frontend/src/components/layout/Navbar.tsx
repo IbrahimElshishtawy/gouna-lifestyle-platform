@@ -4,12 +4,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { locale, setLocale, toggleLocale, t } = useLanguage();
+  const { buildWhatsAppUrl, whatsappDigits } = useSiteSettings();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,16 +51,20 @@ export default function Navbar() {
           </span>
         </div>
         <div className="flex items-center gap-3 sm:gap-4 text-[11px] shrink-0">
-          <a
-            href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition flex items-center gap-1 font-medium"
-          >
-            <span className="hidden sm:inline">{t.common.whatsAppConcierge}</span>
-            <span className="sm:hidden">WhatsApp</span>
-          </a>
-          <span className="text-white/30">|</span>
+          {whatsappDigits && (
+            <>
+              <a
+                href={buildWhatsAppUrl("Hello GouNow, I need assistance")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition flex items-center gap-1 font-medium"
+              >
+                <span className="hidden sm:inline">{t.common.whatsAppConcierge}</span>
+                <span className="sm:hidden">WhatsApp</span>
+              </a>
+              <span className="text-white/30">|</span>
+            </>
+          )}
 
           {/* Ribbon Bilingual Switcher Pill */}
           <div className="flex items-center bg-white/10 backdrop-blur-md p-0.5 rounded-full border border-white/15 text-[10px] font-bold">
@@ -401,14 +407,16 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <a
-                href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center gap-2"
-              >
-                <span>{t.common.whatsAppConcierge}</span>
-              </a>
+              {whatsappDigits && (
+                <a
+                  href={buildWhatsAppUrl("Hello GouNow, I need assistance")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full text-center py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center gap-2"
+                >
+                  <span>{t.common.whatsAppConcierge}</span>
+                </a>
+              )}
 
               <Link
                 href="/stays?listing_type=rent"

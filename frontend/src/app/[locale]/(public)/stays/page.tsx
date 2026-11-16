@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "@/i18n/routing";
 import PropertyCard from "@/features/properties/components/PropertyCard";
 import { getProperties } from "@/features/properties/services/properties.api";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 import { setRequestLocale } from "next-intl/server";
 import { getDictionary } from "@/locales/dictionary";
 import type { Metadata } from "next";
@@ -41,15 +42,22 @@ export default async function StaysPage({ params, searchParams }: Props) {
   const queryParams = await searchParams;
   const listingType = queryParams.listing_type || "rent";
   const isRent = listingType === "rent";
+  const isAr = locale === "ar";
 
-  const properties = await getProperties({
-    listing_type: listingType,
-    location: queryParams.location,
-    category: queryParams.category,
-    bedrooms: queryParams.bedrooms,
-    guests: queryParams.guests,
-    sort: queryParams.sort,
-  });
+  const [properties, taxonomies] = await Promise.all([
+    getProperties({
+      listing_type: listingType,
+      location: queryParams.location,
+      category: queryParams.category,
+      bedrooms: queryParams.bedrooms,
+      guests: queryParams.guests,
+      sort: queryParams.sort,
+    }),
+    getPublicTaxonomies(),
+  ]);
+
+  const locations = taxonomies?.locations || [];
+  const categories = taxonomies?.property_categories || [];
 
   return (
     <div className="bg-[#FAF8F5]">
@@ -127,11 +135,11 @@ export default async function StaysPage({ params, searchParams }: Props) {
                     className="w-full text-xs bg-white border border-brand-border rounded-xl px-3 py-2 focus:outline-none"
                   >
                     <option value="all">{t.staysPage.allLocations}</option>
-                    <option value="abu-tig-marina">Abu Tig Marina</option>
-                    <option value="fanadir-bay">Fanadir Bay</option>
-                    <option value="mangroovy-beach">Mangroovy &amp; Kite Beach</option>
-                    <option value="west-golf">West Golf</option>
-                    <option value="tawila-island">Tawila Island</option>
+                    {locations.map((loc) => (
+                      <option key={loc.id} value={loc.slug}>
+                        {isAr && loc.name_ar ? loc.name_ar : loc.name_en}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -146,10 +154,11 @@ export default async function StaysPage({ params, searchParams }: Props) {
                     className="w-full text-xs bg-white border border-brand-border rounded-xl px-3 py-2 focus:outline-none"
                   >
                     <option value="all">{t.staysPage.allCategories}</option>
-                    <option value="luxury-villas">{t.staysPage.luxuryVillas}</option>
-                    <option value="waterfront-chalets">{t.staysPage.waterfrontChalets}</option>
-                    <option value="marina-apartments">{t.staysPage.marinaApartments}</option>
-                    <option value="signature-villas">{t.staysPage.signatureRealEstate}</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.slug}>
+                        {isAr && cat.name_ar ? cat.name_ar : cat.name_en}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

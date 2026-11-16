@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { submitConciergeInquiry } from "../services/home.api";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 
 export default function ConciergeInquiry() {
   const { t, locale } = useLanguage();
+  const { settings, buildWhatsAppUrl, whatsappDigits } = useSiteSettings();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -31,11 +33,10 @@ export default function ConciergeInquiry() {
       setStatus("success");
       setFeedback(res.message || t.concierge.successText);
 
-      // Open WhatsApp for instant VIP concierge connection
-      const whatsappText = encodeURIComponent(
-        `Hello GouNow VIP Concierge,\nMy Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nRequested Service: ${service}\nDetails: ${message || "I would like to inquire about bespoke arrangements."}`
-      );
-      window.open(`https://wa.me/201000000000?text=${whatsappText}`, "_blank");
+      if (whatsappDigits) {
+        const whatsappText = `Hello GouNow VIP Concierge,\nMy Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nRequested Service: ${service}\nDetails: ${message || "I would like to inquire about bespoke arrangements."}`;
+        window.open(buildWhatsAppUrl(whatsappText), "_blank");
+      }
     } catch {
       setStatus("error");
       setFeedback(
@@ -87,69 +88,75 @@ export default function ConciergeInquiry() {
 
             <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
               {/* Phone Channel */}
-              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta shrink-0">
-                  <svg className="w-5 h-5 text-brand-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                  </svg>
+              {settings?.phone && (
+                <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta shrink-0">
+                    <svg className="w-5 h-5 text-brand-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                      {t.concierge.directPhone}
+                    </span>
+                    <a
+                      href={`tel:${settings.phone.replace(/\s+/g, "")}`}
+                      className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
+                    >
+                      {settings.phone}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
-                    {t.concierge.directPhone}
-                  </span>
-                  <a
-                    href="tel:+201000000000"
-                    className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors"
-                  >
-                    +20 100 000 0000
-                  </a>
-                </div>
-              </div>
+              )}
 
               {/* Email Channel */}
-              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta shrink-0">
-                  <svg className="w-5 h-5 text-brand-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
+              {settings?.email && (
+                <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border/70 shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-brand-sand-light flex items-center justify-center text-brand-terracotta shrink-0">
+                    <svg className="w-5 h-5 text-brand-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
+                      {t.concierge.clientEmail}
+                    </span>
+                    <a
+                      href={`mailto:${settings.email}`}
+                      className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors truncate block"
+                    >
+                      {settings.email}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-brand-brown-muted tracking-wider">
-                    {t.concierge.clientEmail}
-                  </span>
-                  <a
-                    href="mailto:concierge@gounow.com"
-                    className="text-xs sm:text-sm font-bold text-brand-brown hover:text-brand-terracotta transition-colors truncate block"
-                  >
-                    concierge@gounow.com
-                  </a>
-                </div>
-              </div>
+              )}
 
               {/* WhatsApp Fast Track */}
-              <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 shadow-xs">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.943.514 1.785.78 2.796.78h.005c3.18 0 5.767-2.587 5.768-5.766.001-3.182-2.585-5.767-5.773-5.767zm3.375 8.16c-.14.394-.808.753-1.121.794-.312.041-.703.064-2.146-.532-1.748-.724-2.884-2.483-2.973-2.6-.088-.117-.714-.95-.714-1.812s.449-1.286.609-1.464c.16-.178.349-.223.465-.223.116 0 .233.001.335.006.107.006.251-.041.393.3.145.349.494 1.205.538 1.293.044.088.073.19.015.306-.058.117-.087.19-.174.292-.087.102-.184.228-.263.307-.087.087-.178.182-.077.356.102.175.452.747.97 1.208.667.594 1.229.778 1.404.865.174.087.276.073.378-.044.102-.117.436-.51.553-.685.116-.175.233-.146.393-.087.16.058 1.019.48 1.194.568.174.087.291.131.335.204.043.073.043.423-.097.817z" />
-                  </svg>
+              {whatsappDigits && (
+                <div className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.943.514 1.785.78 2.796.78h.005c3.18 0 5.767-2.587 5.768-5.766.001-3.182-2.585-5.767-5.773-5.767zm3.375 8.16c-.14.394-.808.753-1.121.794-.312.041-.703.064-2.146-.532-1.748-.724-2.884-2.483-2.973-2.6-.088-.117-.714-.95-.714-1.812s.449-1.286.609-1.464c.16-.178.349-.223.465-.223.116 0 .233.001.335.006.107.006.251-.041.393.3.145.349.494 1.205.538 1.293.044.088.073.19.015.306-.058.117-.087.19-.174.292-.087.102-.184.228-.263.307-.087.087-.178.182-.077.356.102.175.452.747.97 1.208.667.594 1.229.778 1.404.865.174.087.276.073.378-.044.102-.117.436-.51.553-.685.116-.175.233-.146.393-.087.16.058 1.019.48 1.194.568.174.087.291.131.335.204.043.073.043.423-.097.817z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-emerald-800 tracking-wider truncate">
+                      {t.concierge.instantWhatsApp}
+                    </span>
+                    <span className="block text-[11px] sm:text-xs text-emerald-700 font-light truncate">
+                      {t.concierge.whatsappSub}
+                    </span>
+                  </div>
+                  <a
+                    href={buildWhatsAppUrl("Hello GouNow, I would like VIP concierge assistance")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 sm:px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shrink-0"
+                  >
+                    {t.concierge.chatNow}
+                  </a>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="block text-[10px] sm:text-[11px] uppercase font-bold text-emerald-800 tracking-wider truncate">
-                    {t.concierge.instantWhatsApp}
-                  </span>
-                  <span className="block text-[11px] sm:text-xs text-emerald-700 font-light truncate">
-                    {t.concierge.whatsappSub}
-                  </span>
-                </div>
-                <a
-                  href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20would%20like%20VIP%20concierge%20assistance"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 sm:px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shrink-0"
-                >
-                  {t.concierge.chatNow}
-                </a>
-              </div>
+              )}
             </div>
           </div>
 

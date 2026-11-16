@@ -6,6 +6,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing, Locale } from "@/i18n/routing";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -85,14 +87,17 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // Enable static rendering in next-intl
   setRequestLocale(locale);
 
-  const messages = await getMessages();
+  const [messages, taxonomies] = await Promise.all([
+    getMessages(),
+    getPublicTaxonomies(),
+  ]);
   const dir = locale === "ar" ? "rtl" : "ltr";
   const fontClass = locale === "ar" ? "font-arabic" : "font-sans";
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: locale === "ar" ? "جو ناو لايف ستايل" : "GouNow Lifestyle",
+    name: taxonomies?.settings?.site_name || (locale === "ar" ? "جو ناو لايف ستايل" : "GouNow Lifestyle"),
     url: `https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/${locale}`,
     logo: "https://ibrahimelshishtawy.github.io/gouna-lifestyle-platform/assets/images/logo.jpg",
     description:
@@ -101,17 +106,22 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         : "Bespoke vacation villa rentals, real estate sales, and yacht charters in El Gouna, Red Sea.",
     address: {
       "@type": "PostalAddress",
+      streetAddress: taxonomies?.settings?.address || undefined,
       addressLocality: "El Gouna",
       addressRegion: "Red Sea",
       addressCountry: "EG",
     },
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+201000000000",
-      contactType: "customer service",
-      areaServed: "EG",
-      availableLanguage: ["English", "Arabic"],
-    },
+    ...(taxonomies?.settings?.phone
+      ? {
+          contactPoint: {
+            "@type": "ContactPoint",
+            telephone: taxonomies.settings.phone,
+            contactType: "customer service",
+            areaServed: "EG",
+            availableLanguage: ["English", "Arabic"],
+          },
+        }
+      : {}),
   };
 
   return (
@@ -136,7 +146,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
       <body className={`min-h-full flex flex-col text-brand-brown bg-[#FAF8F5] antialiased selection:bg-brand-terracotta/20 selection:text-brand-terracotta ${fontClass}`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LanguageProvider initialLocale={locale as Locale}>
-            {children}
+            <SiteSettingsProvider initialData={taxonomies}>
+              {children}
+            </SiteSettingsProvider>
           </LanguageProvider>
         </NextIntlClientProvider>
 

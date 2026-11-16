@@ -7,8 +7,11 @@ import {
   getBookingByReference,
   getPaymentProofStatusApi,
   submitPaymentProofApi,
+  fetchPaymentMethodsApi,
   PaymentProofData,
 } from "@/features/checkout/services/checkout.api";
+import type { PaymentMethod } from "@/features/checkout/types/checkout.types";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface Props {
   params: Promise<{
@@ -21,9 +24,11 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
   const searchParams = useSearchParams();
   const isAr = locale === "ar";
   const token = searchParams.get("token") || "";
+  const { whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
 
   const [booking, setBooking] = useState<any>(null);
   const [proofs, setProofs] = useState<PaymentProofData[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -43,9 +48,10 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
   useEffect(() => {
     async function load() {
       try {
-        const [bookingData, proofStatusData] = await Promise.all([
+        const [bookingData, proofStatusData, methodsRes] = await Promise.all([
           getBookingByReference(ref, token),
           getPaymentProofStatusApi(ref, token).catch(() => null),
+          fetchPaymentMethodsApi().catch(() => ({ data: [] })),
         ]);
 
         if (bookingData) {
@@ -58,6 +64,14 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
 
         if (proofStatusData?.proofs) {
           setProofs(proofStatusData.proofs);
+        }
+
+        if (methodsRes?.data) {
+          setPaymentMethods(methodsRes.data);
+          const firstOffline = methodsRes.data.find((m) => !m.is_online) || methodsRes.data[0];
+          if (firstOffline) {
+            setPaymentMethodCode(firstOffline.code);
+          }
         }
       } catch {
         setError(true);
@@ -189,11 +203,11 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
   const isUnpaid = !isVerified && !isPendingVerification;
 
   // Pre-filled WhatsApp message
-  const waMessage = encodeURIComponent(
-    isAr
-      ? `مرحباً كونسيرج جوناو VIP، بخصوص حجزي رقم: ${ref} في ${property?.attributes?.title || "العقار"}.`
-      : `Hello GouNow VIP Concierge, regarding my reservation ${ref} at ${property?.attributes?.title || "property"}.`
-  );
+  const waMessage = isAr
+    ? `مرحباً كونسيرج جوناو VIP، بخصوص حجزي رقم: ${ref} في ${property?.attributes?.title || "العقار"}.`
+    : `Hello GouNow VIP Concierge, regarding my reservation ${ref} at ${property?.attributes?.title || "property"}.`;
+
+  const offlineMethods = paymentMethods.filter((m) => !m.is_online);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -332,39 +346,34 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
                 </h3>
               </div>
 
-              {/* Instructions Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 bg-white rounded-2xl border border-amber-200/80 space-y-2 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-brand-brown">⚡ Instapay / إنستاباي</span>
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-[10px]">
-                      {isAr ? "موصى به" : "Recommended"}
-                    </span>
-                  </div>
-                  <p className="text-brand-brown-muted">
-                    {isAr ? "عنوان إنستاباي (IPA):" : "Instapay Handle:"}{" "}
-                    <span className="font-mono font-bold text-brand-brown select-all">gounow@cib</span>
-                  </p>
-                  <p className="text-brand-brown-muted">
-                    {isAr ? "المبلغ المطلوب تحويله:" : "Required Amount:"}{" "}
-                    <span className="font-bold text-brand-terracotta">
-                      {formatCurrency(pricing?.total_cents || 0)}
-                    </span>
-                  </p>
+              {/* Instructions Cards from Backend Payment Methods */}
+              {offlineMethods.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  {offlineMethods.map((method) => (
+                    <div key={method.id} className="p-4 bg-white rounded-2xl border border-amber-200/80 space-y-2 shadow-sm">
+                      <span className="font-bold text-brand-brown block">{method.name}</span>
+                      {(isAr ? method.instructions_ar || method.instructions : method.instructions_en || method.instructions) && (
+                        <p className="text-brand-brown-muted leading-relaxed">
+                          {isAr ? method.instructions_ar || method.instructions : method.instructions_en || method.instructions}
+                        </p>
+                      )}
+                      {method.configuration &&
+                        Object.entries(method.configuration).map(([k, v]) => (
+                          <p key={k} className="text-brand-brown-muted">
+                            <span className="capitalize">{k.replace(/_/g, " ")}:</span>{" "}
+                            <span className="font-mono font-bold text-brand-brown select-all">{String(v)}</span>
+                          </p>
+                        ))}
+                      <p className="text-brand-brown-muted">
+                        {isAr ? "المبلغ المطلوب:" : "Required Amount:"}{" "}
+                        <span className="font-bold text-brand-terracotta">
+                          {formatCurrency(pricing?.total_cents || 0)}
+                        </span>
+                      </p>
+                    </div>
+                  ))}
                 </div>
-
-                <div className="p-4 bg-white rounded-2xl border border-amber-200/80 space-y-2 shadow-sm">
-                  <span className="font-bold text-brand-brown block">🏦 تحويل بنكي (CIB Egypt)</span>
-                  <p className="text-brand-brown-muted">
-                    {isAr ? "اسم الحساب:" : "Account:"}{" "}
-                    <span className="font-bold text-brand-brown">GouNow Lifestyle LLC</span>
-                  </p>
-                  <p className="text-brand-brown-muted">
-                    {isAr ? "رقم الحساب:" : "Acc No:"}{" "}
-                    <span className="font-mono font-bold text-brand-brown select-all">1000-4829-9182-01</span>
-                  </p>
-                </div>
-              </div>
+              )}
 
               {/* Submit Proof Form */}
               <form onSubmit={handleProofSubmit} className="space-y-4 pt-4 border-t border-amber-200/80">
@@ -394,10 +403,11 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
                       onChange={(e) => setPaymentMethodCode(e.target.value)}
                       className="w-full px-3 py-2 bg-white rounded-xl border border-brand-border text-brand-brown focus:outline-none focus:ring-2 focus:ring-brand-terracotta"
                     >
-                      <option value="bank_transfer">إنستاباي / Instapay (IPA)</option>
-                      <option value="bank_transfer">تحويل بنكي / CIB Bank Wire</option>
-                      <option value="vodafone_cash">محفظة فودافون كاش / Vodafone Cash</option>
-                      <option value="cash">سداد نقدي بمكتب مارينا أبو تيج / Cash</option>
+                      {paymentMethods.map((m) => (
+                        <option key={m.id} value={m.code}>
+                          {m.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -604,15 +614,17 @@ function CheckoutConfirmationContent({ locale, ref }: { locale: string; ref: str
               </button>
             )}
 
-            <a
-              href={`https://wa.me/201000000000?text=${waMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 shadow-lg shadow-emerald-900/20"
-            >
-              <span>💬</span>
-              <span>{isAr ? "تواصل مع كونسيرج الجونة الخاص" : "Chat with VIP Concierge"}</span>
-            </a>
+            {whatsappDigits && (
+              <a
+                href={buildWhatsAppUrl(waMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center gap-2 shadow-lg shadow-emerald-900/20"
+              >
+                <span>💬</span>
+                <span>{isAr ? "تواصل مع كونسيرج الجونة الخاص" : "Chat with VIP Concierge"}</span>
+              </a>
+            )}
 
             <Link
               href="/"

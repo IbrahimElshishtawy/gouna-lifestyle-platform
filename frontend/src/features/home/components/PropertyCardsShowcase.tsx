@@ -39,19 +39,21 @@ export default function PropertyCardsShowcase({
         if (!map.has(id)) {
           map.set(id, {
             id,
-            name: p.category.name || "Estate",
+            name: (isAr && p.category.name_ar ? p.category.name_ar : p.category.name) || "Estate",
           });
         }
       }
     });
     return Array.from(map.values());
-  }, [properties]);
+  }, [properties, isAr]);
 
   // Filter properties
   const filteredProperties = useMemo(() => {
     return properties.filter((p) => {
       const matchType =
-        activeListingType === "all" || p.listing_type === activeListingType;
+        activeListingType === "all" ||
+        p.listing_type === activeListingType ||
+        p.listing_type === "both";
       const matchCat =
         activeCategory === "all" ||
         String(p.category?.id) === activeCategory ||
@@ -220,8 +222,8 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
   };
 
   const title = (isAr ? property.title_ar : property.title) || property.title || property.reference_code;
-  const locationName = property.location?.name || (isAr ? "الجونة" : "El Gouna");
-  const categoryName = property.category?.name || (isAr ? "فيلا فاخرة" : "Luxury Villa");
+  const locationName = (isAr ? property.location?.name_ar : property.location?.name) || property.location?.name || (isAr ? "الجونة" : "El Gouna");
+  const categoryName = (isAr ? property.category?.name_ar : property.category?.name) || property.category?.name || (isAr ? "فيلا فاخرة" : "Luxury Villa");
 
   return (
     <article className="group bg-white rounded-3xl border border-brand-border/70 overflow-hidden shadow-xs hover:shadow-xl hover:border-brand-terracotta/40 transition-all duration-300 flex flex-col justify-between">
@@ -342,8 +344,10 @@ function ShowcaseCard({ property, isAr, onOpenSpatial }: ShowcaseCardProps) {
               {property.listing_type === "sale" ? (isAr ? "سعر العقار" : "Price") : (isAr ? "يبدأ من" : "Starting from")}
             </span>
             <div className="font-serif text-lg font-bold text-brand-terracotta">
-              {property.price_formatted || `${property.price_cents / 100} ${property.currency || "EGP"}`}
-              {property.listing_type === "rent" && (
+              {property.listing_type === "sale"
+                ? (property.sale_price_formatted || property.price_formatted)
+                : (property.price_formatted || `${property.price_cents / 100} ${property.currency || "EGP"}`)}
+              {property.listing_type !== "sale" && (
                 <span className="text-xs font-normal text-brand-brown-muted">
                   {isAr ? " / ليلة" : " / night"}
                 </span>

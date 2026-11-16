@@ -33,6 +33,38 @@ class StayController extends Controller
             });
         }
 
+        // Support listing_type including 'both' when filtering for rent or sale
+        if ($listingType = $request->input('listing_type')) {
+            if ($listingType === 'rent') {
+                $query->whereIn('listing_type', ['rent', 'both']);
+            } elseif ($listingType === 'sale') {
+                $query->whereIn('listing_type', ['sale', 'both']);
+            }
+        }
+
+        // Support location slug filtering
+        if ($locationSlug = $request->input('location')) {
+            if ($locationSlug !== 'all') {
+                $query->whereHas('location', function ($q) use ($locationSlug) {
+                    $q->where('slug', $locationSlug);
+                });
+            }
+        }
+
+        // Support category slug filtering
+        if ($categorySlug = $request->input('category')) {
+            if ($categorySlug !== 'all') {
+                $query->whereHas('category', function ($q) use ($categorySlug) {
+                    $q->where('slug', $categorySlug);
+                });
+            }
+        }
+
+        // Support minimum bedrooms filtering
+        if ($minBedrooms = $request->input('min_bedrooms')) {
+            $query->where('bedrooms', '>=', (int) $minBedrooms);
+        }
+
         // Support guest capacity filtering
         if ($guests = $request->input('guests')) {
             $query->where('max_guests', '>=', (int) $guests);
@@ -49,10 +81,10 @@ class StayController extends Controller
         $paginated = $this->paginateWithListingStandard(
             query: $query,
             request: $request,
-            allowedSorts: ['id', 'base_price_cents', 'bedrooms', 'bathrooms', 'created_at'],
+            allowedSorts: ['id', 'base_price_cents', 'sale_price_cents', 'bedrooms', 'bathrooms', 'is_featured', 'created_at'],
             allowedFilters: ['bedrooms', 'bathrooms', 'compound', 'location_id', 'property_category_id', 'listing_type'],
             allowedIncludes: ['category', 'location', 'amenities', 'media'],
-            defaultSort: '-created_at',
+            defaultSort: '-is_featured,-created_at',
             defaultPerPage: 15,
             maxPerPage: 100
         );

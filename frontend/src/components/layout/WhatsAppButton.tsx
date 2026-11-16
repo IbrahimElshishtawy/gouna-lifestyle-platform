@@ -2,14 +2,20 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export default function WhatsAppButton() {
   const { locale } = useLanguage();
+  const { whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
+
+  if (!whatsappDigits) return null;
 
   return (
     <div className="fixed bottom-6 end-6 z-50 transition-all">
       <a
-        href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20am%20interested%20in%20luxury%20stays%20and%20experiences%20in%20El%20Gouna"
+        href={buildWhatsAppUrl(
+          "Hello GouNow, I am interested in luxury stays and experiences in El Gouna"
+        )}
         target="_blank"
         rel="noopener noreferrer"
         data-ga-event="contact_whatsapp_floating"

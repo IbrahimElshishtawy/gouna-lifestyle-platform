@@ -17,7 +17,9 @@ interface Props {
 export default function FeaturedVacationRentals({ properties }: Props) {
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
-  const rentalProperties = properties.filter((p) => p.listing_type === "rent");
+  const rentalProperties = properties.filter(
+    (p) => p.listing_type === "rent" || p.listing_type === "both"
+  );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -218,7 +220,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
             {/* Right Column: Property Specs & Booking Info */}
             <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4 sm:space-y-6">
               <div>
-                {/* Location & Rating Header */}
+                {/* Location & Reference Header */}
                 <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
                   <span className="flex items-center gap-1.5">
                     <span className="relative w-4 h-4 rounded-full overflow-hidden inline-block shrink-0 border border-brand-terracotta/40">
@@ -230,22 +232,21 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                         className="object-cover"
                       />
                     </span>
-                    <span>{activeProperty.location?.name || t.common.elGouna}</span>
+                    <span>{(isAr && activeProperty.location?.name_ar ? activeProperty.location.name_ar : activeProperty.location?.name) || t.common.elGouna}</span>
                   </span>
-                  <span className="flex items-center gap-1.5 text-brand-brown text-xs font-semibold">
-                    <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold">4.98</span>
-                    <span className="text-brand-brown-muted font-normal">(24 {t.common.readReviews})</span>
+                  <span className="text-[10px] font-mono text-brand-brown-muted">
+                    {activeProperty.reference_code}
                   </span>
                 </div>
 
                 {/* Title */}
                 <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-brand-brown leading-tight mb-2 sm:mb-3">
-                  {activeProperty.title}
+                  {isAr && activeProperty.title_ar ? activeProperty.title_ar : activeProperty.title}
                 </h3>
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed mb-4 sm:mb-6 line-clamp-3">
-                  {activeProperty.description}
+                  {isAr && activeProperty.description_ar ? activeProperty.description_ar : activeProperty.description}
                 </p>
 
                 {/* Specs Pills (Beds, Baths, Guests, Area) */}
@@ -276,7 +277,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                   </div>
                   <div>
                     <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
-                      {activeProperty.area_sqm || 480}
+                      {activeProperty.area_sqm || "—"}
                     </span>
                     <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-brown-muted">
                       {t.common.bua}
@@ -284,27 +285,19 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                   </div>
                 </div>
 
-                {/* Key Features */}
-                <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.vacationRentals.feature1}</span>
+                {/* Key Features from Backend Amenities */}
+                {activeProperty.amenities && activeProperty.amenities.length > 0 && (
+                  <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
+                    {activeProperty.amenities.slice(0, 3).map((amenity) => (
+                      <div key={amenity.id} className="flex items-center gap-2">
+                        <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{isAr && amenity.name_ar ? amenity.name_ar : amenity.name}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.vacationRentals.feature2}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{t.vacationRentals.feature3}</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Price & Actions */}
@@ -378,7 +371,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                       style={{ transform: "translateZ(24px)" }}
                     >
                       <span className="px-2.5 py-0.5 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                        {property.location?.name || t.common.elGouna}
+                        {(isAr && property.location?.name_ar ? property.location.name_ar : property.location?.name) || t.common.elGouna}
                       </span>
                     </div>
                   </div>
@@ -388,7 +381,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                       className="font-serif text-sm font-bold text-brand-brown line-clamp-1 group-hover:text-brand-terracotta transition-colors mb-1"
                       style={{ transform: "translateZ(16px)" }}
                     >
-                      {property.title}
+                      {isAr && property.title_ar ? property.title_ar : property.title}
                     </h4>
                     <div
                       className="flex items-center gap-2 text-[11px] text-brand-brown-muted mb-2 font-light"

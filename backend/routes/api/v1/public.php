@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Public\CheckoutController;
 use App\Http\Controllers\Api\V1\Public\EventController;
 use App\Http\Controllers\Api\V1\Public\ExperienceController;
 use App\Http\Controllers\Api\V1\Public\LeadController;
+use App\Http\Controllers\Api\V1\Public\PublicMetadataController;
 use App\Http\Controllers\Api\V1\Public\StayController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +82,10 @@ Route::post('/leads', [LeadController::class, 'store'])
 Route::post('/concierge', [\App\Http\Controllers\Api\V1\Public\PublicConciergeController::class, 'store'])
     ->middleware('throttle:inquiries')
     ->name('concierge.store');
+
+// Public FAQs & Taxonomies / Site Settings
+Route::get('/faqs', [PublicMetadataController::class, 'faqs'])->name('faqs.index');
+Route::get('/taxonomies', [PublicMetadataController::class, 'taxonomies'])->name('taxonomies.index');
 
 // Homepage Media Design Config
 Route::get('/settings/media-design', function () {

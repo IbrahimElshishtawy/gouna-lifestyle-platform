@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { Property } from "@/features/properties/types/property.types";
 
 interface UnitSpatialModalProps {
@@ -17,6 +18,7 @@ export default function UnitSpatialModal({
   onClose,
 }: UnitSpatialModalProps) {
   const { locale, t } = useLanguage();
+  const { buildWhatsAppUrl } = useSiteSettings();
   const isAr = locale === "ar";
 
   // 3D Orbital Rotation State
@@ -231,7 +233,6 @@ export default function UnitSpatialModal({
                     <span className="text-[9px] font-bold uppercase text-amber-300">
                       {isAr ? "تراس التشمس" : "Sundeck & Lounge"}
                     </span>
-                    <span className="text-[8px] text-amber-200/70">85 m²</span>
                   </div>
 
                   <div
@@ -243,7 +244,6 @@ export default function UnitSpatialModal({
                     <span className="text-[9px] font-bold uppercase text-stone-200">
                       {isAr ? "صالون الاستقبال" : "Atrium Living"}
                     </span>
-                    <span className="text-[8px] text-stone-400">120 m²</span>
                   </div>
                 </div>
               </div>
@@ -273,9 +273,11 @@ export default function UnitSpatialModal({
                   </p>
                 </div>
 
-                <div className="bg-white/10 rounded-lg py-1 px-2 text-center text-[9px] text-stone-200 font-mono">
-                  {property.area_sqm || 480} m² BUA
-                </div>
+                {property.area_sqm && (
+                  <div className="bg-white/10 rounded-lg py-1 px-2 text-center text-[9px] text-stone-200 font-mono">
+                    {property.area_sqm} m² BUA
+                  </div>
+                )}
               </div>
 
               {/* Floating Rooftop Solarium & Sky Terrace (Z: +80px) */}
@@ -372,30 +374,30 @@ export default function UnitSpatialModal({
                 )}
               </div>
 
-              {/* Spatial Specifications Matrix */}
+              {/* Spatial Specifications Matrix (Real Backend Fields Only) */}
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block">
                     {t.common.bua}
                   </span>
                   <span className="text-base font-bold text-white font-mono">
-                    {property.area_sqm || 480} m²
+                    {property.area_sqm ? `${property.area_sqm} m²` : "—"}
                   </span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block">
-                    {isAr ? "المساحة الإجمالية" : "Plot Size"}
+                    {t.common.beds} / {t.common.baths}
                   </span>
                   <span className="text-base font-bold text-white font-mono">
-                    780 m²
+                    {property.bedrooms} / {property.bathrooms}
                   </span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block">
-                    {isAr ? "إطلالة الواجهة" : "Water Frontage"}
+                    {isAr ? "الموقع" : "Location"}
                   </span>
-                  <span className="text-base font-bold text-cyan-300 font-mono">
-                    28m {isAr ? "لاجون" : "Lagoon"}
+                  <span className="text-xs font-bold text-cyan-300 truncate block">
+                    {(isAr && property.location?.name_ar ? property.location.name_ar : property.location?.name) || t.common.elGouna}
                   </span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
@@ -414,10 +416,10 @@ export default function UnitSpatialModal({
               <div className="flex items-baseline justify-between">
                 <div>
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block">
-                    {property.listing_type === "rent" ? t.propertyCard.pricePerNight : t.sales.askingPrice}
+                    {property.listing_type === "sale" ? t.sales.askingPrice : t.propertyCard.pricePerNight}
                   </span>
                   <span className="text-xl font-serif font-bold text-white">
-                    {property.price_formatted}{" "}
+                    {property.listing_type === "sale" ? (property.sale_price_formatted || property.price_formatted) : property.price_formatted}{" "}
                     <span className="text-xs font-sans text-stone-400">
                       {property.currency === "EGP" ? t.common.currency : property.currency}
                     </span>
@@ -427,9 +429,9 @@ export default function UnitSpatialModal({
 
               <div className="grid grid-cols-2 gap-2">
                 <a
-                  href={`https://wa.me/201000000000?text=${encodeURIComponent(
-                    `Hello GouNow Concierge, I am viewing the 3D model for ${property.title} (${property.reference_code}) and would like to reserve/schedule a viewing.`
-                  )}`}
+                  href={buildWhatsAppUrl(
+                    `Hello GouNow Concierge, I am viewing ${property.title} (${property.reference_code}) and would like to reserve/schedule a viewing.`
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3 px-3 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-all duration-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer"

@@ -8,7 +8,7 @@ import {
 } from "@/features/experiences/services/experiences.api";
 import ExperienceInquiryWidget from "@/features/experiences/components/ExperienceInquiryWidget";
 import ExperienceCard from "@/features/experiences/components/ExperienceCard";
-import ReviewsSection from "@/features/reviews/components/ReviewsSection";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 import { setRequestLocale } from "next-intl/server";
 import { getDictionary } from "@/locales/dictionary";
 import type { Metadata } from "next";
@@ -44,21 +44,36 @@ export default async function ExperienceDetailPage({ params }: Props) {
   const t = getDictionary(locale);
   const isAr = locale === "ar";
 
-  const experience = await getExperienceBySlug(slug);
+  const [experience, allExperiences, taxonomies] = await Promise.all([
+    getExperienceBySlug(slug),
+    getExperiences(),
+    getPublicTaxonomies(),
+  ]);
 
   if (!experience) {
     notFound();
   }
 
-  const allExperiences = await getExperiences();
   const relatedExperiences = allExperiences
     .filter((e) => e.id !== experience.id)
     .slice(0, 3);
 
+  const displayTitle = isAr && experience.title_ar ? experience.title_ar : experience.title;
+  const displayDesc = isAr && experience.description_ar ? experience.description_ar : experience.description;
+  const displayOverview = isAr && experience.overview_ar ? experience.overview_ar : experience.overview;
+  const displayLocation = (isAr && experience.location?.name_ar ? experience.location.name_ar : experience.location?.name) || (isAr ? "الجونة" : "El Gouna");
+  const displayCategory = (isAr && experience.category?.name_ar ? experience.category.name_ar : experience.category?.name) || (isAr ? "مغامرة مميزة" : "Curated Adventure");
+  const displayMeetingPoint = isAr && experience.meeting_point_ar ? experience.meeting_point_ar : experience.meeting_point;
+  const displayWhatToBring = isAr && experience.what_to_bring_ar ? experience.what_to_bring_ar : experience.what_to_bring;
+  const displayCancellation = isAr && experience.cancellation_policy_ar ? experience.cancellation_policy_ar : experience.cancellation_policy;
+
+  const waDigits = (taxonomies?.settings?.whatsapp_number || taxonomies?.settings?.phone || "").replace(/\D/g, "");
   const whatsappMsgHeader = isAr ? "مرحباً جوناو،" : "Hello GouNow,";
-  const whatsappInquiryUrl = `https://wa.me/201000000000?text=${encodeURIComponent(
-    `${whatsappMsgHeader}\n\n${isAr ? "أستفسر عن تجربة:" : "I am inquiring about the experience:"} ${experience.title}\n\n${isAr ? "هل يمكن تزويدي بالمواعيد المتاحة وخيارات الانطلاق؟" : "Could you please let me know availability and departure options?"}`
-  )}`;
+  const whatsappInquiryUrl = waDigits
+    ? `https://wa.me/${waDigits}?text=${encodeURIComponent(
+        `${whatsappMsgHeader}\n\n${isAr ? "أستفسر عن تجربة:" : "I am inquiring about the experience:"} ${displayTitle}\n\n${isAr ? "هل يمكن تزويدي بالمواعيد المتاحة وخيارات الانطلاق؟" : "Could you please let me know availability and departure options?"}`
+      )}`
+    : "#";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 lg:py-12">
@@ -75,11 +90,11 @@ export default async function ExperienceDetailPage({ params }: Props) {
             </Link>
             <span className="rtl:rotate-180">/</span>
             <span className="text-brand-brown font-medium">
-              {experience.category?.name || (isAr ? "مغامرة مميزة" : "Curated Adventure")}
+              {displayCategory}
             </span>
           </nav>
           <h1 className="font-serif text-2xl sm:text-4xl font-semibold text-brand-brown">
-            {experience.title}
+            {displayTitle}
           </h1>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-brand-brown-muted mt-2">
             <span className="flex items-center gap-1.5 font-medium text-brand-brown">
@@ -87,7 +102,7 @@ export default async function ExperienceDetailPage({ params }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{experience.location?.name || (isAr ? "الجونة" : "El Gouna")}</span>
+              <span>{displayLocation}</span>
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
@@ -163,11 +178,13 @@ export default async function ExperienceDetailPage({ params }: Props) {
             </h2>
             <div className="text-xs sm:text-sm text-brand-brown/90 leading-relaxed space-y-4 font-light">
               <p className="font-normal text-brand-brown leading-relaxed">
-                {experience.description}
+                {displayDesc}
               </p>
-              <div className="whitespace-pre-line text-brand-brown-muted">
-                {experience.overview}
-              </div>
+              {displayOverview && displayOverview !== displayDesc && (
+                <div className="whitespace-pre-line text-brand-brown-muted">
+                  {displayOverview}
+                </div>
+              )}
             </div>
           </div>
 
@@ -178,47 +195,50 @@ export default async function ExperienceDetailPage({ params }: Props) {
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70">
-                <span className="font-bold text-brand-brown flex items-center gap-2">
-                  <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                  </svg>
-                  <span>{isAr ? "نقطة التجمع والانطلاق:" : "Meeting & Departure Point:"}</span>
-                </span>
-                <p className="text-brand-brown-muted leading-relaxed">
-                  {experience.meeting_point}
-                </p>
-              </div>
+              {displayMeetingPoint && (
+                <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70">
+                  <span className="font-bold text-brand-brown flex items-center gap-2">
+                    <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    </svg>
+                    <span>{isAr ? "نقطة التجمع والانطلاق:" : "Meeting & Departure Point:"}</span>
+                  </span>
+                  <p className="text-brand-brown-muted leading-relaxed">
+                    {displayMeetingPoint}
+                  </p>
+                </div>
+              )}
 
-              <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70">
-                <span className="font-bold text-brand-brown flex items-center gap-2">
-                  <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                  </svg>
-                  <span>{isAr ? "ما يجب إحضاره:" : "What to Bring:"}</span>
-                </span>
-                <p className="text-brand-brown-muted leading-relaxed">
-                  {experience.what_to_bring}
-                </p>
-              </div>
+              {displayWhatToBring && (
+                <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70">
+                  <span className="font-bold text-brand-brown flex items-center gap-2">
+                    <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span>{isAr ? "ما يجب إحضاره:" : "What to Bring:"}</span>
+                  </span>
+                  <p className="text-brand-brown-muted leading-relaxed">
+                    {displayWhatToBring}
+                  </p>
+                </div>
+              )}
 
-              <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70 sm:col-span-2">
-                <span className="font-bold text-brand-brown flex items-center gap-2">
-                  <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                  </svg>
-                  <span>{isAr ? "سياسة الإلغاء والطقس:" : "Cancellation & Weather Policy:"}</span>
-                </span>
-                <p className="text-brand-brown-muted leading-relaxed">
-                  {experience.cancellation_policy}
-                </p>
-              </div>
+              {displayCancellation && (
+                <div className="space-y-2 p-4 rounded-2xl bg-brand-sand-light/50 border border-brand-border/70 sm:col-span-2">
+                  <span className="font-bold text-brand-brown flex items-center gap-2">
+                    <svg className="w-4 h-4 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                    <span>{isAr ? "سياسة الإلغاء والطقس:" : "Cancellation & Weather Policy:"}</span>
+                  </span>
+                  <p className="text-brand-brown-muted leading-relaxed">
+                    {displayCancellation}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Guest Reviews Section */}
-          <ReviewsSection title={isAr ? `تقييمات الضيوف لـ ${experience.title}` : `Guest Reviews for ${experience.title}`} />
         </div>
 
         {/* Right: Sticky Inquiry Form */}

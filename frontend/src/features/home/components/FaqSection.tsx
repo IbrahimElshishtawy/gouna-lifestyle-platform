@@ -3,11 +3,18 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
+import type { PublicFaqItem } from "@/features/home/services/home.api";
 
-export default function FaqSection() {
-  const { t } = useLanguage();
+interface FaqSectionProps {
+  faqs: PublicFaqItem[];
+}
+
+export default function FaqSection({ faqs }: FaqSectionProps) {
+  const { t, locale } = useLanguage();
+  const isAr = locale === "ar";
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const faqs = t.faq.items;
+
+  if (!faqs || faqs.length === 0) return null;
 
   return (
     <section id="faq" className="py-20 px-4 sm:px-6 lg:px-12 max-w-4xl mx-auto scroll-mt-24">
@@ -37,9 +44,11 @@ export default function FaqSection() {
       <div className="space-y-4">
         {faqs.map((faq, index) => {
           const isOpen = openIndex === index;
+          const question = isAr && faq.question_ar ? faq.question_ar : faq.question_en;
+          const answer = isAr && faq.answer_ar ? faq.answer_ar : faq.answer_en;
           return (
             <div
-              key={index}
+              key={faq.id}
               className="bg-white rounded-2xl border border-brand-border overflow-hidden transition-shadow shadow-xs"
             >
               <button
@@ -48,7 +57,7 @@ export default function FaqSection() {
                 className="w-full text-left rtl:text-right p-5 flex items-center justify-between gap-4 cursor-pointer focus:outline-none"
               >
                 <span className="font-serif text-sm sm:text-base font-bold text-brand-brown">
-                  {faq.q}
+                  {question}
                 </span>
                 <span
                   className={`text-brand-terracotta text-lg transform transition-transform duration-200 ${
@@ -61,7 +70,7 @@ export default function FaqSection() {
 
               {isOpen && (
                 <div className="px-5 pb-5 text-xs text-brand-brown-muted leading-relaxed font-light border-t border-brand-border/40 pt-3">
-                  {faq.a}
+                  {answer}
                 </div>
               )}
             </div>

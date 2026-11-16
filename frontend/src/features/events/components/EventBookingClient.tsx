@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Link } from "@/i18n/routing";
 import SafeImage from "@/components/ui/SafeImage";
 import { bookPublicEvent, inquirePublicEvent, type PublicEventItem } from "../services/events.api";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface EventBookingClientProps {
   event: PublicEventItem;
@@ -12,6 +13,7 @@ interface EventBookingClientProps {
 
 export default function EventBookingClient({ event, locale }: EventBookingClientProps) {
   const isAr = locale === "ar";
+  const { whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
   const { attributes, relationships } = event;
 
   const ticketTypes = relationships?.ticket_types || [];
@@ -175,19 +177,21 @@ export default function EventBookingClient({ event, locale }: EventBookingClient
 
         {/* WhatsApp Share Button */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <a
-            href={`https://wa.me/201000000000?text=${encodeURIComponent(
-              `Hello GouNow Concierge, here is my Event Booking #${successData.order_number} for "${successData.event_title}". Name: ${successData.customer_name}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.353.101.173.448.74 1.018 1.246.732.651 1.349.852 1.541.947.192.095.304.08.418-.051.116-.13.491-.572.622-.767.13-.195.26-.163.439-.097.179.065 1.133.535 1.328.633.195.098.326.145.375.228.049.083.049.48-.095.885z" />
-            </svg>
-            <span>{isAr ? "إرسال التذكرة للكونسيرج عبر واتساب" : "Send Receipt to WhatsApp"}</span>
-          </a>
+          {whatsappDigits && (
+            <a
+              href={buildWhatsAppUrl(
+                `Hello GouNow Concierge, here is my Event Booking #${successData.order_number} for "${successData.event_title}". Name: ${successData.customer_name}`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.353.101.173.448.74 1.018 1.246.732.651 1.349.852 1.541.947.192.095.304.08.418-.051.116-.13.491-.572.622-.767.13-.195.26-.163.439-.097.179.065 1.133.535 1.328.633.195.098.326.145.375.228.049.083.049.48-.095.885z" />
+              </svg>
+              <span>{isAr ? "إرسال التذكرة للكونسيرج عبر واتساب" : "Send Receipt to WhatsApp"}</span>
+            </a>
+          )}
 
           <Link
             href="/events"

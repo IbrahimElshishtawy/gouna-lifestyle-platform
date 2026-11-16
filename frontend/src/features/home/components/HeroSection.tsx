@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 import type { MediaDesignConfig } from "@/features/admin/types";
 
@@ -14,13 +15,20 @@ interface HeroSectionProps {
 export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
   const router = useRouter();
   const { t, locale } = useLanguage();
+  const { locations, propertyCategories, experienceCategories } = useSiteSettings();
   const isAr = locale === "ar";
+
+  const formatDateOffset = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d.toISOString().split("T")[0];
+  };
 
   // Booking widget state
   const [activeTab, setActiveTab] = useState<"rent" | "sale" | "experiences">("rent");
   const [location, setLocation] = useState("all");
-  const [checkIn, setCheckIn] = useState("2026-10-24");
-  const [checkOut, setCheckOut] = useState("2026-10-31");
+  const [checkIn, setCheckIn] = useState(() => formatDateOffset(1));
+  const [checkOut, setCheckOut] = useState(() => formatDateOffset(5));
   const [guests, setGuests] = useState("4");
 
   // Real Estate specific states
@@ -71,7 +79,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
       {/* ==================== 1. IMMERSIVE BACKGROUND VISUALS ==================== */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/assets/images/logo.jpg"
+          src={heroConfig?.background_image || "/assets/images/logo.jpg"}
           alt="GouNow Lifestyle - El Gouna"
           fill
           priority
@@ -173,12 +181,11 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                         className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.locationAll}</option>
-                        <option value="fanadir-bay">{t.hero.locationFanadir}</option>
-                        <option value="abu-tig-marina">{t.hero.locationMarina}</option>
-                        <option value="tawila-island">{t.hero.locationTawila}</option>
-                        <option value="ancient-sands">{t.hero.locationAncient}</option>
-                        <option value="west-golf">{t.hero.locationWestGolf}</option>
-                        <option value="mangroovy-beach">{t.hero.locationMangroovy}</option>
+                        {locations.map((loc) => (
+                          <option key={loc.id} value={loc.slug}>
+                            {isAr && loc.name_ar ? loc.name_ar : loc.name_en}
+                          </option>
+                        ))}
                       </select>
                       <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -259,10 +266,11 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                         className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.locationAll}</option>
-                        <option value="fanadir-bay">{t.hero.locationFanadir}</option>
-                        <option value="abu-tig-marina">{t.hero.locationMarina}</option>
-                        <option value="tawila-island">{t.hero.locationTawila}</option>
-                        <option value="west-golf">{t.hero.locationWestGolf}</option>
+                        {locations.map((loc) => (
+                          <option key={loc.id} value={loc.slug}>
+                            {isAr && loc.name_ar ? loc.name_ar : loc.name_en}
+                          </option>
+                        ))}
                       </select>
                       <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -284,9 +292,11 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                         className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.propertyAll}</option>
-                        <option value="villas">{t.hero.propertyVillas}</option>
-                        <option value="townhomes">{t.hero.propertyTownhomes}</option>
-                        <option value="penthouses">{t.hero.propertyPenthouses}</option>
+                        {propertyCategories.map((cat) => (
+                          <option key={cat.id} value={cat.slug}>
+                            {isAr && cat.name_ar ? cat.name_ar : cat.name_en}
+                          </option>
+                        ))}
                       </select>
                       <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -361,10 +371,11 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                         className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
                       >
                         <option value="all">{t.hero.expAll}</option>
-                        <option value="yachts">{t.hero.expYachts}</option>
-                        <option value="tawila">{t.hero.expTawila}</option>
-                        <option value="safari">{t.hero.expSafari}</option>
-                        <option value="watersports">{t.hero.expWatersports}</option>
+                        {experienceCategories.map((cat) => (
+                          <option key={cat.id} value={cat.slug}>
+                            {isAr && cat.name_ar ? cat.name_ar : cat.name_en}
+                          </option>
+                        ))}
                       </select>
                       <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />

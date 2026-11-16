@@ -13,6 +13,7 @@ import {
   PropertyCalendarAvailability,
 } from "../services/properties.api";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface Props {
   property: Property;
@@ -21,8 +22,9 @@ interface Props {
 
 export default function BookingQuoteWidget({ property, initialQuote }: Props) {
   const { t, locale } = useLanguage();
+  const { whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
   const isAr = locale === "ar";
-  const isRent = property.listing_type === "rent";
+  const isRent = property.listing_type === "rent" || property.listing_type === "both";
   const [isPending, startTransition] = useTransition();
 
   // Dates defaults: checkIn tomorrow, checkOut in 4 days
@@ -127,9 +129,15 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
       } else {
         setQuote(null);
       }
-    } catch {
-      // Graceful offline fallback
-      setIsAvailable(true);
+    } catch (err: any) {
+      setIsAvailable(null);
+      setQuote(null);
+      setErrorMessage(
+        err?.message ||
+          (isAr
+            ? "تعذر التحقق من التوافر حالياً. يرجى المحاولة مرة أخرى."
+            : "Unable to verify availability right now. Please try again.")
+      );
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -163,12 +171,13 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
     });
     setInquiryStatus("success");
 
-    const text = encodeURIComponent(
-      locale === "ar"
-        ? `مرحباً كونسيرج جو ناو VIP، أود الاستفسار عن شراء عقار: ${property.title} (المرجع: ${property.reference_code}).\nالاسم: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
-        : `Hello GouNow VIP Concierge, I am inquiring about purchasing: ${property.title} (Ref: ${property.reference_code}).\nName: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
-    );
-    window.open(`https://wa.me/201000000000?text=${text}`, "_blank");
+    if (whatsappDigits) {
+      const text =
+        locale === "ar"
+          ? `مرحباً كونسيرج جو ناو VIP، أود الاستفسار عن شراء عقار: ${property.title} (المرجع: ${property.reference_code}).\nالاسم: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`
+          : `Hello GouNow VIP Concierge, I am inquiring about purchasing: ${property.title} (Ref: ${property.reference_code}).\nName: ${inquiryName} (${inquiryPhone})\n${inquiryMessage}`;
+      window.open(buildWhatsAppUrl(text), "_blank");
+    }
   };
 
   const checkoutUrl = `/checkout/${property.slug}?check_in=${checkIn}&check_out=${checkOut}&guests=${guests}`;
@@ -421,7 +430,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
               {isAr ? "عقار استثماري للبيع" : "Luxury Property For Sale"}
             </span>
             <span className="text-xl font-serif font-bold text-brand-brown block mt-1">
-              {property.price_formatted}
+              {property.sale_price_formatted || property.price_formatted} {property.currency}
             </span>
           </div>
 

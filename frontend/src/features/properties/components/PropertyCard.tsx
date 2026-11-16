@@ -19,6 +19,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   const isRent = property.listing_type === "rent";
   const [showSpatialModal, setShowSpatialModal] = useState(false);
 
+  const displayTitle = isAr && property.title_ar ? property.title_ar : property.title;
+  const displayDesc = isAr && property.description_ar ? property.description_ar : property.description;
+  const displayLocation = isAr && property.location?.name_ar ? property.location.name_ar : property.location?.name;
+  const displayCategory = isAr && property.category?.name_ar ? property.category.name_ar : property.category?.name;
+  const displayPrice =
+    property.listing_type === "sale"
+      ? (property.sale_price_formatted || property.price_formatted)
+      : property.price_formatted;
+
   const primaryImage =
     property.images?.find((img) => img.is_primary)?.url ||
     property.images?.[0]?.url ||
@@ -49,7 +58,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               {property.location && (
                 <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm border border-brand-border/80 flex items-center gap-1">
                   <span>📍</span>
-                  <span className="truncate max-w-[120px]">{property.location.name}</span>
+                  <span className="truncate max-w-[120px]">{displayLocation}</span>
                 </span>
               )}
               {property.is_featured && (
@@ -85,7 +94,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 style={{ transform: "translateZ(14px)" }}
               >
                 <span className="text-[10px] uppercase font-bold tracking-[0.18em] text-brand-terracotta truncate">
-                  {property.category?.name || (isRent ? t.propertyCard.vacationVilla : t.propertyCard.realEstate)}
+                  {displayCategory || (isRent ? t.propertyCard.vacationVilla : t.propertyCard.realEstate)}
                 </span>
                 <span className="text-[10px] font-mono text-brand-brown-muted/70 shrink-0 ml-2 rtl:mr-2 rtl:ml-0">
                   {property.reference_code}
@@ -98,7 +107,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                   className="font-serif text-lg sm:text-xl font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors line-clamp-1 leading-snug"
                   style={{ transform: "translateZ(20px)" }}
                 >
-                  {property.title}
+                  {displayTitle}
                 </h3>
               </Link>
 
@@ -107,7 +116,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 className="text-xs text-brand-brown-muted line-clamp-2 mt-1.5 sm:mt-2 leading-relaxed font-light"
                 style={{ transform: "translateZ(12px)" }}
               >
-                {property.description}
+                {displayDesc}
               </p>
 
               {/* Specs Strip */}
@@ -138,7 +147,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-lg sm:text-xl font-serif font-bold text-brand-brown">
-                    {property.price_formatted}
+                    {displayPrice}
                   </span>
                   <span className="text-[10px] text-brand-brown-muted font-medium">
                     {t.common.currency}

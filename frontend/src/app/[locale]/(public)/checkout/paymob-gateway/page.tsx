@@ -4,7 +4,12 @@ import React, { useState, useEffect, use, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { completePaymobPaymentApi, declinePaymobPaymentApi } from "@/features/checkout/services/checkout.api";
+import {
+  completePaymobPaymentApi,
+  declinePaymobPaymentApi,
+  fetchPaymentMethodsApi,
+} from "@/features/checkout/services/checkout.api";
+import type { PaymentMethod } from "@/features/checkout/types/checkout.types";
 
 interface Props {
   params: Promise<{
@@ -35,6 +40,15 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
 
   // Instapay state
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [offlineMethods, setOfflineMethods] = useState<PaymentMethod[]>([]);
+
+  useEffect(() => {
+    fetchPaymentMethodsApi()
+      .then((res) => {
+        setOfflineMethods((res?.data || []).filter((m) => !m.is_online));
+      })
+      .catch(() => {});
+  }, []);
 
   // Processing & 3DS state
   const [isProcessing, setIsProcessing] = useState(false);
@@ -420,45 +434,34 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
                   </p>
                 </div>
 
-                {/* Transfer Details Card */}
+                {/* Transfer Details Card (Loaded from Backend Payment Methods) */}
                 <div className="bg-slate-900/80 rounded-xl p-5 border border-slate-700 space-y-4">
-                  {/* IPA Handle */}
-                  <div className="flex items-center justify-between gap-4 p-3 bg-slate-800/80 rounded-xl border border-slate-700/60">
-                    <div>
-                      <span className="text-[11px] text-slate-400 block font-medium">
-                        {isAr ? "عنوان الدفع اللحظي (IPA)" : "InstaPay Address (IPA)"}
-                      </span>
-                      <span className="text-sm font-mono font-bold text-emerald-400">
-                        gounow@cib
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy("gounow@cib", "ipa")}
-                      className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-lg text-slate-200 transition"
-                    >
-                      {copiedField === "ipa" ? (isAr ? "تم النسخ ✓" : "Copied ✓") : (isAr ? "نسخ" : "Copy")}
-                    </button>
-                  </div>
-
-                  {/* Bank Account */}
-                  <div className="flex items-center justify-between gap-4 p-3 bg-slate-800/80 rounded-xl border border-slate-700/60">
-                    <div>
-                      <span className="text-[11px] text-slate-400 block font-medium">
-                        {isAr ? "حساب البنك التجاري الدولي (CIB)" : "CIB Bank Account Number"}
-                      </span>
-                      <span className="text-sm font-mono font-bold text-slate-200">
-                        1000-4829-9182-01
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy("10004829918201", "acc")}
-                      className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-lg text-slate-200 transition"
-                    >
-                      {copiedField === "acc" ? (isAr ? "تم النسخ ✓" : "Copied ✓") : (isAr ? "نسخ" : "Copy")}
-                    </button>
-                  </div>
+                  {offlineMethods.map((m) =>
+                    m.configuration
+                      ? Object.entries(m.configuration).map(([k, v]) => (
+                          <div
+                            key={`${m.id}-${k}`}
+                            className="flex items-center justify-between gap-4 p-3 bg-slate-800/80 rounded-xl border border-slate-700/60"
+                          >
+                            <div>
+                              <span className="text-[11px] text-slate-400 block font-medium capitalize">
+                                {m.name} — {k.replace(/_/g, " ")}
+                              </span>
+                              <span className="text-sm font-mono font-bold text-emerald-400">
+                                {String(v)}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(String(v), `${m.id}-${k}`)}
+                              className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-semibold rounded-lg text-slate-200 transition"
+                            >
+                              {copiedField === `${m.id}-${k}` ? (isAr ? "تم النسخ ✓" : "Copied ✓") : (isAr ? "نسخ" : "Copy")}
+                            </button>
+                          </div>
+                        ))
+                      : null
+                  )}
 
                   {/* Reference code */}
                   <div className="flex items-center justify-between gap-4 p-3 bg-amber-950/20 rounded-xl border border-amber-500/30">

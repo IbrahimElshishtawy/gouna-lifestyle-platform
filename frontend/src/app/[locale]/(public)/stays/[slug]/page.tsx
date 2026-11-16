@@ -9,7 +9,7 @@ import {
 import PropertyDetailGallery from "@/features/properties/components/PropertyDetailGallery";
 import BookingQuoteWidget from "@/features/properties/components/BookingQuoteWidget";
 import PropertyCard from "@/features/properties/components/PropertyCard";
-import ReviewsSection from "@/features/reviews/components/ReviewsSection";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 import { setRequestLocale } from "next-intl/server";
 import { getDictionary } from "@/locales/dictionary";
 import type { Metadata } from "next";
@@ -45,21 +45,35 @@ export default async function PropertyDetailPage({ params }: Props) {
   const t = getDictionary(locale);
   const isAr = locale === "ar";
 
-  const property = await getPropertyBySlug(slug);
+  const [property, allProps, taxonomies] = await Promise.all([
+    getPropertyBySlug(slug),
+    getProperties(),
+    getPublicTaxonomies(),
+  ]);
 
   if (!property) {
     notFound();
   }
 
-  const allProps = await getProperties();
   const similarProperties = allProps
     .filter((p) => p.id !== property.id)
     .slice(0, 3);
 
+  const displayTitle = isAr && property.title_ar ? property.title_ar : property.title;
+  const displayDesc = isAr && property.description_ar ? property.description_ar : property.description;
+  const displayLocation = (isAr && property.location?.name_ar ? property.location.name_ar : property.location?.name) || (isAr ? "الجونة" : "El Gouna");
+  const displayCancellation =
+    (isAr ? property.cancellation_policy_text_ar : property.cancellation_policy_text_en) ||
+    property.cancellation_policy;
+  const displayHouseRules = isAr ? property.house_rules_ar : property.house_rules_en;
+
+  const waDigits = (taxonomies?.settings?.whatsapp_number || taxonomies?.settings?.phone || "").replace(/\D/g, "");
   const whatsappMsgHeader = isAr ? "مرحباً جوناو،" : "Hello GouNow,";
-  const whatsappInquiryUrl = `https://wa.me/201000000000?text=${encodeURIComponent(
-    `${whatsappMsgHeader}\n\n${isAr ? "أستفسر عن عقار:" : "I am inquiring about:"} ${property.title}\n${isAr ? "المرجع:" : "Reference:"} ${property.reference_code}\n\n${isAr ? "هل يمكن تزويدي بالمزيد من التفاصيل والتواريخ المتاحة؟" : "Could you please provide more details?"}`
-  )}`;
+  const whatsappInquiryUrl = waDigits
+    ? `https://wa.me/${waDigits}?text=${encodeURIComponent(
+        `${whatsappMsgHeader}\n\n${isAr ? "أستفسر عن عقار:" : "I am inquiring about:"} ${displayTitle}\n${isAr ? "المرجع:" : "Reference:"} ${property.reference_code}\n\n${isAr ? "هل يمكن تزويدي بالمزيد من التفاصيل والتواريخ المتاحة؟" : "Could you please provide more details?"}`
+      )}`
+    : "#concierge";
 
   // Clean formatted check-in/out without seconds
   const formattedCheckIn = property.check_in_time ? property.check_in_time.slice(0, 5) : "15:00";
@@ -83,12 +97,12 @@ export default async function PropertyDetailPage({ params }: Props) {
             </Link>
             <span className="rtl:rotate-180">/</span>
             <span className="text-brand-brown font-medium">
-              {property.location?.name || (isAr ? "الجونة" : "El Gouna")}
+              {displayLocation}
             </span>
           </nav>
 
           <h1 className="font-serif text-2xl sm:text-4xl font-semibold text-brand-brown">
-            {property.title}
+            {displayTitle}
           </h1>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-brand-brown-muted mt-2">
@@ -97,7 +111,7 @@ export default async function PropertyDetailPage({ params }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{property.location?.name}, {isAr ? "الجونة، مصر" : "El Gouna, Egypt"}</span>
+              <span>{displayLocation}, {isAr ? "الجونة، مصر" : "El Gouna, Egypt"}</span>
             </span>
             <span>&bull;</span>
             <span className="font-mono text-brand-terracotta font-semibold" dir="ltr">
@@ -222,7 +236,7 @@ export default async function PropertyDetailPage({ params }: Props) {
             </h2>
             <div className="text-xs sm:text-sm text-brand-brown-muted leading-relaxed space-y-4 font-light">
               <p className="font-normal text-brand-brown leading-relaxed">
-                {property.description}
+                {displayDesc}
               </p>
             </div>
           </div>
@@ -242,7 +256,9 @@ export default async function PropertyDetailPage({ params }: Props) {
                     <svg className="w-3.5 h-3.5 text-brand-terracotta shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    <span className="font-medium text-brand-brown">{amenity.name}</span>
+                    <span className="font-medium text-brand-brown">
+                      {isAr && amenity.name_ar ? amenity.name_ar : amenity.name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -255,30 +271,29 @@ export default async function PropertyDetailPage({ params }: Props) {
               {isAr ? "سياسات وتعليمات الإقامة" : "Stay Policies & Information"}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
-              <div className="space-y-2">
-                <span className="font-bold text-brand-brown block">
-                  {isAr ? "سياسة الإلغاء:" : "Cancellation Policy:"}
-                </span>
-                <p className="text-brand-brown-muted leading-relaxed">
-                  {property.cancellation_policy}
-                </p>
-              </div>
-
-              {property.payment_rules && (
+              {displayCancellation && (
                 <div className="space-y-2">
                   <span className="font-bold text-brand-brown block">
-                    {isAr ? "شروط الدفع:" : "Payment Rules:"}
+                    {isAr ? "سياسة الإلغاء:" : "Cancellation Policy:"}
                   </span>
                   <p className="text-brand-brown-muted leading-relaxed">
-                    {property.payment_rules}
+                    {displayCancellation}
+                  </p>
+                </div>
+              )}
+
+              {displayHouseRules && (
+                <div className="space-y-2">
+                  <span className="font-bold text-brand-brown block">
+                    {isAr ? "قواعد الإقامة:" : "House Rules:"}
+                  </span>
+                  <p className="text-brand-brown-muted leading-relaxed">
+                    {displayHouseRules}
                   </p>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Guest Reviews Section */}
-          <ReviewsSection title={isAr ? `تقييمات الضيوف لـ ${property.title}` : `Guest Reviews for ${property.title}`} />
         </div>
 
         {/* Right Column: Sticky Booking / Inquiry Widget */}

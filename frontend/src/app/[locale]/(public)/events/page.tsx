@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/routing";
 import { getPublicEvents } from "@/features/events/services/events.api";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 import EventCard from "@/features/events/components/EventCard";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
@@ -36,19 +37,24 @@ export default async function EventsPage({ params, searchParams }: Props) {
 
   const { category = "all", q = "" } = await searchParams;
 
-  const res = await getPublicEvents({
-    category: category !== "all" ? category : undefined,
-    q: q || undefined,
-  });
+  const [res, taxonomies] = await Promise.all([
+    getPublicEvents({
+      category: category !== "all" ? category : undefined,
+      q: q || undefined,
+    }),
+    getPublicTaxonomies(),
+  ]);
 
   const events = res.data || [];
+  const waDigits = (taxonomies?.settings?.whatsapp_number || taxonomies?.settings?.phone || "").replace(/\D/g, "");
 
   const CATEGORIES = [
     { id: "all", label_en: "All Events", label_ar: "جميع الفعاليات" },
-    { id: "Festival", label_en: "Festivals & Galas", label_ar: "مهرجانات وسجادة حمراء" },
-    { id: "Music", label_en: "Music & Acoustic", label_ar: "موسيقى وأمسيات حية" },
-    { id: "Sports", label_en: "Sports & Regattas", label_ar: "رياضات وبطولات" },
-    { id: "Nightlife", label_en: "Exclusive Nightlife", label_ar: "سهرات ومارينا" },
+    ...(taxonomies?.event_categories || []).map((cat) => ({
+      id: cat,
+      label_en: cat,
+      label_ar: cat,
+    })),
   ];
 
   return (
@@ -174,21 +180,23 @@ export default async function EventsPage({ params, searchParams }: Props) {
             </p>
           </div>
 
-          <a
-            href={`https://wa.me/201000000000?text=${encodeURIComponent(
-              isAr
-                ? "مرحباً، أود الاستفسار عن حجز تصاريح وطاولات VIP لفعاليات ومهرجانات الجونة."
-                : "Hello GouNow Concierge, I would like to inquire about VIP tickets and private table arrangements in El Gouna."
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-8 py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/40 transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 flex items-center gap-2"
-          >
-            <span>{isAr ? "تواصل مع الكونسيرج واتساب" : "Contact VIP Concierge"}</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
+          {waDigits && (
+            <a
+              href={`https://wa.me/${waDigits}?text=${encodeURIComponent(
+                isAr
+                  ? "مرحباً، أود الاستفسار عن حجز تصاريح وطاولات VIP لفعاليات ومهرجانات الجونة."
+                  : "Hello GouNow Concierge, I would like to inquire about VIP tickets and private table arrangements in El Gouna."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-3.5 rounded-full bg-brand-terracotta hover:bg-brand-terracotta-dark text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-lg shadow-brand-terracotta/40 transition-all duration-300 hover:scale-105 active:scale-95 shrink-0 flex items-center gap-2"
+            >
+              <span>{isAr ? "تواصل مع الكونسيرج واتساب" : "Contact VIP Concierge"}</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          )}
         </div>
       </section>
     </div>

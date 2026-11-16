@@ -4,9 +4,11 @@ import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export default function Footer() {
   const { t } = useLanguage();
+  const { settings, whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
 
   return (
     <footer className="bg-brand-brown-dark text-[#E5DCD3] pt-16 pb-12 border-t border-brand-brown/50">
@@ -145,27 +147,33 @@ export default function Footer() {
               {t.footer.talkToTeam}
             </h4>
             <ul className="space-y-2.5 text-xs text-[#C7BCB3]">
-              <li className="flex items-center gap-2">
-                <span>📞</span>
-                <span className="font-semibold text-white">
-                  +20 100 000 0000
-                </span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span>✉️</span>
-                <span>concierge@gounow.com</span>
-              </li>
-              <li className="pt-2">
-                <a
-                  href="https://wa.me/201000000000?text=Hello%20GouNow,%20I%20need%20assistance"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-sm"
-                >
-                  <span>💬</span>
-                  <span>{t.footer.whatsappConcierge}</span>
-                </a>
-              </li>
+              {settings?.phone && (
+                <li className="flex items-center gap-2">
+                  <span>📞</span>
+                  <span className="font-semibold text-white">
+                    {settings.phone}
+                  </span>
+                </li>
+              )}
+              {settings?.email && (
+                <li className="flex items-center gap-2">
+                  <span>✉️</span>
+                  <span>{settings.email}</span>
+                </li>
+              )}
+              {whatsappDigits && (
+                <li className="pt-2">
+                  <a
+                    href={buildWhatsAppUrl("Hello GouNow, I need assistance")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-sm"
+                  >
+                    <span>💬</span>
+                    <span>{t.footer.whatsappConcierge}</span>
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

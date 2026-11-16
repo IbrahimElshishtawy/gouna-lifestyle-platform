@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@/i18n/routing";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
+import { getPublicTaxonomies } from "@/features/home/services/home.api";
 import ExperienceCard from "@/features/experiences/components/ExperienceCard";
 import { setRequestLocale } from "next-intl/server";
 import { getDictionary } from "@/locales/dictionary";
@@ -35,14 +36,17 @@ export default async function ExperiencesPage({ params, searchParams }: Props) {
   const isAr = locale === "ar";
 
   const { category = "" } = await searchParams;
-  const allExperiences = await getExperiences(category || undefined);
+  const [allExperiences, taxonomies] = await Promise.all([
+    getExperiences(category || undefined),
+    getPublicTaxonomies(),
+  ]);
 
   const CATEGORIES = [
     { slug: "", label: t.experiencesPage.allAdventures },
-    { slug: "boat-trips", label: t.experiencesPage.boatTrips },
-    { slug: "safari", label: t.experiencesPage.safari },
-    { slug: "watersports-kitesurfing", label: t.experiencesPage.watersports },
-    { slug: "lifestyle-wellness", label: t.experiencesPage.wellness },
+    ...(taxonomies?.experience_categories || []).map((cat) => ({
+      slug: cat.slug,
+      label: isAr && cat.name_ar ? cat.name_ar : cat.name_en,
+    })),
   ];
 
   const filteredExperiences = category

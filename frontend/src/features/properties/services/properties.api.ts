@@ -1,5 +1,4 @@
 import { apiClient } from "@/lib/api/client";
-import { PROPERTIES_DATA } from "../data/properties.data";
 import {
   Property,
   QuoteCalculation,
@@ -14,6 +13,8 @@ export interface PropertySearchParams {
   bedrooms?: string | number;
   guests?: string | number;
   sort?: string;
+  min_price?: number;
+  max_price?: number;
 }
 
 interface BackendPropertyResource {
@@ -26,7 +27,11 @@ interface BackendPropertyResource {
     title_en?: string;
     title_ar?: string | null;
     short_description?: string | null;
+    short_description_en?: string | null;
+    short_description_ar?: string | null;
     description?: string | null;
+    description_en?: string | null;
+    description_ar?: string | null;
     listing_type: "rent" | "sale" | "both";
     bedrooms: number;
     bathrooms: number;
@@ -42,23 +47,31 @@ interface BackendPropertyResource {
     check_out_time?: string;
     pricing?: {
       base_price_cents: number;
+      sale_price_cents?: number | null;
       cleaning_fee_cents?: number;
       service_fee_cents?: number;
       tax_percentage?: number;
       currency?: string;
       formatted_base_price?: string;
+      formatted_sale_price?: string | null;
     };
+    payment_requirement?: string;
+    deposit_percentage?: number | null;
     cancellation_policy?: string;
+    cancellation_policy_text_en?: string | null;
+    cancellation_policy_text_ar?: string | null;
+    house_rules_en?: string | null;
+    house_rules_ar?: string | null;
     is_featured?: boolean;
     is_available?: boolean;
     cover_url?: string;
     gallery_urls?: string[];
   };
   relationships?: {
-    category?: { id: number; name: string; slug: string };
-    location?: { id: number; name: string; slug: string };
-    amenities?: Array<{ id: number; name: string; icon?: string }>;
-    media?: Array<{ id: number; url: string; is_primary?: boolean; order?: number }>;
+    category?: { id: number; name: string; name_en?: string; name_ar?: string; slug: string };
+    location?: { id: number; name: string; name_en?: string; name_ar?: string; slug: string };
+    amenities?: Array<{ id: number; name: string; name_en?: string; name_ar?: string; icon?: string }>;
+    media?: Array<{ id: number; url: string; is_primary?: boolean; order?: number; alt_text?: string }>;
   };
 }
 
@@ -66,20 +79,26 @@ interface BackendPropertyResource {
  * Normalizes backend JSON:API resource to frontend Property interface
  */
 export function mapBackendPropertyToFrontend(
-  item: BackendPropertyResource | Property
+  item: BackendPropertyResource
 ): Property {
-  if (!("attributes" in item)) {
-    return item as Property;
-  }
-
   const attr = item.attributes;
   const rel = item.relationships || {};
 
   const basePriceCents = attr.pricing?.base_price_cents ?? 0;
+  const salePriceCents = attr.pricing?.sale_price_cents ?? null;
   const currency = attr.pricing?.currency || "EGP";
+
+  const effectiveCents =
+    attr.listing_type === "sale" && salePriceCents ? salePriceCents : basePriceCents;
+
   const formattedPrice =
-    attr.pricing?.formatted_base_price ||
-    `${(basePriceCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency}`;
+    attr.listing_type === "sale" && attr.pricing?.formatted_sale_price
+      ? attr.pricing.formatted_sale_price
+      : (effectiveCents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+  const formattedSalePrice = salePriceCents
+    ? (salePriceCents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : null;
 
   const cleanUrl = (u?: string | null): string => {
     if (!u) return "/assets/images/hero-villa-dusk.jpg";
@@ -93,6 +112,13 @@ export function mapBackendPropertyToFrontend(
           id: m.id,
           url: cleanUrl(m.url),
           is_primary: m.is_primary ?? false,
+          alt: m.alt_text,
+        }))
+      : Array.isArray(attr.gallery_urls) && attr.gallery_urls.length > 0
+      ? attr.gallery_urls.map((u, idx) => ({
+          id: idx + 1,
+          url: cleanUrl(u),
+          is_primary: idx === 0,
         }))
       : attr.cover_url
       ? [
@@ -102,23 +128,19 @@ export function mapBackendPropertyToFrontend(
             is_primary: true,
           },
         ]
-      : [
-          {
-            id: 1,
-            url: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80",
-            is_primary: true,
-          },
-        ];
+      : [];
 
   return {
     id: Number(item.id),
-    title: attr.title || attr.title_en || "El Gouna Residence",
+    title: attr.title || attr.title_en || "",
     title_ar: attr.title_ar || undefined,
     slug: attr.slug,
     reference_code: attr.reference_number || `GON-PROP-${item.id}`,
     listing_type: attr.listing_type || "rent",
     price_cents: basePriceCents,
     price_formatted: formattedPrice,
+    sale_price_cents: salePriceCents,
+    sale_price_formatted: formattedSalePrice,
     currency,
     bedrooms: attr.bedrooms ?? 0,
     bathrooms: attr.bathrooms ?? 0,
@@ -128,19 +150,48 @@ export function mapBackendPropertyToFrontend(
     is_published: Boolean(attr.is_available ?? true),
     check_in_time: attr.check_in_time || "15:00",
     check_out_time: attr.check_out_time || "11:00",
-    description: attr.description || attr.short_description || "",
-    cancellation_policy: attr.cancellation_policy || "moderate",
+    description: attr.description_en || attr.description || attr.short_description_en || attr.short_description || "",
+    description_ar: attr.description_ar || attr.short_description_ar || undefined,
+    cancellation_policy: attr.cancellation_policy || "",
+    cancellation_policy_text_en: attr.cancellation_policy_text_en ?? null,
+    cancellation_policy_text_ar: attr.cancellation_policy_text_ar ?? null,
+    house_rules_en: attr.house_rules_en ?? null,
+    house_rules_ar: attr.house_rules_ar ?? null,
+    payment_requirement: attr.payment_requirement,
+    deposit_percentage: attr.deposit_percentage ?? null,
     category: rel.category
-      ? { id: rel.category.id, name: rel.category.name, slug: rel.category.slug }
+      ? {
+          id: rel.category.id,
+          name: rel.category.name_en || rel.category.name,
+          name_ar: rel.category.name_ar,
+          slug: rel.category.slug,
+        }
       : undefined,
     location: rel.location
-      ? { id: rel.location.id, name: rel.location.name, slug: rel.location.slug }
+      ? {
+          id: rel.location.id,
+          name: rel.location.name_en || rel.location.name,
+          name_ar: rel.location.name_ar,
+          slug: rel.location.slug,
+        }
       : undefined,
     amenities: Array.isArray(rel.amenities)
-      ? rel.amenities.map((a) => ({ id: a.id, name: a.name, icon: a.icon }))
+      ? rel.amenities.map((a) => ({
+          id: a.id,
+          name: a.name_en || a.name,
+          name_ar: a.name_ar,
+          icon: a.icon,
+        }))
       : [],
     images,
   };
+}
+
+function mapSortToBackend(sort?: string): string | undefined {
+  if (!sort || sort === "featured") return "-is_featured,-created_at";
+  if (sort === "price_asc") return "base_price_cents";
+  if (sort === "price_desc") return "-base_price_cents";
+  return sort;
 }
 
 export async function getProperties(
@@ -149,24 +200,32 @@ export async function getProperties(
   try {
     const query = new URLSearchParams();
     query.set("include", "category,location,amenities,media");
+    query.set("per_page", "50");
 
     if (params?.listing_type) {
-      query.set("filter[listing_type]", params.listing_type);
+      query.set("listing_type", params.listing_type);
     }
     if (params?.location && params.location !== "all") {
-      query.set("q", params.location);
+      query.set("location", params.location);
     }
     if (params?.category && params.category !== "all") {
-      query.set("filter[compound]", params.category);
+      query.set("category", params.category);
     }
     if (params?.bedrooms) {
-      query.set("filter[bedrooms]", String(params.bedrooms));
+      query.set("min_bedrooms", String(params.bedrooms));
     }
     if (params?.guests) {
       query.set("guests", String(params.guests));
     }
-    if (params?.sort) {
-      query.set("sort", params.sort);
+    if (params?.min_price) {
+      query.set("min_price", String(params.min_price));
+    }
+    if (params?.max_price) {
+      query.set("max_price", String(params.max_price));
+    }
+    const mappedSort = mapSortToBackend(params?.sort);
+    if (mappedSort) {
+      query.set("sort", mappedSort);
     }
 
     const response = await apiClient<{ data: BackendPropertyResource[] }>(
@@ -176,43 +235,11 @@ export async function getProperties(
     if (response?.data && Array.isArray(response.data)) {
       return response.data.map(mapBackendPropertyToFrontend);
     }
-  } catch {
-    // Fallback to embedded local dataset if backend is not currently connected
+    return [];
+  } catch (err) {
+    console.error("Failed to fetch properties from backend:", err);
+    return [];
   }
-
-  let filtered = [...PROPERTIES_DATA];
-
-  if (params?.listing_type) {
-    filtered = filtered.filter((p) => p.listing_type === params.listing_type);
-  }
-  if (params?.location && params.location !== "all") {
-    filtered = filtered.filter(
-      (p) =>
-        p.location?.slug === params.location ||
-        p.location?.name.toLowerCase().includes(params.location!.toLowerCase())
-    );
-  }
-  if (params?.category && params.category !== "all") {
-    filtered = filtered.filter(
-      (p) =>
-        p.category?.slug === params.category ||
-        p.category?.name.toLowerCase().includes(params.category!.toLowerCase())
-    );
-  }
-  if (params?.bedrooms) {
-    const beds = Number(params.bedrooms);
-    if (!isNaN(beds)) {
-      filtered = filtered.filter((p) => p.bedrooms >= beds);
-    }
-  }
-  if (params?.guests) {
-    const guests = Number(params.guests);
-    if (!isNaN(guests)) {
-      filtered = filtered.filter((p) => p.max_guests >= guests);
-    }
-  }
-
-  return filtered;
 }
 
 export async function getPropertyBySlug(
@@ -220,17 +247,15 @@ export async function getPropertyBySlug(
 ): Promise<Property | null> {
   try {
     const response = await apiClient<{ data: BackendPropertyResource }>(
-      `/stays/${slug}?include=category,location,amenities,media`
+      `/stays/${encodeURIComponent(slug)}?include=category,location,amenities,media`
     );
     if (response?.data) {
       return mapBackendPropertyToFrontend(response.data);
     }
+    return null;
   } catch {
-    // Fallback to local dataset
+    return null;
   }
-
-  const found = PROPERTIES_DATA.find((p) => p.slug === slug);
-  return found || null;
 }
 
 interface BackendQuoteResponse {
@@ -268,104 +293,50 @@ interface BackendQuoteResponse {
 export async function calculateQuote(
   req: QuoteRequest
 ): Promise<QuoteCalculation> {
-  try {
-    const response = await apiClient<BackendQuoteResponse>("/checkout/quote", {
-      method: "POST",
-      body: JSON.stringify({
-        property_id: req.property_id,
-        check_in: req.check_in,
-        check_out: req.check_out,
-        guests: req.guests,
-        promo_code: req.promo_code || null,
-      }),
-    });
-
-    if (response?.data?.attributes) {
-      const attr = response.data.attributes;
-      const p = attr.pricing;
-      const currency = p.currency || "EGP";
-
-      const nightlyPrices: NightlyPrice[] = (attr.breakdown || []).map((b) => ({
-        night_date: b.night_date,
-        day_of_week: b.day_of_week,
-        price_cents: b.price_cents,
-        price_formatted: b.price_formatted,
-        currency: b.currency || currency,
-        is_base_price: b.is_base_price,
-      }));
-
-      return {
-        nights: attr.nights,
-        nightly_prices: nightlyPrices,
-        subtotal_cents: p.subtotal_cents,
-        subtotal_formatted: (p.subtotal_cents / 100).toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-        }),
-        cleaning_fee_cents: p.cleaning_fee_cents,
-        service_fee_cents: p.service_fee_cents,
-        discount_cents: p.discount_cents,
-        promo_code: req.promo_code || null,
-        tax_percentage: 14,
-        tax_cents: p.tax_cents,
-        total_cents: p.total_cents,
-        total_formatted: (p.total_cents / 100).toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-        }),
-        deposit_cents: p.deposit_cents,
-        amount_remaining_cents: Math.max(0, p.total_cents - p.deposit_cents),
-        currency,
-        min_stay_required: 1,
-        satisfies_min_stay: true,
-      };
-    }
-  } catch {
-    // Local calculation fallback
-  }
-
-  const prop =
-    PROPERTIES_DATA.find((p) => p.id === req.property_id) || PROPERTIES_DATA[0];
-  const dIn = new Date(req.check_in);
-  const dOut = new Date(req.check_out);
-  const diffTime = Math.abs(dOut.getTime() - dIn.getTime());
-  const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-  const basePriceCents = prop.price_cents;
-  const subtotalCents = basePriceCents * nights;
-  const cleaningFeeCents = 100000;
-  const serviceFeeCents = 50000;
-  const taxCents = Math.round(subtotalCents * 0.14);
-  const totalCents =
-    subtotalCents + cleaningFeeCents + serviceFeeCents + taxCents;
-
-  const nightly_prices: NightlyPrice[] = Array.from({ length: nights }, (_, i) => {
-    const d = new Date(dIn);
-    d.setDate(d.getDate() + i);
-    return {
-      night_date: d.toISOString().split("T")[0],
-      day_of_week: d.toLocaleDateString("en-US", { weekday: "long" }),
-      price_cents: basePriceCents,
-      price_formatted: (basePriceCents / 100).toLocaleString(),
-      currency: "EGP",
-      is_base_price: true,
-    };
+  const response = await apiClient<BackendQuoteResponse>("/checkout/quote", {
+    method: "POST",
+    body: JSON.stringify({
+      property_id: req.property_id,
+      check_in: req.check_in,
+      check_out: req.check_out,
+      guests: req.guests,
+      promo_code: req.promo_code || null,
+    }),
   });
 
+  const attr = response.data.attributes;
+  const p = attr.pricing;
+  const currency = p.currency || "EGP";
+
+  const nightlyPrices: NightlyPrice[] = (attr.breakdown || []).map((b) => ({
+    night_date: b.night_date,
+    day_of_week: b.day_of_week,
+    price_cents: b.price_cents,
+    price_formatted: b.price_formatted,
+    currency: b.currency || currency,
+    is_base_price: b.is_base_price,
+  }));
+
   return {
-    nights,
-    nightly_prices,
-    subtotal_cents: subtotalCents,
-    subtotal_formatted: (subtotalCents / 100).toLocaleString(),
-    cleaning_fee_cents: cleaningFeeCents,
-    service_fee_cents: serviceFeeCents,
-    discount_cents: 0,
+    nights: attr.nights,
+    nightly_prices: nightlyPrices,
+    subtotal_cents: p.subtotal_cents,
+    subtotal_formatted: (p.subtotal_cents / 100).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+    }),
+    cleaning_fee_cents: p.cleaning_fee_cents,
+    service_fee_cents: p.service_fee_cents,
+    discount_cents: p.discount_cents,
     promo_code: req.promo_code || null,
     tax_percentage: 14,
-    tax_cents: taxCents,
-    total_cents: totalCents,
-    total_formatted: (totalCents / 100).toLocaleString(),
-    deposit_cents: totalCents,
-    amount_remaining_cents: 0,
-    currency: "EGP",
+    tax_cents: p.tax_cents,
+    total_cents: p.total_cents,
+    total_formatted: (p.total_cents / 100).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+    }),
+    deposit_cents: p.deposit_cents,
+    amount_remaining_cents: Math.max(0, p.total_cents - p.deposit_cents),
+    currency,
     min_stay_required: 1,
     satisfies_min_stay: true,
   };
@@ -375,33 +346,25 @@ export async function inquireProperty(
   slug: string,
   data: { name: string; email?: string; phone?: string; message: string; property_id?: number }
 ): Promise<{ success: boolean; message: string }> {
-  try {
-    const response = await apiClient<{ data: { id: number; message: string } }>(
-      "/leads",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email || "guest@gounow.com",
-          phone: data.phone || null,
-          message: `Property Inquiry [${slug}]: ${data.message}`,
-          type: "stay",
-          property_id: data.property_id || undefined,
-        }),
-      }
-    );
+  const response = await apiClient<{ data: { id: number; message: string } }>(
+    "/leads",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email || "guest@gounow.com",
+        phone: data.phone || null,
+        message: `Property Inquiry [${slug}]: ${data.message}`,
+        type: "stay",
+        property_id: data.property_id || undefined,
+      }),
+    }
+  );
 
-    return {
-      success: true,
-      message: response.data.message || "Your inquiry has been received!",
-    };
-  } catch {
-    return {
-      success: true,
-      message:
-        "Your inquiry has been received! Our El Gouna property consultant will contact you shortly.",
-    };
-  }
+  return {
+    success: true,
+    message: response.data.message,
+  };
 }
 
 export interface AlternativeProperty {
@@ -464,35 +427,24 @@ export async function checkPropertyAvailability(
     promo_code?: string;
   }
 ): Promise<AvailabilityCheckResponse> {
-  try {
-    const res = await apiClient<AvailabilityCheckResponse>(
-      `/stays/${slug}/check-availability`,
-      {
-        method: "POST",
-        body: JSON.stringify(params),
-      }
-    );
-    return res;
-  } catch (err: any) {
-    return {
-      is_available: true,
-      message_en: "Dates available",
-      message_ar: "التواريخ متاحة للحجز",
-    };
-  }
+  return apiClient<AvailabilityCheckResponse>(
+    `/stays/${encodeURIComponent(slug)}/check-availability`,
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
 }
 
 export async function getPropertyAvailabilityCalendar(
   slug: string
 ): Promise<PropertyCalendarAvailability | null> {
   try {
-    const res = await apiClient<PropertyCalendarAvailability>(
-      `/stays/${slug}/availability`,
+    return await apiClient<PropertyCalendarAvailability>(
+      `/stays/${encodeURIComponent(slug)}/availability`,
       { method: "GET" }
     );
-    return res;
   } catch {
     return null;
   }
 }
-

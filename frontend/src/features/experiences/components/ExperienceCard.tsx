@@ -16,6 +16,11 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
   const { t, locale } = useLanguage();
   const isAr = locale === "ar";
 
+  const displayTitle = isAr && experience.title_ar ? experience.title_ar : experience.title;
+  const displayDesc = isAr && experience.description_ar ? experience.description_ar : experience.description;
+  const displayLocation = (isAr && experience.location?.name_ar ? experience.location.name_ar : experience.location?.name) || t.common.elGouna;
+  const displayCategory = (isAr && experience.category?.name_ar ? experience.category.name_ar : experience.category?.name) || (isAr ? "تجربة حصرية" : "Exclusive Experience");
+
   return (
     <Card3D maxTilt={7} glare={true} className="h-full">
       <div className="h-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-brand-border/80 shadow-xs hover:shadow-2xl hover:border-brand-terracotta/40 transition-all duration-500 flex flex-col preserve-3d group">
@@ -38,7 +43,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
             style={{ transform: "translateZ(26px)" }}
           >
             <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[9px] sm:text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm border border-brand-border/80">
-              {experience.category?.name || (isAr ? "تجربة حصرية" : "Exclusive Experience")}
+              {displayCategory}
             </span>
           </div>
 
@@ -62,7 +67,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
               className="flex items-center gap-2 text-[11px] sm:text-xs text-brand-brown-muted transition-transform duration-300"
               style={{ transform: "translateZ(14px)" }}
             >
-              <span className="truncate">📍 {experience.location?.name || t.common.elGouna}</span>
+              <span className="truncate">📍 {displayLocation}</span>
               <span>•</span>
               <span className="shrink-0">
                 {t.experiences.upToGuests} {experience.max_guests} {t.common.guests}
@@ -73,14 +78,14 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
               className="font-serif text-lg sm:text-xl font-bold text-brand-brown group-hover:text-brand-terracotta transition-colors line-clamp-1 leading-snug"
               style={{ transform: "translateZ(20px)" }}
             >
-              <Link href={`/experiences/${experience.slug}`}>{experience.title}</Link>
+              <Link href={`/experiences/${experience.slug}`}>{displayTitle}</Link>
             </h3>
 
             <p
               className="text-xs text-brand-brown-muted line-clamp-2 leading-relaxed font-light"
               style={{ transform: "translateZ(12px)" }}
             >
-              {experience.description}
+              {displayDesc}
             </p>
           </div>
 

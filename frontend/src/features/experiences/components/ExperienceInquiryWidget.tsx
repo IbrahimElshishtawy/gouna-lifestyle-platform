@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Experience } from "../types/experience.types";
 import { inquireExperience } from "../services/experiences.api";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface ExperienceInquiryWidgetProps {
   experience: Experience;
@@ -13,6 +14,7 @@ export default function ExperienceInquiryWidget({
   experience,
 }: ExperienceInquiryWidgetProps) {
   const { t, locale } = useLanguage();
+  const { whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
   const [requestedDate, setRequestedDate] = useState(() => {
     const today = new Date();
     today.setDate(today.getDate() + 1);
@@ -43,13 +45,13 @@ export default function ExperienceInquiryWidget({
         message: `[Activity Booking Details]\nDate: ${requestedDate}\nPax: ${guests} Persons\nTime: ${preferredTime}${message ? `\nNotes: ${message}` : ""}`,
       });
 
-      // Construct WhatsApp fallback URL matching concierge desk
-      const waText = encodeURIComponent(
-        locale === "ar"
-          ? `مرحباً كونسيرج جو ناو VIP،\n\nأود حجز التجربة: ${experience.title}\nالتاريخ: ${requestedDate}\nعدد الأفراد: ${guests}\nالموعد: ${preferredTime}\nالعميل: ${name} (${phone || email})\n\nملاحظات: ${message || "يرجى تأكيد التوافر."}`
-          : `Hello GouNow VIP Concierge,\n\nI am inquiring about the activity: ${experience.title}\nDate: ${requestedDate}\nPax: ${guests} Persons\nTime: ${preferredTime}\nClient: ${name} (${phone || email})\n\nNotes: ${message || "Please confirm availability."}`
-      );
-      window.open(`https://wa.me/201000000000?text=${waText}`, "_blank");
+      if (whatsappDigits) {
+        const waText =
+          locale === "ar"
+            ? `مرحباً كونسيرج جو ناو VIP،\n\nأود حجز التجربة: ${experience.title}\nالتاريخ: ${requestedDate}\nعدد الأفراد: ${guests}\nالموعد: ${preferredTime}\nالعميل: ${name} (${phone || email})\n\nملاحظات: ${message || "يرجى تأكيد التوافر."}`
+            : `Hello GouNow VIP Concierge,\n\nI am inquiring about the activity: ${experience.title}\nDate: ${requestedDate}\nPax: ${guests} Persons\nTime: ${preferredTime}\nClient: ${name} (${phone || email})\n\nNotes: ${message || "Please confirm availability."}`;
+        window.open(buildWhatsAppUrl(waText), "_blank");
+      }
 
       setSuccessMessage(
         locale === "ar"

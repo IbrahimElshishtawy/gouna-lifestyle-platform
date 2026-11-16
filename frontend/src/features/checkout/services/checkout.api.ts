@@ -5,31 +5,6 @@ import {
   PaymentMethod,
 } from "../types/checkout.types";
 
-export const PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    id: 1,
-    name: "Instapay / Mobile Wallet Transfer",
-    type: "bank_transfer",
-    description: "تحويل مباشر عبر تطبيق إنستاباي أو المحافظ الإلكترونية المصرية مع مراجعة الإيصال.",
-    is_enabled: true,
-  },
-  {
-    id: 2,
-    name: "Bank Wire Transfer (CIB Egypt)",
-    type: "bank_transfer",
-    description: "تحويل بنكي مباشر لحساب الشركة بالبنك التجاري الدولي (CIB).",
-    is_enabled: true,
-  },
-  {
-    id: 3,
-    name: "Cash at Abu Tig Marina Office",
-    type: "cash",
-    description: "سداد نقدي بمقر مكتب الشركة بمارينا أبو تيج بالجونة عند الوصول.",
-    is_enabled: true,
-  },
-];
-
-
 interface BackendBookingResponse {
   data: {
     id: number;
@@ -65,59 +40,41 @@ interface BackendBookingResponse {
 export async function processCheckout(
   formData: CheckoutFormData
 ): Promise<CheckoutProcessResponse> {
-  const methodMap: Record<number, string> = {
-    1: "bank_transfer",
-    2: "bank_transfer",
-    3: "cash",
-  };
-  const paymentMethodCode = methodMap[formData.payment_method_id] || "bank_transfer";
-
   const idempotencyKey = `chk-${formData.property_id}-${formData.email}-${Date.now()}`;
 
-  try {
-    const response = await apiClient<BackendBookingResponse>(
-      "/checkout/bookings",
-      {
-        method: "POST",
-        headers: {
-          "Idempotency-Key": idempotencyKey,
-        },
-        body: JSON.stringify({
-          property_id: formData.property_id,
-          check_in: formData.check_in,
-          check_out: formData.check_out,
-          guests: Number(formData.guests),
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          email: formData.email,
-          phone: formData.phone,
-          special_requests: formData.special_requests || undefined,
-          promo_code: formData.promo_code || undefined,
-          payment_method: paymentMethodCode,
-        }),
-      }
-    );
-
-    if (response?.data?.attributes?.reference) {
-      const ref = response.data.attributes.reference;
-      const token = response.meta?.access_token;
-      return {
-        success: true,
-        booking_reference: ref,
-        redirect_url: `/checkout/confirmation/${ref}${token ? `?token=${encodeURIComponent(token)}` : ""}`,
-        message: "Your reservation has been created!",
-      };
+  const response = await apiClient<BackendBookingResponse>(
+    "/checkout/bookings",
+    {
+      method: "POST",
+      headers: {
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify({
+        property_id: formData.property_id,
+        check_in: formData.check_in,
+        check_out: formData.check_out,
+        guests: Number(formData.guests),
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone: formData.phone,
+        special_requests: formData.special_requests || undefined,
+        promo_code: formData.promo_code || undefined,
+        payment_method: formData.payment_method,
+      }),
     }
-  } catch (error) {
-    // If it's a conflict or validation error, rethrow so the form can display it
-    throw error;
+  );
+
+  const ref = response?.data?.attributes?.reference;
+  if (!ref) {
+    throw new Error("Booking creation did not return a valid booking reference.");
   }
 
-  const mockRef = `GON-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+  const token = response.meta?.access_token;
   return {
     success: true,
-    booking_reference: mockRef,
-    redirect_url: `/checkout/confirmation/${mockRef}`,
+    booking_reference: ref,
+    redirect_url: `/checkout/confirmation/${ref}${token ? `?token=${encodeURIComponent(token)}` : ""}`,
     message: "Your reservation has been created!",
   };
 }
@@ -131,7 +88,7 @@ export async function getBookingByReference(
   if (token) query.set("token", token);
   if (email) query.set("email", email);
 
-  const url = `/checkout/bookings/${reference}${
+  const url = `/checkout/bookings/${encodeURIComponent(reference)}${
     query.toString() ? `?${query.toString()}` : ""
   }`;
 
@@ -157,7 +114,7 @@ export async function completePaymobPaymentApi(
     booking_reference: string;
     redirect_url: string;
     message: string;
-  }>(`/checkout/bookings/${reference}/paymob-complete`, {
+  }>(`/checkout/bookings/${encodeURIComponent(reference)}/paymob-complete`, {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -173,7 +130,7 @@ export async function declinePaymobPaymentApi(
     success: boolean;
     status: string;
     message: string;
-  }>(`/checkout/bookings/${reference}/paymob-decline`, {
+  }>(`/checkout/bookings/${encodeURIComponent(reference)}/paymob-decline`, {
     method: "POST",
     body: JSON.stringify(data || {}),
   });
@@ -206,7 +163,7 @@ export async function submitPaymentProofApi(
   formData: FormData,
   token?: string
 ) {
-  const url = `/checkout/bookings/${reference}/payment-proof${
+  const url = `/checkout/bookings/${encodeURIComponent(reference)}/payment-proof${
     token ? `?token=${encodeURIComponent(token)}` : ""
   }`;
 
@@ -225,27 +182,13 @@ export async function getPaymentProofStatusApi(
   reference: string,
   token?: string
 ): Promise<PaymentProofStatusResponse> {
-  const url = `/checkout/bookings/${reference}/payment-proof${
+  const url = `/checkout/bookings/${encodeURIComponent(reference)}/payment-proof${
     token ? `?token=${encodeURIComponent(token)}` : ""
   }`;
 
   return apiClient<PaymentProofStatusResponse>(url);
 }
 
-export async function fetchPaymentMethodsApi() {
-  return apiClient<{
-    data: Array<{
-      id: number;
-      code: string;
-      name: string;
-      description: string;
-      is_online: boolean;
-      instructions: string;
-      instructions_en?: string;
-      instructions_ar?: string;
-      configuration?: Record<string, string>;
-    }>;
-  }>("/payment-methods");
+export async function fetchPaymentMethodsApi(): Promise<{ data: PaymentMethod[] }> {
+  return apiClient<{ data: PaymentMethod[] }>("/payment-methods");
 }
-
-

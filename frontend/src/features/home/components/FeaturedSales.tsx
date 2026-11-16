@@ -6,6 +6,7 @@ import SafeImage from "@/components/ui/SafeImage";
 import { Link } from "@/i18n/routing";
 import { Property } from "@/features/properties/types/property.types";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { ChapterTag } from "@/components/ui/MotionPrimitives";
 import Card3D from "@/components/ui/Card3D";
 import UnitSpatialModal from "@/components/ui/UnitSpatialModal";
@@ -16,6 +17,7 @@ interface Props {
 
 export default function FeaturedSales({ properties }: Props) {
   const { t, locale } = useLanguage();
+  const { buildWhatsAppUrl } = useSiteSettings();
   const isAr = locale === "ar";
   const saleProperties = properties.filter(
     (p) => p.listing_type === "sale" || p.listing_type === "both"
@@ -142,7 +144,7 @@ export default function FeaturedSales({ properties }: Props) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>{activeProperty.location?.name || t.common.elGouna}</span>
+                    <span>{(isAr && activeProperty.location?.name_ar ? activeProperty.location.name_ar : activeProperty.location?.name) || t.common.elGouna}</span>
                   </div>
                 </div>
               </div>
@@ -151,25 +153,22 @@ export default function FeaturedSales({ properties }: Props) {
               <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-4 sm:space-y-6">
                 <div>
                   <div className="flex items-center justify-between text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-brand-terracotta mb-1.5 sm:mb-2">
-                    <span>{activeProperty.category?.name || t.sales.signatureEstate}</span>
-                    <span className="flex items-center gap-1.5 text-brand-brown">
-                      <svg className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span>4.95 {t.common.readReviews}</span>
+                    <span>{(isAr && activeProperty.category?.name_ar ? activeProperty.category.name_ar : activeProperty.category?.name) || t.sales.signatureEstate}</span>
+                    <span className="text-[10px] font-mono text-brand-brown-muted">
+                      {activeProperty.reference_code}
                     </span>
                   </div>
 
                   <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-brand-brown leading-tight mb-2 sm:mb-3">
-                    {activeProperty.title}
+                    {isAr && activeProperty.title_ar ? activeProperty.title_ar : activeProperty.title}
                   </h3>
 
                   <p className="text-xs sm:text-sm text-brand-brown-muted font-light leading-relaxed mb-4 sm:mb-6 line-clamp-3">
-                    {activeProperty.description}
+                    {isAr && activeProperty.description_ar ? activeProperty.description_ar : activeProperty.description}
                   </p>
 
                   {/* Specs Grid */}
-                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center py-2.5 sm:py-4 px-2 sm:px-3 bg-white rounded-xl sm:rounded-2xl border border-brand-border/70 mb-4 sm:mb-6 shadow-xs">
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center py-2.5 sm:py-4 px-2 sm:px-3 bg-white rounded-xl sm:rounded-2xl border border-brand-border/70 mb-4 sm:mb-6 shadow-xs">
                     <div>
                       <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
                         {activeProperty.bedrooms}
@@ -188,43 +187,27 @@ export default function FeaturedSales({ properties }: Props) {
                     </div>
                     <div>
                       <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
-                        {activeProperty.area_sqm || 450}
+                        {activeProperty.area_sqm || "—"}
                       </span>
                       <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-brown-muted">
                         {t.common.bua}
                       </span>
                     </div>
-                    <div>
-                      <span className="block text-sm sm:text-lg font-bold text-brand-brown font-mono">
-                        750
-                      </span>
-                      <span className="block text-[9px] sm:text-[10px] uppercase font-semibold text-brand-brown-muted">
-                        {t.common.plot}
-                      </span>
-                    </div>
                   </div>
 
-                  {/* Investment Highlights */}
-                  <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{t.sales.feature1}</span>
+                  {/* Property Amenities from Backend */}
+                  {activeProperty.amenities && activeProperty.amenities.length > 0 && (
+                    <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 text-xs text-brand-brown">
+                      {activeProperty.amenities.slice(0, 3).map((amenity) => (
+                        <div key={amenity.id} className="flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{isAr && amenity.name_ar ? amenity.name_ar : amenity.name}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{t.sales.feature2}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{t.sales.feature3}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Price & Consultation CTA */}
@@ -236,7 +219,7 @@ export default function FeaturedSales({ properties }: Props) {
                       </span>
                       <div className="flex items-baseline gap-1">
                         <span className="text-xl sm:text-2xl lg:text-3xl font-bold font-serif text-brand-brown">
-                          {activeProperty.price_formatted}
+                          {activeProperty.sale_price_formatted || activeProperty.price_formatted}
                         </span>
                         <span className="text-[11px] sm:text-xs font-semibold text-brand-brown-muted">
                           {activeProperty.currency === "EGP" ? t.common.currency : activeProperty.currency}
@@ -250,9 +233,9 @@ export default function FeaturedSales({ properties }: Props) {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                     <a
-                      href={`https://wa.me/201000000000?text=${encodeURIComponent(
-                        `Hello GouNow Real Estate, I would like to schedule a private VIP viewing for ${activeProperty.title}`
-                      )}`}
+                      href={buildWhatsAppUrl(
+                        `Hello GouNow Real Estate, I would like to schedule a private VIP viewing for ${activeProperty.title} (${activeProperty.reference_code})`
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="py-2.5 sm:py-3 px-4 bg-brand-terracotta hover:bg-brand-terracotta-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
@@ -302,7 +285,7 @@ export default function FeaturedSales({ properties }: Props) {
                         style={{ transform: "translateZ(24px)" }}
                       >
                         <span className="px-2.5 py-0.5 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                          {property.location?.name || t.common.elGouna}
+                          {(isAr && property.location?.name_ar ? property.location.name_ar : property.location?.name) || t.common.elGouna}
                         </span>
                       </div>
                     </div>
@@ -312,7 +295,7 @@ export default function FeaturedSales({ properties }: Props) {
                         className="font-serif text-sm sm:text-base font-bold text-brand-brown line-clamp-1 group-hover:text-brand-terracotta transition-colors mb-1.5"
                         style={{ transform: "translateZ(16px)" }}
                       >
-                        {property.title}
+                        {isAr && property.title_ar ? property.title_ar : property.title}
                       </h4>
                       <div
                         className="flex items-center gap-2.5 text-xs text-brand-brown-muted mb-3 font-light"
@@ -321,8 +304,12 @@ export default function FeaturedSales({ properties }: Props) {
                         <span>{property.bedrooms} {t.common.beds}</span>
                         <span>•</span>
                         <span>{property.bathrooms} {t.common.baths}</span>
-                        <span>•</span>
-                        <span>{property.area_sqm || 450} {t.common.bua}</span>
+                        {property.area_sqm && (
+                          <>
+                            <span>•</span>
+                            <span>{property.area_sqm} {t.common.bua}</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -333,7 +320,7 @@ export default function FeaturedSales({ properties }: Props) {
                   >
                     <div>
                       <span className="text-xs sm:text-sm font-bold text-brand-brown font-serif">
-                        {property.price_formatted}
+                        {property.sale_price_formatted || property.price_formatted}
                       </span>
                       <span className="text-[10px] sm:text-[11px] text-brand-brown-muted ml-1 rtl:mr-1 rtl:ml-0">
                         {property.currency === "EGP" ? t.common.currency : property.currency}

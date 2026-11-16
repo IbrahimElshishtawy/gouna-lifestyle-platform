@@ -6,9 +6,7 @@ import HeroSection from "@/features/home/components/HeroSection";
 import BrandPillarsSection from "@/features/home/components/BrandPillarsSection";
 import FeaturedVacationRentals from "@/features/home/components/FeaturedVacationRentals";
 import FeaturedExperiences from "@/features/home/components/FeaturedExperiences";
-import DivingSection from "@/features/home/components/DivingSection";
 import FeaturedSales from "@/features/home/components/FeaturedSales";
-import TestimonialsSection from "@/features/home/components/TestimonialsSection";
 import EventsSection from "@/features/home/components/EventsSection";
 import ConciergeInquiry from "@/features/home/components/ConciergeInquiry";
 import FaqSection from "@/features/home/components/FaqSection";
@@ -16,6 +14,7 @@ import { getProperties } from "@/features/properties/services/properties.api";
 import { getExperiences } from "@/features/experiences/services/experiences.api";
 import { getPublicEvents } from "@/features/events/services/events.api";
 import { getPublicMediaDesignConfig } from "@/features/home/services/media-design.public";
+import { getPublicFaqs } from "@/features/home/services/home.api";
 import PropertyCardsShowcase from "@/features/home/components/PropertyCardsShowcase";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { setRequestLocale } from "next-intl/server";
@@ -30,11 +29,12 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [properties, experiences, eventsRes, mediaConfig] = await Promise.all([
+  const [properties, experiences, eventsRes, mediaConfig, faqs] = await Promise.all([
     getProperties(),
     getExperiences(),
     getPublicEvents(),
     getPublicMediaDesignConfig(),
+    getPublicFaqs(),
   ]);
 
   const events = eventsRes?.data || [];
@@ -96,54 +96,43 @@ export default async function HomePage({
           </ScrollReveal>
         )}
 
-        {/* 4. Curated Experiences Split Showcase (Tawila Island Yacht & Adventures) */}
+        {/* 4. Curated Experiences Split Showcase */}
         {sections?.experiences !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <FeaturedExperiences experiences={experiences} />
           </ScrollReveal>
         )}
 
-        {/* 5. What's On This Season (Events, Festivals & VIP Gatherings) */}
-        {sections?.events !== false && (
+        {/* 5. What's On This Season (Events from Backend) */}
+        {sections?.events !== false && events.length > 0 && (
           <ScrollReveal animation="fade-up" duration={800}>
             <EventsSection events={events} />
           </ScrollReveal>
         )}
 
-        {/* 6. The Deep: Red Sea Marine Expeditions & Diving */}
-        {sections?.diving !== false && <DivingSection />}
-
-        {/* 7. Modern Property Cards Showcase (21st Style with Category Tabs & Spatial Tour) */}
+        {/* 6. Modern Property Cards Showcase */}
         <ScrollReveal animation="fade-up" duration={800}>
           <PropertyCardsShowcase properties={displayProperties} />
         </ScrollReveal>
 
-        {/* 8. Real Estate For Sale Split Showcase (Tawila Modern Villa & Estates) */}
+        {/* 7. Real Estate For Sale Split Showcase */}
         {sections?.sales !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <FeaturedSales properties={displayProperties} />
           </ScrollReveal>
         )}
 
-        {/* 9. Guest Testimonials & Social Proof */}
-        {sections?.testimonials !== false && (
-          <ScrollReveal animation="fade-up" duration={800}>
-            <TestimonialsSection />
-          </ScrollReveal>
-        )}
-
-
-        {/* 11. Personal Concierge & Tailored Arrangements Lead Form */}
+        {/* 8. Personal Concierge & Tailored Arrangements Lead Form */}
         {sections?.concierge !== false && (
           <ScrollReveal animation="fade-up" duration={800}>
             <ConciergeInquiry />
           </ScrollReveal>
         )}
 
-        {/* 9. Frequently Asked Questions */}
-        {sections?.faq !== false && (
+        {/* 9. Frequently Asked Questions (From Backend DB) */}
+        {sections?.faq !== false && faqs.length > 0 && (
           <ScrollReveal animation="fade-up" duration={800}>
-            <FaqSection />
+            <FaqSection faqs={faqs} />
           </ScrollReveal>
         )}
       </main>

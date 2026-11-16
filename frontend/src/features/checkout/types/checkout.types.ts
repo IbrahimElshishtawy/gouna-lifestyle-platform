@@ -1,9 +1,14 @@
 export interface PaymentMethod {
   id: number;
+  code: string;
   name: string;
-  type: string;
   description: string;
-  is_enabled: boolean;
+  is_online: boolean;
+  instructions?: string;
+  instructions_en?: string;
+  instructions_ar?: string;
+  supported_currencies?: string[];
+  configuration?: Record<string, string> | null;
 }
 
 export interface CheckoutFormData {
@@ -19,7 +24,7 @@ export interface CheckoutFormData {
   country: string;
   special_requests?: string;
   payment_type: "full" | "deposit";
-  payment_method_id: number;
+  payment_method: string;
 }
 
 export interface CheckoutProcessResponse {
