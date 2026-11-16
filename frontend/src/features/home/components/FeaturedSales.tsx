@@ -100,7 +100,7 @@ export default function FeaturedSales({ properties }: Props) {
           <div className="bg-[#FAF8F5] rounded-2xl sm:rounded-3xl border border-brand-border/80 shadow-md hover:shadow-xl overflow-hidden p-3.5 sm:p-7 lg:p-10 mb-8 sm:mb-12 transition-all duration-500">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-center">
               
-              {/* Left Column: Property Visuals (7 cols) with 3D Spatial Badge */}
+              {/* Left Column: Property Visuals (7 cols) */}
               <div className="lg:col-span-7">
                 <div className="relative h-[220px] sm:h-[360px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand group">
                   <SafeImage
@@ -115,13 +115,17 @@ export default function FeaturedSales({ properties }: Props) {
 
                   {/* Badges Overlay */}
                   <div className="absolute top-3 start-3 sm:top-4 sm:start-4 flex flex-wrap gap-1.5 sm:gap-2 z-10">
-                    <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
-                      <span>{t.sales.exclusiveListing}</span>
-                    </span>
-                    <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
-                      {t.sales.lagoonFrontage}
-                    </span>
+                    {activeProperty.is_featured && (
+                      <span className="px-2.5 sm:px-3 py-1 bg-white/95 backdrop-blur-md text-brand-brown text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs flex items-center gap-1.5 border border-brand-border">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-terracotta" />
+                        <span>{t.sales.exclusiveListing}</span>
+                      </span>
+                    )}
+                    {(activeProperty.compound || activeProperty.location?.name) && (
+                      <span className="px-2.5 sm:px-3 py-1 bg-brand-terracotta text-white text-[10px] sm:text-[11px] font-bold rounded-full uppercase tracking-wider shadow-xs">
+                        {activeProperty.compound || (isAr && activeProperty.location?.name_ar ? activeProperty.location.name_ar : activeProperty.location?.name)}
+                      </span>
+                    )}
                   </div>
 
                   <div className="absolute bottom-3 end-3 sm:bottom-4 sm:end-4 z-10 px-2.5 sm:px-3 py-1 bg-black/60 backdrop-blur-md text-white text-[11px] font-medium rounded-xl flex items-center gap-1.5">
@@ -211,9 +215,13 @@ export default function FeaturedSales({ properties }: Props) {
                         </span>
                       </div>
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-semibold text-brand-terracotta bg-brand-terracotta/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-terracotta/20">
-                      {t.sales.paymentPlans}
-                    </span>
+                    {(activeProperty.payment_requirement || activeProperty.deposit_percentage) && (
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-brand-terracotta bg-brand-terracotta/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-brand-terracotta/20">
+                        {activeProperty.deposit_percentage
+                          ? (isAr ? `دفعة حجز ${activeProperty.deposit_percentage}%` : `${activeProperty.deposit_percentage}% Deposit`)
+                          : (isAr ? "خيارات سداد متاحة" : "Structured Payment")}
+                      </span>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">

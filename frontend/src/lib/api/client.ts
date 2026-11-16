@@ -1,4 +1,13 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const SERVER_API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+
+function getApiBaseUrl(): string {
+  // Route browser requests same-origin through Next.js /api/v1 rewrite proxy
+  if (typeof window !== "undefined") {
+    return "/api/v1";
+  }
+  return SERVER_API_BASE_URL;
+}
 
 export interface NormalizedApiError {
   status: number;
@@ -82,12 +91,16 @@ export async function apiClient<T>(
 ): Promise<T> {
   const method = (options.method || "GET").toUpperCase();
   const normalizedEndpoint = endpoint.replace(/\?$/, "");
+  const baseUrl = getApiBaseUrl();
   const url = normalizedEndpoint.startsWith("http")
     ? normalizedEndpoint
-    : `${API_BASE_URL.replace(/\/$/, "")}/${normalizedEndpoint.replace(/^\//, "")}`;
+    : `${baseUrl.replace(/\/$/, "")}/${normalizedEndpoint.replace(/^\//, "")}`;
 
-  // Cache & deduplication key for safe idempotent GET requests
-  const cacheKey = `${method}:${url}`;
+  // Attach Authorization header if provided or found in storage
+  const authToken = options.token !== undefined ? options.token : getStoredAuthToken();
+
+  // Cache & deduplication key segregated by auth scope for safe idempotent GET requests
+  const cacheKey = `${method}:${url}:${authToken ? "auth" : "pub"}`;
   const now = Date.now();
 
   // 1. Check in-memory cache if applicable
@@ -110,14 +123,16 @@ export async function apiClient<T>(
       headers.set("Accept", "application/json");
     }
 
+    if (!headers.has("X-Requested-With")) {
+      headers.set("X-Requested-With", "XMLHttpRequest");
+    }
+
     if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
 
-    // Attach Authorization header if provided or found in storage
-    const token = options.token !== undefined ? options.token : getStoredAuthToken();
-    if (token && !headers.has("Authorization")) {
-      headers.set("Authorization", `Bearer ${token}`);
+    if (authToken && !headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${authToken}`);
     }
 
     const timeoutMs = options.timeoutMs ?? 10000;

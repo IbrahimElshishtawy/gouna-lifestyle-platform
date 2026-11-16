@@ -29,6 +29,10 @@ function AdminLayoutShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-brand-brown flex">
       {/* Sidebar */}

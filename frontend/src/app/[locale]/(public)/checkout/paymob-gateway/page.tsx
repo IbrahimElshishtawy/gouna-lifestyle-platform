@@ -192,7 +192,10 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
   // Decline & Return
   const handleCancel = async () => {
     try {
-      await declinePaymobPaymentApi(reference, { reason: "User cancelled on gateway" });
+      await declinePaymobPaymentApi(reference, {
+        token,
+        reason: "User cancelled on gateway",
+      });
     } catch {
       // ignore
     }
@@ -205,6 +208,29 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
       return () => clearInterval(interval);
     }
   }, [show3DSModal, otpTimer]);
+
+  if (!reference || !token) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-slate-800/90 border border-slate-700 rounded-2xl p-8 text-center space-y-4 shadow-2xl">
+          <h1 className="text-lg font-bold text-white">
+            {isAr ? "رابط الدفع غير مكتمل أو غير مصرح به" : "Unauthorized or Incomplete Payment Link"}
+          </h1>
+          <p className="text-xs text-slate-400">
+            {isAr
+              ? "يرجى بدء عملية الحجز من صفحة الإقامة للحصول على رمز أمان صالح للدفع."
+              : "Please initiate your reservation from a property page to obtain a valid booking security token."}
+          </p>
+          <Link
+            href="/stays"
+            className="inline-block px-5 py-2.5 rounded-xl bg-brand-terracotta text-white text-xs font-bold hover:opacity-90 transition"
+          >
+            {isAr ? "استعراض الإقامات" : "Browse Stays"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 py-10 px-4 sm:px-6 relative overflow-hidden font-sans">

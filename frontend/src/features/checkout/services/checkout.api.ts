@@ -123,6 +123,7 @@ export async function completePaymobPaymentApi(
 export async function declinePaymobPaymentApi(
   reference: string,
   data?: {
+    token?: string;
     reason?: string;
   }
 ) {

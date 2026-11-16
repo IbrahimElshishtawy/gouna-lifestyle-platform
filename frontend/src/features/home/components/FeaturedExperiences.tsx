@@ -13,7 +13,8 @@ interface Props {
 }
 
 export default function FeaturedExperiences({ experiences }: Props) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
+  const isAr = locale === "ar";
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activeExperience = experiences[selectedIndex] || experiences[0];
 

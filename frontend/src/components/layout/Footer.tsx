@@ -7,8 +7,9 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export default function Footer() {
-  const { t } = useLanguage();
-  const { settings, whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
+  const { t, locale } = useLanguage();
+  const { settings, locations, experienceCategories, whatsappDigits, buildWhatsAppUrl } = useSiteSettings();
+  const isAr = locale === "ar";
 
   return (
     <footer className="bg-brand-brown-dark text-[#E5DCD3] pt-16 pb-12 border-t border-brand-brown/50">
@@ -59,7 +60,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Stays & Properties */}
+          {/* Stays & Properties (Backend Locations) */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-widest text-white">
               {t.footer.portfolio}
@@ -73,22 +74,16 @@ export default function Footer() {
                   {t.footer.vacationVillas}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/stays?listing_type=rent&location=fanadir-bay"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.fanadirBay}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/stays?listing_type=rent&location=abu-tig-marina"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.marinaPenthouses}
-                </Link>
-              </li>
+              {locations.slice(0, 3).map((loc) => (
+                <li key={loc.id}>
+                  <Link
+                    href={`/stays?listing_type=rent&location=${loc.slug}`}
+                    className="hover:text-brand-terracotta transition"
+                  >
+                    {isAr && loc.name_ar ? loc.name_ar : loc.name_en}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link
                   href="/stays?listing_type=sale"
@@ -100,44 +95,32 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Experiences */}
+          {/* Experiences (Backend Categories) */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-widest text-white">
               {t.footer.experiences}
             </h4>
             <ul className="space-y-2 text-xs text-[#C7BCB3]">
-              <li>
-                <Link
-                  href="/experiences"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.yachtCharters}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/experiences"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.tawilaExpeditions}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/experiences"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.desertSafari}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/experiences"
-                  className="hover:text-brand-terracotta transition"
-                >
-                  {t.footer.kitesurfing}
-                </Link>
-              </li>
+              {experienceCategories.slice(0, 4).map((cat) => (
+                <li key={cat.id}>
+                  <Link
+                    href={`/experiences?category=${cat.slug}`}
+                    className="hover:text-brand-terracotta transition"
+                  >
+                    {isAr && cat.name_ar ? cat.name_ar : cat.name_en}
+                  </Link>
+                </li>
+              ))}
+              {experienceCategories.length === 0 && (
+                <li>
+                  <Link
+                    href="/experiences"
+                    className="hover:text-brand-terracotta transition"
+                  >
+                    {t.footer.experiences}
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
