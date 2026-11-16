@@ -19,6 +19,7 @@ import type {
   ConciergeType,
 } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import PermissionGuard from "@/components/ui/PermissionGuard";
@@ -46,6 +47,7 @@ const QUEUE_TABS = [
 
 export default function AdminConciergePage() {
   const { locale } = useLanguage();
+  const { buildWhatsAppUrl, settings } = useSiteSettings();
   const isAr = locale === "ar";
   const searchParams = useSearchParams();
   const initialQueue = searchParams.get("queue") || "all";
@@ -253,15 +255,17 @@ export default function AdminConciergePage() {
             </button>
           </PermissionGuard>
 
-          <a
-            href="https://wa.me/201000000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-          >
-            <span>💬</span>
-            <span className="hidden sm:inline">{isAr ? "ديسباتش واتساب" : "WhatsApp Dispatch"}</span>
-          </a>
+          {settings.whatsapp_number && (
+            <a
+              href={buildWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <span>💬</span>
+              <span className="hidden sm:inline">{isAr ? "ديسباتش واتساب" : "WhatsApp Dispatch"}</span>
+            </a>
+          )}
         </div>
       </div>
 
@@ -624,7 +628,7 @@ export default function AdminConciergePage() {
                     value={createForm.customer_name}
                     onChange={(e) => setCreateForm({ ...createForm, customer_name: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none bg-white"
-                    placeholder="e.g. Tarek Mansour"
+                    placeholder={isAr ? "الاسم بالكامل" : "Customer Full Name"}
                   />
                 </div>
 

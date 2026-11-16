@@ -157,74 +157,11 @@
     "requestViewing": "Request VIP Viewing",
     "downloadBrochure": "Download Brochure"
   },
-  "testimonials": {
-    "eyebrow": "Verified Guest Experiences",
-    "title": "Praised by Discerning Travelers",
-    "subtitle": "Direct reviews from high-net-worth travelers, property owners, and repeat guests who trust us with their Red Sea stays.",
-    "reviews": [
-      {
-        "id": 1,
-        "name": "Marcus & Sophia V.",
-        "origin": "Zurich, Switzerland",
-        "stay": "Fanadir Bay Waterfront Villa",
-        "quote": "The most seamless luxury rental experience in El Gouna. The villa was immaculate with breathtaking lagoon views and a heated infinity pool our children adored. The VIP concierge handled our arrival and dinner bookings effortlessly.",
-        "rating": 5
-      },
-      {
-        "id": 2,
-        "name": "Alexander & Claire K.",
-        "origin": "London, UK",
-        "stay": "Private Tawila Yacht Expedition",
-        "quote": "Our private yacht charter to Tawila Island was undeniably the highlight of our holiday. Professional skipper, gourmet seafood lunch prepared on board, and swimming with wild dolphins in crystal waters. Truly world-class.",
-        "rating": 5
-      },
-      {
-        "id": 3,
-        "name": "Laila & Tarek M.",
-        "origin": "Cairo, Egypt",
-        "stay": "Tawila Lagoon Modern Villa Buyer",
-        "quote": "GouNow sets a brand-new standard for hospitality and real estate advisory on the Red Sea. Transparent transaction, instant communication, and genuine attention to detail. We couldn't be happier with our new home.",
-        "rating": 5
-      }
-    ]
-  },
   "events": {
     "eyebrow": "El Gouna Happenings & Festivities",
     "title": "What's On This Season",
     "subtitle": "Curated cultural gatherings, sunset parties, and private dinners happening in town.",
-    "reserveSpot": "Reserve Spot",
-    "eventsList": [
-      {
-        "id": 1,
-        "title": "Sunset Lagoon Acoustic Sessions",
-        "date": "EVERY FRIDAY",
-        "time": "17:30 - 21:00",
-        "location": "The Clubhouse Lagoon, Downtown",
-        "category": "Live Music & Sunset",
-        "image": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80",
-        "description": "Acoustic indie sets, artisanal cocktails, and chilled bohemian vibes as the golden twilight reflects over the lagoon."
-      },
-      {
-        "id": 2,
-        "title": "Gouna Street Food & Wine Gathering",
-        "date": "OCT 28, 2026",
-        "time": "19:00 - LATE",
-        "location": "Abu Tig Marina Promenade",
-        "category": "Culinary & Lifestyle",
-        "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
-        "description": "Curated tasting stations by Red Sea master chefs, boutique Mediterranean wines, and live jazz along the superyacht harbor."
-      },
-      {
-        "id": 3,
-        "title": "Full Moon Yacht Regatta & Party",
-        "date": "NOV 04, 2026",
-        "time": "20:00 - 02:00",
-        "location": "Tawila Anchorage & Open Sea",
-        "category": "Yacht Gathering",
-        "image": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80",
-        "description": "Flotilla of illuminated luxury yachts sailing out for night swimming, deep house DJ sets under the desert moon, and champagne bar."
-      }
-    ]
+    "reserveSpot": "Reserve Spot"
   },
   "concierge": {
     "eyebrow": "Bespoke 24/7 Concierge",
@@ -260,29 +197,7 @@
   "faq": {
     "eyebrow": "Help & Information",
     "title": "Frequently Asked Questions",
-    "subtitle": "Essential details regarding villa stays, experiences, and VIP services in El Gouna.",
-    "items": [
-      {
-        "q": "What are the standard check-in and check-out times?",
-        "a": "Standard check-in begins at 15:00 (3:00 PM) and check-out is by 11:00 AM. Early check-in and late departures can be coordinated with the GouNow Concierge desk subject to calendar availability."
-      },
-      {
-        "q": "Are the private swimming pools heated during winter?",
-        "a": "Yes. All featured luxury vacation villas in our signature portfolio include temperature-controlled heated swimming pools active from November through April at no supplementary charge."
-      },
-      {
-        "q": "Can you arrange private airport transfers from Hurghada Airport (HRG)?",
-        "a": "Certainly. We provide seamless VIP door-to-door chauffeured transfers in premium Mercedes V-Class vans and executive sedans directly from Hurghada International Airport (HRG) to your villa doorstep in El Gouna (approx. 25-30 minutes)."
-      },
-      {
-        "q": "How does the booking deposit and payment schedule operate?",
-        "a": "For vacation rentals, you may choose at checkout to pay in full or reserve with an upfront deposit (30% to 50%), with the remaining balance due prior to arrival. We accept Visa, Mastercard, and direct bank transfers."
-      },
-      {
-        "q": "Do you offer private boat trips and bespoke yacht excursions?",
-        "a": "Yes, our maritime desk operates private luxury motor yachts ranging from 38ft to 80ft departing from Abu Tig Marina for day voyages to Tawila Island, dolphin reef sanctuaries, and sunset champagne cruises."
-      }
-    ]
+    "subtitle": "Essential details regarding villa stays, experiences, and VIP services in El Gouna."
   },
   "footer": {
     "tagline": "The premier independent ecosystem for bespoke luxury vacation rentals, real estate investments, yacht charters, and curated Red Sea adventures in El Gouna, Egypt.",
@@ -468,29 +383,6 @@
     "vipConciergeIncluded": "VIP Concierge Included",
     "conciergeBenefit": "Every GouNow reservation includes on-the-ground concierge support in El Gouna."
   },
-  "reviews": {
-    "title": "Guest Reviews & Ratings",
-    "verifiedReviews": "Verified Reviews",
-    "writeReview": "Write a Review",
-    "cleanliness": "Cleanliness",
-    "accuracy": "Accuracy",
-    "communication": "Communication",
-    "location": "Location",
-    "checkIn": "Check-in",
-    "valueForMoney": "Value for Money",
-    "verifiedGuest": "Verified Guest",
-    "conciergeResponse": "Concierge Response",
-    "shareExperience": "Share Your Experience",
-    "rating": "Rating",
-    "yourFullName": "Your Full Name",
-    "namePlaceholder": "e.g. Dr. Marianne Weber",
-    "reviewDetails": "Review Details",
-    "reviewPlaceholder": "How was your stay? Mention amenities, cleanliness, location...",
-    "cancel": "Cancel",
-    "submitReview": "Submit Review",
-    "reviewSubmitted": "Review Submitted for Verification",
-    "reviewSubmittedSub": "Thank you! Your verified review will be published shortly."
-  },
   "notFound": {
     "badge": "404 Error",
     "title": "Page Not Found",
@@ -509,11 +401,8 @@
     "heroTitle2": "on the Red Sea.",
     "heroSubtitle": "GouNow Command centralizes ultra-luxury waterfront estates, private superyacht charters, and VIP concierge dispatch across El Gouna's premier lagoons.",
     "activeVillas": "Active Villa Stays",
-    "villasCount": "142 Properties",
     "fleetDispatches": "Marina Fleet Dispatches",
-    "fleetCount": "28 Active Charters",
     "satisfaction": "Concierge Satisfaction",
-    "satisfactionScore": "99.4% (Q1 High-Season)",
     "encrypted": "256-Bit Hardware Encrypted",
     "management": "GouNow Management",
     "managementSubtitle": "Sign in to access your administrative workspace & reservation engines",
@@ -528,7 +417,6 @@
     "ssoReady": "SSO Ready",
     "authenticating": "Authenticating Session...",
     "signIn": "Sign in to Platform",
-    "demoAccounts": "Demo Test Accounts",
     "superAdmin": "Super Admin",
     "fullAccess": "Full Access",
     "propertyManager": "Property Manager",

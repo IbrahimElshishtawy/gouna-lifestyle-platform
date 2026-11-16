@@ -28,7 +28,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
   const activeProperty = rentalProperties[selectedIndex] || rentalProperties[0];
   const images = activeProperty?.images?.length
     ? activeProperty.images
-    : [{ id: 1, url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1400&q=85" }];
+    : [{ id: 1, url: "/assets/images/fanadir-villa.jpg" }];
 
   const currentImage = images[selectedImageIndex] || images[0];
 
@@ -360,7 +360,7 @@ export default function FeaturedVacationRentals({ properties }: Props) {
                 <div>
                   <div className="relative h-40 sm:h-44 overflow-hidden bg-brand-sand shrink-0">
                     <Image
-                      src={property.images[0]?.url || "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80"}
+                      src={property.images[0]?.url || "/assets/images/fanadir-villa.jpg"}
                       alt={property.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

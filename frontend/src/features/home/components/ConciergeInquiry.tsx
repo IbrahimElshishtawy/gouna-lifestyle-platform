@@ -207,7 +207,7 @@ export default function ConciergeInquiry() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Lord Alexander Wright"
+                      placeholder={isAr ? "الاسم بالكامل" : "Full Name"}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"
@@ -222,7 +222,7 @@ export default function ConciergeInquiry() {
                       <input
                         type="tel"
                         required
-                        placeholder="+20 100 000 0000"
+                        placeholder={isAr ? "رقم الهاتف مع رمز الدولة" : "+XX XXX XXX XXXX"}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 bg-brand-sand-light/50 border border-brand-border rounded-xl text-xs text-brand-brown focus:outline-none focus:border-brand-terracotta focus:bg-white transition-colors"

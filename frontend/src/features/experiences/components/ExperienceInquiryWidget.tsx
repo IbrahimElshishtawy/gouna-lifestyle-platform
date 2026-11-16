@@ -167,7 +167,7 @@ export default function ExperienceInquiryWidget({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder={locale === "ar" ? "مثال: مريم خليل" : "Elena Rostova"}
+              placeholder={locale === "ar" ? "الاسم بالكامل" : "Full Name"}
               className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
             />
           </div>
@@ -182,7 +182,7 @@ export default function ExperienceInquiryWidget({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="elena@example.com"
+              placeholder="name@domain.com"
               className="w-full text-xs bg-brand-sand-light/50 border border-brand-border rounded-xl p-2.5 focus:outline-none focus:ring-1 focus:ring-brand-terracotta"
             />
           </div>

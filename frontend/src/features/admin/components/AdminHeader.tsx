@@ -1,25 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
-import { useRouter } from "@/i18n/routing";
-import { logout } from "@/lib/api/auth";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAdminAuth } from "@/context/AdminAuthContext";
+import { getDashboardMetrics } from "@/features/admin/services/admin.api";
+import type { AdminBookingItem } from "@/features/admin/types";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
 }
 
 export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
-  const router = useRouter();
-  const { locale, setLocale, t, isRtl } = useLanguage();
+  const { locale, setLocale, t } = useLanguage();
+  const { user, signOut } = useAdminAuth();
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [recentBookings, setRecentBookings] = useState<AdminBookingItem[]>([]);
 
-  const handleSignOut = async () => {
-    await logout();
-    router.push("/admin/login");
-  };
+  useEffect(() => {
+    let mounted = true;
+    getDashboardMetrics()
+      .then((data) => {
+        if (mounted && Array.isArray(data?.recentBookings)) {
+          setRecentBookings(data.recentBookings.slice(0, 5));
+        }
+      })
+      .catch(() => {
+        if (mounted) setRecentBookings([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const displayName = user?.name || (locale === "ar" ? "مشرف النظام" : "Administrator");
+  const displayEmail = user?.email || "";
+  const initials = (user?.name || "A")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("") || "A";
 
   return (
     <header className="h-20 bg-white border-b border-brand-border flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30 shadow-xs">
@@ -132,44 +154,43 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
-            <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-brand-terracotta rounded-full ring-2 ring-white" />
+            {recentBookings.length > 0 && (
+              <span className="absolute top-1.5 end-1.5 w-2 h-2 bg-brand-terracotta rounded-full ring-2 ring-white" />
+            )}
           </button>
 
           {notifyOpen && (
             <div className="absolute end-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-brand-border py-2 z-50">
               <div className="px-4 py-2 border-b border-brand-border flex items-center justify-between">
                 <span className="text-xs font-bold text-brand-brown uppercase tracking-wider">
-                  {locale === "ar" ? "التنبيهات" : "Notifications"}
+                  {locale === "ar" ? "أحدث الحجوزات" : "Recent Bookings"}
                 </span>
                 <span className="text-[10px] text-brand-terracotta font-semibold">
-                  {locale === "ar" ? "2 جديد" : "2 New"}
+                  {recentBookings.length}
                 </span>
               </div>
               <div className="divide-y divide-brand-border/60 max-h-64 overflow-y-auto text-xs">
-                <Link
-                  href="/admin/bookings"
-                  onClick={() => setNotifyOpen(false)}
-                  className="block p-3 hover:bg-brand-sand-light transition-colors"
-                >
-                  <p className="font-semibold text-brand-brown">
-                    {locale === "ar" ? "حجز فيلا جديد: GON-2026-000101" : "New Villa Reservation: GON-2026-000101"}
-                  </p>
-                  <span className="text-[10px] text-brand-brown-muted">
-                    {locale === "ar" ? "منذ 10 دقائق • فيلا خليج فنادير" : "10 mins ago • Fanadir Bay Villa"}
-                  </span>
-                </Link>
-                <Link
-                  href="/admin/customers"
-                  onClick={() => setNotifyOpen(false)}
-                  className="block p-3 hover:bg-brand-sand-light transition-colors"
-                >
-                  <p className="font-semibold text-brand-brown">
-                    {locale === "ar" ? "طلب شراء عقار: طارق خليل" : "New Buyer Lead: Tarek Khalil"}
-                  </p>
-                  <span className="text-[10px] text-brand-brown-muted">
-                    {locale === "ar" ? "منذ ساعة • استفسار واتساب" : "1 hour ago • WhatsApp Inquiry"}
-                  </span>
-                </Link>
+                {recentBookings.length === 0 ? (
+                  <div className="p-4 text-center text-brand-brown-muted">
+                    {locale === "ar" ? "لا توجد إشعارات حديثة" : "No recent notifications"}
+                  </div>
+                ) : (
+                  recentBookings.map((booking) => (
+                    <Link
+                      key={booking.id}
+                      href={`/admin/bookings/${booking.id}`}
+                      onClick={() => setNotifyOpen(false)}
+                      className="block p-3 hover:bg-brand-sand-light transition-colors"
+                    >
+                      <p className="font-semibold text-brand-brown">
+                        {booking.reference} — {booking.customer?.name}
+                      </p>
+                      <span className="text-[10px] text-brand-brown-muted">
+                        {booking.bookable?.title} • {booking.formatted_total}
+                      </span>
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -182,10 +203,10 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
             className="flex items-center gap-2 p-1 rounded-xl hover:bg-brand-sand/40 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-full bg-brand-terracotta text-white flex items-center justify-center font-bold text-xs shadow-xs">
-              G
+              {initials}
             </div>
-            <span className="hidden sm:block text-xs font-bold text-brand-brown max-w-[120px] truncate">
-              {locale === "ar" ? "مسؤول النظام" : "Gounow Super Admin"}
+            <span className="hidden sm:block text-xs font-bold text-brand-brown max-w-[140px] truncate">
+              {displayName}
             </span>
             <svg
               className="w-3.5 h-3.5 text-brand-brown-muted"
@@ -203,18 +224,20 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
           </button>
 
           {userMenuOpen && (
-            <div className="absolute end-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-brand-border py-2 z-50 text-xs">
+            <div className="absolute end-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-brand-border py-2 z-50 text-xs">
               <div className="px-4 py-2 border-b border-brand-border">
                 <span className="block font-bold text-brand-brown">
-                  {locale === "ar" ? "مسؤول النظام" : "Gounow Super Admin"}
+                  {displayName}
                 </span>
-                <span className="block text-[10px] text-brand-brown-muted truncate" dir="ltr">
-                  admin@gounow.com
-                </span>
+                {displayEmail && (
+                  <span className="block text-[10px] text-brand-brown-muted truncate" dir="ltr">
+                    {displayEmail}
+                  </span>
+                )}
               </div>
               <button
                 type="button"
-                onClick={handleSignOut}
+                onClick={signOut}
                 className="w-full text-start px-4 py-2.5 text-red-600 hover:bg-red-50 font-semibold cursor-pointer"
               >
                 {t.admin.signOut}
@@ -226,4 +249,3 @@ export default function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
     </header>
   );
 }
-

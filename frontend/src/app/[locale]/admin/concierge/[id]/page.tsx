@@ -17,6 +17,7 @@ import type {
   ConciergeStatus,
 } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import LoadingState from "@/components/ui/LoadingState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PermissionGuard from "@/components/ui/PermissionGuard";
@@ -41,6 +42,7 @@ export default function ConciergeRequestDetailPage({ params }: { params: Promise
   const requestId = parseInt(resolvedParams.id, 10);
 
   const { locale } = useLanguage();
+  const { settings } = useSiteSettings();
   const isAr = locale === "ar";
 
   const [request, setRequest] = useState<ConciergeRequestItem | null>(null);
@@ -350,15 +352,17 @@ export default function ConciergeRequestDetailPage({ params }: { params: Promise
             </button>
           </PermissionGuard>
 
-          <a
-            href={`https://wa.me/${request.customer?.phone?.replace(/\D/g, "") || "201000000000"}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
-          >
-            <span>💬</span>
-            <span className="hidden sm:inline">{isAr ? "مراسلة العميل" : "WhatsApp"}</span>
-          </a>
+          {(request.customer?.phone || settings.whatsapp_number) && (
+            <a
+              href={`https://wa.me/${(request.customer?.phone || settings.whatsapp_number || "").replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <span>💬</span>
+              <span className="hidden sm:inline">{isAr ? "مراسلة العميل" : "WhatsApp"}</span>
+            </a>
+          )}
         </div>
       </div>
 

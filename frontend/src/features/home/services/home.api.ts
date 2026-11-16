@@ -3,7 +3,7 @@ import { apiClient } from "@/lib/api/client";
 export interface ConciergeInquiryData {
   name: string;
   phone?: string;
-  email?: string;
+  email: string;
   message: string;
 }
 
@@ -62,7 +62,7 @@ export async function submitConciergeInquiry(
       method: "POST",
       body: JSON.stringify({
         name: data.name,
-        email: data.email || "concierge-lead@gounow.com",
+        email: data.email,
         phone: data.phone || null,
         message: data.message,
         type: "concierge",

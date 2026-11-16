@@ -1023,7 +1023,7 @@ export default function AdminUsersPage() {
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border focus:border-brand-terracotta focus:outline-none"
-                  placeholder="karim@gounow.com"
+                  placeholder="name@domain.com"
                 />
               </div>
 

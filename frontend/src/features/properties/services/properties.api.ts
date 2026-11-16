@@ -344,7 +344,7 @@ export async function calculateQuote(
 
 export async function inquireProperty(
   slug: string,
-  data: { name: string; email?: string; phone?: string; message: string; property_id?: number }
+  data: { name: string; email: string; phone?: string; message: string; property_id?: number }
 ): Promise<{ success: boolean; message: string }> {
   const response = await apiClient<{ data: { id: number; message: string } }>(
     "/leads",
@@ -352,7 +352,7 @@ export async function inquireProperty(
       method: "POST",
       body: JSON.stringify({
         name: data.name,
-        email: data.email || "guest@gounow.com",
+        email: data.email,
         phone: data.phone || null,
         message: `Property Inquiry [${slug}]: ${data.message}`,
         type: "stay",

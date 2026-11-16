@@ -54,6 +54,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
 
   // Inquiry for Sale
   const [inquiryName, setInquiryName] = useState("");
+  const [inquiryEmail, setInquiryEmail] = useState("");
   const [inquiryPhone, setInquiryPhone] = useState("");
   const [inquiryMessage, setInquiryMessage] = useState("");
   const [inquiryStatus, setInquiryStatus] = useState<"idle" | "success" | "loading">("idle");
@@ -166,6 +167,7 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
     setInquiryStatus("loading");
     await inquireProperty(property.slug, {
       name: inquiryName,
+      email: inquiryEmail,
       phone: inquiryPhone,
       message: inquiryMessage,
     });
@@ -446,6 +448,20 @@ export default function BookingQuoteWidget({ property, initialQuote }: Props) {
                 onChange={(e) => setInquiryName(e.target.value)}
                 placeholder={isAr ? "الاسم الكريم" : "Your full name"}
                 className="w-full p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl text-brand-brown focus:outline-none focus:border-brand-terracotta"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-brown-muted mb-1">
+                {isAr ? "البريد الإلكتروني" : "Email Address"}
+              </label>
+              <input
+                type="email"
+                required
+                value={inquiryEmail}
+                onChange={(e) => setInquiryEmail(e.target.value)}
+                placeholder="name@domain.com"
+                className="w-full p-2.5 bg-brand-sand-light/50 border border-brand-border rounded-xl text-brand-brown focus:outline-none focus:border-brand-terracotta font-mono"
               />
             </div>
 

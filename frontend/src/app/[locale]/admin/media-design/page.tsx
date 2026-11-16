@@ -1138,19 +1138,9 @@ export default function AdminMediaDesignPage() {
                 labelEn: "Curated Yacht Charters & Red Sea Expeditions",
               },
               {
-                key: "diving",
-                labelAr: "عالم الأعماق والغوص البحري (The Deep: Marine & Diving)",
-                labelEn: "Marine Expeditions & Scuba Diving Showcase",
-              },
-              {
                 key: "sales",
                 labelAr: "عقارات وقصور التملك والبيع (Real Estate Sales)",
                 labelEn: "Luxury Real Estate & Signature Estates For Sale",
-              },
-              {
-                key: "testimonials",
-                labelAr: "آراء وتجارب كبار النزلاء (Guest Testimonials)",
-                labelEn: "Guest Social Proof & Testimonials",
               },
               {
                 key: "events",

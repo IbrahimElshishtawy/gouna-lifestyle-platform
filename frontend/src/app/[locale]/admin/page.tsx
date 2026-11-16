@@ -6,12 +6,14 @@ import { getProperties } from "@/features/properties/services/properties.api";
 import { getDashboardMetrics } from "@/features/admin/services/admin.api";
 import type { DashboardData } from "@/features/admin/types";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAdminAuth } from "@/context/AdminAuthContext";
 import { TableSkeleton } from "@/components/ui/LoadingState";
 import UserActionsHistory from "@/features/admin/components/UserActionsHistory";
 import DataExportModal from "@/features/admin/components/DataExportModal";
 
 export default function AdminDashboardPage() {
   const { locale } = useLanguage();
+  const { user } = useAdminAuth();
   const isAr = locale === "ar";
 
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -60,7 +62,9 @@ export default function AdminDashboardPage() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-brand-brown">
-            {isAr ? "مرحباً بعودتك، المدير العام (سوبر أدمن)" : "Welcome back, Gounow Super Admin"}
+            {isAr
+              ? `مرحباً بعودتك${user?.name ? `، ${user.name}` : ""}`
+              : `Welcome back${user?.name ? `, ${user.name}` : ""}`}
           </h1>
           <p className="text-xs sm:text-sm text-brand-brown-muted mt-1 max-w-xl font-light">
             {isAr

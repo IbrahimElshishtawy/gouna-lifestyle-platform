@@ -626,7 +626,7 @@ export default function AdminEventsPage() {
                   <div>
                     <div className="relative h-48 w-full bg-brand-sand-light">
                       <SafeImage
-                        src={(event as any).cover_url || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80"}
+                        src={(event as any).cover_url || "/assets/images/fanadir-villa.jpg"}
                         alt={event.title_en}
                         fill
                         fallbackSrc="/assets/images/fanadir-villa.jpg"

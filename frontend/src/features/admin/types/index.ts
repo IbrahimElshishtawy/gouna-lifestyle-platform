@@ -767,6 +767,42 @@ export interface AdminCustomerItem {
   created_at: string;
 }
 
+export interface AdminCustomerDetail {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  nationality: string | null;
+  country_of_residence: string | null;
+  is_active: boolean;
+  bookings: Array<{
+    id: number;
+    reference: string;
+    check_in: string;
+    check_out: string;
+    nights: number;
+    guests: number;
+    total_cents: number;
+    currency: string;
+    status: string;
+    payment_status: string;
+    created_at: string;
+  }>;
+  leads: Array<{
+    id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    type: string;
+    message: string;
+    status: string;
+    created_at: string;
+  }>;
+  created_at: string;
+}
+
 // 8. Platform Settings
 export interface PlatformSettingsMap {
   [key: string]: string | number | boolean | null;

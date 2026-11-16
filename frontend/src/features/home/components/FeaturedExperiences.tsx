@@ -95,7 +95,7 @@ export default function FeaturedExperiences({ experiences }: Props) {
             <div className="lg:col-span-7">
               <div className="relative h-[220px] sm:h-[360px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand group">
                 <Image
-                  src={activeExperience.image || "https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1400&q=85"}
+                  src={activeExperience.image || "/assets/images/tawila-yacht.jpg"}
                   alt={activeExperience.title}
                   fill
                   priority

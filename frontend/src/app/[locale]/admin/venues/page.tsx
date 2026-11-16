@@ -44,7 +44,7 @@ const INITIAL_VENUE_FORM: VenueFormState = {
   description_en: "Premier open-air venue with Red Sea panorama and luxury deck facilities.",
   description_ar: "أرقى ساحة احتفالات مفتوحة بإطلالة مباشرة على مارينا أبو تيج والبحر الأحمر.",
   facilities: "VIP Lounge, Full Sound Rig, Stage, Cocktail Bar, Security, Beach Access",
-  cover_image: "https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=1200&q=80",
+  cover_image: "/assets/images/fanadir-villa.jpg",
   status: "active",
 };
 
@@ -103,7 +103,7 @@ export default function AdminVenuesPage() {
       description_en: v.description_en || "",
       description_ar: v.description_ar || "",
       facilities: v.facilities ? v.facilities.join(", ") : "",
-      cover_image: v.cover_image || "https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=1200&q=80",
+      cover_image: v.cover_image || "",
       status: v.status,
     });
     setModalOpen(true);
@@ -233,7 +233,7 @@ export default function AdminVenuesPage() {
               <div>
                 <div className="relative h-44 w-full bg-brand-sand-light">
                   <SafeImage
-                    src={v.cover_image || "https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=600&q=80"}
+                    src={v.cover_image || "/assets/images/fanadir-villa.jpg"}
                     alt={v.name_en}
                     fill
                     fallbackSrc="/assets/images/fanadir-villa.jpg"

@@ -18,7 +18,7 @@ class LeadController extends Controller
 
         $lead = Lead::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'message' => $validated['message'],
             'type' => $validated['type'] ?? 'general',

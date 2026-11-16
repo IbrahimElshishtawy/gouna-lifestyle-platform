@@ -8,6 +8,7 @@ import {
   completePaymobPaymentApi,
   declinePaymobPaymentApi,
   fetchPaymentMethodsApi,
+  getBookingByReference,
 } from "@/features/checkout/services/checkout.api";
 import type { PaymentMethod } from "@/features/checkout/types/checkout.types";
 
@@ -22,13 +23,15 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
   const searchParams = useSearchParams();
   const isAr = locale === "ar";
 
-  const reference = searchParams.get("reference") || "GON-2026-PAYMOB";
+  const reference = searchParams.get("reference") || "";
   const session = searchParams.get("session") || "";
   const token = searchParams.get("token") || "";
-  const initialAmount = searchParams.get("amount") ? Number(searchParams.get("amount")) / 100 : 24966;
-  const currency = searchParams.get("currency") || (isAr ? "ج.م" : "EGP");
+  const paramAmount = searchParams.get("amount") ? Number(searchParams.get("amount")) / 100 : 0;
+  const paramCurrency = searchParams.get("currency") || (isAr ? "ج.م" : "EGP");
   const initialChannel = (searchParams.get("channel") as "card" | "instapay") || "card";
 
+  const [initialAmount, setInitialAmount] = useState<number>(paramAmount);
+  const [currency, setCurrency] = useState<string>(paramCurrency);
   const [activeTab, setActiveTab] = useState<"card" | "instapay">(initialChannel);
 
   // Card form state
@@ -49,6 +52,23 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!reference) return;
+    getBookingByReference(reference, token)
+      .then((booking) => {
+        const pricing = booking?.attributes?.pricing;
+        if (pricing) {
+          if (paramAmount === 0 && pricing.total_cents) {
+            setInitialAmount(pricing.total_cents / 100);
+          }
+          if (pricing.currency) {
+            setCurrency(pricing.currency);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [reference, token, paramAmount]);
 
   // Processing & 3DS state
   const [isProcessing, setIsProcessing] = useState(false);
@@ -241,7 +261,7 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
             </span>
             <div className="flex items-baseline gap-1.5 justify-end">
               <span className="text-2xl font-black text-emerald-400 tracking-tight">
-                {formatAmount(initialAmount)}
+                {formatAmount(amountDue)}
               </span>
               <span className="text-xs font-bold text-emerald-500/80">{currency}</span>
             </div>
@@ -410,8 +430,8 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
                       <span>🔒</span>
                       <span>
                         {isAr
-                          ? `دفع آمن الآن (${formatAmount(initialAmount)} ${currency})`
-                          : `Pay Securely (${formatAmount(initialAmount)} ${currency})`}
+                          ? `دفع آمن الآن (${formatAmount(amountDue)} ${currency})`
+                          : `Pay Securely (${formatAmount(amountDue)} ${currency})`}
                       </span>
                     </>
                   )}
@@ -571,7 +591,7 @@ function PaymobGatewayContent({ locale }: { locale: string }) {
 
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
               <span className="text-slate-400">{isAr ? "المبلغ المطلوب تفويضه:" : "Authorized Amount:"}</span>
-              <span className="font-bold text-emerald-400">{formatAmount(initialAmount)} {currency}</span>
+              <span className="font-bold text-emerald-400">{formatAmount(amountDue)} {currency}</span>
             </div>
 
             <div>

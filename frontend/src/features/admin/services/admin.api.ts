@@ -434,6 +434,43 @@ export async function getAdminCustomers(params?: {
   return apiClient<PaginatedResponse<AdminCustomerItem>>(`/admin/customers${qs ? `?${qs}` : ""}`);
 }
 
+export async function getAdminCustomerDetails(
+  id: number
+): Promise<import("../types").AdminCustomerDetail> {
+  const res = await apiClient<SingleResponse<import("../types").AdminCustomerDetail>>(`/admin/customers/${id}`);
+  return res.data;
+}
+
+export interface AdminCustomerDetail extends AdminCustomerItem {
+  bookings: Array<{
+    id: number;
+    reference: string;
+    check_in?: string | null;
+    check_out?: string | null;
+    nights?: number;
+    total_cents?: number;
+    currency?: string;
+    status: string;
+    payment_status?: string;
+    created_at?: string;
+  }>;
+  leads: Array<{
+    id: number;
+    name: string;
+    email: string;
+    phone?: string | null;
+    type: string;
+    status: string;
+    message?: string | null;
+    created_at?: string;
+  }>;
+}
+
+export async function getAdminCustomer(id: number): Promise<AdminCustomerDetail> {
+  const res = await apiClient<SingleResponse<AdminCustomerDetail>>(`/admin/customers/${id}`);
+  return res.data;
+}
+
 /**
  * 7. Settings & Audit Logs
  */

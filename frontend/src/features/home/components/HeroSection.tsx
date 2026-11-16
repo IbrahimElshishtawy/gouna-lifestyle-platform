@@ -33,12 +33,10 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
 
   // Real Estate specific states
   const [propertyType, setPropertyType] = useState("all");
-  const [budget, setBudget] = useState("all");
   const [bedrooms, setBedrooms] = useState("any");
 
   // Experiences specific states
   const [expType, setExpType] = useState("all");
-  const [expTiming, setExpTiming] = useState("all");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +46,6 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
       if (expType && expType !== "all") params.set("category", expType);
       if (guests) params.set("guests", guests);
       if (checkIn) params.set("date", checkIn);
-      if (expTiming && expTiming !== "all") params.set("timing", expTiming);
       router.push(`/experiences?${params.toString()}`);
       return;
     }
@@ -58,7 +55,6 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
       params.set("listing_type", "sale");
       if (location && location !== "all") params.set("location", location);
       if (propertyType && propertyType !== "all") params.set("category", propertyType);
-      if (budget && budget !== "all") params.set("budget", budget);
       if (bedrooms && bedrooms !== "any") params.set("bedrooms", bedrooms);
       router.push(`/stays?${params.toString()}`);
       return;
@@ -304,31 +300,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                     </div>
                   </div>
 
-                  {/* Field 3: Budget Range */}
-                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
-                    <div className="mb-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
-                        {t.hero.budgetLabel}
-                      </span>
-                    </div>
-                    <div className="relative flex items-center">
-                      <select
-                        value={budget}
-                        onChange={(e) => setBudget(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
-                      >
-                        <option value="all">{t.hero.budgetAny}</option>
-                        <option value="tier1">{t.hero.budget1}</option>
-                        <option value="tier2">{t.hero.budget2}</option>
-                        <option value="tier3">{t.hero.budget3}</option>
-                      </select>
-                      <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Field 4: Bedrooms */}
+                  {/* Field 3: Bedrooms */}
                   <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
                     <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
@@ -398,31 +370,7 @@ export default function HeroSection({ heroConfig }: HeroSectionProps = {}) {
                     />
                   </div>
 
-                  {/* Field 3: Schedule / Timing */}
-                  <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
-                    <div className="mb-0.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">
-                        {t.hero.timingLabel}
-                      </span>
-                    </div>
-                    <div className="relative flex items-center">
-                      <select
-                        value={expTiming}
-                        onChange={(e) => setExpTiming(e.target.value)}
-                        className="w-full text-xs sm:text-sm font-serif font-bold text-brand-brown dark:text-sand-light bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 rtl:pr-0 rtl:pl-5"
-                      >
-                        <option value="full-day">{t.hero.timingFullDay}</option>
-                        <option value="sunset">{t.hero.timingSunset}</option>
-                        <option value="morning">{t.hero.timingMorning}</option>
-                        <option value="night">{t.hero.timingNight}</option>
-                      </select>
-                      <svg className="w-3.5 h-3.5 absolute right-0 rtl:right-auto rtl:left-0 pointer-events-none text-brand-brown-muted/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Field 4: Guests */}
+                  {/* Field 3: Guests */}
                   <div className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 hover:bg-brand-sand-light/60 dark:hover:bg-white/5 rounded-xl transition-all text-start cursor-pointer group">
                     <div className="mb-0.5">
                       <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-brown-muted group-hover:text-brand-terracotta transition-colors">

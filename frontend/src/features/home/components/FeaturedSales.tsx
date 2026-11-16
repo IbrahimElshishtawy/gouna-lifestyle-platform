@@ -106,7 +106,7 @@ export default function FeaturedSales({ properties }: Props) {
               <div className="lg:col-span-7">
                 <div className="relative h-[220px] sm:h-[360px] lg:h-[440px] rounded-xl sm:rounded-2xl overflow-hidden bg-brand-sand group">
                   <SafeImage
-                    src={activeProperty.images[0]?.url || "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1400&q=85"}
+                    src={activeProperty.images[0]?.url || "/assets/images/hero-villa-dusk.jpg"}
                     alt={activeProperty.title}
                     fill
                     priority
@@ -274,7 +274,7 @@ export default function FeaturedSales({ properties }: Props) {
                   <div>
                     <div className="relative h-44 sm:h-48 overflow-hidden bg-brand-sand shrink-0">
                       <Image
-                        src={property.images[0]?.url || "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80"}
+                        src={property.images[0]?.url || "/assets/images/hero-villa-dusk.jpg"}
                         alt={property.title}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
